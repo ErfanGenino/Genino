@@ -3,6 +3,7 @@ import logo from "./assets/logo-genino.png";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
+import { useNavigate } from "react-router-dom";
 
 
 // 🌍 فهرست استان‌ها و شهرها
@@ -60,6 +61,7 @@ export default function SignupUser() {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+    const navigate = useNavigate();
 
   // ✳️ تغییرات فرم + اعتبارسنجی لحظه‌ای
   function handleChange(e) {
@@ -119,6 +121,12 @@ function handleSubmit(e) {
       setMessage(`🎉 خوش آمدی ${formData.firstName} 🌿 ثبت‌نام شما با موفقیت انجام شد!`);
     }
   }, 50);
+
+  // هدایت خودکار به داشبورد پس از ۲ ثانیه
+setTimeout(() => {
+  navigate("/dashboard");
+}, 2000);
+
 }
 
   // ✅ تابع اعتبارسنجی فیلدها
