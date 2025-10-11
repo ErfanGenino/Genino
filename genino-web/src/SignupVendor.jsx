@@ -135,7 +135,7 @@ export default function SignupVendor() {
     setMessage(`🎉 خوش آمدید ${formData.firstName} 🌿 ثبت‌نام شما با موفقیت انجام شد!`);
 
     setTimeout(() => {
-      navigate("/vendor-dashboard");
+      navigate("/dashboard-vendor");
     }, 2000);
   };
 

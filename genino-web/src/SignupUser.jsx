@@ -124,7 +124,7 @@ function handleSubmit(e) {
 
   // هدایت خودکار به داشبورد پس از ۲ ثانیه
 setTimeout(() => {
-  navigate("/dashboard");
+  navigate("/dashboard-user");
 }, 2000);
 
 }

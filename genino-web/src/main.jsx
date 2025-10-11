@@ -8,6 +8,8 @@ import SignupStart from "./SignupStart.jsx";
 import SignupUser from "./SignupUser.jsx";
 import Navbar from "./Navbar.jsx"; // ✅ فقط ایمپورتش می‌کنی، نه تعریف
 import SignupVendor from "./SignupVendor.jsx";
+import UserDashboard from "./pages/dashboard/UserDashboard";
+import VendorDashboard from "./pages/dashboard/VendorDashboard";
 
 // صفحات دیگر
 function Dashboard() {
@@ -47,6 +49,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/signup" element={<SignupStart />} />
       <Route path="/signup-user" element={<SignupUser />} />
       <Route path="/signup-vendor" element={<SignupVendor />} />
+      <Route path="/dashboard-user" element={<UserDashboard />} />
+      <Route path="/dashboard-vendor" element={<VendorDashboard />} />
     </Routes>
   </BrowserRouter>
 );
