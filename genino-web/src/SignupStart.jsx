@@ -25,7 +25,7 @@ export default function SignupStart() {
         </Link>
 
         <Link
-          to="/signup-provider"
+          to="/signup-vendor"
           className="text-center bg-white text-yellow-600 border border-yellow-400 py-3 rounded-xl hover:bg-yellow-50 transition shadow-sm"
         >
           ثبت‌نام به عنوان ارائه‌دهنده کالا یا خدمت 🛍️
