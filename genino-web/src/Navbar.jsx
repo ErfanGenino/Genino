@@ -2,13 +2,14 @@ import { NavLink, Link } from "react-router-dom";
 import { LogIn, UserPlus, Menu, X } from "lucide-react"; // ✅ آیکون‌ها
 import { useState } from "react";
 import logo from "./assets/logo-genino.png";
+import { motion } from "framer-motion";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const links = [
     { to: "/", label: "خانه" },
-    { to: "/market", label: "مارکت" },
+    { to: "/market", label: "فروشگاه" },
     { to: "/dashboard", label: "داشبورد" },
     { to: "/settings", label: "تنظیمات" },
   ];
@@ -19,20 +20,31 @@ function Navbar() {
         dir="rtl"
         className="max-w-6xl mx-auto flex items-center justify-between px-5 py-3"
       >
-        {/* 🔸 لوگو */}
-        <Link to="/" className="flex items-center gap-2">
-  <div className="w-10 h-10 rounded-full bg-yellow-100 p-1.5 shadow-md flex items-center justify-center">
-    <img
-      src={logo}
-      alt="Genino Logo"
-      className="w-8 h-8 object-contain"
-    />
-  </div>
-  <div className="flex flex-col leading-tight">
-    <span className="text-base font-bold text-yellow-600">ژنینو 🌿</span>
-    <span className="text-[11px] text-gray-500">دستیار والدین</span>
-  </div>
-</Link>
+{/* 🔸 لوگو با انیمیشن ورود */}
+<motion.div
+  initial={{ opacity: 0, y: -15 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, ease: "easeOut" }}
+>
+  <Link to="/" className="flex items-center gap-2">
+    <div className="relative flex items-center justify-center">
+      {/* افکت درخشش طلایی */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-300/40 to-white/0 blur-xl animate-pulse"></div>
+
+      {/* لوگو اصلی */}
+      <img
+        src={logo}
+        alt="Genino Logo"
+        className="relative w-14 h-14 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-transform duration-500 hover:scale-110"
+      />
+    </div>
+
+    <div className="flex flex-col leading-tight">
+      <span className="text-base font-bold text-yellow-600">ژنینو 🌿</span>
+      <span className="text-[11px] text-gray-500">دستیار هوشمند</span>
+    </div>
+  </Link>
+</motion.div>
 
 
         {/* 🔸 لینک‌های دسکتاپ */}

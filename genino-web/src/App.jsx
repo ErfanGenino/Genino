@@ -1,19 +1,43 @@
-import logo from "./assets/logo-genino.png";
+// src/App.jsx
+import { Routes, Route } from "react-router-dom";
+
+// اگر این فایل‌ها در ریشه‌ی src هستند (طبق اسکرین‌شات تو):
+import Navbar from "./Navbar.jsx";
+import AuthStart from "./AuthStart.jsx";
+import Login from "./Login.jsx";
+import SignupStart from "./SignupStart.jsx";
+import SignupUser from "./SignupUser.jsx";
+import SignupVendor from "./SignupVendor.jsx";
+
+// 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
+import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
+import VendorDashboard from "./pages/dashboard/VendorDashboard.jsx";
+
+// ✅ اگر هنوز داشبوردها را نساختی، موقتاً می‌تونی از سایدبارها استفاده کنی:
+// import SidebarUser from "./components/SidebarUser.jsx";
+// import SidebarVendor from "./components/SidebarVendor.jsx";
 
 export default function App() {
   return (
-    <main className="h-screen flex flex-col items-center justify-center bg-[#f7f2eb] text-gray-800">
-      <div className="flex items-center gap-4">
-        <img
-          src={logo}
-          alt="Genino Logo"
-          className="w-24 h-24 object-contain"
-        />
-        <div>
-          <h1 className="text-4xl font-bold text-yellow-600">Genino</h1>
-          <p className="mt-2 text-lg text-gray-600">دستیار هوشمند والدین</p>
-        </div>
-      </div>
-    </main>
+    <>
+      {/* نوار ناوبری بالای همه‌ی صفحات */}
+      <Navbar />
+
+      {/* مسیرها */}
+      <Routes>
+        {/* صفحه خانه: همون AuthStart که گفتی نقش Home رو داره */}
+        <Route path="/" element={<AuthStart />} />
+
+        {/* احراز هویت و ثبت‌نام */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignupStart />} />
+        <Route path="/signup-user" element={<SignupUser />} />
+        <Route path="/signup-vendor" element={<SignupVendor />} />
+
+        {/* داشبوردها */}
+        <Route path="/dashboard-user" element={<UserDashboard /* یا <SidebarUser /> */ />} />
+        <Route path="/dashboard-vendor" element={<VendorDashboard /* یا <SidebarVendor /> */ />} />
+      </Routes>
+    </>
   );
 }

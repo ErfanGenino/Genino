@@ -17,28 +17,68 @@ useEffect(() => {
   document.addEventListener("mousedown", handleClickOutside);
   return () => document.removeEventListener("mousedown", handleClickOutside);
 }, []);
-  const features = [
-    {
-      icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />,
-      title: "رشد و آموزش کودک",
-      desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.",
-    },
-    {
-      icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />,
-      title: "تعامل و هدیه خانوادگی",
-      desc: "اتصال خانواده و اقوام برای اشتراک لحظات و هدیه به کودک.",
-    },
-    {
-      icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />,
-      title: "مارکت‌پلیس تخصصی کودک",
-      desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.",
-    },
-    {
-      icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />,
-      title: "دستیار هوشمند والدین",
-      desc: "پیشنهادهای هوشمند و تحلیل رفتار کودک بر اساس داده‌های روزانه.",
-    },
-  ];
+const features = [
+  {
+    icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "رشد و آموزش کودک",
+    desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.",
+  },
+  {
+    icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "تعامل و هدیه خانوادگی",
+    desc: "اتصال خانواده و اقوام برای اشتراک لحظات و هدیه به کودک.",
+  },
+  {
+    icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "فروشگاه تخصصی",
+    desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.",
+  },
+  {
+    icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "دستیار هوشمند والدین",
+    desc: "پیشنهادهای هوشمند و تحلیل رفتار کودک بر اساس داده‌های روزانه.",
+  },
+  {
+    icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "آموزش والدین",
+    desc: "مقاله‌ها و دوره‌های آموزشی برای پرورش بهتر و آگاهانه‌تر کودک.",
+  },
+  {
+    icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "بازی و سرگرمی",
+    desc: "ایده‌های خلاقانه برای بازی‌های خانوادگی و تقویت مهارت‌های کودک.",
+  },
+  {
+    icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "رویدادها و جشن‌ها",
+    desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما.",
+  },
+  {
+    icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "گزارش رشد هوشمند",
+    desc: "تحلیل داده‌های روزانه و ارائه گزارش پیشرفت کودک در طول زمان.",
+  },
+  {
+    icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "سلامت و تغذیه کودک",
+    desc: "برنامه‌های غذایی متناسب با سن و نیاز رشد کودک.",
+  },
+  {
+    icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "مدیریت خواب کودک",
+    desc: "تنظیم و پایش الگوی خواب کودک برای رشد بهتر.",
+  },
+  {
+    icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "احساسات و رفتار",
+    desc: "کمک به والدین در شناخت احساسات کودک و تقویت هوش هیجانی.",
+  },
+  {
+    icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "برنامه‌ریز روزانه",
+    desc: "تنظیم خودکار فعالیت‌ها و یادآورها برای والدین و کودک.",
+  },
+];
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-20 text-center overflow-hidden">
@@ -133,7 +173,7 @@ useEffect(() => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 1 }}
         >
-          هر کودک، یک جهان نوآوری ✨  
+          هر کودک، یک دنیا نوآوری ✨  
           <br />
           ژنینو همراه شماست برای رشد، آموزش و شادی فرزندانتان.
         </motion.p>
@@ -158,7 +198,7 @@ useEffect(() => {
           <motion.div
             key={i}
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-            className="bg-white/70 backdrop-blur-sm p-6 rounded-2xl shadow-sm hover:shadow-md border border-yellow-100 transition-all text-center"
+            className="group bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-yellow-100 transition-all text-center hover:bg-yellow-50 hover:shadow-lg hover:-translate-y-1"
           >
             <div className="flex flex-col items-center">
               {item.icon}
