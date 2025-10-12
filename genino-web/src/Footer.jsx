@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="w-full bg-white border-t border-yellow-100 text-gray-600 mt-16">
+    <footer className="relative z-20 w-full bg-white/70 backdrop-blur-md text-gray-700 border-t border-yellow-100 mt-10 py-6">
       <div className="max-w-6xl mx-auto py-6 px-6 flex flex-col sm:flex-row items-center justify-between text-sm text-center sm:text-right">
         
         {/* چپ: نام برند و سال */}
