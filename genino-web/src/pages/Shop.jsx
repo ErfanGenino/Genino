@@ -345,6 +345,36 @@ export default function Shop() {
           </Link>
         ))}
       </motion.section>
+            {/* 📄 صفحه‌بندی */}
+      <div className="relative z-10 flex justify-center items-center mt-12 gap-3">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((p) => p - 1)}
+          className={`px-4 py-2 rounded-lg text-sm font-medium border transition ${
+            currentPage === 1
+              ? "text-gray-400 border-gray-200 cursor-not-allowed"
+              : "text-yellow-600 border-yellow-300 hover:bg-yellow-50"
+          }`}
+        >
+          قبلی
+        </button>
+
+        <span className="text-gray-600 text-sm">
+          صفحه {currentPage} از {totalPages}
+        </span>
+
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((p) => p + 1)}
+          className={`px-4 py-2 rounded-lg text-sm font-medium border transition ${
+            currentPage === totalPages
+              ? "text-gray-400 border-gray-200 cursor-not-allowed"
+              : "text-yellow-600 border-yellow-300 hover:bg-yellow-50"
+          }`}
+        >
+          بعدی
+        </button>
+      </div>
     </main>
   );
 }
