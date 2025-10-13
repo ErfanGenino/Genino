@@ -1,10 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShoppingBag, ArrowRight } from "lucide-react";
+import { useCart } from "../context/CartContext.jsx";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart, cartItems } = useCart(); // ✅ اضافه شد برای شمارنده سبد خرید
 
   // 🔸 داده نمونه محصول
   const product = {
@@ -98,24 +100,33 @@ export default function ProductDetail() {
       </div>
 
       {/* 🔹 نوار بالا: بازگشت + سبد خرید */}
-<div
-  dir="rtl"
-  className="relative z-10 w-full flex items-center justify-between mb-10 px-6"
->
-  {/* 🔸 دکمه بازگشت سمت راست */}
-  <button
-    onClick={() => navigate(-1)}
-    className="flex items-center gap-2 text-yellow-600 font-medium hover:text-yellow-700 transition"
-  >
-    <ArrowRight className="w-5 h-5" />
-    بازگشت به فروشگاه
-  </button>
+      <div
+        dir="rtl"
+        className="relative z-10 w-full flex items-center justify-between mb-10 px-6"
+      >
+        {/* 🔸 دکمه بازگشت سمت راست */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-yellow-600 font-medium hover:text-yellow-700 transition"
+        >
+          <ArrowRight className="w-5 h-5" />
+          بازگشت به فروشگاه
+        </button>
 
-  {/* 🔸 دکمه سبد خرید سمت چپ */}
-  <button className="bg-yellow-500 text-white px-4 py-2 rounded-xl hover:bg-yellow-600 transition flex items-center gap-2 shadow-sm">
-    🛒 سبد خرید
-  </button>
-</div>
+        {/* 🔸 دکمه سبد خرید سمت چپ */}
+        <button
+          onClick={() => navigate("/cart")}
+          className="relative bg-yellow-500 text-white px-4 py-2 rounded-xl hover:bg-yellow-600 transition flex items-center gap-2 shadow-sm"
+        >
+          🛒 سبد خرید
+          {/* ✅ شمارنده آیتم‌های داخل سبد */}
+          {cartItems.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+              {cartItems.length}
+            </span>
+          )}
+        </button>
+      </div>
 
       {/* 🟡 محتوای اصلی محصول */}
       <div className="relative z-10 bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg p-6 max-w-md text-right mb-12">
@@ -131,6 +142,7 @@ export default function ProductDetail() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => addToCart(product)} // ✅ اضافه به سبد خرید
           className="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-3 rounded-xl hover:from-yellow-600 hover:to-yellow-500 transition flex items-center justify-center gap-2 font-medium shadow-md"
         >
           <ShoppingBag className="w-5 h-5" />
