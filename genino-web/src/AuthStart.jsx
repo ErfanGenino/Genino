@@ -199,12 +199,58 @@ export default function AuthStart() {
   </div>
 
   {/* 🔸 موبایل */}
-  <motion.button
-    whileTap={{ scale: 0.98 }}
-    className="sm:hidden fixed bottom-0 left-0 right-0 w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-4 text-base font-medium shadow-[0_-2px_10px_rgba(0,0,0,0.1)] hover:from-yellow-600 hover:to-yellow-500 transition-all"
-  >
-    📱 دریافت اپ ژنینو
-  </motion.button>
+<AnimatePresence>
+  {!open && (
+    <motion.button
+      key="mobileButton"
+      onClick={() => setOpen(true)}
+      whileTap={{ scale: 0.98 }}
+      className="sm:hidden fixed bottom-0 left-0 right-0 z-40 w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-4 text-base font-medium shadow-[0_-2px_10px_rgba(0,0,0,0.1)] hover:from-yellow-600 hover:to-yellow-500 transition-all"
+    >
+      📱 دریافت اپ ژنینو
+    </motion.button>
+  )}
+
+  {open && (
+    <>
+      {/* پس‌زمینه تار */}
+      <motion.div
+        key="overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="sm:hidden fixed inset-0 bg-black z-40"
+        onClick={() => setOpen(false)}
+      />
+      {/* کارت پایین */}
+      <motion.div
+        key="sheet"
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl p-5 pt-6 text-center"
+      >
+        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-5" />
+        <h3 className="text-gray-700 font-semibold mb-3">انتخاب نسخه اپ</h3>
+        <a
+          href="#"
+          className="block w-full py-3 mb-3 rounded-xl border border-yellow-300 text-yellow-600 font-medium hover:bg-yellow-50 transition"
+        >
+          📲 نسخه Android
+        </a>
+        <a
+          href="#"
+          className="block w-full py-3 rounded-xl border border-yellow-300 text-yellow-600 font-medium hover:bg-yellow-50 transition"
+        >
+          🍎 نسخه iOS
+        </a>
+      </motion.div>
+    </>
+  )}
+</AnimatePresence>
+
 </motion.div>
 
 
