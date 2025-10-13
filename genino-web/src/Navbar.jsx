@@ -9,7 +9,7 @@ function Navbar() {
 
   const links = [
     { to: "/", label: "خانه" },
-    { to: "/market", label: "فروشگاه" },
+    { to: "/shop", label: "فروشگاه" },
     { to: "/dashboard", label: "داشبورد" },
     { to: "/settings", label: "تنظیمات" },
   ];

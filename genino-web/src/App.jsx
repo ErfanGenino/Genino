@@ -12,6 +12,8 @@ import SignupVendor from "./SignupVendor.jsx";
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
 import VendorDashboard from "./pages/dashboard/VendorDashboard.jsx";
+import Shop from "./pages/Shop.jsx";
+import ProductDetail from "./pages/ProductDetail.jsx";
 
 // ✅ اگر هنوز داشبوردها را نساختی، موقتاً می‌تونی از سایدبارها استفاده کنی:
 // import SidebarUser from "./components/SidebarUser.jsx";
@@ -33,6 +35,8 @@ export default function App() {
         <Route path="/signup" element={<SignupStart />} />
         <Route path="/signup-user" element={<SignupUser />} />
         <Route path="/signup-vendor" element={<SignupVendor />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
 
         {/* داشبوردها */}
         <Route path="/dashboard-user" element={<UserDashboard /* یا <SidebarUser /> */ />} />
