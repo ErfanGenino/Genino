@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "../context/CartContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Shop() {
   const [flyingItems, setFlyingItems] = useState([]);
@@ -12,6 +13,7 @@ export default function Shop() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("کالا");
   const { addToCart, cartItems } = useCart();
+  const navigate = useNavigate();
 
   const itemsPerPage = 30;
   const cartRef = useRef(null);
@@ -177,22 +179,23 @@ export default function Shop() {
         </h1>
 
         <motion.button
-          ref={cartRef}
-          animate={
-            isBouncing
-              ? { scale: [1, 1.2, 0.9, 1], rotate: [0, -10, 10, 0] }
-              : {}
-          }
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative bg-yellow-500 text-white px-4 py-2 rounded-xl hover:bg-yellow-600 transition shadow-md"
-        >
-          🛒 سبد خرید
-          {cartItems.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-              {cartItems.length}
-            </span>
-          )}
-        </motion.button>
+  ref={cartRef}
+  onClick={() => navigate("/cart")}
+  animate={
+    isBouncing
+      ? { scale: [1, 1.2, 0.9, 1], rotate: [0, -10, 10, 0] }
+      : {}
+  }
+  transition={{ duration: 0.6, ease: "easeOut" }}
+  className="relative bg-yellow-500 text-white px-4 py-2 rounded-xl hover:bg-yellow-600 transition shadow-md"
+>
+  🛒 سبد خرید
+  {cartItems.length > 0 && (
+    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+      {cartItems.length}
+    </span>
+  )}
+</motion.button>
       </header>
 
       {/* 🔍 نوار جستجو */}
@@ -211,6 +214,85 @@ export default function Shop() {
           🔍
         </span>
       </div>
+
+      {/* 🧭 فیلتر کلی: نوع (کالا / خدمت) و زیر‌دسته‌ها */}
+<div dir="rtl" className="relative z-10 mb-10 flex flex-col items-center gap-5">
+
+  {/* 🔸 انتخاب نوع کلی */}
+  <div className="flex justify-center gap-4">
+    {[{ title: "کالا", icon: "🛍️" }, { title: "خدمت", icon: "💼" }].map((type) => (
+      <motion.button
+        key={type.title}
+        onClick={() => {
+          setCategory("همه");
+          setCurrentPage(1);
+          setSelectedType(type.title);
+        }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        animate={
+          selectedType === type.title
+            ? { scale: [1, 1.1, 1], boxShadow: "0 0 15px rgba(234,179,8,0.5)" }
+            : {}
+        }
+        transition={{ duration: 0.4 }}
+        className={`px-6 py-2.5 flex items-center gap-2 rounded-2xl text-sm font-medium transition-all ${
+          selectedType === type.title
+            ? "bg-gradient-to-r from-yellow-500 to-yellow-400 text-white shadow-md ring-2 ring-yellow-300/50"
+            : "bg-white border border-yellow-200 text-gray-600 hover:bg-yellow-50"
+        }`}
+      >
+        <span className="text-lg">{type.icon}</span>
+        <span>{type.title}</span>
+      </motion.button>
+    ))}
+  </div>
+
+  {/* 🔹 زیر‌دسته‌ها بر اساس نوع انتخاب‌شده */}
+  <div className="flex flex-wrap justify-center gap-3 mt-2">
+    {(selectedType === "کالا"
+      ? [
+          { title: "همه", icon: "🌟" },
+          { title: "آموزشی", icon: "📚" },
+          { title: "هنر", icon: "🎨" },
+          { title: "اسباب‌بازی", icon: "🧸" },
+        ]
+      : [
+          { title: "همه", icon: "🌟" },
+          { title: "آموزش کودک", icon: "🧑‍🏫" },
+          { title: "مشاوره و سلامت", icon: "🩺" },
+          { title: "رویداد و تولد", icon: "🎉" },
+        ]
+    ).map((cat) => {
+      const isActive = category === cat.title;
+      return (
+        <motion.button
+          key={cat.title}
+          onClick={() => {
+            setCategory(cat.title);
+            setCurrentPage(1);
+          }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          animate={
+            isActive
+              ? { scale: [1, 1.15, 1], boxShadow: "0 0 12px rgba(234,179,8,0.6)" }
+              : {}
+          }
+          transition={{ duration: 0.4 }}
+          className={`px-4 py-2 flex items-center gap-2 rounded-2xl text-sm font-medium transition-all ${
+            isActive
+              ? "bg-gradient-to-r from-yellow-500 to-yellow-400 text-white shadow-md ring-2 ring-yellow-300/50"
+              : "bg-white border border-yellow-200 text-gray-600 hover:bg-yellow-50"
+          }`}
+        >
+          <span>{cat.icon}</span>
+          <span>{cat.title}</span>
+        </motion.button>
+      );
+    })}
+  </div>
+</div>
 
       {/* 🟡 کارت‌های محصول */}
       <motion.section
@@ -250,10 +332,10 @@ export default function Shop() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={(e) => {
-                    e.preventDefault(); // جلوگیری از رفتن به صفحه محصول
-                    addToCart(item);
-                    handleFlyAnimation(e);
-                  }}
+  e.preventDefault();
+  addToCart(item);
+  handleFlyAnimation(e);
+}}
                   className="mt-3 w-full bg-yellow-500 text-white py-2 rounded-xl hover:bg-yellow-600 transition"
                 >
                   افزودن به سبد

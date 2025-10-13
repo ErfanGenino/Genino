@@ -8,6 +8,7 @@ import Login from "./Login.jsx";
 import SignupStart from "./SignupStart.jsx";
 import SignupUser from "./SignupUser.jsx";
 import SignupVendor from "./SignupVendor.jsx";
+import Cart from "./pages/Cart.jsx";
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/signup-vendor" element={<SignupVendor />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
 
         {/* داشبوردها */}
         <Route path="/dashboard-user" element={<UserDashboard /* یا <SidebarUser /> */ />} />
