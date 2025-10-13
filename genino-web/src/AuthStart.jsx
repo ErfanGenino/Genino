@@ -1,87 +1,95 @@
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo-genino.png";
-import { Brain, Gift, ShoppingBag, Bot } from "lucide-react";
+import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight } from "lucide-react";
 import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 
-// 🔸 اسلایدر خودکار با انیمیشن ورود و خروج کامل
+// 🔸 اسلایدر خودکار با انیمیشن جهت‌دار (راست/چپ)
 function AutoSlider() {
   const slides = [
-    {
-      id: 1,
-      text: "هر کودک، یک دنیا نوآوری ✨",
-      sub: "ژنینو، همراه رشد و خلاقیت فرزندتان.",
-      bg: "from-[#fffaf0] to-[#fef7dc]",
-    },
-    {
-      id: 2,
-      text: "رشد کودک را هوشمندانه دنبال کنید 🌱",
-      sub: "با تحلیل داده‌ها و پیشنهادهای تخصصی.",
-      bg: "from-[#fefdf8] to-[#fff4e0]",
-    },
-    {
-      id: 3,
-      text: "ژنینو؛ پلی بین علم و احساس 💛",
-      sub: "برای والدینی که می‌خواهند متفاوت تربیت کنند.",
-      bg: "from-[#fffdf6] to-[#fff2d8]",
-    },
-    {
-      id: 4,
-      text: "هدیه‌ای برای آینده کودک شما 🎁",
-      sub: "محیطی امن برای رشد و شادی.",
-      bg: "from-[#fff8eb] to-[#fef4da]",
-    },
-    {
-      id: 5,
-      text: "دستیار هوشمند والدین 🌿",
-      sub: "همراه روزهای پرماجرای کودکی.",
-      bg: "from-[#fffdf8] to-[#f7f3e6]",
-    },
+    { id: 1, text: "هر کودک، یک دنیا نوآوری ✨", sub: "ژنینو، همراه رشد و خلاقیت فرزندتان.", bg: "from-[#fffaf0] to-[#fef7dc]" },
+    { id: 2, text: "رشد کودک را هوشمندانه دنبال کنید 🌱", sub: "با تحلیل داده‌ها و پیشنهادهای تخصصی.", bg: "from-[#fefdf8] to-[#fff4e0]" },
+    { id: 3, text: "ژنینو؛ پلی بین علم و احساس 💛", sub: "برای والدینی که می‌خواهند متفاوت تربیت کنند.", bg: "from-[#fffdf6] to-[#fff2d8]" },
+    { id: 4, text: "هدیه‌ای برای آینده کودک شما 🎁", sub: "محیطی امن برای رشد و شادی.", bg: "from-[#fff8eb] to-[#fef4da]" },
+    { id: 5, text: "دستیار هوشمند والدین 🌿", sub: "همراه روزهای پرماجرای کودکی.", bg: "from-[#fffdf8] to-[#f7f3e6]" },
   ];
 
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState(1); // 1: بعدی، -1: قبلی
   const timeoutRef = useRef(null);
 
+  // زمان‌بندی اسلاید خودکار (رو به جلو)
   useEffect(() => {
-    const nextSlide = () => setIndex((prev) => (prev + 1) % slides.length);
-    timeoutRef.current = setTimeout(nextSlide, 5000);
+    scheduleNext();
     return () => clearTimeout(timeoutRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  const handleClick = () => setIndex((prev) => (prev + 1) % slides.length);
+  const scheduleNext = () => {
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setDirection(1);
+      setIndex((prev) => (prev + 1) % slides.length);
+    }, 5000);
+  };
+
+  const nextSlide = () => {
+    setDirection(1);
+    setIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setDirection(-1);
+    setIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  // واریانت‌های جهت‌دار برای framer-motion
+  const variants = {
+    enter: (dir) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
+  };
 
   return (
-    <div
-      className="absolute inset-0 flex items-center justify-center text-center cursor-pointer select-none overflow-hidden"
-      onClick={handleClick}
-    >
-      <AnimatePresence mode="wait">
+    <div className="relative w-full h-full select-none overflow-hidden rounded-3xl group">
+      <AnimatePresence initial={false} mode="wait" custom={direction}>
         <motion.div
           key={slides[index].id}
-          initial={{ x: 300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -300, opacity: 0 }}
+          custom={direction}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br ${slides[index].bg} rounded-3xl`}
+          className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br ${slides[index].bg}`}
         >
-          <img
-            src={logo}
-            alt="Genino Logo"
-            className="w-24 h-24 mb-6 opacity-90 drop-shadow-md"
-          />
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-2">
-            {slides[index].text}
-          </h2>
-          <p className="text-gray-600 text-sm sm:text-base">
-            {slides[index].sub}
-          </p>
-          <span className="text-xs text-gray-400 mt-4">
-            (برای رفتن به بعدی کلیک کنید)
-          </span>
+          <img src={logo} alt="Genino Logo" className="w-24 h-24 mb-6 opacity-90 drop-shadow-md" />
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-2">{slides[index].text}</h2>
+          <p className="text-gray-600 text-sm sm:text-base">{slides[index].sub}</p>
         </motion.div>
       </AnimatePresence>
 
-      {/* 🔸 نقاط وضعیت (Indicators) */}
+      {/* فلش‌ها */}
+      <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-6">
+        <button
+          onClick={prevSlide}
+          className="p-2 rounded-full bg-white/70 hover:bg-white text-yellow-600 shadow-md transition-all
+                     opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+          aria-label="قبلی"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="p-2 rounded-full bg-white/70 hover:bg-white text-yellow-600 shadow-md transition-all
+                     opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+          aria-label="بعدی"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* نقاط وضعیت */}
       <div className="absolute bottom-4 flex gap-2 justify-center w-full">
         {slides.map((_, i) => (
           <div
@@ -89,7 +97,7 @@ function AutoSlider() {
             className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
               i === index ? "bg-yellow-500 scale-110" : "bg-gray-300"
             }`}
-          ></div>
+          />
         ))}
       </div>
     </div>
@@ -127,29 +135,78 @@ export default function AuthStart() {
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-20 text-center overflow-x-hidden overflow-y-auto">
-      {/* 🔹 دکمه دریافت اپ */}
-      <div
-        className="absolute top-20 left-20 z-50"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-      >
-        <div className="relative">
-          <button className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all">
-            📱 دریافت اپ ژنینو
-          </button>
+      
+  {/* 🔹 دکمه دریافت اپ - نسخه نهایی با انیمیشن باز و بسته طبیعی */}
+<motion.div
+  ref={menuRef}
+  className="fixed bottom-6 left-1/2 -translate-x-1/2 sm:bottom-8 sm:left-8 sm:translate-x-0 z-50 flex flex-col items-center sm:items-start"
+  onMouseEnter={() => setOpen(true)}
+  onMouseLeave={() => setOpen(false)}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, ease: "easeOut" }}
+>
+  {/* 🔸 دسکتاپ */}
+  <div className="hidden sm:flex flex-col items-center relative">
+    <motion.button
+      whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(212,175,55,0.4)" }}
+      whileTap={{ scale: 0.97 }}
+      className="items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg hover:from-yellow-600 hover:to-yellow-500 transition-all w-44"
+    >
+      📱 دریافت اپ ژنینو
+    </motion.button>
 
-          {open && (
-            <div className="absolute left-0 bg-white shadow-lg rounded-xl border border-yellow-100 overflow-hidden w-40 text-right">
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition">
-                📲 نسخه Android
-              </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition">
-                🍎 نسخه iOS
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
+    {/* 🔸 افکت سایه طلایی بالا */}
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="gold-shadow"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="absolute top-0 -translate-y-full h-2 w-full bg-gradient-to-b from-yellow-400/30 to-transparent blur-md rounded-t-xl pointer-events-none"
+        ></motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* 🔸 منوی بازشونده (از بالا باز و بسته می‌شود با fade) */}
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="menu"
+          initial={{ opacity: 0, y: -5, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -5, scale: 0.97 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="absolute bottom-full left-0 w-full bg-white shadow-xl rounded-t-xl border border-yellow-100 overflow-hidden text-center"
+        >
+          <a
+            href="#"
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition"
+          >
+            📲 نسخه Android
+          </a>
+          <a
+            href="#"
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition"
+          >
+            🍎 نسخه iOS
+          </a>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+
+  {/* 🔸 موبایل */}
+  <motion.button
+    whileTap={{ scale: 0.98 }}
+    className="sm:hidden fixed bottom-0 left-0 right-0 w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-4 text-base font-medium shadow-[0_-2px_10px_rgba(0,0,0,0.1)] hover:from-yellow-600 hover:to-yellow-500 transition-all"
+  >
+    📱 دریافت اپ ژنینو
+  </motion.button>
+</motion.div>
+
 
       {/* 🔹 بک‌گراند DNA چرخان */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#fffdf8] to-[#f7f3e6] overflow-hidden z-0">
