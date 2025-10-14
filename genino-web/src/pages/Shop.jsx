@@ -2,8 +2,10 @@ import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
+import logo from "../assets/logo-genino.png";
 import { useCart } from "../context/CartContext.jsx";
 import { useNavigate } from "react-router-dom";
+import PromoSlider from "../components/PromoSlider.jsx";
 
 export default function Shop() {
   const [flyingItems, setFlyingItems] = useState([]);
@@ -11,11 +13,11 @@ export default function Shop() {
   const [currentPage, setCurrentPage] = useState(1);
   const [category, setCategory] = useState("همه");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState("کالا");
+  const [selectedType, setSelectedType] = useState("");
   const { addToCart, cartItems } = useCart();
   const navigate = useNavigate();
 
-  const itemsPerPage = 30;
+  const itemsPerPage = 15;
   const cartRef = useRef(null);
 
   // ✈️ افکت پرواز آیتم
@@ -45,9 +47,7 @@ export default function Shop() {
     id: i + 1,
     name: `محصول شماره ${i + 1}`,
     price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
-    image: `https://via.placeholder.com/200x200?text=${encodeURIComponent(
-      "🛍️ " + (i + 1)
-    )}`,
+    image: logo,
     category: ["آموزشی", "هنر", "اسباب‌بازی"][i % 3],
   }));
 
@@ -215,88 +215,139 @@ export default function Shop() {
         </span>
       </div>
 
-      {/* 🧭 فیلتر کلی: نوع (کالا / خدمت) و زیر‌دسته‌ها */}
-<div dir="rtl" className="relative z-10 mb-10 flex flex-col items-center gap-5">
+{/* 🧭 فیلتر ساده و هماهنگ با رنگ برند ژنینو */}
+<div dir="rtl" className="relative z-30 flex flex-col items-center gap-6 mb-10">
 
-  {/* 🔸 انتخاب نوع کلی */}
-  <div className="flex justify-center gap-4">
-    {[{ title: "کالا", icon: "🛍️" }, { title: "خدمت", icon: "💼" }].map((type) => (
+  {/* 🔹 دکمه بدون فیلتر (عرض برابر دو دکمه زیرش) */}
+  <motion.button
+    onClick={() => {
+      setCategory("همه");
+      setSelectedType("");
+      setCurrentPage(1);
+    }}
+    whileHover={{ scale: 1.03 }}
+    whileTap={{ scale: 0.97 }}
+    className="w-[90%] sm:w-[66%] md:w-[55%] py-4 rounded-2xl font-medium text-lg flex justify-center items-center gap-2 shadow-lg bg-gradient-to-r from-yellow-500 to-yellow-400 text-white hover:from-yellow-600 hover:to-yellow-500 transition-all"
+  >
+    🌟 بدون فیلتر (نمایش همه محصولات)
+  </motion.button>
+
+  {/* 🔹 دکمه‌های کالا و خدمات */}
+  <div className="flex flex-col sm:flex-row justify-center items-center gap-5 w-[90%] sm:w-[66%] md:w-[55%]">
+
+    {/* 🔸 کالا */}
+    <div className="relative w-full sm:w-1/2">
       <motion.button
-        key={type.title}
-        onClick={() => {
-          setCategory("همه");
-          setCurrentPage(1);
-          setSelectedType(type.title);
-        }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        animate={
-          selectedType === type.title
-            ? { scale: [1, 1.1, 1], boxShadow: "0 0 15px rgba(234,179,8,0.5)" }
-            : {}
+        onClick={() =>
+          setSelectedType(selectedType === "کالا" ? "" : "کالا")
         }
-        transition={{ duration: 0.4 }}
-        className={`px-6 py-2.5 flex items-center gap-2 rounded-2xl text-sm font-medium transition-all ${
-          selectedType === type.title
-            ? "bg-gradient-to-r from-yellow-500 to-yellow-400 text-white shadow-md ring-2 ring-yellow-300/50"
-            : "bg-white border border-yellow-200 text-gray-600 hover:bg-yellow-50"
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        className={`w-full py-4 rounded-2xl font-medium text-lg flex justify-center items-center gap-2 shadow-lg transition-all ${
+          selectedType === "کالا"
+            ? "bg-gradient-to-r from-yellow-500 to-yellow-400 text-white ring-2 ring-yellow-300/70"
+            : "bg-gradient-to-r from-yellow-400 to-yellow-300 text-white hover:from-yellow-500 hover:to-yellow-400"
         }`}
       >
-        <span className="text-lg">{type.icon}</span>
-        <span>{type.title}</span>
+        🛍️ کالا
       </motion.button>
-    ))}
-  </div>
 
-  {/* 🔹 زیر‌دسته‌ها بر اساس نوع انتخاب‌شده */}
-  <div className="flex flex-wrap justify-center gap-3 mt-2">
-    {(selectedType === "کالا"
-      ? [
-          { title: "همه", icon: "🌟" },
-          { title: "آموزشی", icon: "📚" },
-          { title: "هنر", icon: "🎨" },
-          { title: "اسباب‌بازی", icon: "🧸" },
-        ]
-      : [
-          { title: "همه", icon: "🌟" },
-          { title: "آموزش کودک", icon: "🧑‍🏫" },
-          { title: "مشاوره و سلامت", icon: "🩺" },
-          { title: "رویداد و تولد", icon: "🎉" },
-        ]
-    ).map((cat) => {
-      const isActive = category === cat.title;
-      return (
-        <motion.button
-          key={cat.title}
-          onClick={() => {
-            setCategory(cat.title);
-            setCurrentPage(1);
-          }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          animate={
-            isActive
-              ? { scale: [1, 1.15, 1], boxShadow: "0 0 12px rgba(234,179,8,0.6)" }
-              : {}
-          }
-          transition={{ duration: 0.4 }}
-          className={`px-4 py-2 flex items-center gap-2 rounded-2xl text-sm font-medium transition-all ${
-            isActive
-              ? "bg-gradient-to-r from-yellow-500 to-yellow-400 text-white shadow-md ring-2 ring-yellow-300/50"
-              : "bg-white border border-yellow-200 text-gray-600 hover:bg-yellow-50"
-          }`}
+      {/* 🌿 منوی آبشاری کالا */}
+      {selectedType === "کالا" && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+          className="absolute top-full left-0 right-0 bg-white border border-yellow-100 shadow-2xl rounded-2xl mt-2 overflow-hidden z-50"
         >
-          <span>{cat.icon}</span>
-          <span>{cat.title}</span>
-        </motion.button>
-      );
-    })}
+          {["آموزشی", "هنر", "اسباب‌بازی", "کتاب و دفتر"].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => {
+                setCategory(cat);
+                setSelectedType(""); // منو بسته می‌شود
+                setCurrentPage(1);
+              }}
+              className="w-full text-right px-5 py-3 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition-all"
+            >
+              {cat}
+            </button>
+          ))}
+
+          {/* 🔙 دکمه بستن منو */}
+          <button
+            onClick={() => setSelectedType("")}
+            className="w-full text-center py-3 text-sm font-medium text-yellow-600 bg-yellow-50 hover:bg-yellow-100 border-t border-yellow-100 transition-all"
+          >
+            🔙 بستن منو
+          </button>
+        </motion.div>
+      )}
+    </div>
+
+    {/* 🔸 خدمات */}
+    <div className="relative w-full sm:w-1/2">
+      <motion.button
+        onClick={() =>
+          setSelectedType(selectedType === "خدمات" ? "" : "خدمات")
+        }
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        className={`w-full py-4 rounded-2xl font-medium text-lg flex justify-center items-center gap-2 shadow-lg transition-all ${
+          selectedType === "خدمات"
+            ? "bg-gradient-to-r from-yellow-500 to-yellow-400 text-white ring-2 ring-yellow-300/70"
+            : "bg-gradient-to-r from-yellow-400 to-yellow-300 text-white hover:from-yellow-500 hover:to-yellow-400"
+        }`}
+      >
+        💼 خدمات
+      </motion.button>
+
+      {/* 🌿 منوی آبشاری خدمات */}
+      {selectedType === "خدمات" && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+          className="absolute top-full left-0 right-0 bg-white border border-yellow-100 shadow-2xl rounded-2xl mt-2 overflow-hidden z-50"
+        >
+          {["آموزش کودک", "مشاوره و سلامت", "رویداد و تولد", "ورزش و مهارت"].map(
+            (cat) => (
+              <button
+                key={cat}
+                onClick={() => {
+                  setCategory(cat);
+                  setSelectedType(""); // منو بسته می‌شود
+                  setCurrentPage(1);
+                }}
+                className="w-full text-right px-5 py-3 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition-all"
+              >
+                {cat}
+              </button>
+            )
+          )}
+
+          {/* 🔙 دکمه بستن منو */}
+          <button
+            onClick={() => setSelectedType("")}
+            className="w-full text-center py-3 text-sm font-medium text-yellow-600 bg-yellow-50 hover:bg-yellow-100 border-t border-yellow-100 transition-all"
+          >
+            🔙 بستن منو
+          </button>
+        </motion.div>
+      )}
+    </div>
   </div>
 </div>
 
+{/* 🖼️ اسلایدر تبلیغاتی */}
+<PromoSlider />
+
+
       {/* 🟡 کارت‌های محصول */}
       <motion.section
-        className="relative z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+        className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mt-16"
         initial="hidden"
         animate="visible"
         variants={{
@@ -310,18 +361,22 @@ export default function Shop() {
         {currentProducts.map((item) => (
           <Link to={`/product/${item.id}`} key={item.id} className="block">
             <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 40 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all border border-yellow-100 cursor-pointer"
-            >
+  variants={{
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0 },
+  }}
+  transition={{ duration: 0.7, ease: "easeOut" }}
+  whileHover={{
+    y: -5,
+    boxShadow: "0 10px 25px rgba(212,175,55,0.25)", // سایه طلایی نرم
+  }}
+  className="bg-white/85 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-100 cursor-pointer transition-all duration-300 hover:bg-gradient-to-b hover:from-[#fffaf0] hover:to-[#fff7e0]"
+>
               <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-48 object-cover"
-              />
+  src={item.image}
+  alt={item.name}
+  className="w-24 h-24 mx-auto mt-6 mb-2 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110"
+/>
               <div className="p-4 text-right">
                 <h2 className="font-semibold text-lg">{item.name}</h2>
                 <p className="text-gray-500 text-sm mb-2">{item.category}</p>
