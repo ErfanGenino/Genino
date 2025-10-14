@@ -168,6 +168,27 @@ export default function Shop() {
         </motion.div>
       ))}
 
+      {/* 🛒 دکمه سبد خرید شناور (بالا سمت چپ) */}
+<motion.button
+  ref={cartRef}
+  onClick={() => navigate("/cart")}
+  animate={
+    isBouncing
+      ? { scale: [1, 1.15, 0.95, 1], rotate: [0, -8, 8, 0] }
+      : {}
+  }
+  transition={{ duration: 0.6, ease: "easeOut" }}
+  className="fixed top-6 left-6 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-5 py-2.5 rounded-full shadow-[0_4px_18px_rgba(212,175,55,0.3)] hover:shadow-[0_6px_25px_rgba(212,175,55,0.45)] transition-all duration-300 flex items-center gap-2 z-50"
+>
+  <ShoppingBag className="w-5 h-5" />
+  <span className="font-medium text-sm sm:text-base">سبد خرید</span>
+  {cartItems.length > 0 && (
+    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+      {cartItems.length}
+    </span>
+  )}
+</motion.button>
+
       {/* 🔹 هدر */}
       <header
         dir="rtl"
@@ -178,24 +199,7 @@ export default function Shop() {
           فروشگاه ژنینو
         </h1>
 
-        <motion.button
-  ref={cartRef}
-  onClick={() => navigate("/cart")}
-  animate={
-    isBouncing
-      ? { scale: [1, 1.2, 0.9, 1], rotate: [0, -10, 10, 0] }
-      : {}
-  }
-  transition={{ duration: 0.6, ease: "easeOut" }}
-  className="relative bg-yellow-500 text-white px-4 py-2 rounded-xl hover:bg-yellow-600 transition shadow-md"
->
-  🛒 سبد خرید
-  {cartItems.length > 0 && (
-    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-      {cartItems.length}
-    </span>
-  )}
-</motion.button>
+      
       </header>
 
       {/* 🔍 نوار جستجو */}

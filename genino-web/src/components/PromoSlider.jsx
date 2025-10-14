@@ -18,7 +18,7 @@ export default function PromoSlider() {
   ];
 
   const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState(1); // 1: راست به چپ، -1: چپ به راست
+  const [direction, setDirection] = useState(1);
   const touchStartX = useRef(null);
 
   const next = () => {
@@ -32,14 +32,12 @@ export default function PromoSlider() {
   };
 
   // لمس موبایل
-  const onTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
+  const onTouchStart = (e) => (touchStartX.current = e.touches[0].clientX);
   const onTouchEnd = (e) => {
     if (touchStartX.current == null) return;
     const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (diff > 50) next();
-    if (diff < -50) prev();
+    if (diff > 40) next();
+    if (diff < -40) prev();
     touchStartX.current = null;
   };
 
@@ -51,63 +49,86 @@ export default function PromoSlider() {
 
   return (
     <div
-      className="relative w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] xl:h-[450px] overflow-hidden rounded-3xl shadow-xl mt-16 z-10"
+      className="relative w-full h-[220px] sm:h-[300px] md:h-[340px] lg:h-[380px] xl:h-[420px] overflow-hidden rounded-3xl shadow-[0_10px_40px_rgba(212,175,55,0.15)] mt-12 z-10 bg-white/30 backdrop-blur-md border border-yellow-100"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
+      {/* 🔄 انیمیشن اسلایدها */}
       <AnimatePresence mode="wait">
         <motion.div
           key={slides[index].id}
-          className={`absolute inset-0 bg-gradient-to-br ${slides[index].bg} pointer-events-none`}
-          initial={{ opacity: 0, x: direction === 1 ? 100 : -100 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: direction === 1 ? -100 : 100 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
+          className={`absolute inset-0 bg-gradient-to-br ${slides[index].bg} flex flex-col items-center justify-center text-center select-none`}
+          initial={{ opacity: 0, x: direction === 1 ? 80 : -80, scale: 0.98 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: direction === 1 ? -80 : 80, scale: 0.98 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
         >
-          {/* محتوای اسلاید */}
-          <div className="relative w-full h-full flex flex-col items-center justify-center text-center select-none">
-            <img
-              src={logo}
-              alt="Genino"
-              className="w-14 h-14 sm:w-16 sm:h-16 mb-3 opacity-90 drop-shadow"
-            />
-            <div className="flex items-center gap-2 text-yellow-600/90 text-xl sm:text-2xl font-bold mb-1">
-              <span>اینجا جای تبلیغ شماست</span>
-              <span>{slides[index].accent}</span>
-            </div>
-            <div className="text-gray-600 text-xs sm:text-sm">
-              Your Ad Here — Coming Soon
-            </div>
-            <div className="mt-4 h-[3px] w-24 rounded-full bg-gradient-to-r from-yellow-500/60 to-yellow-400/60" />
-          </div>
+          <motion.img
+            src={logo}
+            alt="Genino Logo"
+            className="w-16 h-16 sm:w-20 sm:h-20 mb-4 drop-shadow-lg opacity-90"
+            animate={{
+              scale: [1, 1.03, 1],
+              rotate: [0, 2, -2, 0],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          <motion.h2
+            className="text-yellow-600 text-2xl sm:text-3xl font-extrabold flex items-center justify-center gap-2 mb-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span>{slides[index].accent}</span>
+            <span>اینجا جای تبلیغ شماست</span>
+          </motion.h2>
+
+          <motion.p
+            className="text-gray-600 text-sm sm:text-base font-medium"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            Your Ad Here — Coming Soon
+          </motion.p>
+
+          <motion.div
+            className="mt-5 h-[3px] w-28 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400"
+            animate={{ scaleX: [1, 0.7, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          />
         </motion.div>
       </AnimatePresence>
 
-      {/* فلش‌ها */}
+      {/* 🔸 فلش‌ها */}
       <button
         onClick={prev}
         aria-label="previous"
-        className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-yellow-600 p-2 rounded-full shadow-md transition z-20"
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-yellow-50 text-yellow-600 p-2.5 rounded-full shadow-md hover:shadow-lg transition z-20 border border-yellow-100"
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
       <button
         onClick={next}
         aria-label="next"
-        className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-yellow-600 p-2 rounded-full shadow-md transition z-20"
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-yellow-50 text-yellow-600 p-2.5 rounded-full shadow-md hover:shadow-lg transition z-20 border border-yellow-100"
       >
         <ChevronRight className="w-5 h-5" />
       </button>
 
-      {/* نقاط وضعیت */}
+      {/* 🔘 نقاط وضعیت */}
       <div className="absolute bottom-4 w-full flex justify-center gap-2 z-20">
         {slides.map((_, i) => (
-          <button
+          <motion.button
             key={i}
             onClick={() => setIndex(i)}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${
-              i === index ? "bg-yellow-500 scale-110" : "bg-gray-300"
+            className={`w-3 h-3 rounded-full transition-all ${
+              i === index
+                ? "bg-gradient-to-r from-yellow-500 to-yellow-400 scale-125 shadow-md"
+                : "bg-gray-300 hover:bg-yellow-300"
             }`}
+            whileTap={{ scale: 0.9 }}
           />
         ))}
       </div>
