@@ -200,84 +200,88 @@ const [dailyCalories, setDailyCalories] = useState(null);
         </motion.div>
       ))}
 
-      {/* ✨ جمله انگیزشی */}
-      <motion.div
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        className="relative z-10 bg-white/70 backdrop-blur-md border border-yellow-100 rounded-3xl shadow-lg p-2 sm:p-10 max-w-2xl"
-      >
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-yellow-600 mb-4">
-          بهت تبریک می‌گم 
-        </h1>
-        <p className="text-gray-700 leading-relaxed text-lg sm:text-xl font-medium">
-          اولین قدم رو برای ساختن{" "}
-          <span className="text-yellow-600 font-semibold">بهترین نسخه‌ی بدنی خودت</span> برداشتی.
-        </p>
-        <p className="mt-4 text-gray-600 italic text-base sm:text-lg">
-          یادت باشه 💫{" "}
-          <span className="text-yellow-600 font-semibold">سخت‌ترین قدم، همیشه اولین قدمه.</span>
-        </p>
+      {/* ✨ جمله انگیزشی + تاریخ */}
+<motion.div
+  initial={{ opacity: 0, y: -40 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1 }}
+  className="relative z-10 bg-white/70 backdrop-blur-md border border-yellow-100 rounded-3xl shadow-lg p-6 sm:p-10 max-w-2xl text-center"
+>
+  <h1 className="text-3xl sm:text-4xl font-extrabold text-yellow-600 mb-4">
+    بهت تبریک می‌گم 
+  </h1>
+  <p className="text-gray-700 leading-relaxed text-lg sm:text-xl font-medium">
+    اولین قدم رو برای ساختن{" "}
+    <span className="text-yellow-600 font-semibold">بهترین نسخه‌ی بدنی خودت</span> برداشتی.
+  </p>
+  <p className="mt-4 text-gray-600 italic text-base sm:text-lg">
+    یادت باشه 💫{" "}
+    <span className="text-yellow-600 font-semibold">سخت‌ترین قدم، همیشه اولین قدمه.</span>
+  </p>
 
-        {/* 📅 تاریخ */}
-        <div className="mt-8 flex justify-center">
-          <DatePicker
-            value={selectedDay}
-            onChange={(date) => {
-              if (date) {
-                const d = {
-                  year: date.year,
-                  month: date.month.number,
-                  day: date.day,
-                };
-                setSelectedDay(d);
-              } else setSelectedDay(null);
-            }}
-            calendar={persian}
-            locale={persian_fa}
-            placeholder="📅 تاریخ شروع کالری‌شماری"
-            inputClass="custom-input rounded-xl border border-yellow-200 shadow-sm p-3 text-center bg-white/80 font-medium text-gray-700 w-56 focus:ring-2 focus:ring-yellow-400 outline-none placeholder-gray-400"
-          />
-        </div>
+  {/* 📅 تاریخ */}
+<div className="mt-8 flex justify-center relative z-[50]">
+  <DatePicker
+    value={selectedDay}
+    onChange={(date) => {
+      if (date) {
+        const d = {
+          year: date.year,
+          month: date.month.number,
+          day: date.day,
+        };
+        setSelectedDay(d);
+      } else setSelectedDay(null);
+    }}
+    calendar={persian}
+    locale={persian_fa}
+    placeholder="📅 تاریخ شروع کالری‌شماری"
+    containerClassName="relative z-[60]"  // 👈 بالاتر از جدول آماری
+    inputClass="custom-input rounded-xl border border-yellow-200 shadow-sm p-3 text-center bg-white/80 font-medium text-gray-700 w-56 focus:ring-2 focus:ring-yellow-400 outline-none placeholder-gray-400"
+    portal           // 👈 این باعث میشه تقویم در body باز بشه، نه داخل کارت
+  />
+</div>
 
-        {selectedDay && (
-          <p className="mt-4 text-gray-700 text-sm sm:text-base">
-            🗓 کالری‌شماری از{" "}
-            <span className="font-semibold text-yellow-700">
-              {selectedDay.year}/{selectedDay.month}/{selectedDay.day}
-            </span>{" "}
-            شروع شده است.
-          </p>
-        )}
-      </motion.div>
 
-      {/* 📊 جدول آماری پایین */}
+  {selectedDay && (
+    <p className="mt-4 text-gray-700 text-sm sm:text-base">
+      🗓 کالری‌شماری از{" "}
+      <span className="font-semibold text-yellow-700">
+        {selectedDay.year}/{selectedDay.month}/{selectedDay.day}
+      </span>{" "}
+      شروع شده است.
+    </p>
+  )}
+</motion.div>
+
+{/* 📊 جدول آماری پایین */}
 {selectedDay && (
   <motion.div
-    initial={{ opacity: 0, y: 30 }}
+    initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.5, duration: 0.8 }}
-    className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl relative z-10"
+    transition={{ delay: 0.4, duration: 0.6 }}
+    className="mt-6 grid grid-cols-3 gap-2 w-full max-w-md relative z-10"
   >
-    <div className="bg-white/80 backdrop-blur-sm border border-yellow-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all text-center">
-      <h3 className="text-yellow-600 text-lg font-bold mb-1">مجموع روزها</h3>
-      <p className="text-gray-700 text-2xl font-extrabold">{totalDays}</p>
-      <p className="text-gray-500 text-sm mt-1">از شروع کالری‌شماری</p>
+    <div className="bg-white/80 backdrop-blur-sm border border-yellow-100 rounded-lg p-4 shadow-sm hover:shadow-md transition-all text-center">
+      <h3 className="text-yellow-600 text-sm font-bold mb-1">مجموع روزها</h3>
+      <p className="text-gray-700 text-lg font-extrabold">{totalDays}</p>
+      <p className="text-gray-500 text-xs mt-1">از شروع</p>
     </div>
 
-    <div className="bg-white/80 backdrop-blur-sm border border-yellow-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all text-center">
-      <h3 className="text-green-600 text-lg font-bold mb-1">روزهای ثبت‌شده</h3>
-      <p className="text-gray-700 text-2xl font-extrabold">{loggedDays}</p>
-      <p className="text-gray-500 text-sm mt-1">با موفقیت ثبت شده</p>
+    <div className="bg-white/80 backdrop-blur-sm border border-yellow-100 rounded-lg p-4 shadow-sm hover:shadow-md transition-all text-center">
+      <h3 className="text-green-600 text-sm font-bold mb-1">ثبت‌شده</h3>
+      <p className="text-gray-700 text-lg font-extrabold">{loggedDays}</p>
+      <p className="text-gray-500 text-xs mt-1">روز موفق</p>
     </div>
 
-    <div className="bg-white/80 backdrop-blur-sm border border-yellow-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all text-center">
-      <h3 className="text-red-500 text-lg font-bold mb-1">روزهای ثبت‌نشده</h3>
-      <p className="text-gray-700 text-2xl font-extrabold">{missedDays}</p>
-      <p className="text-gray-500 text-sm mt-1">در انتظار ثبت</p>
+    <div className="bg-white/80 backdrop-blur-sm border border-yellow-100 rounded-lg p-4 shadow-sm hover:shadow-md transition-all text-center">
+      <h3 className="text-red-500 text-sm font-bold mb-1">ثبت‌نشده</h3>
+      <p className="text-gray-700 text-lg font-extrabold">{missedDays}</p>
+      <p className="text-gray-500 text-xs mt-1">در انتظار</p>
     </div>
   </motion.div>
 )}
+
 
 {/* ⚡ دکمه محاسبه کالری روزانه */}
 {selectedDay && (
@@ -329,7 +333,6 @@ const [dailyCalories, setDailyCalories] = useState(null);
 
             {/* فرم ورودی */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-right">
-              {/* ورودی‌ها */}
               <div>
                 <label className="block text-gray-700 text-sm mb-2">جنسیت:</label>
                 <select
@@ -422,154 +425,256 @@ const [dailyCalories, setDailyCalories] = useState(null);
   </div>
 )}
 
-
 {/* 📋 جدول خلاصه وضعیت کالری دریافتی */}
 {selectedDay && (
   <>
+    {/* محاسبه پیشنهاد بهینه */}
+    {dailyCalories && (
+      <script>
+        {`
+          const suggestedCalories = {
+            صبحانه: ${dailyCalories} * 0.2,
+            ناهار: ${dailyCalories} * 0.4,
+            شام: ${dailyCalories} * 0.3,
+            "میان‌وعده": ${dailyCalories} * 0.1
+          };
+        `}
+      </script>
+    )}
+
     <motion.h2
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.7 }}
-      className="mt-20 text-xl sm:text-2xl font-bold text-yellow-600 text-center relative z-10"
+      className="mt-2 text-xl sm:text-2xl font-bold text-yellow-600 text-center relative z-10"
     >
       🍽 خلاصه وضعیت کالری دریافتی شما
     </motion.h2>
-    {/* 📊 جدول اکسل‌طور خلاصه وضعیت کالری */}
-<motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 0.7, duration: 0.8 }}
-  className="mt-6 w-full max-w-3xl mx-auto relative z-10 overflow-x-auto"
->
-  <table className="w-full border-collapse text-sm sm:text-base text-center bg-white/70 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-yellow-100">
-    <thead className="bg-yellow-100/70 text-gray-700 font-semibold">
-      <tr>
-        <th className="py-3 px-2 border border-yellow-100">وعده غذایی</th>
-        <th className="py-3 px-2 border border-yellow-100">کالری دریافتی</th>
-        <th className="py-3 px-2 border border-yellow-100">پیشنهاد بهینه دریافت</th>
-        <th className="py-3 px-2 border border-yellow-100">مانده کالری دریافت‌نشده</th>
-      </tr>
-    </thead>
-    <tbody className="text-gray-700">
-      {[
-        { meal: "صبحانه", cal: 420, suggestion: 450, diff: 30 },
-        { meal: "ناهار", cal: 700, suggestion: 750, diff: 50 },
-        { meal: "شام", cal: 560, suggestion: 600, diff: 40 },
-        { meal: "میان‌وعده", cal: 200, suggestion: 250, diff: 50 },
-        { meal: "مجموع", cal: 1880, suggestion: 2050, diff: 170 },
-      ].map((row, index) => (
-        <tr
-          key={index}
-          className={`${
-            row.meal === "مجموع"
-              ? "bg-yellow-50 font-bold text-yellow-700"
-              : "hover:bg-yellow-50/60"
-          } transition`}
-        >
-          <td className="py-3 px-2 border border-yellow-100">{row.meal}</td>
-          <td className="py-3 px-2 border border-yellow-100">{row.cal}</td>
-          <td className="py-3 px-2 border border-yellow-100">{row.suggestion}</td>
-          <td className="py-3 px-2 border border-yellow-100">{row.diff}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</motion.div>
 
+    {/* 📊 جدول اکسل‌طور خلاصه وضعیت کالری */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.7, duration: 0.8 }}
+      className="mt-6 w-full max-w-3xl mx-auto relative z-10 overflow-x-auto"
+    >
+      <table className="w-full border-collapse text-sm sm:text-base text-center bg-white/70 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-yellow-100">
+        <thead className="bg-yellow-100/70 text-gray-700 font-semibold">
+          <tr>
+            <th className="py-3 px-2 border border-yellow-100">وعده غذایی</th>
+            <th className="py-3 px-2 border border-yellow-100">کالری دریافتی</th>
+            <th className="py-3 px-2 border border-yellow-100">پیشنهاد بهینه دریافت</th>
+            <th className="py-3 px-2 border border-yellow-100">مانده کالری دریافت‌نشده</th>
+          </tr>
+        </thead>
+        <tbody className="text-gray-700">
+          {["صبحانه", "ناهار", "شام", "میان‌وعده"].map((meal) => {
+            const received = mealCalories[meal];
+            const suggested = dailyCalories
+              ? (meal === "صبحانه"
+                  ? dailyCalories * 0.2
+                  : meal === "ناهار"
+                  ? dailyCalories * 0.4
+                  : meal === "شام"
+                  ? dailyCalories * 0.3
+                  : dailyCalories * 0.1)
+              : 0;
+            const diff = suggested - received;
+
+            return (
+              <tr
+                key={meal}
+                className={`hover:bg-yellow-50/60 transition ${
+                  diff < 0 ? "text-red-500" : "text-gray-700"
+                }`}
+              >
+                <td className="py-3 px-2 border border-yellow-100">{meal}</td>
+                <td className="py-3 px-2 border border-yellow-100">{received}</td>
+                <td className="py-3 px-2 border border-yellow-100">
+                  {suggested ? suggested.toFixed(0) : "-"}
+                </td>
+                <td className="py-3 px-2 border border-yellow-100">
+                  {diff ? diff.toFixed(0) : "-"}
+                </td>
+              </tr>
+            );
+          })}
+
+          {dailyCalories && (
+            <tr className="bg-yellow-50 font-bold text-yellow-700">
+              <td className="py-3 px-2 border border-yellow-100">مجموع</td>
+              <td className="py-3 px-2 border border-yellow-100">{totalCalories}</td>
+              <td className="py-3 px-2 border border-yellow-100">
+                {dailyCalories.toFixed(0)}
+              </td>
+              <td className="py-3 px-2 border border-yellow-100">
+                {(dailyCalories - totalCalories).toFixed(0)}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </motion.div>
   </>
 )}
 
-      {/* 🍽 وعده‌ها و نمودار پایین */}
-      {selectedDay && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.7 }}
-          className="mt-16 mb-20 w-full max-w-4xl bg-white/70 backdrop-blur-md border border-yellow-100 rounded-3xl shadow-md p-8 text-right relative z-10"
-        >
-          <h2 className="text-xl font-bold text-yellow-600 mb-6 text-center">
-            🍽 انتخاب وعده غذایی
-          </h2>
 
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {["صبحانه", "ناهار", "شام", "میان‌وعده"].map((meal) => (
-              <button
-                key={meal}
-                onClick={() => setSelectedMeal(meal)}
-                className={`px-5 py-2 rounded-xl text-sm font-medium border transition-all shadow-sm ${
-                  selectedMeal === meal
-                    ? "bg-yellow-500 text-white border-yellow-500 shadow-md"
-                    : "bg-white text-gray-700 border-yellow-200 hover:bg-yellow-50"
-                }`}
+    {/* 🍽 وعده‌ها و نمودار پایین */}
+{selectedDay && (
+  <>
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.8, duration: 0.7 }}
+      className="mt-16 mb-20 w-full max-w-4xl bg-white/70 backdrop-blur-md border border-yellow-100 rounded-3xl shadow-md p-8 text-right relative z-10"
+    >
+      <h2 className="text-xl font-bold text-yellow-600 mb-6 text-center">
+        🍽 انتخاب وعده غذایی
+      </h2>
+
+      {/* دکمه‌های وعده‌ها */}
+      <div className="flex flex-wrap justify-center gap-3 mb-8">
+        {["صبحانه", "ناهار", "شام", "میان‌وعده"].map((meal) => (
+          <button
+            key={meal}
+            onClick={() => setSelectedMeal(meal)}
+            className={`px-5 py-2 rounded-xl text-sm font-medium border transition-all shadow-sm ${
+              selectedMeal === meal
+                ? "bg-yellow-500 text-white border-yellow-500 shadow-md"
+                : "bg-white text-gray-700 border-yellow-200 hover:bg-yellow-50"
+            }`}
+          >
+            {meal}
+          </button>
+        ))}
+      </div>
+
+      {/* 🔹 مجموع کالری وعده‌ها */}
+      {totalCalories > 0 && (
+        <div className="mt-10 text-center">
+          <p className="text-xl font-bold text-yellow-700 mb-4">
+            ⚡ مجموع کالری روز:{" "}
+            <span className="text-gray-800">{totalCalories}</span> کیلوکالری
+          </p>
+
+          <div className="flex justify-center">
+            <PieChart width={320} height={260}>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                dataKey="value"
+                label
               >
-                {meal}
-              </button>
-            ))}
-          </div>
-
-          {selectedMeal && (
-            <div className="mt-4 text-right">
-              <h3 className="text-gray-700 font-semibold mb-3">
-                لیست غذاهای {selectedMeal}:
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                {foodOptions[selectedMeal].map((food) => (
-                  <label
-                    key={food.name}
-                    className={`flex justify-between items-center bg-white/80 p-3 rounded-xl border cursor-pointer transition ${
-                      selectedFoods[selectedMeal].includes(food.name)
-                        ? "border-yellow-400 bg-yellow-50"
-                        : "border-yellow-100 hover:bg-yellow-50"
-                    }`}
-                  >
-                    <span className="text-gray-700">{food.name}</span>
-                    <span className="text-gray-500">{food.calories} کالری</span>
-                    <input
-                      type="checkbox"
-                      checked={selectedFoods[selectedMeal].includes(food.name)}
-                      onChange={() => handleFoodSelection(selectedMeal, food)}
-                      className="hidden"
-                    />
-                  </label>
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
-              </div>
-
-              <p className="mt-6 text-center text-yellow-600 font-semibold">
-                🔸 مجموع کالری {selectedMeal}:{" "}
-                <span className="text-gray-800">{mealCalories[selectedMeal]}</span> کیلوکالری
-              </p>
-            </div>
-          )}
-
-          {totalCalories > 0 && (
-            <div className="mt-10 text-center">
-              <p className="text-xl font-bold text-yellow-700 mb-4">
-                ⚡ مجموع کالری روز:{" "}
-                <span className="text-gray-800">{totalCalories}</span> کیلوکالری
-              </p>
-
-              <div className="flex justify-center">
-                <PieChart width={320} height={260}>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={90}
-                    dataKey="value"
-                    label
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `${value} کالری`} />
-                  <Legend />
-                </PieChart>
-              </div>
-            </div>
-          )}
-        </motion.section>
+              </Pie>
+              <Tooltip formatter={(value) => `${value} کالری`} />
+              <Legend />
+            </PieChart>
+          </div>
+        </div>
       )}
+    </motion.section>
+
+    {/* 🟡 پنجره انتخاب وعده از پایین */}
+    <AnimatePresence>
+      {selectedMeal && (
+        <>
+          {/* پس‌زمینه تار */}
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[40]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedMeal(null)}
+          />
+
+          {/* Sheet پایین صفحه */}
+          <motion.div
+            className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg rounded-t-3xl shadow-2xl border-t border-yellow-100 p-6 z-[50] max-h-[85vh] overflow-y-auto"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 250, damping: 30 }}
+          >
+            <h2 className="text-center text-xl font-bold text-yellow-600 mb-6">
+              🍽 انتخاب غذا برای {selectedMeal}
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-right">
+              {foodOptions[selectedMeal].map((food) => (
+                <label
+                  key={food.name}
+                  className={`flex justify-between items-center bg-white/80 p-3 rounded-xl border cursor-pointer transition ${
+                    selectedFoods[selectedMeal].includes(food.name)
+                      ? "border-yellow-400 bg-yellow-50"
+                      : "border-yellow-100 hover:bg-yellow-50"
+                  }`}
+                >
+                  <span className="text-gray-700">{food.name}</span>
+                  <span className="text-gray-500">{food.calories} کالری</span>
+                  <input
+                    type="checkbox"
+                    checked={selectedFoods[selectedMeal].includes(food.name)}
+                    onChange={() => handleFoodSelection(selectedMeal, food)}
+                    className="hidden"
+                  />
+                </label>
+              ))}
+
+              {/* گزینه سایر */}
+              <div className="bg-white/80 p-3 rounded-xl border border-yellow-100 hover:bg-yellow-50 transition">
+                <label className="text-gray-700 font-medium block mb-2">
+                  ➕ سایر (وارد کردن دستی کالری)
+                </label>
+                <input
+                  type="number"
+                  placeholder="مثلاً 220"
+                  className="w-full border border-yellow-200 rounded-lg p-2 text-center focus:ring-2 focus:ring-yellow-400 outline-none text-gray-700"
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    const customFood = { name: "سایر", calories: value || 0 };
+                    setMealCalories((prev) => ({
+                      ...prev,
+                      [selectedMeal]: prev[selectedMeal] + value,
+                    }));
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 text-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setSelectedMeal(null)}
+                className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all"
+              >
+                ✅ محاسبه کالری {selectedMeal}
+              </motion.button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  </>
+)}
+
+      {/* 🔙 دکمه بازگشت به خانه (زیر نوبار سمت راست) */}
+<motion.a
+  href="/"
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, ease: "easeOut" }}
+  className="fixed top-24 right-6 z-50 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-bold py-2 px-5 rounded-xl shadow-lg hover:from-yellow-600 hover:to-yellow-500 transition-all text-sm sm:text-base flex items-center gap-2"
+>
+  <span>بازگشت</span>
+  <span className="text-lg">➡️</span>
+</motion.a>
+
     </main>
   );
 }

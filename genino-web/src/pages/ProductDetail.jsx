@@ -145,7 +145,7 @@ useEffect(() => {
       : {}
   }
   transition={{ duration: 0.6, ease: "easeOut" }}
-  className="fixed top-6 left-6 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-5 py-2.5 rounded-full shadow-[0_4px_18px_rgba(212,175,55,0.3)] hover:shadow-[0_6px_25px_rgba(212,175,55,0.45)] transition-all duration-300 flex items-center gap-2 z-50"
+  className="fixed top-24 left-6 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-5 py-2.5 rounded-full shadow-[0_4px_18px_rgba(212,175,55,0.3)] hover:shadow-[0_6px_25px_rgba(212,175,55,0.45)] transition-all duration-300 flex items-center gap-2 z-50"
 >
   <ShoppingBag className="w-5 h-5" />
   <span className="font-medium text-sm sm:text-base">سبد خرید</span>
