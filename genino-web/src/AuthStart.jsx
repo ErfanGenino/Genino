@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo-genino.png";
-import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple } from "lucide-react";
+import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck } from "lucide-react";
 import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
@@ -123,7 +123,7 @@ export default function AuthStart() {
     { icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />, title: "رشد و آموزش کودک", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو." },
     { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "فروشگاه تخصصی", desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.", link: "/shop" },
     { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker" },
-    { icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />, title: "دستیار هوشمند والدین", desc: "پیشنهادهای هوشمند و تحلیل رفتار کودک بر اساس داده‌های روزانه." },
+    { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنیهای روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge" },
     { icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />, title: "آموزش والدین", desc: "مقاله‌ها و دوره‌های آموزشی برای پرورش بهتر و آگاهانه‌تر کودک." },
     { icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "ایده‌های خلاقانه برای بازی‌های خانوادگی و تقویت مهارت‌های کودک." },
     { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما." },
@@ -138,8 +138,8 @@ export default function AuthStart() {
 useEffect(() => {
   const interval = setInterval(() => {
     setHighlight(true);
-    setTimeout(() => setHighlight(false), 1200); // طول زمان درخشش
-  }, 7000); // هر ۷ ثانیه یک‌بار تکرار شود
+    setTimeout(() => setHighlight(false), 2000); // طول زمان درخشش
+  }, 5000); // هر ۷ ثانیه یک‌بار تکرار شود
   return () => clearInterval(interval);
 }, []);
 
@@ -325,20 +325,27 @@ useEffect(() => {
     <motion.div
       variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
       animate={
-        item.title === "فروشگاه تخصصی" && highlight
-          ? {
-              scale: [1, 1.05, 1],
-              rotate: [0, -3, 3, 0],
-              boxShadow: [
-                "0 0 0px rgba(212,175,55,0)",
-                "0 0 20px rgba(212,175,55,0.8)",
-                "0 0 0px rgba(212,175,55,0)",
-              ],
-            }
-          : {}
+  item.title === "فروشگاه تخصصی" && highlight
+    ? {
+        scale: [1, 1.08, 0.98, 1.06, 1],
+        rotate: [0, -4, 4, -2, 2, 0],
+        background: [
+          "linear-gradient(to bottom right, #fffaf0, #fffdf8)",
+          "linear-gradient(to bottom right, #fceabb, #f8b500)",
+          "linear-gradient(to bottom right, #fffaf0, #fffdf8)",
+        ],
+        boxShadow: [
+          "0 0 0px rgba(212,175,55,0)",
+          "0 0 25px rgba(212,175,55,0.9)",
+          "0 0 0px rgba(212,175,55,0)",
+        ],
       }
-      transition={{ duration: 1, ease: "easeInOut" }}
-      className="group bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-yellow-100 transition-all text-center hover:bg-yellow-50 hover:shadow-lg hover:-translate-y-1 cursor-pointer h-full flex flex-col justify-between"
+    : {}
+}
+transition={{ duration: 1.5, ease: "easeInOut" }}
+      className="group bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-yellow-100 transition-all text-center 
+hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100 
+hover:shadow-xl hover:-translate-y-1 cursor-pointer h-full flex flex-col justify-between"
     >
       <div className="flex flex-col items-center">
         {item.icon}

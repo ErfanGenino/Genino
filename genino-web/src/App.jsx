@@ -10,6 +10,7 @@ import SignupUser from "./SignupUser.jsx";
 import SignupVendor from "./SignupVendor.jsx";
 import Cart from "./pages/Cart.jsx";
 import CalorieTracker from "./pages/CalorieTracker.jsx";
+import WorldKnowledge from "./pages/WorldKnowledge";
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/calorie-tracker" element={<CalorieTracker />} />
+        <Route path="/world-knowledge" element={<WorldKnowledge />} />
 
         {/* داشبوردها */}
         <Route path="/dashboard-user" element={<UserDashboard /* یا <SidebarUser /> */ />} />

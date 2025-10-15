@@ -1,11 +1,20 @@
 import { NavLink, Link } from "react-router-dom";
 import { LogIn, UserPlus, Menu, X } from "lucide-react"; // ✅ آیکون‌ها
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "./assets/logo-genino.png";
 import { motion } from "framer-motion";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+useEffect(() => {
+  const handleScroll = () => {
+    setScrolled(window.scrollY > 20);
+  };
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
 
   const links = [
     { to: "/", label: "خانه" },
@@ -15,88 +24,85 @@ function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
-      <nav
-        dir="rtl"
-        className="max-w-6xl mx-auto flex items-center justify-between px-5 py-3"
-      >
-{/* 🔸 لوگو با انیمیشن ورود */}
-<motion.div
-  initial={{ opacity: 0, y: -15 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.8, ease: "easeOut" }}
+    <header
+  className={`sticky top-0 z-50 backdrop-blur transition-all duration-500 ${
+    scrolled
+      ? "bg-white/95 border-b-2 border-yellow-300 shadow-[0_2px_8px_rgba(212,175,55,0.15)]"
+      : "bg-white/90 border-b border-gray-100"
+  }`}
 >
-  <Link to="/" className="flex items-center gap-2">
-    <div className="relative flex items-center justify-center">
-      {/* افکت درخشش طلایی */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-300/40 to-white/0 blur-xl animate-pulse"></div>
+      <nav dir="rtl" className="w-full flex items-center justify-between px-8 py-3">
 
-      {/* لوگو اصلی */}
-      <img
-        src={logo}
-        alt="Genino Logo"
-        className="relative w-14 h-14 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-transform duration-500 hover:scale-110"
-      />
-    </div>
+  {/* 🔸 راست: لوگو */}
+  <div className="flex-shrink-0">
+    <Link to="/" className="flex items-center gap-2">
+      <div className="relative flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-300/40 to-white/0 blur-xl animate-pulse"></div>
+        <img
+          src={logo}
+          alt="Genino Logo"
+          className="relative w-14 h-14 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-transform duration-500 hover:scale-110"
+        />
+      </div>
+      <div className="flex flex-col leading-tight">
+        <span className="text-base font-bold text-yellow-600">ژنینو 🌿</span>
+        <span className="text-[11px] text-gray-500">دستیار هوشمند</span>
+      </div>
+    </Link>
+  </div>
 
-    <div className="flex flex-col leading-tight">
-      <span className="text-base font-bold text-yellow-600">ژنینو 🌿</span>
-      <span className="text-[11px] text-gray-500">دستیار هوشمند</span>
-    </div>
-  </Link>
-</motion.div>
+  {/* 🔸 وسط: لینک‌ها */}
+  <div className="hidden md:flex items-center justify-center flex-1 gap-8">
+    {links.map((item) => (
+      <NavLink
+        key={item.to}
+        to={item.to}
+        className={({ isActive }) =>
+          [
+            "text-sm transition-all",
+            isActive
+              ? "text-yellow-600 font-semibold"
+              : "text-gray-600 hover:text-yellow-600",
+          ].join(" ")
+        }
+      >
+        {item.label}
+      </NavLink>
+    ))}
+  </div>
 
+  {/* 🔸 چپ: ورود و ثبت‌نام */}
+  <div className="hidden md:flex items-center justify-end gap-3 flex-shrink-0">
+    <Link
+      to="/login"
+      className="flex items-center gap-1.5 text-gray-700 border border-gray-200 px-3 py-1.5 rounded-xl text-sm font-medium hover:border-yellow-400 hover:text-yellow-600 transition-all shadow-sm hover:shadow-md"
+    >
+      <LogIn size={17} className="opacity-80" />
+      <span>ورود</span>
+    </Link>
+    <Link
+      to="/signup"
+      className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-3.5 py-1.5 rounded-xl text-sm font-medium hover:from-yellow-600 hover:to-yellow-500 shadow-sm hover:shadow-md transition-all"
+    >
+      <UserPlus size={17} className="opacity-90" />
+      <span>ثبت‌نام</span>
+    </Link>
+  </div>
 
-        {/* 🔸 لینک‌های دسکتاپ */}
-        <div className="hidden md:flex items-center gap-6">
-          {links.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                [
-                  "text-sm transition-all",
-                  isActive
-                    ? "text-yellow-600 font-semibold"
-                    : "text-gray-600 hover:text-yellow-600",
-                ].join(" ")
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </div>
+  {/* 🔸 منوی موبایل */}
+  <button
+    className="md:hidden p-2 rounded-lg hover:bg-yellow-50 transition"
+    onClick={() => setMenuOpen(!menuOpen)}
+  >
+    {menuOpen ? (
+      <X size={24} className="text-yellow-600" />
+    ) : (
+      <Menu size={24} className="text-gray-700" />
+    )}
+  </button>
 
-        {/* 🔸 دکمه‌های ورود و ثبت‌نام - دسکتاپ */}
-        <div className="hidden md:flex items-center gap-3">
-          <Link
-            to="/login"
-            className="flex items-center gap-1.5 text-gray-700 border border-gray-200 px-3 py-1.5 rounded-xl text-sm font-medium hover:border-yellow-400 hover:text-yellow-600 transition-all shadow-sm hover:shadow-md"
-          >
-            <LogIn size={17} className="opacity-80" />
-            <span>ورود</span>
-          </Link>
-          <Link
-            to="/signup"
-            className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-3.5 py-1.5 rounded-xl text-sm font-medium hover:from-yellow-600 hover:to-yellow-500 shadow-sm hover:shadow-md transition-all"
-          >
-            <UserPlus size={17} className="opacity-90" />
-            <span>ثبت‌نام</span>
-          </Link>
-        </div>
+</nav>
 
-        {/* 🔸 منوی موبایل */}
-        <button
-          className="md:hidden p-2 rounded-lg hover:bg-yellow-50 transition"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? (
-            <X size={24} className="text-yellow-600" />
-          ) : (
-            <Menu size={24} className="text-gray-700" />
-          )}
-        </button>
-      </nav>
 
       {/* 🔹 محتوای منوی بازشونده در موبایل */}
       {menuOpen && (
