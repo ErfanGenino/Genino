@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo-genino.png";
-import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight } from "lucide-react";
+import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple } from "lucide-react";
 import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 
 // 🔸 اسلایدر خودکار با انیمیشن جهت‌دار (راست/چپ)
 function AutoSlider() {
@@ -120,8 +121,8 @@ export default function AuthStart() {
 
   const features = [
     { icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />, title: "رشد و آموزش کودک", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو." },
-    { icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />, title: "تعامل و هدیه خانوادگی", desc: "اتصال خانواده و اقوام برای اشتراک لحظات و هدیه به کودک." },
-    { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "فروشگاه تخصصی", desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان." },
+    { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "فروشگاه تخصصی", desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.", link: "/shop" },
+    { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker" },
     { icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />, title: "دستیار هوشمند والدین", desc: "پیشنهادهای هوشمند و تحلیل رفتار کودک بر اساس داده‌های روزانه." },
     { icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />, title: "آموزش والدین", desc: "مقاله‌ها و دوره‌های آموزشی برای پرورش بهتر و آگاهانه‌تر کودک." },
     { icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "ایده‌های خلاقانه برای بازی‌های خانوادگی و تقویت مهارت‌های کودک." },
@@ -132,6 +133,15 @@ export default function AuthStart() {
     { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "احساسات و رفتار", desc: "کمک به والدین در شناخت احساسات کودک و تقویت هوش هیجانی." },
     { icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />, title: "برنامه‌ریز روزانه", desc: "تنظیم خودکار فعالیت‌ها و یادآورها برای والدین و کودک." },
   ];
+  const [highlight, setHighlight] = useState(false);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setHighlight(true);
+    setTimeout(() => setHighlight(false), 1200); // طول زمان درخشش
+  }, 7000); // هر ۷ ثانیه یک‌بار تکرار شود
+  return () => clearInterval(interval);
+}, []);
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-20 text-center overflow-x-hidden overflow-y-auto">
@@ -255,7 +265,7 @@ export default function AuthStart() {
 
 
       {/* 🔹 بک‌گراند DNA چرخان */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#fffdf8] to-[#f7f3e6] overflow-hidden z-0">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#fffdf8] to-[#f7f3e6] overflow-hidden z-[1]">
         {Array.from({ length: 8 }).map((_, i) => (
           <motion.svg
             key={i}
@@ -301,7 +311,7 @@ export default function AuthStart() {
 
       {/* 🔸 کارت‌های ویژگی */}
       <motion.section
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl mb-20 relative z-10"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl mb-20 relative z-[5] items-stretch"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
@@ -311,21 +321,36 @@ export default function AuthStart() {
         }}
       >
         {features.map((item, i) => (
-          <motion.div
-            key={i}
-            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-            className="group bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-yellow-100 transition-all text-center hover:bg-yellow-50 hover:shadow-lg hover:-translate-y-1"
-          >
-            <div className="flex flex-col items-center">
-              {item.icon}
-              <h3 className="text-base font-semibold text-gray-700 mb-1">{item.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
-            </div>
-          </motion.div>
-        ))}
+  <Link key={i} to={item.link || "#"}>
+    <motion.div
+      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+      animate={
+        item.title === "فروشگاه تخصصی" && highlight
+          ? {
+              scale: [1, 1.05, 1],
+              rotate: [0, -3, 3, 0],
+              boxShadow: [
+                "0 0 0px rgba(212,175,55,0)",
+                "0 0 20px rgba(212,175,55,0.8)",
+                "0 0 0px rgba(212,175,55,0)",
+              ],
+            }
+          : {}
+      }
+      transition={{ duration: 1, ease: "easeInOut" }}
+      className="group bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-yellow-100 transition-all text-center hover:bg-yellow-50 hover:shadow-lg hover:-translate-y-1 cursor-pointer h-full flex flex-col justify-between"
+    >
+      <div className="flex flex-col items-center">
+        {item.icon}
+        <h3 className="text-base font-semibold text-gray-700 mb-1">{item.title}</h3>
+        <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+      </div>
+    </motion.div>
+  </Link>
+))}
       </motion.section>
 
-      <Footer />
+            <Footer className="relative z-[2]" />
     </main>
   );
 }
