@@ -19,6 +19,8 @@ import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
 import VendorDashboard from "./pages/dashboard/VendorDashboard.jsx";
 import Shop from "./pages/Shop.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
+import ChildAssessment from "./pages/ChildAssessment";
+
 
 // ✅ اگر هنوز داشبوردها را نساختی، موقتاً می‌تونی از سایدبارها استفاده کنی:
 // import SidebarUser from "./components/SidebarUser.jsx";
@@ -48,6 +50,7 @@ export default function App() {
         {/* صفحات جزئیات دانستنی‌ها */}
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
         <Route path="/my-child" element={<MyChild />} />
+        <Route path="/child-assessment" element={<ChildAssessment />} />
 
 
         {/* داشبوردها */}

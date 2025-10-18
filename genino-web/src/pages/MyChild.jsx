@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Baby, Brain, Heart, Activity } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function MyChild() {
   const [activeTab, setActiveTab] = useState("physical");
@@ -103,6 +104,77 @@ export default function MyChild() {
           ژنینو همراه شماست تا هر لحظه، طلایی‌تر از قبل باشد.
         </p>
       </motion.div>
+
+      {/* 🧠 باکس پرسشنامه تخصصی ژنینو */}
+<motion.div
+  className="relative z-[6] mt-12 mb-4 bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-300 rounded-3xl shadow-lg p-8 text-center w-full max-w-2xl"
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8 }}
+>
+  <h2 className="text-2xl sm:text-3xl font-extrabold text-yellow-800 mb-4 drop-shadow-[0_0_8px_rgba(255,220,100,0.6)]">
+    🧠 پرسشنامه تخصصی ژنینو – کودک من
+  </h2>
+
+  <p className="text-gray-700 mb-6 text-sm sm:text-base leading-relaxed">
+    با پاسخ به چند سؤال هدفمند درباره رفتار، احساس و رشد فرزندتان،
+    ژنینو تحلیل هوشمند رشد کودک را در اختیارتان قرار می‌دهد.
+  </p>
+
+  <motion.div
+    whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(212,175,55,0.6)" }}
+    whileTap={{ scale: 0.97 }}
+  >
+    <Link
+      to="/child-assessment"
+      className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-10 py-3 rounded-xl font-semibold shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all"
+    >
+      ✨ شروع پرسشنامه
+    </Link>
+  </motion.div>
+</motion.div>
+
+{/* 📊 نمایش تحلیل نتایج پرسشنامه */}
+{(() => {
+  const savedResult = localStorage.getItem("childAssessmentResult");
+  if (!savedResult) return null;
+
+  const result = JSON.parse(savedResult);
+  const keys = Object.keys(result);
+  const values = Object.values(result);
+
+  return (
+    <motion.div
+      className="relative z-[6] mt-8 bg-white/85 backdrop-blur-sm border border-yellow-200 rounded-3xl shadow-lg p-6 max-w-2xl w-full"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <h3 className="text-xl font-bold text-yellow-800 mb-4 text-center">
+        📈 تحلیل نتایج رشد کودک
+      </h3>
+
+      <div className="space-y-4">
+        {keys.map((key, i) => (
+          <div key={i}>
+            <div className="flex justify-between mb-1 text-sm text-gray-700">
+              <span>{key}</span>
+              <span>{values[i]}%</span>
+            </div>
+            <div className="w-full h-3 bg-yellow-100 rounded-full overflow-hidden">
+              <motion.div
+                className="h-3 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full shadow-[0_0_10px_rgba(212,175,55,0.6)]"
+                initial={{ width: 0 }}
+                animate={{ width: `${values[i]}%` }}
+                transition={{ duration: 1 }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+})()}
 
       {/* 🌟 تب‌ها */}
       <motion.div
