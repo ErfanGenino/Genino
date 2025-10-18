@@ -13,6 +13,10 @@ import CalorieTracker from "./pages/CalorieTracker.jsx";
 import WorldKnowledge from "./pages/WorldKnowledge";
 import KnowledgeDetail from "./pages/KnowledgeDetail.jsx";
 import MyChild from "./pages/MyChild.jsx";
+import Feed from "./pages/social/Feed.jsx";
+import Profile from "./pages/social/Profile.jsx";
+import CreatePost from "./pages/social/CreatePost.jsx";
+import FunAndPlay from "./pages/FunAndPlay.jsx";
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
@@ -51,6 +55,10 @@ export default function App() {
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
         <Route path="/my-child" element={<MyChild />} />
         <Route path="/child-assessment" element={<ChildAssessment />} />
+        <Route path="/social" element={<Feed />} />
+        <Route path="/social/profile" element={<Profile />} />
+        <Route path="/social/create" element={<CreatePost />} />
+        <Route path="/fun" element={<FunAndPlay />} />
 
 
         {/* داشبوردها */}
