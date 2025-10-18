@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo-genino.png";
-import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck } from "lucide-react";
+import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby } from "lucide-react";
 import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
@@ -120,7 +120,7 @@ export default function AuthStart() {
   }, []);
 
   const features = [
-    { icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />, title: "رشد و آموزش کودک", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو." },
+    { icon: <Baby className="w-8 h-8 text-yellow-500 mb-3" />, title: "کودک من", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.", link: "/my-child" },
     { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "فروشگاه تخصصی", desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.", link: "/shop" },
     { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker" },
     { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنیهای روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge" },
@@ -140,6 +140,15 @@ useEffect(() => {
     setHighlight(true);
     setTimeout(() => setHighlight(false), 2000); // طول زمان درخشش
   }, 5000); // هر ۷ ثانیه یک‌بار تکرار شود
+  return () => clearInterval(interval);
+}, []);
+const [pulse, setPulse] = useState(false);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setPulse(true);
+    setTimeout(() => setPulse(false), 1500); // مدت پالس ۱.۵ ثانیه
+  }, 6000); // هر ۶ ثانیه یک‌بار
   return () => clearInterval(interval);
 }, []);
 
@@ -340,21 +349,52 @@ useEffect(() => {
           "0 0 0px rgba(212,175,55,0)",
         ],
       }
+    : item.title === "کودک من" && pulse
+    ? {
+        scale: [1, 1.03, 1],
+        boxShadow: [
+          "0 0 0px rgba(212,175,55,0)",
+          "0 0 25px rgba(212,175,55,0.6)",
+          "0 0 0px rgba(212,175,55,0)",
+        ],
+      }
     : {}
 }
-transition={{ duration: 1.5, ease: "easeInOut" }}
-      className="group bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-yellow-100 transition-all text-center 
-hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100 
-hover:shadow-xl hover:-translate-y-1 cursor-pointer h-full flex flex-col justify-between"
+      transition={{ duration: 2 , ease: "easeInOut" }}
+      className={`group p-6 rounded-2xl border transition-all text-center h-full flex flex-col justify-between cursor-pointer 
+        ${
+          item.title === "کودک من"
+  ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
+  : "bg-white/80 backdrop-blur-sm border-yellow-100 hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100 hover:shadow-xl hover:-translate-y-1"
+        }`}
     >
       <div className="flex flex-col items-center">
-        {item.icon}
-        <h3 className="text-base font-semibold text-gray-700 mb-1">{item.title}</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+        {item.title === "کودک من" ? (
+          <Baby className="w-10 h-10 text-yellow-700 mb-3 drop-shadow-md" />
+        ) : (
+          item.icon
+        )}
+        <h3
+          className={`${
+            item.title === "کودک من"
+              ? "text-lg font-extrabold text-yellow-800"
+              : "text-base font-semibold text-gray-700"
+          } mb-1`}
+        >
+          {item.title}
+        </h3>
+        <p
+          className={`${
+            item.title === "کودک من" ? "text-gray-700" : "text-gray-500"
+          } text-sm leading-relaxed`}
+        >
+          {item.desc}
+        </p>
       </div>
     </motion.div>
   </Link>
 ))}
+
       </motion.section>
 
             <Footer className="relative z-[2]" />

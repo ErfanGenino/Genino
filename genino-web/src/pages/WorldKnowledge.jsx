@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Heart, Baby, Users, Sparkles, Smile, Utensils } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function WorldKnowledge() {
   const topics = [
@@ -35,6 +36,24 @@ export default function WorldKnowledge() {
       desc: "احترام، همدلی و درک متقابل، زیربنای رشد سالم فرزندان.",
     },
   ];
+
+  const cardColors = [
+  "from-yellow-50 to-yellow-100",
+  "from-green-50 to-green-100",
+  "from-pink-50 to-pink-100",
+  "from-blue-50 to-blue-100",
+  "from-purple-50 to-purple-100",
+  "from-orange-50 to-orange-100",
+];
+const [shine, setShine] = React.useState(false);
+
+React.useEffect(() => {
+  const interval = setInterval(() => {
+    setShine(true);
+    setTimeout(() => setShine(false), 2000); // درخشش ۲ ثانیه‌ای
+  }, 6000); // هر ۶ ثانیه تکرار
+  return () => clearInterval(interval);
+}, []);
 
   return (
     <main
@@ -99,13 +118,13 @@ export default function WorldKnowledge() {
 
       {/* ✅ تیتر صفحه */}
       <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-[10] text-3xl font-bold text-yellow-600 mb-8"
-      >
-        🌍 دانستنی‌های روز دنیا
-      </motion.h1>
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8 }}
+  className="relative z-[10] text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-600 animate-gradient mb-8"
+>
+  🌍 دانستنی‌های روز دنیا
+</motion.h1>
 
       <motion.p
         initial={{ opacity: 0, y: 10 }}
@@ -116,30 +135,41 @@ export default function WorldKnowledge() {
         مجموعه‌ای از دانستنی‌های علمی، آموزشی و روان‌شناسی برای والدین آگاه و خانواده‌های آینده‌نگر.
       </motion.p>
 
-      {/* 🔸 کارت‌های دانستنی‌ها */}
-      <section className="relative z-[10] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mb-20">
-        {topics.map((topic, i) => (
-          <motion.div
-            key={i}
-            whileHover={{
-              scale: 1.03,
-              boxShadow: "0 0 25px rgba(212,175,55,0.4)",
-            }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="bg-white/80 backdrop-blur-md border border-yellow-100 rounded-3xl shadow-md p-6 text-right flex flex-col justify-between hover:bg-yellow-50 transition-all cursor-pointer"
-          >
-            <div className="flex flex-col items-center mb-4">
-              {topic.icon}
-              <h2 className="text-lg font-bold text-yellow-600 mb-2 text-center leading-snug">
-                {topic.title}
-              </h2>
-              <p className="text-sm text-gray-600 text-center leading-relaxed">
-                {topic.desc}
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </section>
+      {/* 🔸 کارت‌های دانستنی‌ها با لینک به جزئیات */}
+<section className="relative z-[10] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mb-20">
+  {topics.map((topic, i) => (
+    <Link
+      key={i}
+      to={`/knowledge/${[
+        "pre-pregnancy",
+        "under-3",
+        "children-3-10",
+        "nutrition",
+        "parents-behavior",
+        "family-relations",
+      ][i]}`}
+    >
+      <motion.div
+        whileHover={{
+          scale: 1.03,
+          boxShadow: "0 0 25px rgba(212,175,55,0.4)",
+        }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+        className={`bg-gradient-to-br ${cardColors[i % cardColors.length]} border border-yellow-100 rounded-3xl shadow-md p-6 text-right flex flex-col justify-between hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer`}
+      >
+        <div className="flex flex-col items-center mb-4">
+          {topic.icon}
+          <h2 className="text-lg font-bold text-yellow-600 mb-2 text-center leading-snug">
+            {topic.title}
+          </h2>
+          <p className="text-sm text-gray-600 text-center leading-relaxed">
+            {topic.desc}
+          </p>
+        </div>
+      </motion.div>
+    </Link>
+  ))}
+</section>
 
       {/* 🔸 کارت‌های بدن زنان و مردان */}
       <section className="relative z-[20] grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-5xl mb-20">
@@ -147,7 +177,9 @@ export default function WorldKnowledge() {
         <motion.div
           whileHover={{ scale: 1.03, rotate: 1 }}
           transition={{ type: "spring", stiffness: 180, damping: 12 }}
-          className="bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all"
+          className={`bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
+  shine ? "shadow-[0_0_40px_rgba(255,105,180,0.6)] scale-[1.02]" : ""
+}`}
         >
           <motion.div
             animate={{ rotate: [0, 360] }}
@@ -178,7 +210,9 @@ export default function WorldKnowledge() {
         <motion.div
           whileHover={{ scale: 1.03, rotate: -1 }}
           transition={{ type: "spring", stiffness: 180, damping: 12 }}
-          className="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all"
+          className={`bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
+  shine ? "shadow-[0_0_40px_rgba(212,175,55,0.6)] scale-[1.02]" : ""
+}`}
         >
           <motion.div
             animate={{ rotate: [0, -360] }}
