@@ -17,6 +17,7 @@ import Feed from "./pages/social/Feed.jsx";
 import Profile from "./pages/social/Profile.jsx";
 import CreatePost from "./pages/social/CreatePost.jsx";
 import FunAndPlay from "./pages/FunAndPlay.jsx";
+import FamilyFinance from "./pages/FamilyFinance";
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/social/create" element={<CreatePost />} />
         <Route path="/fun" element={<FunAndPlay />} />
         <Route path="/child-profile" element={<ChildProfile />} />
+        <Route path="/family-finance" element={<FamilyFinance />} />
 
         {/* داشبوردها */}
         <Route path="/dashboard-user" element={<UserDashboard /* یا <SidebarUser /> */ />} />

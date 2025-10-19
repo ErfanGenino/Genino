@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo-genino.png";
-import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby } from "lucide-react";
+import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby, DollarSign } from "lucide-react";
 import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
@@ -136,7 +136,7 @@ export default function AuthStart() {
   { icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />, title: "سلامت و تغذیه کودک", desc: "برنامه‌های غذایی متناسب با سن و نیاز رشد کودک." },
   { icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />, title: "مدیریت خواب کودک", desc: "تنظیم و پایش الگوی خواب کودک برای رشد بهتر." },
   { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "احساسات و رفتار", desc: "کمک به والدین در شناخت احساسات کودک و تقویت هوش هیجانی." },
-  { icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />, title: "برنامه‌ریز روزانه", desc: "تنظیم خودکار فعالیت‌ها و یادآورها برای والدین و کودک." },
+  { icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
 ];
 
   const [highlight, setHighlight] = useState(false);

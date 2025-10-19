@@ -3,6 +3,7 @@ import { Baby, Brain, Heart, Activity } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import FamilyTree from "./FamilyTree";
+import AchievementsBar from "../components/AchievementsBar";
 
 export default function MyChild() {
   const [activeTab, setActiveTab] = useState("physical");
@@ -121,6 +122,9 @@ const daysLeft = Math.ceil((nextBirthday - today) / msInDay);
         ))}
       </div>
 
+      {/* 🏅 نوار دستاوردهای کودک */}
+      <AchievementsBar />
+
      {/* 👶 دایره کودک */}
 <motion.div
   className="relative z-[5] flex flex-col items-center text-center"
@@ -142,16 +146,18 @@ const daysLeft = Math.ceil((nextBirthday - today) / msInDay);
       )}
     </motion.div>
 
-    {/* 🎂 روزشمار تولد */}
-    <motion.div
-      className="absolute -left-72 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-yellow-400 to-yellow-300 
-                 text-yellow-900 text-sm font-semibold px-5 py-2 rounded-2xl shadow-lg border border-yellow-200 whitespace-nowrap"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.6 }}
-    >
-      🎂 {daysLeft} روز مانده تا تولد {childName}
-    </motion.div>
+    {/* 🎂 روزشمار تولد (بهینه‌شده برای دسکتاپ و موبایل) */}
+<motion.div
+  className="absolute top-1/2 -translate-y-1/2 
+             bg-gradient-to-r from-yellow-400 to-yellow-300 text-yellow-900 text-sm font-semibold
+             px-4 sm:px-5 py-2 rounded-2xl shadow-lg border border-yellow-200 whitespace-nowrap
+             left-[calc(50%-10rem)] sm:left-auto sm:-right-[18rem] sm:translate-x-0"
+  initial={{ opacity: 0, x: -20 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ delay: 0.6 }}
+>
+  🎂 {daysLeft} روز مانده تا تولد {childName}
+</motion.div>
 
     {/* 🔗 لینک پروفایل کودک */}
     <Link
