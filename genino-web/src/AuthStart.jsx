@@ -120,7 +120,7 @@ export default function AuthStart() {
   }, []);
 
   const features = [
-  { icon: <Baby className="w-8 h-8 text-yellow-500 mb-3" />, title: "کودک من", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.", link: "/my-child" },
+  { icon: <Baby className="w-8 h-8 text-yellow-500 mb-3" />, title: "کودک من", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.", link: "/mychild" },
   { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "فروشگاه تخصصی", desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.", link: "/shop" },
   { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker" },
   { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنی‌های روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge" },
