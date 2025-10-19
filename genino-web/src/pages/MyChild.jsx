@@ -195,6 +195,24 @@ const daysLeft = Math.ceil((nextBirthday - today) / msInDay);
 </motion.div>
 <FamilyTree show={showFamilyTree} onClose={() => setShowFamilyTree(false)} />
 
+{/* 🖼️ دکمه آلبوم خاطرات */}
+<motion.div
+  className="relative z-[5] -mt-6 mb-12 flex justify-center"
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.4, duration: 0.6 }}
+>
+  <Link
+    to="/memory-album"
+    className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#facc15] via-[#fbbf24] to-[#f59e0b] 
+               text-white px-10 py-3 rounded-2xl font-semibold shadow-[0_0_20px_rgba(251,191,36,0.6)] 
+               hover:scale-105 hover:shadow-[0_0_30px_rgba(251,191,36,0.8)] transition-all"
+  >
+    📸 آلبوم خاطرات
+  </Link>
+</motion.div>
+
+
       {/* 🧠 باکس پرسشنامه تخصصی ژنینو */}
 <motion.div
   className="relative z-[6] mt-2 mb-4 bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-300 rounded-3xl shadow-lg p-8 text-center w-full max-w-2xl"

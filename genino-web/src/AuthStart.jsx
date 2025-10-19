@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo-genino.png";
-import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby, DollarSign } from "lucide-react";
+import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby, DollarSign, PartyPopper, Play, LetterText } from "lucide-react";
 import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { TbXboxY } from "react-icons/tb";
 
 // 🔸 اسلایدر خودکار با انیمیشن جهت‌دار (راست/چپ)
 function AutoSlider() {
@@ -122,16 +123,16 @@ export default function AuthStart() {
   const features = [
   { icon: <Baby className="w-8 h-8 text-yellow-500 mb-3" />, title: "کودک من", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.", link: "/mychild" },
   { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "فروشگاه تخصصی", desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.", link: "/shop" },
-  { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker" },
+  { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker",color: "calorie",},  
   { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنی‌های روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge" },
   {
-    icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />,
+    icon: <LetterText className="w-8 h-8 text-yellow-500 mb-3" />,
     title: "شبکه اجتماعی ژنینو",
     desc: "در ژنینو با والدین دیگر در ارتباط باشید، تجربه‌ها را به اشتراک بگذارید و از لحظات طلایی کودکی الهام بگیرید 💬✨",
     link: "/social",
   },
-  { icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun" },
-  { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما." },
+  { icon: <Play className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun" },
+  { icon: <PartyPopper className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما", link: "/events" },
   { icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />, title: "گزارش رشد هوشمند", desc: "تحلیل داده‌های روزانه و ارائه گزارش پیشرفت کودک در طول زمان." },
   { icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />, title: "سلامت و تغذیه کودک", desc: "برنامه‌های غذایی متناسب با سن و نیاز رشد کودک." },
   { icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />, title: "مدیریت خواب کودک", desc: "تنظیم و پایش الگوی خواب کودک برای رشد بهتر." },
@@ -340,41 +341,70 @@ useEffect(() => {
     <motion.div
       variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
       animate={
-  item.title === "فروشگاه تخصصی" && highlight
-    ? {
-        scale: [1, 1.08, 0.98, 1.06, 1],
-        rotate: [0, -4, 4, -2, 2, 0],
-        background: [
-          "linear-gradient(to bottom right, #fffaf0, #fffdf8)",
-          "linear-gradient(to bottom right, #fceabb, #f8b500)",
-          "linear-gradient(to bottom right, #fffaf0, #fffdf8)",
-        ],
-        boxShadow: [
-          "0 0 0px rgba(212,175,55,0)",
-          "0 0 25px rgba(212,175,55,0.9)",
-          "0 0 0px rgba(212,175,55,0)",
-        ],
+        item.title === "فروشگاه تخصصی" && highlight
+          ? {
+              scale: [1, 1.08, 0.98, 1.06, 1],
+              rotate: [0, -4, 4, -2, 2, 0],
+              background: [
+                "linear-gradient(to bottom right, #fffaf0, #fffdf8)",
+                "linear-gradient(to bottom right, #fceabb, #f8b500)",
+                "linear-gradient(to bottom right, #fffaf0, #fffdf8)",
+              ],
+              boxShadow: [
+                "0 0 0px rgba(212,175,55,0)",
+                "0 0 25px rgba(212,175,55,0.9)",
+                "0 0 0px rgba(212,175,55,0)",
+              ],
+            }
+          : item.title === "کودک من" && pulse
+          ? {
+              scale: [1, 1.03, 1],
+              boxShadow: [
+                "0 0 0px rgba(212,175,55,0)",
+                "0 0 25px rgba(212,175,55,0.6)",
+                "0 0 0px rgba(212,175,55,0)",
+              ],
+            }
+          : {}
       }
-    : item.title === "کودک من" && pulse
-    ? {
-        scale: [1, 1.03, 1],
-        boxShadow: [
-          "0 0 0px rgba(212,175,55,0)",
-          "0 0 25px rgba(212,175,55,0.6)",
-          "0 0 0px rgba(212,175,55,0)",
-        ],
-      }
-    : {}
-}
-      transition={{ duration: 2 , ease: "easeInOut" }}
-      className={`group p-6 rounded-2xl border transition-all text-center h-full flex flex-col justify-between cursor-pointer 
+      transition={{ duration: 2, ease: "easeInOut" }}
+      className={`relative group p-6 rounded-2xl border transition-all text-center h-full flex flex-col justify-between cursor-pointer
         ${
           item.title === "کودک من"
-  ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
-  : "bg-white/80 backdrop-blur-sm border-yellow-100 hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100 hover:shadow-xl hover:-translate-y-1"
+            ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
+            : item.title === "کالری شمار"
+            ? "bg-gradient-to-br from-[#b5f2c0] via-[#fff8e8] to-[#ffb6b6] border-[#ffd6a5] shadow-[0_0_15px_rgba(255,150,150,0.3)] hover:shadow-[0_0_25px_rgba(255,150,150,0.4)] hover:-translate-y-1 transition-all"
+            : "bg-white/80 backdrop-blur-sm border-yellow-100 hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100 hover:shadow-xl hover:-translate-y-1"
         }`}
     >
-      <div className="flex flex-col items-center">
+      {/* 🌟 ستاره‌های طلایی مخصوص دانستنی‌های روز دنیا */}
+      {item.title === "دانستنی‌های روز دنیا" && (
+        <>
+          {Array.from({ length: 10 }).map((_, idx) => (
+            <motion.div
+              key={idx}
+              className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full shadow-[0_0_8px_rgba(255,215,0,0.8)]"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                opacity: 0.8,
+              }}
+              animate={{
+                opacity: [0.2, 1, 0.2],
+                scale: [0.9, 1.4, 0.9],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 2 + Math.random() * 2,
+                delay: Math.random() * 2,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </>
+      )}
+
+      <div className="flex flex-col items-center relative z-10">
         {item.title === "کودک من" ? (
           <Baby className="w-10 h-10 text-yellow-700 mb-3 drop-shadow-md" />
         ) : (
