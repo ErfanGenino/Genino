@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Baby, Brain, Heart, Activity } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import FamilyTree from "./FamilyTree";
 
 export default function MyChild() {
   const [activeTab, setActiveTab] = useState("physical");
@@ -25,8 +26,47 @@ export default function MyChild() {
     { label: "احساس و انرژی", value: "شاد و فعال", unit: "", percent: 95 },
   ];
 
-  const average =
-    stats.reduce((sum, s) => sum + s.percent, 0) / stats.length;
+  const average = stats.reduce((sum, s) => sum + s.percent, 0) / stats.length;
+
+  // 🌳 استیت‌های درختواره
+  const [showFamilyTree, setShowFamilyTree] = useState(false);
+  const [sisters, setSisters] = useState([]);
+  const [brothers, setBrothers] = useState([]);
+  const [aunts, setAunts] = useState([]);
+  const [uncles, setUncles] = useState([]);
+  const [khaleha, setKhaleha] = useState([]);
+  const [dayiha, setDayiha] = useState([]);
+  const [others, setOthers] = useState([]);
+
+  // 👶 اطلاعات کودک از localStorage
+  const [childPhoto, setChildPhoto] = useState(localStorage.getItem("childPhoto") || null);
+  const [childName, setChildName] = useState(localStorage.getItem("childName") || "حنا");
+  const [birthDate, setBirthDate] = useState(localStorage.getItem("birthDate") || "2021-03-12");
+  const [gender, setGender] = useState(localStorage.getItem("gender") || "girl");
+
+  // 📆 محاسبه دقیق سن و روز مانده تا تولد
+const birth = new Date(birthDate);
+const today = new Date();
+
+// محاسبه سن به سال و ماه
+let ageYears = today.getFullYear() - birth.getFullYear();
+let ageMonths = today.getMonth() - birth.getMonth();
+if (today.getDate() < birth.getDate()) ageMonths--;
+
+if (ageMonths < 0) {
+  ageYears--;
+  ageMonths += 12;
+}
+const ageText = `${ageYears} سال و ${ageMonths} ماه`;
+
+// محاسبه دقیق روزهای مانده تا تولد بعدی
+let nextBirthday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
+if (nextBirthday < today) {
+  nextBirthday = new Date(today.getFullYear() + 1, birth.getMonth(), birth.getDate());
+}
+const msInDay = 1000 * 60 * 60 * 24;
+const daysLeft = Math.ceil((nextBirthday - today) / msInDay);
+
 
   return (
     <main
@@ -81,33 +121,77 @@ export default function MyChild() {
         ))}
       </div>
 
-      {/* 👶 آیکون کودک */}
-      <motion.div
-        className="relative z-[5] flex flex-col items-center text-center"
-        animate={{ y: [0, -8, 0] }}
-        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-      >
-        <motion.div
-          animate={{ scale: [1, 1.08, 1] }}
-          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-          className="flex items-center justify-center w-44 h-44 rounded-full bg-white/70 backdrop-blur-md 
-                     shadow-[0_0_70px_rgba(212,175,55,0.6)] border border-yellow-300"
-        >
-          <Baby className="w-24 h-24 text-yellow-700 drop-shadow-xl" />
-        </motion.div>
+     {/* 👶 دایره کودک */}
+<motion.div
+  className="relative z-[5] flex flex-col items-center text-center"
+  animate={{ y: [0, -8, 0] }}
+  transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+>
+  <div className="relative flex flex-col items-center">
+    {/* 📸 دایره تصویر */}
+    <motion.div
+      animate={{ scale: [1, 1.05, 1] }}
+      transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+      className="flex items-center justify-center w-44 h-44 rounded-full bg-white/70 backdrop-blur-md 
+                 shadow-[0_0_70px_rgba(212,175,55,0.6)] border border-yellow-300 overflow-hidden"
+    >
+      {childPhoto ? (
+        <img src={childPhoto} alt="کودک" className="w-full h-full object-cover" />
+      ) : (
+        <Baby className="w-24 h-24 text-yellow-700 drop-shadow-xl" />
+      )}
+    </motion.div>
 
-        <h1 className="mt-6 text-4xl sm:text-5xl font-extrabold text-yellow-800 drop-shadow-[0_0_10px_rgba(255,220,100,0.7)]">
-          کودک من 💛
-        </h1>
-        <p className="text-gray-700 max-w-md leading-relaxed mt-3 text-sm sm:text-base">
-          در اینجا می‌توانید مسیر رشد، احساسات و مهارت‌های فرزند خود را دنبال کنید.  
-          ژنینو همراه شماست تا هر لحظه، طلایی‌تر از قبل باشد.
-        </p>
-      </motion.div>
+    {/* 🎂 روزشمار تولد */}
+    <motion.div
+      className="absolute -left-72 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-yellow-400 to-yellow-300 
+                 text-yellow-900 text-sm font-semibold px-5 py-2 rounded-2xl shadow-lg border border-yellow-200 whitespace-nowrap"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.6 }}
+    >
+      🎂 {daysLeft} روز مانده تا تولد {childName}
+    </motion.div>
+
+    {/* 🔗 لینک پروفایل کودک */}
+    <Link
+      to="/child-profile"
+      className="mt-3 text-sm text-yellow-700 font-semibold hover:text-yellow-900 transition underline underline-offset-4"
+    >
+      ✏️ ویرایش اطلاعات کودک
+    </Link>
+  </div>
+
+  {/* 👧 نام، سن و جنسیت */}
+  <h1 className="mt-5 text-3xl sm:text-4xl font-extrabold text-yellow-800 drop-shadow-[0_0_10px_rgba(255,220,100,0.7)]">
+    {childName} 
+  </h1>
+  <p className="text-gray-700 text-sm mt-2">
+    {ageText} ({gender === "girl" ? "دختر" : "پسر"})
+  </p>
+</motion.div>
+
+
+
+{/* 🌳 دکمه باز کردن درختواره */}
+<motion.div
+  className="relative z-[5] mt-10 mb-10 flex justify-center"
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.3, duration: 0.6 }}
+>
+  <button
+    onClick={() => setShowFamilyTree(true)}
+    className="flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-8 py-3 rounded-2xl font-semibold shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all"
+  >
+    🌳 درختواره کودک من
+  </button>
+</motion.div>
+<FamilyTree show={showFamilyTree} onClose={() => setShowFamilyTree(false)} />
 
       {/* 🧠 باکس پرسشنامه تخصصی ژنینو */}
 <motion.div
-  className="relative z-[6] mt-12 mb-4 bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-300 rounded-3xl shadow-lg p-8 text-center w-full max-w-2xl"
+  className="relative z-[6] mt-2 mb-4 bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-300 rounded-3xl shadow-lg p-8 text-center w-full max-w-2xl"
   initial={{ opacity: 0, y: 30 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.8 }}
@@ -284,6 +368,7 @@ export default function MyChild() {
           ))}
         </div>
       </motion.div>
-    </main>
-  );
+
+</main>
+);
 }

@@ -24,6 +24,7 @@ import VendorDashboard from "./pages/dashboard/VendorDashboard.jsx";
 import Shop from "./pages/Shop.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import ChildAssessment from "./pages/ChildAssessment";
+import ChildProfile from "./pages/ChildProfile";
 
 
 // ✅ اگر هنوز داشبوردها را نساختی، موقتاً می‌تونی از سایدبارها استفاده کنی:
@@ -53,13 +54,13 @@ export default function App() {
         <Route path="/world-knowledge" element={<WorldKnowledge />} />
         {/* صفحات جزئیات دانستنی‌ها */}
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
-        <Route path="/my-child" element={<MyChild />} />
+        <Route path="/mychild" element={<MyChild />} />
         <Route path="/child-assessment" element={<ChildAssessment />} />
         <Route path="/social" element={<Feed />} />
         <Route path="/social/profile" element={<Profile />} />
         <Route path="/social/create" element={<CreatePost />} />
         <Route path="/fun" element={<FunAndPlay />} />
-
+        <Route path="/child-profile" element={<ChildProfile />} />
 
         {/* داشبوردها */}
         <Route path="/dashboard-user" element={<UserDashboard /* یا <SidebarUser /> */ />} />
