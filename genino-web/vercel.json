@@ -2,11 +2,13 @@
   "version": 2,
   "builds": [
     {
-      "src": "genino-web/package.json",
+      "src": "package.json",
       "use": "@vercel/static-build"
     }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "genino-web/dist/$1" }
-  ]
+    { "src": "/(.*)", "dest": "/dist/$1" }
+  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }
