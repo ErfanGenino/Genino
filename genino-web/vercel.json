@@ -1,9 +1,12 @@
 {
   "version": 2,
   "builds": [
-    { "src": "genino-web/package.json", "use": "@vercel/static-build", "config": {} }
+    {
+      "src": "genino-web/package.json",
+      "use": "@vercel/static-build"
+    }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "genino-web/$1" }
+    { "src": "/(.*)", "dest": "genino-web/dist/$1" }
   ]
 }
