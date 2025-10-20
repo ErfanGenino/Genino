@@ -1,27 +1,32 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // ✅ useNavigate اضافه شد
+import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo-genino.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate(); // ✅ برای هدایت بعد از ورود موفق
+  const navigate = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault();
 
     if (email === "" || password === "") {
       setMessage("لطفاً همه فیلدها را پر کنید ❗");
-    }else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-  setMessage("ایمیل خود را به درستی وارد کنید 📧");
-}
-     else if (email === "test@mail.com" && password === "1234") {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setMessage("ایمیل خود را به درستی وارد کنید 📧");
+    } else if (email === "test@mail.com" && password === "1234") {
       setMessage("ورود موفقیت‌آمیز بود 🌿 خوش آمدی!");
 
-      // ✅ هدایت به داشبورد بعد از ۲ ثانیه
+      // 🔹 تعیین مسیر بر اساس مرحله‌ی زندگی کاربر
+      const lifeStage = localStorage.getItem("lifeStage");
+
       setTimeout(() => {
-        navigate("/dashboard");
+        if (lifeStage === "single") navigate("/dashboard-single");
+        else if (lifeStage === "couple") navigate("/dashboard-couple");
+        else if (lifeStage === "pregnancy") navigate("/dashboard-pregnancy");
+        else if (lifeStage === "parent") navigate("/dashboard-parent");
+        else navigate("/signup-user"); // اگر هنوز مرحله‌ای انتخاب نکرده
       }, 2000);
     } else {
       setMessage("ایمیل یا رمز عبور اشتباه است ❌");
@@ -51,12 +56,12 @@ export default function Login() {
         <label className="block mb-4 text-right">
           <span className="text-sm text-gray-600">ایمیل</span>
           <input
-  type="text" // ✅ از email به text تغییر یافت
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  placeholder="example@mail.com"
-  className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:outline-none focus:border-yellow-500 text-right"
-/>
+            type="text"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="example@mail.com"
+            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:outline-none focus:border-yellow-500 text-right"
+          />
         </label>
 
         <label className="block mb-5 text-right">
@@ -100,3 +105,4 @@ export default function Login() {
     </main>
   );
 }
+

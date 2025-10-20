@@ -20,12 +20,14 @@ import FunAndPlay from "./pages/FunAndPlay.jsx";
 import FamilyFinance from "./pages/FamilyFinance";
 import MemoryAlbum from "./pages/MemoryAlbum";
 import Events from "./pages/Events";
+import DashboardSingle from "./pages/dashboard/DashboardSingle";
+import DashboardCouple from "./pages/dashboard/DashboardCouple";
+import DashboardPregnancy from "./pages/dashboard/DashboardPregnancy";
+import DashboardParent from "./pages/dashboard/DashboardParent";
 
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
-import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
-import VendorDashboard from "./pages/dashboard/VendorDashboard.jsx";
 import Shop from "./pages/Shop.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import ChildAssessment from "./pages/ChildAssessment";
@@ -69,11 +71,12 @@ export default function App() {
         <Route path="/family-finance" element={<FamilyFinance />} />
         <Route path="/memory-album" element={<MemoryAlbum />} />
         <Route path="/events" element={<Events />} />
-
-        {/* داشبوردها */}
-        <Route path="/dashboard-user" element={<UserDashboard /* یا <SidebarUser /> */ />} />
-        <Route path="/dashboard-vendor" element={<VendorDashboard /* یا <SidebarVendor /> */ />} />
+        <Route path="/dashboard-single" element={<DashboardSingle />} />
+        <Route path="/dashboard-couple" element={<DashboardCouple />} />
+        <Route path="/dashboard-pregnancy" element={<DashboardPregnancy />} />
+        <Route path="/dashboard-parent" element={<DashboardParent />} />
       </Routes>
     </>
   );
 }
+{/* <Navbar /> */}

@@ -59,6 +59,8 @@ export default function SignupUser() {
   });
 
   const [message, setMessage] = useState("");
+  const [showTypeModal, setShowTypeModal] = useState(false);
+  const [showLifeStage, setShowLifeStage] = useState(false);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
     const navigate = useNavigate();
@@ -115,17 +117,14 @@ function handleSubmit(e) {
 
   // توقف موقت برای اطمینان از نمایش پیام‌ها
   setTimeout(() => {
-    if (hasError) {
-      setMessage("⚠️ لطفاً خطاهای مشخص‌شده را برطرف کنید.");
-    } else {
-      setMessage(`🎉 خوش آمدی ${formData.firstName} 🌿 ثبت‌نام شما با موفقیت انجام شد!`);
-    }
-  }, 50);
+  if (hasError) {
+    setMessage("⚠️ لطفاً خطاهای مشخص‌شده را برطرف کنید.");
+  } else {
+    setMessage(`🎉 خوش آمدی ${formData.firstName} 🌿 ثبت‌نام شما با موفقیت انجام شد!`);
+    setShowTypeModal(true); // ✳️ نمایش پاپ‌آپ انتخاب نوع کاربر
+  }
+}, 50);
 
-  // هدایت خودکار به داشبورد پس از ۲ ثانیه
-setTimeout(() => {
-  navigate("/dashboard-user");
-}, 2000);
 
 }
 
@@ -439,6 +438,135 @@ const v = typeof value === "string" ? value.trim() : value;
     {message}
   </p>
 )}
+
+
+{/* 🌿 پاپ‌آپ انتخاب نوع کاربر */}
+{showTypeModal && (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-gradient-to-b from-[#fffef9] to-[#f7f3eb] rounded-3xl shadow-2xl p-7 w-[90%] max-w-md text-center border border-yellow-100 animate-fadeIn">
+      <img
+        src={logo}
+        alt="Genino Logo"
+        className="w-16 h-16 mx-auto mb-4 drop-shadow-md"
+      />
+      <h2 className="text-2xl font-bold text-yellow-600 mb-2">
+        خوش اومدی به ژنینو 🌿
+      </h2>
+      <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+        حالا انتخاب کن که چطور می‌خوای مسیرت رو در ژنینو شروع کنی
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        {/* کاربر عادی */}
+        <button
+          onClick={() => navigate("/dashboard-user")}
+          className="bg-white border-2 border-yellow-400 rounded-2xl py-4 hover:shadow-xl transition-all text-yellow-700 font-semibold hover:scale-105"
+        >
+          👤 کاربر عادی
+          <p className="text-xs text-gray-500 mt-1 font-normal">
+            فقط استفاده از محتوای عمومی
+          </p>
+        </button>
+
+        {/* کاربر ژنینویی */}
+        <button
+  onClick={() => {
+    setShowTypeModal(false);
+    setShowLifeStage(true);
+  }}
+  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-2.5 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all"
+>
+  🌿 کاربر ژنینویی
+</button>
+      </div>
+
+      <button
+        onClick={() => setShowTypeModal(false)}
+        className="text-xs text-gray-400 hover:text-gray-500 transition"
+      >
+        بستن
+      </button>
+    </div>
+  </div>
+)}
+
+
+{/* 🌼 پاپ‌آپ انتخاب مرحله‌ی زندگی کاربر ژنینویی */}
+{/* 🌼 پاپ‌آپ انتخاب مرحله‌ی زندگی کاربر ژنینویی */}
+{showLifeStage && (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-gradient-to-b from-[#fffef9] to-[#f7f3eb] rounded-3xl shadow-2xl p-7 w-[90%] max-w-md text-center border border-yellow-100 animate-fadeIn">
+      <img
+        src={logo}
+        alt="Genino Logo"
+        className="w-16 h-16 mx-auto mb-3 drop-shadow-md"
+      />
+      <h2 className="text-2xl font-bold text-yellow-600 mb-2">
+        مسیر ژنینویی تو از کجاست؟ 🌿
+      </h2>
+      <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+        لطفاً مرحله‌ی فعلی زندگی‌ت رو انتخاب کن تا محتوای ژنینو بر اساس اون تنظیم بشه 💛
+      </p>
+
+      <div
+        dir="rtl"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-right"
+      >
+        {/* مجرد */}
+        <button
+          onClick={() => navigate("/dashboard-single")}
+          className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
+        >
+          💍 <span className="font-semibold">مجردم و قصد ازدواج دارم</span>
+          <p className="text-xs text-gray-500 mt-1 font-normal">
+            آمادگی برای زندگی مشترک
+          </p>
+        </button>
+
+        {/* متأهل بدون فرزند */}
+        <button
+          onClick={() => navigate("/dashboard-couple")}
+          className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
+        >
+          💑 <span className="font-semibold">متأهلم و فرزند ندارم</span>
+          <p className="text-xs text-gray-500 mt-1 font-normal">
+            تحکیم رابطه و آمادگی فرزندآوری
+          </p>
+        </button>
+
+        {/* در آستانه فرزند */}
+        <button
+          onClick={() => navigate("/dashboard-pregnancy")}
+          className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
+        >
+          👶 <span className="font-semibold">در آستانه فرزندآوری</span>
+          <p className="text-xs text-gray-500 mt-1 font-normal">
+            مراقبت بارداری و آماده‌سازی والدگری
+          </p>
+        </button>
+
+        {/* والد دارای فرزند */}
+        <button
+          onClick={() => navigate("/dashboard-parent")}
+          className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-2xl py-4 px-3 hover:shadow-xl transition-all font-semibold hover:scale-105"
+        >
+          🧒 <span>فرزند دارم</span>
+          <p className="text-xs mt-1 font-normal opacity-80">
+            ساخت پروفایل کودک و مسیر رشد
+          </p>
+        </button>
+      </div>
+
+      <button
+        onClick={() => setShowLifeStage(false)}
+        className="text-xs text-gray-400 hover:text-gray-500 transition"
+      >
+        بستن
+      </button>
+    </div>
+  </div>
+)}
+
     </main>
   );
 }

@@ -2,13 +2,13 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
-import { CartProvider } from "./context/CartContext.jsx"; // ✅ این خط مهمه
-import { HashRouter } from "react-router-dom";
+import { CartProvider } from "./context/CartContext.jsx"; 
+import { BrowserRouter } from "react-router-dom"; // ✅ جایگزین HashRouter
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <HashRouter>
+  <BrowserRouter>
     <CartProvider>
       <App />
     </CartProvider>
-  </HashRouter>
+  </BrowserRouter>
 );
