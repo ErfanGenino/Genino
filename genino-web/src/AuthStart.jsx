@@ -140,8 +140,8 @@ export default function AuthStart() {
       <Smile className="w-6 h-6 text-yellow-700" />
     </div>
   ),
-  title: "برای مجردها",
-  desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو."
+  title: "جهان مجردها",
+  desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو.", link: "/single-world",
 },
 {
   icon: (

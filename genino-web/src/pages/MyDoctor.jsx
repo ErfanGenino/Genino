@@ -172,7 +172,7 @@ export default function MyDoctor() {
   className="max-w-6xl mx-auto bg-white/80 backdrop-blur-sm 
              p-4 sm:p-5 rounded-2xl shadow-md border border-yellow-100 mb-8 sm:mb-10"
 >
-  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 text-right items-end">
+  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 text-right items-end">
     {/* 🔸 عنوان گزارش */}
     <div className="col-span-2 sm:col-span-1">
       <label className="block text-xs sm:text-sm text-gray-700 mb-1">
@@ -415,6 +415,8 @@ export default function MyDoctor() {
       })()}
     </>
   )}
+
+  {/* 🖼 پاپ آپ اول نمایش گزارش ثبت شده */}
   <GoldenModal
   show={!!selectedRecord}
   title="جزئیات گزارش پزشکی"
@@ -463,6 +465,8 @@ export default function MyDoctor() {
   </div>
 )}
 </GoldenModal>
+
+{/* 🖼 پاپ آپ دوم نمایش عکس درون گزارش ثبت شده */}
 <AnimatePresence>
   {previewImage && (
     <motion.div
@@ -470,7 +474,7 @@ export default function MyDoctor() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={() => setPreviewImage(null)}
-      className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-6 cursor-zoom-out"
+      className="fixed inset-0 z-[10000] bg-black/70 flex items-center justify-center p-6 cursor-zoom-out"
     >
       <motion.img
         src={previewImage}
