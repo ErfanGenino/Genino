@@ -146,18 +146,20 @@ const daysLeft = Math.ceil((nextBirthday - today) / msInDay);
       )}
     </motion.div>
 
-    {/* 🎂 روزشمار تولد (واکنش‌گرا برای موبایل و دسکتاپ) */}
+    {/* 🎂 روزشمار تولد (جای درست در همه حالت‌ها) */}
 <motion.div
-  className="absolute sm:static top-[105%] sm:top-1/2 sm:-translate-y-1/2 
-             bg-gradient-to-r from-yellow-400 to-yellow-300 text-yellow-900 text-sm font-semibold
-             px-4 sm:px-5 py-2 rounded-2xl shadow-lg border border-yellow-200 whitespace-nowrap
-             sm:ml-6 mt-4 sm:mt-0 z-10"
-  initial={{ opacity: 0, x: -20 }}
-  animate={{ opacity: 1, x: 0 }}
-  transition={{ delay: 0.6 }}
+  className="mt-5 sm:mt-6 mb-2 
+             bg-gradient-to-r from-yellow-400 to-yellow-300 
+             text-yellow-900 text-sm sm:text-base font-semibold
+             px-5 py-2 rounded-2xl shadow-lg border border-yellow-200 
+             whitespace-nowrap z-10"
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.5 }}
 >
   🎂 {daysLeft} روز مانده تا تولد {childName}
 </motion.div>
+
 
     {/* 🔗 لینک پروفایل کودک */}
     <Link

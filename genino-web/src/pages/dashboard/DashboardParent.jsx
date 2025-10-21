@@ -29,9 +29,10 @@ export default function DashboardParent() {
       highlight: true,
     },
     {
-      title: "بدن من",
-      desc: "آزمون‌ها و آگاهی از سلامت جسمی و اندام‌ها",
+      title: "پزشک من",
+      desc: "مدیریت پرونده‌ها، نسخه‌ها و آزمایش‌های پزشکی",
       icon: <Heart size={26} className="text-yellow-600" />,
+      link: "/my-doctor",
     },
     {
       title: "آرامش ذهن و روان",

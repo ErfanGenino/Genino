@@ -164,103 +164,113 @@ export default function MyDoctor() {
         </p>
       </motion.div>
 
-      {/* 🔍 فیلتر بالا */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="max-w-6xl mx-auto bg-white/80 backdrop-blur-sm p-5 rounded-2xl shadow-md border border-yellow-100 mb-10"
+      {/* 🔍 فیلتر بالا (واکنش‌گرا و فشرده در موبایل) */}
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ delay: 0.2 }}
+  className="max-w-6xl mx-auto bg-white/80 backdrop-blur-sm 
+             p-4 sm:p-5 rounded-2xl shadow-md border border-yellow-100 mb-8 sm:mb-10"
+>
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 text-right items-end">
+    {/* 🔸 عنوان گزارش */}
+    <div className="col-span-2 sm:col-span-1">
+      <label className="block text-xs sm:text-sm text-gray-700 mb-1">
+        عنوان گزارش
+      </label>
+      <select
+        value={filters.title}
+        onChange={(e) => setFilters({ ...filters, title: e.target.value })}
+        className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
+                   text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 text-right">
-          {/* 🔸 عنوان گزارش */}
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">عنوان گزارش</label>
-            <select
-              value={filters.title}
-              onChange={(e) =>
-                setFilters({ ...filters, title: e.target.value })
-              }
-              className="w-full border border-yellow-200 rounded-xl p-2 focus:ring-2 focus:ring-yellow-300 outline-none"
-            >
-              <option value="">همه</option>
-              <option value="چکاپ عمومی">چکاپ عمومی</option>
-              <option value="چکاپ تخصصی">چکاپ تخصصی</option>
-              <option value="آزمایش و بررسی‌های تخصصی پزشکی">
-                آزمایش و بررسی‌های تخصصی پزشکی
-              </option>
-              <option value="بستری و جراحی">بستری و جراحی</option>
-              <option value="سایر">سایر</option>
-            </select>
-          </div>
+        <option value="">همه</option>
+        <option value="چکاپ عمومی">چکاپ عمومی</option>
+        <option value="چکاپ تخصصی">چکاپ تخصصی</option>
+        <option value="آزمایش و بررسی‌های تخصصی پزشکی">
+          آزمایش و بررسی‌های تخصصی پزشکی
+        </option>
+        <option value="بستری و جراحی">بستری و جراحی</option>
+        <option value="سایر">سایر</option>
+      </select>
+    </div>
 
-          {/* 🔸 دسته درمانی */}
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">دسته درمانی</label>
-            <select
-              value={filters.category}
-              onChange={(e) =>
-                setFilters({ ...filters, category: e.target.value })
-              }
-              className="w-full border border-yellow-200 rounded-xl p-2 focus:ring-2 focus:ring-yellow-300 outline-none"
-            >
-              <option value="">همه</option>
-              <option value="عمومی">عمومی</option>
-              <option value="قلب و عروق">قلب و عروق</option>
-              <option value="مغز و اعصاب">مغز و اعصاب</option>
-              <option value="زنان">زنان</option>
-              <option value="دندانپزشکی">دندانپزشکی</option>
-              <option value="چشم‌پزشکی">چشم‌پزشکی</option>
-              <option value="ارتوپدی">ارتوپدی</option>
-              <option value="پوست و مو">پوست و مو</option>
-              <option value="سایر">سایر</option>
-            </select>
-          </div>
+    {/* 🔸 دسته درمانی */}
+    <div className="col-span-2 sm:col-span-1">
+      <label className="block text-xs sm:text-sm text-gray-700 mb-1">
+        دسته درمانی
+      </label>
+      <select
+        value={filters.category}
+        onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+        className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
+                   text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
+      >
+        <option value="">همه</option>
+        <option value="عمومی">عمومی</option>
+        <option value="قلب و عروق">قلب و عروق</option>
+        <option value="مغز و اعصاب">مغز و اعصاب</option>
+        <option value="زنان">زنان</option>
+        <option value="دندانپزشکی">دندانپزشکی</option>
+        <option value="چشم‌پزشکی">چشم‌پزشکی</option>
+        <option value="ارتوپدی">ارتوپدی</option>
+        <option value="پوست و مو">پوست و مو</option>
+        <option value="سایر">سایر</option>
+      </select>
+    </div>
 
-          {/* 🔸 از تاریخ */}
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">از تاریخ</label>
-            <DatePicker
-              calendar={persian}
-              locale={persian_fa}
-              value={filters.from}
-              onChange={(date) =>
-                setFilters({ ...filters, from: date?.format("YYYY-MM-DD") })
-              }
-              portal
-              containerStyle={{ zIndex: 2000 }}
-              inputClass="w-full border border-yellow-200 rounded-xl p-2 focus:ring-2 focus:ring-yellow-300 outline-none text-right"
-            />
-          </div>
+    {/* 🔸 از تاریخ */}
+    <div>
+      <label className="block text-xs sm:text-sm text-gray-700 mb-1">
+        از تاریخ
+      </label>
+      <DatePicker
+        calendar={persian}
+        locale={persian_fa}
+        value={filters.from}
+        onChange={(date) =>
+          setFilters({ ...filters, from: date?.format("YYYY-MM-DD") })
+        }
+        portal
+        containerStyle={{ zIndex: 2000 }}
+        inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
+                    text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
+      />
+    </div>
 
-          {/* 🔸 تا تاریخ */}
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">تا تاریخ</label>
-            <DatePicker
-              calendar={persian}
-              locale={persian_fa}
-              value={filters.to}
-              onChange={(date) =>
-                setFilters({ ...filters, to: date?.format("YYYY-MM-DD") })
-              }
-              portal
-              containerStyle={{ zIndex: 2000 }}
-              inputClass="w-full border border-yellow-200 rounded-xl p-2 focus:ring-2 focus:ring-yellow-300 outline-none text-right"
-            />
-          </div>
+    {/* 🔸 تا تاریخ */}
+    <div>
+      <label className="block text-xs sm:text-sm text-gray-700 mb-1">
+        تا تاریخ
+      </label>
+      <DatePicker
+        calendar={persian}
+        locale={persian_fa}
+        value={filters.to}
+        onChange={(date) =>
+          setFilters({ ...filters, to: date?.format("YYYY-MM-DD") })
+        }
+        portal
+        containerStyle={{ zIndex: 2000 }}
+        inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
+                    text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
+      />
+    </div>
 
-          {/* 🔘 دکمه حذف فیلترها */}
-          <div className="flex items-end justify-start">
-            <button
-              onClick={() =>
-                setFilters({ title: "", category: "", from: "", to: "" })
-              }
-              className="w-full bg-yellow-500 text-white py-2 px-5 rounded-xl hover:bg-yellow-600 transition flex items-center justify-center gap-2"
-            >
-              <Search className="w-4 h-4" /> حذف فیلترها
-            </button>
-          </div>
-        </div>
-      </motion.div>
+    {/* 🔘 دکمه حذف فیلترها */}
+    <div className="col-span-2 sm:col-span-1 flex items-center justify-center sm:justify-start mt-2 sm:mt-0">
+      <button
+        onClick={() =>
+          setFilters({ title: "", category: "", from: "", to: "" })
+        }
+        className="w-full sm:w-auto bg-yellow-500 text-white py-2 px-4 
+                   rounded-xl hover:bg-yellow-600 transition text-sm flex items-center justify-center gap-1"
+      >
+        <Search className="w-4 h-4" /> حذف
+      </button>
+    </div>
+  </div>
+</motion.div>
 
       {/* 📋 باکس گزارش‌های من */}
 <motion.section

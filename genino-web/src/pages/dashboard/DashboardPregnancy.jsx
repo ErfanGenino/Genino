@@ -41,9 +41,10 @@ export default function DashboardPregnancy() {
       icon: <Leaf size={26} className="text-yellow-600" />,
     },
     {
-      title: "ویزیت‌ها و سونوگرافی‌ها",
-      desc: "یادآوری زمان مراجعه‌ها و پیگیری نتایج سونوگرافی",
+      title: "پزشک من",
+      desc: "مدیریت پرونده‌ها، نسخه‌ها و سونوگرافی‌های دوران بارداری",
       icon: <Stethoscope size={26} className="text-yellow-600" />,
+      link: "/my-doctor",
     },
     {
       title: "آمادگی برای زایمان",
@@ -99,39 +100,39 @@ export default function DashboardPregnancy() {
               transition={{ delay: i * 0.1 }}
             >
               <CardTag
-                {...cardProps}
-                className={`block rounded-2xl p-6 border transition-all duration-300 ${
-                  card.highlight
-                    ? "bg-gradient-to-r from-yellow-300 to-yellow-200 border-yellow-300 text-white shadow-[0_0_25px_rgba(255,220,100,0.7)] hover:shadow-[0_0_40px_rgba(255,220,100,0.9)]"
-                    : "bg-gradient-to-b from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-[0_0_20px_rgba(255,220,100,0.4)]"
-                } hover:-translate-y-1`}
-              >
-                <div className="flex flex-col items-center gap-3 mb-2">
-                  <div
-                    className={`${
-                      card.highlight
-                        ? "bg-white/30"
-                        : "bg-yellow-100/80 border border-yellow-200"
-                    } p-3 rounded-full shadow-inner`}
-                  >
-                    {card.icon}
-                  </div>
-                  <h3
-                    className={`font-semibold text-lg ${
-                      card.highlight ? "text-white" : "text-yellow-700"
-                    }`}
-                  >
-                    {card.title}
-                  </h3>
-                </div>
-                <p
-                  className={`text-sm leading-relaxed ${
-                    card.highlight ? "text-yellow-50" : "text-gray-600"
-                  }`}
-                >
-                  {card.desc}
-                </p>
-              </CardTag>
+  {...cardProps}
+  className={`block rounded-2xl p-6 border transition-all duration-300 ${
+    card.highlight
+      ? "bg-gradient-to-r from-emerald-300 to-lime-200 border-emerald-300 text-white shadow-[0_0_25px_rgba(110,231,183,0.6)] hover:shadow-[0_0_40px_rgba(110,231,183,0.8)]"
+      : "bg-gradient-to-b from-green-50 to-green-100 border-green-200 hover:shadow-[0_0_20px_rgba(110,231,183,0.4)]"
+  } hover:-translate-y-1`}
+>
+  <div className="flex flex-col items-center gap-3 mb-2">
+    <div
+      className={`${
+        card.highlight
+          ? "bg-white/30"
+          : "bg-green-100/80 border border-green-200"
+      } p-3 rounded-full shadow-inner`}
+    >
+      {card.icon}
+    </div>
+    <h3
+      className={`font-semibold text-lg ${
+        card.highlight ? "text-white" : "text-green-800"
+      }`}
+    >
+      {card.title}
+    </h3>
+  </div>
+  <p
+    className={`text-sm leading-relaxed ${
+      card.highlight ? "text-green-50" : "text-gray-600"
+    }`}
+  >
+    {card.desc}
+  </p>
+</CardTag>
             </motion.div>
           );
         })}
