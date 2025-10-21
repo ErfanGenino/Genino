@@ -24,6 +24,7 @@ import DashboardSingle from "./pages/dashboard/DashboardSingle";
 import DashboardCouple from "./pages/dashboard/DashboardCouple";
 import DashboardPregnancy from "./pages/dashboard/DashboardPregnancy";
 import DashboardParent from "./pages/dashboard/DashboardParent";
+import MyDoctor from "./pages/MyDoctor";
 
 
 
@@ -75,6 +76,7 @@ export default function App() {
         <Route path="/dashboard-couple" element={<DashboardCouple />} />
         <Route path="/dashboard-pregnancy" element={<DashboardPregnancy />} />
         <Route path="/dashboard-parent" element={<DashboardParent />} />
+        <Route path="/my-doctor" element={<MyDoctor />} />
       </Routes>
     </>
   );

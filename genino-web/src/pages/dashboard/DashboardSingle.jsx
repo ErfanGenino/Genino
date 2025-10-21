@@ -1,33 +1,157 @@
 import DashboardLayout from "../../components/DashboardLayout";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import {
+  Brain,
+  Heart,
+  Sparkles,
+  BookOpen,
+  Mountain,
+  Coffee,
+  Music,
+  DollarSign,
+  Dumbbell,
+  Globe,
+} from "lucide-react";
 
 export default function DashboardSingle() {
-  const user = { gender: "male" }; // در آینده از دیتابیس
+  const user = { name: "عرفان" }; // فعلاً فرضی
+
+  const cards = [
+    {
+      title: "رشد شخصی من",
+      desc: "یادگیری مهارت‌های جدید و کشف استعدادهای درونیت",
+      icon: <Brain size={26} className="text-emerald-600" />,
+      highlight: true,
+    },
+    {
+      title: "سلامت و تناسب اندام",
+      desc: "برنامه‌ی ورزشی و تغذیه مناسب برای انرژی روزانه",
+      icon: <Dumbbell size={26} className="text-emerald-600" />,
+      link: "/calorie-tracker",
+    },
+    {
+      title: "روان آرام",
+      desc: "مدیتیشن، آگاهی و کنترل استرس روزمره",
+      icon: <Heart size={26} className="text-emerald-600" />,
+    },
+    {
+      title: "الهام روزانه",
+      desc: "جملات مثبت و انگیزشی برای شروع روزی پرانرژی",
+      icon: <Sparkles size={26} className="text-emerald-600" />,
+    },
+    {
+      title: "کتاب‌خانه‌ی من",
+      desc: "مطالعه‌ی کتاب‌های الهام‌بخش در زمینه‌ی موفقیت و آرامش",
+      icon: <BookOpen size={26} className="text-emerald-600" />,
+    },
+    {
+      title: "ماجراجویی و سفر",
+      desc: "کشف مکان‌های جدید و تجربه‌های تازه",
+      icon: <Mountain size={26} className="text-emerald-600" />,
+    },
+    {
+      title: "استراحت با قهوه",
+      desc: "زمان‌هایی برای آرامش، خلوت و فکر کردن به خودت",
+      icon: <Coffee size={26} className="text-emerald-600" />,
+    },
+    {
+      title: "مدیریت مالی شخصی",
+      desc: "یادگیری هوشمندانه خرج کردن و پس‌انداز",
+      icon: <DollarSign size={26} className="text-emerald-600" />,
+      link: "/family-finance",
+    },
+    {
+      title: "موسیقی و انرژی مثبت",
+      desc: "گوش دادن به پلی‌لیست‌هایی برای تمرکز یا آرامش",
+      icon: <Music size={26} className="text-emerald-600" />,
+    },
+    {
+      title: "جهان من",
+      desc: "اخبار، فناوری و دانستنی‌های روز دنیا",
+      icon: <Globe size={26} className="text-emerald-600" />,
+      link: "/world-knowledge",
+    },
+  ];
 
   return (
-    <DashboardLayout title="داشبورد: مجرد">
-      {user.gender === "male" ? (
-        <div>
-          <h3 className="text-lg font-semibold text-yellow-700 mb-4">
-            مسیر رشد فردی آقایان 👨
-          </h3>
-          <ul className="list-disc pr-6 text-sm space-y-2">
-            <li>مراقبت از بدن و سلامت پروستات</li>
-            <li>مدیریت استرس و انگیزه شغلی</li>
-            <li>مطالب هیجان‌انگیز دنیای خودروها 🚗</li>
-          </ul>
-        </div>
-      ) : (
-        <div>
-          <h3 className="text-lg font-semibold text-yellow-700 mb-4">
-            مسیر رشد فردی بانوان 👩
-          </h3>
-          <ul className="list-disc pr-6 text-sm space-y-2">
-            <li>مراقبت از پوست و بدن</li>
-            <li>سلامت و عادت ماهانه</li>
-            <li>زیبایی، مدل مو و سبک زندگی 💄</li>
-          </ul>
-        </div>
-      )}
+    <DashboardLayout title="داشبورد: دنیای مجردها 🌿">
+      {/* 💚 خوش‌آمدگویی بالا */}
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-10"
+      >
+        <h2 className="text-2xl font-bold text-emerald-700 mb-2">
+          خوش اومدی {user.name} 🌱
+        </h2>
+        <p className="text-gray-600 text-sm">
+          اینجا دنیای رشد، کشف و شادیه؛ هر روزت فرصتیه برای ساختن نسخه‌ی بهتر از خودت 💫
+        </p>
+      </motion.div>
+
+      {/* 🌿 کارت‌ها */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+        {cards.map((card, i) => {
+          const CardTag = card.link ? Link : "div";
+          const cardProps = card.link ? { to: card.link } : {};
+
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <CardTag
+                {...cardProps}
+                className={`block rounded-2xl p-6 border transition-all duration-300 ${
+                  card.highlight
+                    ? "bg-gradient-to-r from-emerald-400 to-emerald-300 border-emerald-300 text-white shadow-[0_0_25px_rgba(100,255,180,0.6)] hover:shadow-[0_0_40px_rgba(100,255,180,0.9)]"
+                    : "bg-gradient-to-b from-emerald-50 to-emerald-100 border-emerald-200 hover:shadow-[0_0_20px_rgba(100,255,180,0.4)]"
+                } hover:-translate-y-1`}
+              >
+                <div className="flex flex-col items-center gap-3 mb-2">
+                  <div
+                    className={`${
+                      card.highlight
+                        ? "bg-white/30"
+                        : "bg-emerald-100/80 border border-emerald-200"
+                    } p-3 rounded-full shadow-inner`}
+                  >
+                    {card.icon}
+                  </div>
+                  <h3
+                    className={`font-semibold text-lg ${
+                      card.highlight ? "text-white" : "text-emerald-700"
+                    }`}
+                  >
+                    {card.title}
+                  </h3>
+                </div>
+                <p
+                  className={`text-sm leading-relaxed ${
+                    card.highlight ? "text-emerald-50" : "text-gray-600"
+                  }`}
+                >
+                  {card.desc}
+                </p>
+              </CardTag>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* 🌸 جمله الهام‌بخش پایین */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-12 text-center text-gray-500 text-sm italic"
+      >
+        🌸 تنهایی یعنی فرصت شناختن خودت، نه خالی بودن از دیگران.
+      </motion.div>
     </DashboardLayout>
   );
 }

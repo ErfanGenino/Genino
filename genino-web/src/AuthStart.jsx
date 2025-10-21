@@ -1,10 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo-genino.png";
-import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby, DollarSign, PartyPopper, Play, LetterText } from "lucide-react";
+import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby, DollarSign, PartyPopper, Play, LetterText, FileHeart } from "lucide-react";
 import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
+import { Smile } from "lucide-react";
 
 // 🔸 اسلایدر خودکار با انیمیشن جهت‌دار (راست/چپ)
 function AutoSlider() {
@@ -133,11 +134,29 @@ export default function AuthStart() {
   },
   { icon: <Play className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun" },
   { icon: <PartyPopper className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما", link: "/events" },
-  { icon: <Bot className="w-8 h-8 text-yellow-500 mb-3" />, title: "گزارش رشد هوشمند", desc: "تحلیل داده‌های روزانه و ارائه گزارش پیشرفت کودک در طول زمان." },
-  { icon: <Brain className="w-8 h-8 text-yellow-500 mb-3" />, title: "سلامت و تغذیه کودک", desc: "برنامه‌های غذایی متناسب با سن و نیاز رشد کودک." },
+{
+  icon: (
+    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-200 shadow-md mb-3">
+      <Smile className="w-6 h-6 text-yellow-700" />
+    </div>
+  ),
+  title: "برای مجردها",
+  desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو."
+},
+{
+  icon: (
+    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-300 via-yellow-200 to-emerald-100 shadow-md mb-3">
+      <FileHeart className="w-7 h-7 text-yellow-700" />
+    </div>
+  ),
+  title: "پزشک من",
+  desc: "بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو.",
+  link: "/my-doctor",
+}, 
   { icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />, title: "مدیریت خواب کودک", desc: "تنظیم و پایش الگوی خواب کودک برای رشد بهتر." },
   { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "احساسات و رفتار", desc: "کمک به والدین در شناخت احساسات کودک و تقویت هوش هیجانی." },
   { icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
+  
 ];
 
   const [highlight, setHighlight] = useState(false);
