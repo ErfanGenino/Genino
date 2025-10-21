@@ -1,10 +1,26 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* 🌿 استایل پایه پروژه ژنینو */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fffdf8;
+  direction: rtl;
+  font-family: "Vazirmatn", "IRANSans", "Tahoma", sans-serif;
+  overflow-x: hidden;
 }
 
+
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+}
+
+/* 🎨 لوگوی React نمونه */
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -27,25 +43,12 @@
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
+/* ✨ افکت‌های زیباسازی عمومی */
 @keyframes gradientShift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradientShift 6s ease-in-out infinite;
@@ -57,5 +60,36 @@
 }
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* 👑 مودال تمام‌صفحه با تار شدن کامل پس‌زمینه */
+.golden-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+  isolation: isolate !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+
+  background-color: rgba(0, 0, 0, 0.5) !important; /* نیمه‌شفاف */
+  backdrop-filter: blur(8px) !important;           /* افکت تار شدن */
+}
+
+/* 🌟 اسکرول زیبا برای مودال‌ها */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(212, 175, 55, 0.6);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 

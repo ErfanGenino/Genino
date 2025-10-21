@@ -350,60 +350,69 @@ export default function Shop() {
 
 
       {/* 🟡 کارت‌های محصول */}
-      <motion.section
-        className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mt-16"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.2 },
-          },
-        }}
-      >
-        {currentProducts.map((item) => (
-          <Link to={`/product/${item.id}`} key={item.id} className="block">
-            <motion.div
+<motion.section
+  className="relative z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 mt-12 px-2 sm:px-0"
+  initial="hidden"
+  animate="visible"
   variants={{
-    hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0 },
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 },
+    },
   }}
-  transition={{ duration: 0.7, ease: "easeOut" }}
-  whileHover={{
-    y: -5,
-    boxShadow: "0 10px 25px rgba(212,175,55,0.25)", // سایه طلایی نرم
-  }}
-  className="bg-white/85 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-100 cursor-pointer transition-all duration-300 hover:bg-gradient-to-b hover:from-[#fffaf0] hover:to-[#fff7e0]"
 >
-              <img
-  src={item.image}
-  alt={item.name}
-  className="w-24 h-24 mx-auto mt-6 mb-2 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110"
-/>
-              <div className="p-4 text-right">
-                <h2 className="font-semibold text-lg">{item.name}</h2>
-                <p className="text-gray-500 text-sm mb-2">{item.category}</p>
-                <p className="text-yellow-600 font-bold">{item.price}</p>
+  {currentProducts.map((item) => (
+    <Link to={`/product/${item.id}`} key={item.id} className="block">
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 40 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        whileHover={{
+          y: -4,
+          boxShadow: "0 10px 25px rgba(212,175,55,0.25)",
+        }}
+        className="bg-white/85 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-100 cursor-pointer transition-all duration-300 hover:bg-gradient-to-b hover:from-[#fffaf0] hover:to-[#fff7e0]"
+      >
+        {/* 🖼 تصویر محصول */}
+        <img
+          src={item.image}
+          alt={item.name}
+          className="w-28 h-28 sm:w-24 sm:h-24 mx-auto mt-6 mb-2 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110"
+        />
 
-                {/* دکمه افزودن به سبد */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={(e) => {
-  e.preventDefault();
-  addToCart(item);
-  handleFlyAnimation(e);
-}}
-                  className="mt-3 w-full bg-yellow-500 text-white py-2 rounded-xl hover:bg-yellow-600 transition"
-                >
-                  افزودن به سبد
-                </motion.button>
-              </div>
-            </motion.div>
-          </Link>
-        ))}
-      </motion.section>
+        {/* 📄 اطلاعات محصول */}
+        <div className="p-4 sm:p-5 text-right">
+          <h2 className="font-semibold text-base sm:text-lg mb-1 line-clamp-1">
+            {item.name}
+          </h2>
+          <p className="text-gray-500 text-xs sm:text-sm mb-1">
+            {item.category}
+          </p>
+          <p className="text-yellow-600 font-bold text-sm sm:text-base">
+            {item.price}
+          </p>
+
+          {/* 🛒 دکمه افزودن به سبد */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={(e) => {
+              e.preventDefault();
+              addToCart(item);
+              handleFlyAnimation(e);
+            }}
+            className="mt-3 w-full bg-yellow-500 text-white py-2 sm:py-2.5 rounded-xl text-sm sm:text-base hover:bg-yellow-600 transition"
+          >
+            افزودن به سبد
+          </motion.button>
+        </div>
+      </motion.div>
+    </Link>
+  ))}
+</motion.section>
             {/* 📄 صفحه‌بندی */}
       <div className="relative z-10 flex justify-center items-center mt-12 gap-3">
         <button

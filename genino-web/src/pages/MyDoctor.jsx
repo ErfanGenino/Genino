@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   PlusCircle,
   FileHeart,
@@ -10,6 +10,10 @@ import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
+import GoldenModal from "../components/GoldenModal";
+import "../App.css"; // اگه هنوز این خط نیست
+
+
 
 export default function MyDoctor() {
   const [records, setRecords] = useState([]);
@@ -19,7 +23,7 @@ export default function MyDoctor() {
     category: "",
     date: "",
     desc: "",
-    file: null,
+    files: [], // ← اینجا اصلاح شد
   });
   const [filters, setFilters] = useState({
     title: "",
@@ -59,13 +63,14 @@ export default function MyDoctor() {
     const timestamp = gregorian.toDate().getTime();
 
     const newRecord = {
-      ...form,
-      id: Date.now(),
-      timestamp,
-      date: `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(
-        dateObj.day
-      ).padStart(2, "0")}`,
-    };
+  ...form,
+  id: Date.now(),
+  timestamp,
+  date: `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(
+    dateObj.day
+  ).padStart(2, "0")}`,
+  files: form.files || [], // ✅ اضافه شد
+};
 
     setRecords([newRecord, ...records]);
     setForm({
@@ -74,7 +79,7 @@ export default function MyDoctor() {
       category: "",
       date: "",
       desc: "",
-      file: null,
+      files: [], // ← اینجا هم اصلاح شد
     });
   };
 
@@ -135,11 +140,13 @@ export default function MyDoctor() {
     startIndex,
     startIndex + itemsPerPage
   );
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   return (
     <main
       dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-[#fffdf8] to-[#f7f3e6] px-6 py-10 text-gray-800"
+      className="relative z-0 min-h-screen bg-gradient-to-b from-[#fffdf8] to-[#f7f3e6] px-6 py-10 text-gray-800"
     >
       {/* 🔹 عنوان صفحه */}
       <motion.div
@@ -220,7 +227,7 @@ export default function MyDoctor() {
                 setFilters({ ...filters, from: date?.format("YYYY-MM-DD") })
               }
               portal
-              containerStyle={{ zIndex: 9999 }}
+              containerStyle={{ zIndex: 2000 }}
               inputClass="w-full border border-yellow-200 rounded-xl p-2 focus:ring-2 focus:ring-yellow-300 outline-none text-right"
             />
           </div>
@@ -236,7 +243,7 @@ export default function MyDoctor() {
                 setFilters({ ...filters, to: date?.format("YYYY-MM-DD") })
               }
               portal
-              containerStyle={{ zIndex: 9999 }}
+              containerStyle={{ zIndex: 2000 }}
               inputClass="w-full border border-yellow-200 rounded-xl p-2 focus:ring-2 focus:ring-yellow-300 outline-none text-right"
             />
           </div>
@@ -260,7 +267,7 @@ export default function MyDoctor() {
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ delay: 0.2 }}
-  className="max-w-6xl mx-auto bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-yellow-100 mb-10"
+  className="relative z-20 max-w-6xl mx-auto bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-yellow-100 mb-10"
 >
   {/* 🔹 هدر باکس */}
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 border-b pb-3">
@@ -280,7 +287,7 @@ export default function MyDoctor() {
   {/* 🟡 مرتب‌سازی و صفحه‌بندی */}
   {filteredRecords.length === 0 ? (
     <p className="text-center text-gray-500 py-6">
-      هنوز گزارشی ثبت نکرده‌اید 🌸
+      هنوز گزارشی ثبت نکرده‌اید 
     </p>
   ) : (
     <>
@@ -333,9 +340,13 @@ export default function MyDoctor() {
                         {rec.category || "—"}
                       </td>
                       <td className="p-3 text-center flex justify-center gap-2">
-                        <button className="px-3 py-1 rounded-lg text-xs bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition">
-                          نمایش
-                        </button>
+                        <button
+  onClick={() => setSelectedRecord(rec)}
+  className="px-3 py-1 rounded-lg text-xs bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition"
+>
+  نمایش
+</button>
+
                         <button className="px-3 py-1 rounded-lg text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
                           ویرایش
                         </button>
@@ -394,6 +405,76 @@ export default function MyDoctor() {
       })()}
     </>
   )}
+  <GoldenModal
+  show={!!selectedRecord}
+  title="جزئیات گزارش پزشکی"
+  description="اطلاعات کامل این گزارش را در ادامه مشاهده می‌کنید."
+  confirmLabel="بستن"
+  onConfirm={() => setSelectedRecord(null)}
+>
+  {selectedRecord && (
+  <div className="text-right text-gray-700 leading-relaxed space-y-3">
+    <p><span className="font-semibold text-yellow-700">📅 تاریخ:</span> {selectedRecord.date}</p>
+    <p><span className="font-semibold text-yellow-700">🧾 عنوان گزارش:</span> {selectedRecord.title}</p>
+    <p><span className="font-semibold text-yellow-700">👨‍⚕️ پزشک معالج:</span> {selectedRecord.doctor || "—"}</p>
+    <p><span className="font-semibold text-yellow-700">🏷 دسته درمانی:</span> {selectedRecord.category}</p>
+    {selectedRecord.desc && (
+      <p><span className="font-semibold text-yellow-700">📝 توضیحات:</span> {selectedRecord.desc}</p>
+    )}
+
+    {/* 🖼 نمایش فایل‌ها */}
+    {selectedRecord.files?.length > 0 && (
+      <div>
+        <p className="font-semibold text-yellow-700 mb-2">📎 فایل‌های پیوست‌شده:</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {selectedRecord.files.map((file, index) => (
+            <div
+              key={index}
+              onClick={() => file.type.startsWith("image/") && setPreviewImage(URL.createObjectURL(file))}
+              className="relative border border-yellow-200 rounded-xl overflow-hidden bg-white/60 
+                         hover:shadow-lg hover:scale-[1.03] transition cursor-pointer"
+            >
+              {file.type.startsWith("image/") ? (
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`file-${index}`}
+                  className="w-full h-24 object-cover"
+                />
+              ) : (
+                <div className="flex items-center justify-center bg-yellow-50 h-24 text-yellow-700 text-xs font-medium">
+                  📄 {file.name}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
+</GoldenModal>
+<AnimatePresence>
+  {previewImage && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setPreviewImage(null)}
+      className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-6 cursor-zoom-out"
+    >
+      <motion.img
+        src={previewImage}
+        alt="Preview"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.8, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+        className="max-h-[90vh] max-w-[90vw] rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+      />
+    </motion.div>
+  )}
+</AnimatePresence>
+
 </motion.section>
 
 
@@ -403,8 +484,8 @@ export default function MyDoctor() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="max-w-lg mx-auto bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-yellow-100 mb-10"
-      >
+        className="relative z-10 max-w-lg mx-auto bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-yellow-100 mb-10"   
+          >
         <h2 className="text-lg font-semibold text-yellow-700 mb-4 flex items-center gap-2">
           <PlusCircle className="w-5 h-5 text-yellow-600" /> افزودن گزارش پزشکی جدید
         </h2>
@@ -461,7 +542,7 @@ export default function MyDoctor() {
                 setForm({ ...form, date: date?.format("YYYY-MM-DD") })
               }
               portal
-              containerStyle={{ zIndex: 9999 }}
+              containerStyle={{ zIndex: 2000 }}
               inputClass="border border-yellow-200 rounded-xl p-2 w-full focus:ring-2 focus:ring-yellow-300 outline-none text-right"
             />
           </div>

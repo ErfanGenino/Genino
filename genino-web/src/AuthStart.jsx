@@ -179,7 +179,8 @@ useEffect(() => {
 }, []);
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-20 text-center overflow-x-hidden overflow-y-auto">
+    <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-20 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
+
       
   {/* 🔹 دکمه دریافت اپ - نسخه نهایی با انیمیشن باز و بسته طبیعی */}
 <motion.div
