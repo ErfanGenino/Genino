@@ -27,6 +27,8 @@ import DashboardParent from "./pages/dashboard/DashboardParent";
 import MyDoctor from "./pages/MyDoctor";
 import SingleWorld from "./pages/SingleWorld";
 import MyCycle from "./pages/MyCycle";
+import MyMenHealth from "./pages/MyMenHealth";
+
 
 
 
@@ -62,7 +64,6 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/calorie-tracker" element={<CalorieTracker />} />
         <Route path="/world-knowledge" element={<WorldKnowledge />} />
-        {/* صفحات جزئیات دانستنی‌ها */}
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
         <Route path="/mychild" element={<MyChild />} />
         <Route path="/child-assessment" element={<ChildAssessment />} />
@@ -81,6 +82,7 @@ export default function App() {
         <Route path="/my-doctor" element={<MyDoctor />} />
         <Route path="/single-world" element={<SingleWorld />} />
         <Route path="/my-cycle" element={<MyCycle />} />
+        <Route path="/my-men-health" element={<MyMenHealth />} />
       </Routes>
     </>
   );

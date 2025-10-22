@@ -5,7 +5,7 @@ import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
-import { Smile, Flower2 } from "lucide-react";
+import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
 
 // 🔸 اسلایدر خودکار با انیمیشن جهت‌دار (راست/چپ)
 function AutoSlider() {
@@ -127,12 +127,12 @@ export default function AuthStart() {
   { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker",color: "calorie",},  
   { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنی‌های روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge" },
   {
-    icon: <LetterText className="w-8 h-8 text-yellow-500 mb-3" />,
+    icon: <UsersRound className="w-8 h-8 text-yellow-500 mb-3" />,
     title: "شبکه اجتماعی ژنینو",
     desc: "در ژنینو با والدین دیگر در ارتباط باشید، تجربه‌ها را به اشتراک بگذارید و از لحظات طلایی کودکی الهام بگیرید 💬✨",
     link: "/social",
   },
-  { icon: <Play className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun" },
+  { icon: <Puzzle className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun" },
   { icon: <PartyPopper className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما", link: "/events" },
 {
   icon: (
@@ -164,7 +164,17 @@ export default function AuthStart() {
   link: "/my-cycle",
   color: "women",
 },
-  { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "احساسات و رفتار", desc: "کمک به والدین در شناخت احساسات کودک و تقویت هوش هیجانی." },
+{
+  icon: (
+    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-400 via-blue-300 to-blue-200 shadow-md mb-3">
+      <Flower2 className="w-6 h-6 text-white" />
+    </div>
+  ),
+  title: "سلامت آقایان",
+  desc: "بررسی علمی وضعیت جسمی، ذهنی و هورمونی آقایان با تست‌های تخصصی و شخصی‌سازی‌شده",
+  link: "/my-men-health",
+  color: "men",
+},
   { icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
   
 ];
