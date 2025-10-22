@@ -103,6 +103,48 @@ const phaseDetails = {
   },
 };
 
+// 🔢 تعیین احتمال بارداری بر اساس روز چرخه (نسخه دقیق ایرفان 💛)
+function getPregnancyChance(day) {
+  let level = "";
+  let color = "";
+
+  if (day >= 1 && day <= 7) {
+    level = "خیلی کم";
+    color = "text-gray-400";
+  } else if (day >= 8 && day <= 9) {
+    level = "کم";
+    color = "text-blue-400";
+  } else if (day >= 10 && day <= 11) {
+    level = "متوسط";
+    color = "text-green-500";
+  } else if (day >= 12 && day <= 13) {
+    level = "زیاد";
+    color = "text-orange-500";
+  } else if (day >= 14 && day <= 15) {
+    level = "خیلی زیاد";
+    color = "text-rose-600 font-semibold";
+  } else if (day >= 16 && day <= 17) {
+    level = "زیاد";
+    color = "text-orange-500";
+  } else if (day >= 18 && day <= 21) {
+    level = "متوسط";
+    color = "text-green-500";
+  } else if (day >= 22 && day <= 25) {
+    level = "کم";
+    color = "text-blue-400";
+  } else if (day >= 26 && day <= 28) {
+    level = "خیلی کم";
+    color = "text-gray-400";
+  } else {
+    // اگر چرخه بیشتر از 28 روز بود
+    level = "خیلی کم";
+    color = "text-gray-400";
+  }
+
+  return { level, color };
+}
+
+
 export default function MyCycle() {
   const [form, setForm] = useState({
     lastPeriod: "",
@@ -340,6 +382,8 @@ export default function MyCycle() {
               const p = getPhaseForDay(day, form.cycleLength, form.periodLength);
               const chip = phaseMeta[p].chip;
               const isToday = day === currentDay;
+              const chance = getPregnancyChance(day);
+
 
               return (
                 <div
@@ -351,6 +395,9 @@ export default function MyCycle() {
                 >
                   <span className="font-semibold">{day}</span>
                   <span className="text-xs">{chip.emoji}</span>
+                  <p className={`text-[10px] mt-0.5 ${chance.color}`}>
+                  {chance.level}
+                  </p>
                   {isToday && (
                     <span className="absolute -top-2 right-2 text-[10px] bg-white text-pink-600 px-1.5 py-0.5 rounded-md shadow">
                       امروز
@@ -364,6 +411,11 @@ export default function MyCycle() {
           <p className="text-gray-500 text-xs mt-4">
             رنگ‌ها و نمادها بر اساس وضعیت چرخه شما نمایش داده می‌شوند.
           </p>
+
+          <p className="text-gray-500 text-xs mt-4">
+
+            احتمال بارداری: خیلی کم🩶 | کم🩵 | متوسط💚 | زیاد🧡 | خیلی زیاد❤️
+          </p>
         </motion.div>
       )}
 
@@ -371,7 +423,7 @@ export default function MyCycle() {
       {phase && (
         <div className="mt-10 bg-white/90 border border-pink-100 rounded-2xl shadow-sm p-6 max-w-3xl w-full text-right leading-relaxed space-y-5">
           <h3 className="text-pink-600 font-semibold text-lg mb-5 text-center">
-            آشنایی با فازهای چرخه قاعدگی 🌿
+            آشنایی با فازهای چرخه قاعدگی 
           </h3>
 
           {/* 💧 قاعدگی */}
