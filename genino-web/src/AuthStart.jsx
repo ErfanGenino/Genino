@@ -5,7 +5,7 @@ import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
-import { Smile } from "lucide-react";
+import { Smile, Flower2 } from "lucide-react";
 
 // 🔸 اسلایدر خودکار با انیمیشن جهت‌دار (راست/چپ)
 function AutoSlider() {
@@ -153,7 +153,17 @@ export default function AuthStart() {
   desc: "بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو.",
   link: "/my-doctor",
 }, 
-  { icon: <Gift className="w-8 h-8 text-yellow-500 mb-3" />, title: "مدیریت خواب کودک", desc: "تنظیم و پایش الگوی خواب کودک برای رشد بهتر." },
+{
+  icon: (
+    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-pink-400 via-pink-300 to-pink-200 shadow-md mb-3">
+      <Flower2 className="w-6 h-6 text-white" />
+    </div>
+  ),
+  title: "سلامت بانوان",
+  desc: "پیگیری چرخه قاعدگی، شناخت بدن و دریافت پیشنهادهای آرام‌بخش روزانه",
+  link: "/my-cycle",
+  color: "women",
+},
   { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "احساسات و رفتار", desc: "کمک به والدین در شناخت احساسات کودک و تقویت هوش هیجانی." },
   { icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
   
