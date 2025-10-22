@@ -12,6 +12,8 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
 import GoldenModal from "../components/GoldenModal";
 import "../App.css"; // اگه هنوز این خط نیست
+import { useEffect } from "react";
+
 
 
 
@@ -34,54 +36,64 @@ export default function MyDoctor() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // 🟢 افزودن گزارش جدید
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.title || !form.date || !form.category)
-      return alert("لطفاً عنوان، تاریخ و دسته درمانی را وارد کنید");
+const handleSubmit = (e) => {
+  e.preventDefault();
+  if (!form.title || !form.date || !form.category)
+    return alert("لطفاً عنوان، تاریخ و دسته درمانی را وارد کنید");
 
-    // ✅ بررسی نوع مقدار تاریخ (object یا string)
-    let dateObj;
-    if (typeof form.date === "object" && form.date.year) {
-      dateObj = form.date; // خروجی مستقیم از DatePicker
-    } else if (typeof form.date === "string") {
-      const [y, m, d] = form.date.split("-").map((n) =>
-        parseInt(n.replace(/[۰-۹]/g, (t) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(t)]))
-      );
-      dateObj = { year: y, month: m, day: d };
-    } else {
-      alert("تاریخ معتبر نیست");
-      return;
-    }
+  let dateObj;
+  if (typeof form.date === "object" && form.date.year) {
+    dateObj = form.date;
+  } else if (typeof form.date === "string") {
+    const [y, m, d] = form.date.split("-").map((n) =>
+      parseInt(n.replace(/[۰-۹]/g, (t) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(t)]))
+    );
+    dateObj = { year: y, month: m, day: d };
+  } else {
+    alert("تاریخ معتبر نیست");
+    return;
+  }
 
-    // ✅ تبدیل شمسی به میلادی با DateObject
-    const gregorian = new DateObject({
-      date: dateObj,
-      calendar: persian,
-      locale: persian_fa,
-    }).convert();
+  const gregorian = new DateObject({
+    date: dateObj,
+    calendar: persian,
+    locale: persian_fa,
+  }).convert();
 
-    const timestamp = gregorian.toDate().getTime();
+  const timestamp = gregorian.toDate().getTime();
 
+  if (isEditing && editingId) {
+    // ✏️ حالت ویرایش
+    setRecords((prev) =>
+      prev.map((r) =>
+        r.id === editingId
+          ? { ...form, id: editingId, timestamp, date: `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(dateObj.day).padStart(2, "0")}` }
+          : r
+      )
+    );
+    setIsEditing(false);
+    setEditingId(null);
+  } else {
+    // ➕ حالت افزودن
     const newRecord = {
-  ...form,
-  id: Date.now(),
-  timestamp,
-  date: `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(
-    dateObj.day
-  ).padStart(2, "0")}`,
-  files: form.files || [], // ✅ اضافه شد
-};
-
+      ...form,
+      id: Date.now(),
+      timestamp,
+      date: `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(dateObj.day).padStart(2, "0")}`,
+      files: form.files || [],
+    };
     setRecords([newRecord, ...records]);
-    setForm({
-      title: "",
-      doctor: "",
-      category: "",
-      date: "",
-      desc: "",
-      files: [], // ← اینجا هم اصلاح شد
-    });
-  };
+  }
+
+  setForm({
+    title: "",
+    doctor: "",
+    category: "",
+    date: "",
+    desc: "",
+    files: [],
+  });
+};
 
   // 🟡 تبدیل عدد فارسی به انگلیسی
   const toEnglishNumber = (str = "") =>
@@ -142,6 +154,48 @@ export default function MyDoctor() {
   );
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  // 🟡 وقتی صفحه بارگذاری میشه، داده‌ها از localStorage خونده میشن
+useEffect(() => {
+  const savedRecords = localStorage.getItem("doctorRecords");
+  if (savedRecords) {
+    setRecords(JSON.parse(savedRecords));
+  }
+}, []);
+
+// ✅ لود داده‌ها فقط یک بار و با پاکسازی ایمن فایل‌ها
+useEffect(() => {
+  const savedRecords = localStorage.getItem("doctorRecords");
+  if (savedRecords) {
+    try {
+      const parsed = JSON.parse(savedRecords);
+      // اطمینان از اینکه فایل‌ها همیشه type داشته باشن
+      const cleaned = parsed.map((r) => ({
+        ...r,
+        files: (r.files || []).map((f) => ({
+          ...f,
+          type: f.type || "",
+        })),
+      }));
+      setRecords(cleaned);
+    } catch (err) {
+      console.error("خطا در خواندن localStorage:", err);
+      setRecords([]); // اگر داده خراب بود، خالی بشه
+    }
+  }
+}, []);
+// ✅ هر بار که لیست گزارش‌ها تغییر می‌کند، در localStorage ذخیره می‌شود
+useEffect(() => {
+  localStorage.setItem("doctorRecords", JSON.stringify(records));
+}, [records]);
+
+const [deleteTarget, setDeleteTarget] = useState(null);
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [deleteLoading, setDeleteLoading] = useState(false);
+const [showShareModal, setShowShareModal] = useState(false);
+const [shareTarget, setShareTarget] = useState(null);
+const [showFilters, setShowFilters] = useState(true);
 
   return (
     <main
@@ -160,117 +214,128 @@ export default function MyDoctor() {
           پزشک من 🩺
         </h1>
         <p className="text-gray-600 text-sm">
-          بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو 🌿
+          بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو 
         </p>
       </motion.div>
 
-      {/* 🔍 فیلتر بالا (واکنش‌گرا و فشرده در موبایل) */}
-<motion.div
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ delay: 0.2 }}
-  className="max-w-6xl mx-auto bg-white/80 backdrop-blur-sm 
-             p-4 sm:p-5 rounded-2xl shadow-md border border-yellow-100 mb-8 sm:mb-10"
->
-  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 text-right items-end">
-    {/* 🔸 عنوان گزارش */}
-    <div className="col-span-2 sm:col-span-1">
-      <label className="block text-xs sm:text-sm text-gray-700 mb-1">
-        عنوان گزارش
-      </label>
-      <select
-        value={filters.title}
-        onChange={(e) => setFilters({ ...filters, title: e.target.value })}
-        className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
-                   text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
-      >
-        <option value="">همه</option>
-        <option value="چکاپ عمومی">چکاپ عمومی</option>
-        <option value="چکاپ تخصصی">چکاپ تخصصی</option>
-        <option value="آزمایش و بررسی‌های تخصصی پزشکی">
-          آزمایش و بررسی‌های تخصصی پزشکی
-        </option>
-        <option value="بستری و جراحی">بستری و جراحی</option>
-        <option value="سایر">سایر</option>
-      </select>
-    </div>
-
-    {/* 🔸 دسته درمانی */}
-    <div className="col-span-2 sm:col-span-1">
-      <label className="block text-xs sm:text-sm text-gray-700 mb-1">
-        دسته درمانی
-      </label>
-      <select
-        value={filters.category}
-        onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-        className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
-                   text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
-      >
-        <option value="">همه</option>
-        <option value="عمومی">عمومی</option>
-        <option value="قلب و عروق">قلب و عروق</option>
-        <option value="مغز و اعصاب">مغز و اعصاب</option>
-        <option value="زنان">زنان</option>
-        <option value="دندانپزشکی">دندانپزشکی</option>
-        <option value="چشم‌پزشکی">چشم‌پزشکی</option>
-        <option value="ارتوپدی">ارتوپدی</option>
-        <option value="پوست و مو">پوست و مو</option>
-        <option value="سایر">سایر</option>
-      </select>
-    </div>
-
-    {/* 🔸 از تاریخ */}
-    <div>
-      <label className="block text-xs sm:text-sm text-gray-700 mb-1">
-        از تاریخ
-      </label>
-      <DatePicker
-        calendar={persian}
-        locale={persian_fa}
-        value={filters.from}
-        onChange={(date) =>
-          setFilters({ ...filters, from: date?.format("YYYY-MM-DD") })
-        }
-        portal
-        containerStyle={{ zIndex: 2000 }}
-        inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
-                    text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
-      />
-    </div>
-
-    {/* 🔸 تا تاریخ */}
-    <div>
-      <label className="block text-xs sm:text-sm text-gray-700 mb-1">
-        تا تاریخ
-      </label>
-      <DatePicker
-        calendar={persian}
-        locale={persian_fa}
-        value={filters.to}
-        onChange={(date) =>
-          setFilters({ ...filters, to: date?.format("YYYY-MM-DD") })
-        }
-        portal
-        containerStyle={{ zIndex: 2000 }}
-        inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
-                    text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
-      />
-    </div>
-
-    {/* 🔘 دکمه حذف فیلترها */}
-    <div className="col-span-2 sm:col-span-1 flex items-center justify-center sm:justify-start mt-2 sm:mt-0">
-      <button
-        onClick={() =>
-          setFilters({ title: "", category: "", from: "", to: "" })
-        }
-        className="w-full sm:w-auto bg-yellow-500 text-white py-2 px-4 
-                   rounded-xl hover:bg-yellow-600 transition text-sm flex items-center justify-center gap-1"
-      >
-        <Search className="w-4 h-4" /> حذف
-      </button>
-    </div>
+     {/* 🔍 فیلتر بالا با حالت باز و بسته شونده */}
+<div className="max-w-6xl mx-auto mb-6 sm:mb-10">
+  {/* دکمه‌ی باز و بسته کردن فیلتر */}
+  <div className="flex justify-center sm:justify-end mb-3">
+    <button
+      onClick={() => setShowFilters(!showFilters)}
+      className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium py-2 px-4 rounded-xl shadow-md transition sm:hidden"
+    >
+      {showFilters ? "بستن فیلترها ▲" : "نمایش فیلترها ▼"}
+    </button>
   </div>
-</motion.div>
+
+  {/* باکس فیلتر */}
+  <AnimatePresence>
+    {(showFilters || window.innerWidth >= 640) && (
+      <motion.div
+        key="filters-box"
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: "auto", opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+        className="overflow-hidden bg-white/80 backdrop-blur-sm p-4 sm:p-5 rounded-2xl shadow-md border border-yellow-100"
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-right items-end">
+          {/* 🔸 عنوان */}
+          <div className="col-span-1">
+            <label className="block text-xs sm:text-sm text-gray-700 mb-1">عنوان</label>
+            <select
+              value={filters.title}
+              onChange={(e) => setFilters({ ...filters, title: e.target.value })}
+              className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
+                         text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
+            >
+              <option value="">همه</option>
+              <option value="چکاپ عمومی">چکاپ عمومی</option>
+              <option value="چکاپ تخصصی">چکاپ تخصصی</option>
+              <option value="آزمایش و بررسی‌های تخصصی پزشکی">آزمایش‌ها</option>
+              <option value="بستری و جراحی">بستری و جراحی</option>
+              <option value="سایر">سایر</option>
+            </select>
+          </div>
+
+          {/* 🔸 دسته */}
+          <div className="col-span-1">
+            <label className="block text-xs sm:text-sm text-gray-700 mb-1">دسته</label>
+            <select
+              value={filters.category}
+              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+              className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
+                         text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
+            >
+              <option value="">همه</option>
+              <option value="عمومی">عمومی</option>
+              <option value="قلب و عروق">قلب و عروق</option>
+              <option value="مغز و اعصاب">مغز و اعصاب</option>
+              <option value="زنان">زنان</option>
+              <option value="دندانپزشکی">دندانپزشکی</option>
+              <option value="چشم‌پزشکی">چشم‌پزشکی</option>
+              <option value="پوست و مو">پوست و مو</option>
+            </select>
+          </div>
+
+          {/* 🔸 از تاریخ */}
+          <div className="col-span-1">
+            <label className="block text-xs sm:text-sm text-gray-700 mb-1">از تاریخ</label>
+            <DatePicker
+              calendar={persian}
+              locale={persian_fa}
+              value={filters.from}
+              onChange={(date) =>
+                setFilters({ ...filters, from: date?.format("YYYY-MM-DD") })
+              }
+              portal
+              containerStyle={{ zIndex: 2000 }}
+              inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
+                          text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
+            />
+          </div>
+
+          {/* 🔸 تا تاریخ */}
+          <div className="col-span-1">
+            <label className="block text-xs sm:text-sm text-gray-700 mb-1">تا تاریخ</label>
+            <DatePicker
+              calendar={persian}
+              locale={persian_fa}
+              value={filters.to}
+              onChange={(date) =>
+                setFilters({ ...filters, to: date?.format("YYYY-MM-DD") })
+              }
+              portal
+              containerStyle={{ zIndex: 2000 }}
+              inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
+                          text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
+            />
+          </div>
+
+          {/* 🔘 دکمه‌ها */}
+          <div className="col-span-2 sm:col-span-2 flex items-center justify-center sm:justify-start gap-2 mt-1">
+            <button
+              onClick={() => setCurrentPage(1)}
+              className="flex-1 sm:flex-none bg-yellow-500 text-white py-2 px-3 rounded-xl hover:bg-yellow-600 transition text-sm font-medium shadow-sm"
+            >
+              اعمال فیلتر
+            </button>
+
+            <button
+              onClick={() => setFilters({ title: "", category: "", from: "", to: "" })}
+              className="flex-1 sm:flex-none bg-gray-200 text-gray-700 py-2 px-3 rounded-xl hover:bg-gray-300 transition text-sm"
+            >
+              حذف فیلترها
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
+
 
       {/* 📋 باکس گزارش‌های من */}
 <motion.section
@@ -357,18 +422,46 @@ export default function MyDoctor() {
   نمایش
 </button>
 
-                        <button className="px-3 py-1 rounded-lg text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                          ویرایش
-                        </button>
                         <button
-                          onClick={() => {
-                            setRecords(records.filter((r) => r.id !== rec.id));
-                            setCurrentPage(1); // بعد از حذف، برگرد صفحه ۱
-                          }}
-                          className="px-3 py-1 rounded-lg text-xs bg-red-100 text-red-700 hover:bg-red-200 transition"
-                        >
-                          حذف
-                        </button>
+  onClick={() => {
+    setForm({
+      title: rec.title,
+      doctor: rec.doctor,
+      category: rec.category,
+      date: rec.date,
+      desc: rec.desc,
+      files: rec.files || [],
+    });
+    setEditingId(rec.id);
+    setIsEditing(true);
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); // اسکرول نرم به فرم پایین
+  }}
+  className="px-3 py-1 rounded-lg text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 transition"
+>
+  ویرایش
+</button>
+
+     <button
+  onClick={() => {
+    setDeleteTarget(rec);
+    setShowDeleteModal(true);
+  }}
+  className="px-3 py-1 rounded-lg text-xs bg-red-100 text-red-700 hover:bg-red-200 transition"
+>
+  حذف
+</button>
+
+<button
+  onClick={() => {
+    setShareTarget(rec);
+    setShowShareModal(true);
+  }}
+  className="px-3 py-1 rounded-lg text-xs bg-green-100 text-green-700 hover:bg-green-200 transition"
+>
+  اشتراک
+</button>
+
+
                       </td>
                     </tr>
                   ))}
@@ -442,20 +535,20 @@ export default function MyDoctor() {
           {selectedRecord.files.map((file, index) => (
             <div
               key={index}
-              onClick={() => file.type.startsWith("image/") && setPreviewImage(URL.createObjectURL(file))}
+              onClick={() => file?.type?.startsWith("image/") && setPreviewImage(URL.createObjectURL(file))}
               className="relative border border-yellow-200 rounded-xl overflow-hidden bg-white/60 
                          hover:shadow-lg hover:scale-[1.03] transition cursor-pointer"
             >
-              {file.type.startsWith("image/") ? (
+              {file?.type?.startsWith("image/") ? (
                 <img
                   src={URL.createObjectURL(file)}
-                  alt={`file-${index}`}
-                  className="w-full h-24 object-cover"
-                />
-              ) : (
-                <div className="flex items-center justify-center bg-yellow-50 h-24 text-yellow-700 text-xs font-medium">
-                  📄 {file.name}
-                </div>
+    alt={`file-${index}`}
+    className="w-full h-24 object-cover"
+  />
+) : (
+  <div className="flex items-center justify-center bg-yellow-50 h-24 text-yellow-700 text-xs font-medium">
+    📄 {file?.name || "فایل نامشخص"}
+  </div>
               )}
             </div>
           ))}
@@ -474,7 +567,7 @@ export default function MyDoctor() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={() => setPreviewImage(null)}
-      className="fixed inset-0 z-[10000] bg-black/70 flex items-center justify-center p-6 cursor-zoom-out"
+      className="fixed inset-0 z-[100000] bg-black/70 flex items-center justify-center p-6 cursor-zoom-out"
     >
       <motion.img
         src={previewImage}
@@ -489,20 +582,88 @@ export default function MyDoctor() {
   )}
 </AnimatePresence>
 
+{/* 🔴 مودال تأیید حذف گزارش */}
+<GoldenModal
+  show={showDeleteModal}
+  title="تأیید حذف گزارش"
+  description="آیا از حذف این گزارش مطمئن هستید؟ این عمل قابل بازگشت نیست."
+  confirmLabel={deleteLoading ? "در حال حذف..." : "بله، حذف شود"}
+  cancelLabel="انصراف"
+  onConfirm={() => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    setTimeout(() => {
+      setRecords(records.filter((r) => r.id !== deleteTarget.id));
+      setShowDeleteModal(false);
+      setDeleteLoading(false);
+      setDeleteTarget(null);
+      setCurrentPage(1);
+    }, 600); // یه تاخیر کوچیک برای حس نرم‌تر
+  }}
+  onCancel={() => {
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+  }}
+  confirmColor="red"
+>
+  {deleteTarget && (
+    <div className="text-right text-gray-700 leading-relaxed">
+      <p>
+        گزارش با عنوان{" "}
+        <span className="font-semibold text-yellow-700">
+          “{deleteTarget.title || "بدون عنوان"}”
+        </span>{" "}
+        حذف خواهد شد.
+      </p>
+    </div>
+  )}
+</GoldenModal>
+
+{/* 🟢 مودال اشتراک گزارش */}
+<GoldenModal
+  show={showShareModal}
+  title="اشتراک‌گذاری گزارش"
+  description="می‌توانید گزارش خود را برای افراد مورد اعتماد ارسال کنید "
+  confirmLabel="باشه"
+  onConfirm={() => setShowShareModal(false)}
+>
+  {shareTarget && (
+    <div className="text-right text-gray-700 space-y-3 leading-relaxed">
+      <p>
+        گزارش با عنوان{" "}
+        <span className="font-semibold text-yellow-700">
+          “{shareTarget.title || "بدون عنوان"}”
+        </span>{" "}
+        انتخاب شده است.
+      </p>
+
+      <p className="text-gray-600 text-sm">
+        این قابلیت در حال آماده‌سازی است و به‌زودی می‌توانید گزارش خود را از
+        طریق لینک اختصاصی، ایمیل یا واتساپ به اشتراک بگذارید 
+      </p>
+    </div>
+  )}
+</GoldenModal>
+
 </motion.section>
 
 
       {/* 🩺 فرم افزودن گزارش */}
       <motion.form
         onSubmit={handleSubmit}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="relative z-10 max-w-lg mx-auto bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-yellow-100 mb-10"   
-          >
-        <h2 className="text-lg font-semibold text-yellow-700 mb-4 flex items-center gap-2">
-          <PlusCircle className="w-5 h-5 text-yellow-600" /> افزودن گزارش پزشکی جدید
-        </h2>
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: isEditing ? -10 : 0, scale: isEditing ? 1.03 : 1 }}
+  transition={{ duration: 0.5, type: "spring" }}
+  className={`relative z-10 max-w-lg mx-auto p-6 rounded-2xl shadow-md border ${
+    isEditing ? "border-blue-300 bg-blue-50/70" : "border-yellow-100 bg-white/80"
+  } backdrop-blur-sm mb-10`}
+>
+  <h2 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
+    isEditing ? "text-blue-700" : "text-yellow-700"
+  }`}>
+    <PlusCircle className={`w-5 h-5 ${isEditing ? "text-blue-600" : "text-yellow-600"}`} />
+    {isEditing ? "ویرایش گزارش پزشکی" : "افزودن گزارش پزشکی جدید"}
+  </h2>
 
         <div className="grid gap-4 text-right">
           {/* 🔸 عنوان گزارش (منوی بازشونده) */}
@@ -589,17 +750,17 @@ export default function MyDoctor() {
             key={index}
             className="relative border border-yellow-200 rounded-lg overflow-hidden bg-white/60"
           >
-            {file.type.startsWith("image/") ? (
-              <img
-                src={URL.createObjectURL(file)}
-                alt={`file-${index}`}
-                className="w-full h-20 object-cover"
-              />
-            ) : (
-              <div className="flex items-center justify-center bg-yellow-50 h-20 text-yellow-700 text-xs font-medium">
-                📄 فایل غیر تصویری
-              </div>
-            )}
+            {file?.type?.startsWith("image/") ? (
+  <img
+    src={URL.createObjectURL(file)}
+    alt={`file-${index}`}
+    className="w-full h-20 object-cover"
+  />
+) : (
+  <div className="flex items-center justify-center bg-yellow-50 h-20 text-yellow-700 text-xs font-medium">
+    📄 {file?.name || "فایل غیر تصویری"}
+  </div>
+)}
             <button
               type="button"
               onClick={(e) => {
@@ -659,11 +820,41 @@ export default function MyDoctor() {
 
 
           <button
-            type="submit"
-            className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-xl transition font-medium"
-          >
-            ذخیره گزارش
-          </button>
+    type="submit"
+    className={`${
+      isEditing
+        ? "bg-blue-500 hover:bg-blue-600"
+        : "bg-yellow-500 hover:bg-yellow-600"
+    } text-white py-3 rounded-xl transition font-medium`}
+  >
+    {isEditing ? "ثبت تغییرات" : "ذخیره گزارش"}
+  </button>
+
+  {/* 🔵 دکمه لغو ویرایش */}
+{isEditing && (
+  <motion.button
+    type="button"
+    onClick={() => {
+      setIsEditing(false);
+      setEditingId(null);
+      setForm({
+        title: "",
+        doctor: "",
+        category: "",
+        date: "",
+        desc: "",
+        files: [],
+      });
+    }}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 10 }}
+    transition={{ duration: 0.4 }}
+    className="mt-3 w-full py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-sm transition"
+  >
+    لغو ویرایش ✖️
+  </motion.button>
+)}
         </div>
       </motion.form>
 

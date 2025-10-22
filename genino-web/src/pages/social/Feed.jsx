@@ -81,10 +81,10 @@ export default function Feed() {
         transition={{ duration: 0.8 }}
       >
         <h1 className="text-4xl sm:text-5xl font-extrabold text-yellow-700 mb-3 drop-shadow-[0_0_12px_rgba(255,230,120,0.6)]">
-          شبکه اجتماعی ژنینو 💛
+          شبکه اجتماعی ژنینو 
         </h1>
         <p className="text-gray-600 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-          جایی برای اشتراک لحظه‌های طلایی والدین و کودکان 🌿
+          جایی برای اشتراک لحظه‌های طلایی والدین و کودکان 
         </p>
       </motion.div>
 
