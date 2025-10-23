@@ -38,11 +38,11 @@ export default function HorizontalScrollGallery({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="overflow-x-auto flex gap-3 pb-3 px-1 scroll-smooth snap-x scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-pink-100"
-    >
+  initial={{ opacity: 0, y: 5 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+  className="flex gap-3 pb-3 px-1 overflow-x-auto scroll-smooth snap-x scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-pink-100 w-full"
+>
       {images.length > 0 ? (
         images.map((src, i) => (
           <div

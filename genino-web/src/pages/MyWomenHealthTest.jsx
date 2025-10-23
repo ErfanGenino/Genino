@@ -47,9 +47,12 @@ export default function MyWomenHealthTest() {
 
   return (
     <main
-      dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-[#fff7fb] to-[#fff3f7] flex flex-col items-center justify-start py-10 text-gray-800 overflow-x-hidden"
-    >
+  dir="rtl"
+  className="min-h-screen w-full bg-gradient-to-b from-[#fff7fb] to-[#fff3f7] flex flex-col items-center justify-start py-10 text-gray-800"
+>
+  {/* لایه محدودکننده اصلی صفحه */}
+  <div className="w-full max-w-[95vw] sm:max-w-3xl px-4 sm:px-6 overflow-x-hidden">
+
       {/* 🔹 تیتر صفحه */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -169,6 +172,7 @@ export default function MyWomenHealthTest() {
           <li>انجام سونوگرافی و معاینه منظم در صورت نیاز.</li>
         </ul>
       </section>
-    </main>
+      </div>
+</main>
   );
 }
