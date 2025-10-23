@@ -48,7 +48,7 @@ export default function MyWomenHealthTest() {
   return (
     <main
       dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-[#fff7fb] to-[#fff3f7] flex flex-col items-center justify-start px-6 py-10 text-gray-800"
+      className="min-h-screen bg-gradient-to-b from-[#fff7fb] to-[#fff3f7] flex flex-col items-center justify-start py-10 text-gray-800 overflow-x-hidden"
     >
       {/* 🔹 تیتر صفحه */}
       <motion.div
@@ -98,7 +98,7 @@ export default function MyWomenHealthTest() {
       <Divider />
 
       {/* 🧴 ۱. سلامت پوست و مو */}
-      <section className="max-w-3xl leading-relaxed mb-12">
+      <section className="max-w-3xl leading-relaxed mb-12 px-4">
         <h2 className="text-xl font-bold text-pink-600 mb-4 text-center">
           ۱. سلامت پوست و مو
         </h2>
@@ -117,7 +117,7 @@ export default function MyWomenHealthTest() {
       <Divider />
 
       {/* 🎀 ۲. سلامت پستان‌ها */}
-      <section className="max-w-3xl leading-relaxed mb-12">
+      <section className="max-w-3xl leading-relaxed mb-12 px-4">
         <h2 className="text-xl font-bold text-pink-600 mb-4 text-center">
           ۲. سلامت پستان‌ها
         </h2>
@@ -135,7 +135,7 @@ export default function MyWomenHealthTest() {
       <Divider />
 
       {/* 🌷 ۳. سلامت واژن و رحم */}
-      <section className="max-w-3xl leading-relaxed mb-12">
+      <section className="max-w-3xl leading-relaxed mb-12 px-4">
         <h2 className="text-xl font-bold text-pink-600 mb-4 text-center">
           ۳. سلامت واژن و آلت تناسلی 
         </h2>
@@ -154,7 +154,7 @@ export default function MyWomenHealthTest() {
       <Divider />
 
       {/* 🌼 ۴. سلامت رحم و تخمدان‌ها */}
-      <section className="max-w-3xl leading-relaxed mb-20">
+      <section className="max-w-3xl leading-relaxed mb-20 px-4">
         <h2 className="text-xl font-bold text-pink-600 mb-4 text-center">
           ۴. سلامت رحم و تخمدان‌ها
         </h2>
