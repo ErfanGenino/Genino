@@ -8,6 +8,7 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
 import { Heart, Flower2, Sun, Moon, Droplet, CalendarDays } from "lucide-react";
 import GoldenModal from "../components/GoldenModal";
+import { Link } from "react-router-dom";
 
 const LS_KEY = "myCycle:v1";
 
@@ -552,6 +553,134 @@ export default function MyCycle() {
           </div>
         )}
       </GoldenModal>
+
+      {/* 🧾 وضعیت سلامت من و جدول گزارش‌ها با نیم‌دایره‌ها */}
+<section className="mt-14 bg-white/90 border border-pink-100 rounded-2xl shadow-sm p-6 max-w-5xl w-full text-center">
+  <h2 className="text-xl font-bold text-pink-600 mb-3 text-center">
+    وضعیت سلامت من
+  </h2>
+  <p className="text-gray-600 text-sm mb-6 text-center">
+    در این بخش می‌توانید گزارش‌های سلامت خود را مشاهده و مدیریت کنید.
+  </p>
+
+  <Link
+  to="/my-women-health-test"
+  className="inline-block bg-pink-500 text-white px-6 py-2 rounded-xl hover:bg-pink-600 transition-all text-sm shadow-sm mb-8"
+>
+  رفتن به صفحه تست و بررسی سلامت بدن من
+</Link>
+
+  
+
+  <div className="overflow-x-auto">
+    <table className="w-full border-collapse bg-white rounded-2xl shadow-md overflow-hidden text-center">
+      <thead className="bg-pink-100 text-gray-700">
+        <tr>
+          <th className="p-3 text-center">شماره گزارش</th>
+          <th className="p-3 text-center">تاریخ ثبت</th>
+          <th className="p-3 text-center">سلامت پوست و مو</th>
+          <th className="p-3 text-center">سلامت پستان‌ها</th>
+          <th className="p-3 text-center">سلامت واژن و رحم</th>
+          <th className="p-3 text-center">سلامت تخمدان‌ها</th>
+          <th className="p-3 text-center">نمایش</th>
+          <th className="p-3 text-center">ویرایش</th>
+          <th className="p-3 text-center">حذف</th>
+          <th className="p-3 text-center">اشتراک</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr className="border-b hover:bg-pink-50 transition-all">
+          <td className="p-3">1</td>
+          <td className="p-3">1404/08/02</td>
+
+          {/* 🌸 پوست و مو */}
+          <td className="p-3">
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-sm mb-1">85٪</span>
+              <svg width="50" height="25" viewBox="0 0 50 25">
+                <path d="M5 25 A20 20 0 0 1 45 25" fill="none" stroke="#f3cfe2" strokeWidth="6" />
+                <path
+                  d="M5 25 A20 20 0 0 1 45 25"
+                  fill="none"
+                  stroke="#ec4899"
+                  strokeWidth="6"
+                  strokeDasharray="40"
+                  strokeDashoffset={40 - (40 * 0.85)}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </td>
+
+          {/* 💗 پستان‌ها */}
+          <td className="p-3">
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-sm mb-1">65٪</span>
+              <svg width="50" height="25" viewBox="0 0 50 25">
+                <path d="M5 25 A20 20 0 0 1 45 25" fill="none" stroke="#f3cfe2" strokeWidth="6" />
+                <path
+                  d="M5 25 A20 20 0 0 1 45 25"
+                  fill="none"
+                  stroke="#f472b6"
+                  strokeWidth="6"
+                  strokeDasharray="40"
+                  strokeDashoffset={40 - (40 * 0.65)}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </td>
+
+          {/* 🌷 واژن و رحم */}
+          <td className="p-3">
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-sm mb-1">90٪</span>
+              <svg width="50" height="25" viewBox="0 0 50 25">
+                <path d="M5 25 A20 20 0 0 1 45 25" fill="none" stroke="#f3cfe2" strokeWidth="6" />
+                <path
+                  d="M5 25 A20 20 0 0 1 45 25"
+                  fill="none"
+                  stroke="#db2777"
+                  strokeWidth="6"
+                  strokeDasharray="40"
+                  strokeDashoffset={40 - (40 * 0.9)}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </td>
+
+          {/* 💖 تخمدان‌ها */}
+          <td className="p-3">
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-sm mb-1">75٪</span>
+              <svg width="50" height="25" viewBox="0 0 50 25">
+                <path d="M5 25 A20 20 0 0 1 45 25" fill="none" stroke="#f3cfe2" strokeWidth="6" />
+                <path
+                  d="M5 25 A20 20 0 0 1 45 25"
+                  fill="none"
+                  stroke="#be185d"
+                  strokeWidth="6"
+                  strokeDasharray="40"
+                  strokeDashoffset={40 - (40 * 0.75)}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </td>
+
+          {/* آیکون‌های اکشن */}
+          <td className="p-3 text-center text-blue-500 cursor-pointer hover:scale-110 transition-transform">👁</td>
+          <td className="p-3 text-center text-green-500 cursor-pointer hover:scale-110 transition-transform">✏️</td>
+          <td className="p-3 text-center text-red-500 cursor-pointer hover:scale-110 transition-transform">🗑</td>
+          <td className="p-3 text-center text-yellow-500 cursor-pointer hover:scale-110 transition-transform">🔗</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
     </main>
   );
 }
