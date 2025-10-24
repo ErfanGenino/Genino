@@ -263,6 +263,7 @@ export default function MyCycle() {
     () => Array.from({ length: Math.max(1, form.cycleLength) }, (_, i) => i + 1),
     [form.cycleLength]
   );
+  const [selectedReport, setSelectedReport] = useState(null);
 
   return (
     <main
@@ -609,10 +610,9 @@ export default function MyCycle() {
           <th className="p-2 sm:p-3 text-center">پستان‌ها</th>
           <th className="p-2 sm:p-3 text-center">واژن و رحم</th>
           <th className="p-2 sm:p-3 text-center">تخمدان‌ها</th>
-          <th className="p-2 sm:p-3 text-center">👁</th>
-          <th className="p-2 sm:p-3 text-center">✏️</th>
-          <th className="p-2 sm:p-3 text-center">🗑</th>
-          <th className="p-2 sm:p-3 text-center">🔗</th>
+          <th className="p-2 sm:p-3 text-center">نمایش</th>
+          <th className="p-2 sm:p-3 text-center">حذف</th>
+          <th className="p-2 sm:p-3 text-center">اشتراک</th>
         </tr>
       </thead>
 
@@ -642,8 +642,43 @@ export default function MyCycle() {
           </td>
 
           {/* اکشن‌ها */}
-          <td className="p-2 sm:p-3 text-blue-500 cursor-pointer hover:scale-110 transition-transform">👁</td>
-          <td className="p-2 sm:p-3 text-green-500 cursor-pointer hover:scale-110 transition-transform">✏️</td>
+          <td
+  className="p-2 sm:p-3 text-blue-500 cursor-pointer hover:scale-110 transition-transform"
+  onClick={() =>
+    setSelectedReport({
+      id: 1,
+      date: "1404/08/02",
+      results: {
+        skin: {
+          score: 85,
+          status: "عالی 🌿",
+          advice: "پوست در وضعیت خوبی است، مراقبت فعلی را ادامه بده.",
+          interval: "هر دو هفته یک‌بار",
+        },
+        breast: {
+          score: 65,
+          status: "خوب 💛",
+          advice: "بهتر است خودآزمایی را ماهیانه انجام دهی.",
+          interval: "ماهی یک‌بار",
+        },
+        vagina: {
+          score: 90,
+          status: "عالی 🌿",
+          advice: "نشانه‌ای از التهاب دیده نمی‌شود. مراقبت روتین ادامه یابد.",
+          interval: "ماهی یک‌بار",
+        },
+        uterus: {
+          score: 75,
+          status: "خوب 💛",
+          advice: "چرخه منظم است، اما بهتر است هر سه ماه یکبار بررسی شود.",
+          interval: "هر سه ماه یک‌بار",
+        },
+      },
+    })
+  }
+>
+  👁
+</td>
           <td className="p-2 sm:p-3 text-red-500 cursor-pointer hover:scale-110 transition-transform">🗑</td>
           <td className="p-2 sm:p-3 text-yellow-500 cursor-pointer hover:scale-110 transition-transform">🔗</td>
         </tr>
@@ -651,6 +686,51 @@ export default function MyCycle() {
     </table>
   </div>
 </section>
+
+{/* مودال نمایش نتیجه تستها */}
+<GoldenModal
+  show={!!selectedReport}
+  title={`گزارش سلامت شماره ${selectedReport?.id || ""}`}
+  confirmLabel="بستن"
+  onConfirm={() => setSelectedReport(null)}
+  onCancel={() => setSelectedReport(null)}
+>
+  {selectedReport && (
+    <div className="space-y-4 text-right text-sm text-gray-700">
+      <p className="text-center text-gray-600 text-xs mb-2">
+        تاریخ ثبت: {selectedReport.date}
+      </p>
+
+      {Object.entries(selectedReport.results).map(([key, val]) => (
+        <div
+          key={key}
+          className="border border-pink-100 rounded-xl p-3 bg-pink-50/50 hover:bg-pink-50 transition-all"
+        >
+          <h3 className="font-semibold text-pink-600 mb-1">
+            {key === "skin"
+              ? "💆‍♀️ پوست و مو"
+              : key === "breast"
+              ? "🎀 پستان‌ها"
+              : key === "vagina"
+              ? "🌷 واژن و تناسلی"
+              : "🌼 رحم و تخمدان‌ها"}
+          </h3>
+
+          <p className={`${val.color || "text-gray-700"} text-sm mb-1`}>
+            وضعیت: {val.status}
+          </p>
+          <p className="text-gray-700 text-sm mb-1">
+            توصیه ژنینو: {val.advice}
+          </p>
+          <p className="text-gray-500 text-xs">
+            ⏰ زمان انجام تست بعدی: {val.interval}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
+</GoldenModal>
+
 
     </main>
   );

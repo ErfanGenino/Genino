@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import FamilyTree from "./FamilyTree";
 import AchievementsBar from "../components/AchievementsBar";
+import TodayCalendarBox from "../components/TodayCalendarBox";
 
 export default function MyChild() {
   const [activeTab, setActiveTab] = useState("physical");
@@ -124,6 +125,10 @@ const daysLeft = Math.ceil((nextBirthday - today) / msInDay);
 
       {/* 🏅 نوار دستاوردهای کودک */}
       <AchievementsBar />
+
+      {/* 📅 باکس تقویم امروز */}
+<TodayCalendarBox color="yellow" />
+
 
      {/* 👶 دایره کودک */}
 <motion.div

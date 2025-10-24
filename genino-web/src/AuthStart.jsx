@@ -6,106 +6,10 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
 import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
+import PromoSlider from "./components/PromoSlider.jsx";
 
-// 🔸 اسلایدر خودکار با انیمیشن جهت‌دار (راست/چپ)
-function AutoSlider() {
-  const slides = [
-    { id: 1, text: "هر کودک، یک دنیا نوآوری ✨", sub: "ژنینو، همراه رشد و خلاقیت فرزندتان.", bg: "from-[#fffaf0] to-[#fef7dc]" },
-    { id: 2, text: "رشد کودک را هوشمندانه دنبال کنید 🌱", sub: "با تحلیل داده‌ها و پیشنهادهای تخصصی.", bg: "from-[#fefdf8] to-[#fff4e0]" },
-    { id: 3, text: "ژنینو؛ پلی بین علم و احساس 💛", sub: "برای والدینی که می‌خواهند متفاوت تربیت کنند.", bg: "from-[#fffdf6] to-[#fff2d8]" },
-    { id: 4, text: "هدیه‌ای برای آینده کودک شما 🎁", sub: "محیطی امن برای رشد و شادی.", bg: "from-[#fff8eb] to-[#fef4da]" },
-    { id: 5, text: "دستیار هوشمند والدین 🌿", sub: "همراه روزهای پرماجرای کودکی.", bg: "from-[#fffdf8] to-[#f7f3e6]" },
-  ];
 
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState(1); // 1: بعدی، -1: قبلی
-  const timeoutRef = useRef(null);
-
-  // زمان‌بندی اسلاید خودکار (رو به جلو)
-  useEffect(() => {
-    scheduleNext();
-    return () => clearTimeout(timeoutRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
-
-  const scheduleNext = () => {
-    clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      setDirection(1);
-      setIndex((prev) => (prev + 1) % slides.length);
-    }, 5000);
-  };
-
-  const nextSlide = () => {
-    setDirection(1);
-    setIndex((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setDirection(-1);
-    setIndex((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
-  // واریانت‌های جهت‌دار برای framer-motion
-  const variants = {
-    enter: (dir) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
-  };
-
-  return (
-    <div className="relative w-full h-full select-none overflow-hidden rounded-3xl group">
-      <AnimatePresence initial={false} mode="wait" custom={direction}>
-        <motion.div
-          key={slides[index].id}
-          custom={direction}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-          className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br ${slides[index].bg}`}
-        >
-          <img src={logo} alt="Genino Logo" className="w-24 h-24 mb-6 opacity-90 drop-shadow-md" />
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-2">{slides[index].text}</h2>
-          <p className="text-gray-600 text-sm sm:text-base">{slides[index].sub}</p>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* فلش‌ها */}
-      <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-6">
-        <button
-          onClick={prevSlide}
-          className="p-2 rounded-full bg-white/70 hover:bg-white text-yellow-600 shadow-md transition-all
-                     opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-          aria-label="قبلی"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="p-2 rounded-full bg-white/70 hover:bg-white text-yellow-600 shadow-md transition-all
-                     opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-          aria-label="بعدی"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* نقاط وضعیت */}
-      <div className="absolute bottom-4 flex gap-2 justify-center w-full">
-        {slides.map((_, i) => (
-          <div
-            key={i}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-              i === index ? "bg-yellow-500 scale-110" : "bg-gray-300"
-            }`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
+    
 
 export default function AuthStart() {
   const [open, setOpen] = useState(false);
@@ -357,13 +261,50 @@ useEffect(() => {
 
       {/* 🔸 اسلایدر */}
       <motion.div
-        className="relative w-full max-w-3xl h-72 sm:h-80 lg:h-96 mb-16 rounded-3xl overflow-hidden shadow-xl z-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        <AutoSlider />
-      </motion.div>
+  className="relative w-full max-w-3xl h-72 sm:h-80 lg:h-96 mb-16 rounded-3xl overflow-hidden shadow-xl z-10"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.8 }}
+>
+  <PromoSlider
+    variant="golden"
+    interval={6}
+    slides={[
+      {
+        id: 1,
+        text: "هر کودک، یک دنیا نوآوری ",
+        sub: "ژنینو، همراه رشد و خلاقیت فرزندتان.",
+        image: "/images/slides/authstart/1.jpg",
+      },
+      {
+        id: 2,
+        text: "سلامت بانوان",
+        sub: "با تحلیل داده‌ها و پیشنهادهای تخصصی.",
+        image: "/images/slides/authstart/2.jpg",
+      },
+      {
+        id: 3,
+        text: "سلامت آقایان",
+        sub: "همراه شما برای ساخت آینده ای سالم",
+        image: "/images/slides/authstart/3.jpg",
+      },
+      {
+        id: 4,
+        text: "پزشک من",
+        sub: "بایگانی پرونده های پزشکی شما",
+        image: "/images/slides/authstart/4.jpg",
+      },
+      {
+        id: 5,
+        text: "فروشگاه تخصصی",
+        sub: "خرید آسان و تخصصی کالاها و خدمات مورد نیاز شما",
+        image: "/images/slides/authstart/5.jpg",
+      },
+    ]}
+  />
+</motion.div>
+
+
 
       {/* 🔸 کارت‌های ویژگی */}
       <motion.section

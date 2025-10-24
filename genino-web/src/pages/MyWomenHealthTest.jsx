@@ -6,6 +6,7 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
 import HorizontalScrollGallery from "../components/HorizontalScrollGallery";
+import HealthTestModal from "../components/HealthTestModal";
 
 
 export default function MyWomenHealthTest() {
@@ -44,6 +45,34 @@ export default function MyWomenHealthTest() {
       ))}
     </div>
   );
+  const [showTestModal, setShowTestModal] = useState(false);
+
+// ذخیره نتایج تست‌ها در localStorage
+const handleSaveTestResult = (result) => {
+  const reports = JSON.parse(localStorage.getItem("womenHealthReports") || "[]");
+
+  // تبدیل پاسخ‌ها به امتیاز و درصد تقریبی (به‌صورت نمونه)
+  const sectionAverages = Object.entries(result.answers).reduce((acc, [key, value]) => {
+    const sectionAnswers = Object.values(value);
+    const score = (sectionAnswers.length * 25); // هر پاسخ 25 امتیاز، فرضی
+    acc[key] = Math.min(100, score);
+    return acc;
+  }, {});
+
+  const newReport = {
+    date: result.date,
+    skin: sectionAverages.skin || 0,
+    breast: sectionAverages.breast || 0,
+    vagina: sectionAverages.vagina || 0,
+    uterus: sectionAverages.uterus || 0,
+  };
+
+  reports.push(newReport);
+  localStorage.setItem("womenHealthReports", JSON.stringify(reports));
+
+  setShowTestModal(false);
+};
+
 
   return (
     <main
@@ -97,6 +126,20 @@ export default function MyWomenHealthTest() {
         <span className="text-pink-600 font-medium"> رزومه سلامت فردی </span>
         و ارائه‌ی دقیق‌تر اطلاعات به پزشک، مفید و مکمل باشند.
       </motion.p>
+
+      <motion.div
+  className="text-center mt-10 mb-12"
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+>
+  <button
+    onClick={() => setShowTestModal(true)}
+    className="bg-gradient-to-r from-pink-500 to-pink-400 text-white font-semibold text-lg px-10 py-4 rounded-2xl shadow-md hover:scale-105 hover:shadow-lg transition-all"
+  >
+     شروع تست سلامت بدن من
+  </button>
+</motion.div>
 
       <Divider />
 
@@ -199,6 +242,113 @@ export default function MyWomenHealthTest() {
         </ul>
       </section>
       </div>
+      
+      <HealthTestModal
+  show={showTestModal}
+  onClose={() => setShowTestModal(false)}
+  title="تست سلامت جنسی بانوان"
+  theme="pink"
+  sections={[
+    {
+      id: "skin",
+      title: "💆‍♀️ سلامت پوست و مو",
+      questions: [
+        {
+          q: "آیا در چند ماه اخیر پوستتان جوش‌های جدید یا ریزش موی غیرعادی داشته؟",
+          options: ["خیر", "مقدار کمی", "بله زیاد"],
+        },
+        {
+          q: "آیا از ضدآفتاب روزانه و شستشوی مناسب استفاده می‌کنید؟",
+          options: ["همیشه", "گاهی", "نه"],
+        },
+        {
+          q: "آیا تغییرات پوستی (مثل چربی یا جوش) در حوالی قاعدگی دارید؟",
+          options: ["خیر", "کمی", "زیاد"],
+        },
+        {
+          q: "مصرف میوه، سبزیجات و آب در روز چقدر است؟",
+          options: ["منظم و زیاد", "متوسط", "کم"],
+        },
+      ],
+    },
+    {
+      id: "breast",
+      title: "🎀 سلامت پستان‌ها",
+      questions: [
+        {
+          q: "آیا در ماه گذشته خودآزمایی پستان انجام داده‌اید؟",
+          options: ["بله", "نه", "یادم نیست"],
+        },
+        {
+          q: "آیا توده، درد یا ترشح غیرطبیعی دیده‌اید؟",
+          options: ["خیر", "کمی حساسیت", "بله موردی مشاهده شد"],
+        },
+        {
+          q: "آیا تغییری در ظاهر یا قرینگی پستان‌ها حس کردید؟",
+          options: ["خیر", "اندک", "بله محسوس"],
+        },
+        {
+          q: "آخرین بار معاینه پزشک یا ماموگرافی چه زمانی بود؟",
+          options: ["زیر ۱ سال", "۱–۲ سال", "بالای ۲ سال یا هرگز"],
+        },
+      ],
+    },
+    {
+      id: "vagina",
+      title: "🌷 سلامت واژن و آلت تناسلی",
+      questions: [
+        {
+          q: "آیا ترشح غیرعادی (رنگ، بو یا مقدار) دارید؟",
+          options: ["خیر", "گاهی", "بله مداوم"],
+        },
+        {
+          q: "آیا در هفته‌های اخیر سوزش یا خارش در ناحیه واژن داشتید؟",
+          options: ["خیر", "کم", "زیاد"],
+        },
+        {
+          q: "نوع لباس زیر و شستشوی روزانه شما چگونه است؟",
+          options: ["نخی و خشک", "گاهی مرطوب", "تنگ یا مصنوعی"],
+        },
+        {
+          q: "آیا سابقه عفونت قارچی یا باکتریایی مکرر دارید؟",
+          options: ["نه", "گاهی", "بله چند بار"],
+        },
+        {
+          q: "آیا در رابطه جنسی احساس درد یا خشکی دارید؟",
+          options: ["خیر", "گاهی", "بله مداوم"],
+        },
+      ],
+    },
+    {
+      id: "uterus",
+      title: "🌼 سلامت رحم و تخمدان‌ها",
+      questions: [
+        {
+          q: "آیا دوره‌های قاعدگی منظم دارید؟",
+          options: ["بله", "گاهی تأخیر", "نامنظم یا قطع شده"],
+        },
+        {
+          q: "آیا درد یا گرفتگی غیرمعمول در پایین شکم دارید؟",
+          options: ["خیر", "گاهی", "بله"],
+        },
+        {
+          q: "آیا خون‌ریزی شدید یا لکه‌بینی بین دو پریود دارید؟",
+          options: ["نه", "گاهی", "بله"],
+        },
+        {
+          q: "آیا سابقه کیست، فیبروم یا تنبلی تخمدان دارید؟",
+          options: ["نه", "مطمئن نیستم", "بله"],
+        },
+        {
+          q: "آیا در بارداری یا تلاش برای بارداری مشکل داشته‌اید؟",
+          options: ["نه", "در گذشته", "بله اکنون دارم"],
+        },
+      ],
+    },
+  ]}
+  onSubmit={handleSaveTestResult}
+/>
+
 </main>
   );
 }
