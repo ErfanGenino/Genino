@@ -1,235 +1,149 @@
-import React, { useState } from "react";
+// 📄 src/pages/social/Feed.jsx
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, PlusCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Users, PlusCircle, MessageSquare, Heart, Baby, User, X } from "lucide-react";
+import GoldenDivider from "../../components/GoldenDivider.jsx";
+import ChatRoom from "./ChatRoom.jsx";
 
 export default function Feed() {
-  const [posts, setPosts] = useState([
+  const [activeRoom, setActiveRoom] = useState(null);
+  const [rooms, setRooms] = useState([
     {
-      id: 1,
-      user: "فرناز 🌸",
-      child: "حنا 💛",
-      text: "اولین نقاشی حنا رو ببینین 😍 هنوز باورم نمیشه خودش کشیده!",
-      image:
-        "https://images.unsplash.com/photo-1587614382346-ac48b0b1f9e7?auto=format&fit=crop&w=600&q=60",
-      likes: 12,
-      comments: 3,
-      liked: false,
+      id: "public",
+      title: "اتاق عمومی",
+      desc: "گفت‌وگو آزاد بین کاربران ژنینو",
+      color: "bg-green-50",
+      icon: <MessageSquare size={42} className="text-green-500" />,
     },
     {
-      id: 2,
-      user: "نگین 🌿",
-      child: "آراد 💙",
-      text: "امروز اولین روز مدرسه‌ش بود... چقدر سریع بزرگ میشن 😢",
-      image:
-        "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=600&q=60",
-      likes: 8,
-      comments: 1,
-      liked: false,
+      id: "kids",
+      title: "کودکان",
+      desc: "رشد، بازی و آموزش کودک",
+      color: "bg-yellow-50",
+      icon: <Baby size={42} className="text-yellow-500" />,
+    },
+    {
+      id: "women",
+      title: "بانوان",
+      desc: "موضوعات مربوط به بانوان و مادران",
+      color: "bg-pink-50",
+      icon: <Heart size={42} className="text-pink-400" />,
+    },
+    {
+      id: "men",
+      title: "آقایان",
+      desc: "گفت‌وگوهای ویژه آقایان",
+      color: "bg-blue-50",
+      icon: <User size={42} className="text-blue-500" />,
     },
   ]);
 
-  const [newPost, setNewPost] = useState("");
-
-  const addPost = () => {
-    if (!newPost.trim()) return;
-    const newItem = {
-      id: posts.length + 1,
-      user: "کاربر ژنینو 👩‍👧",
-      child: "کودک من 🌼",
-      text: newPost,
-      image: "",
-      likes: 0,
-      comments: 0,
-      liked: false,
+  const handleCreateRoom = () => {
+    const name = prompt("نام اتاق جدید را وارد کنید:");
+    if (!name) return;
+    const newRoom = {
+      id: Date.now().toString(),
+      title: name,
+      desc: "اتاق ساخته‌شده توسط کاربر",
+      color: "bg-gray-50",
+      icon: <MessageSquare size={42} className="text-gray-500" />,
     };
-    setPosts([newItem, ...posts]);
-    setNewPost("");
-  };
-
-  const toggleLike = (id) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? {
-              ...p,
-              liked: !p.liked,
-              likes: p.liked ? p.likes - 1 : p.likes + 1,
-            }
-          : p
-      )
-    );
+    setRooms([...rooms, newRoom]);
   };
 
   return (
-    <main
-      dir="rtl"
-      className="relative min-h-screen bg-gradient-to-b from-[#fffaf0] via-[#fff5dc] to-[#fff0cc] text-gray-800 px-4 pt-28 pb-24 flex flex-col items-center overflow-x-hidden"
-    >
-      {/* ☀️ هاله طلایی بالا */}
-      <motion.div
-        className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-[#fff8dc]/90 to-transparent blur-3xl"
-        animate={{ opacity: [0.5, 0.8, 0.5] }}
-        transition={{ repeat: Infinity, duration: 6 }}
-      />
-
-      {/* 🌟 عنوان */}
-      <motion.div
-        className="text-center mb-10 z-10"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-yellow-700 mb-3 drop-shadow-[0_0_12px_rgba(255,230,120,0.6)]">
-          شبکه اجتماعی ژنینو 
-        </h1>
-        <p className="text-gray-600 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-          جایی برای اشتراک لحظه‌های طلایی والدین و کودکان 
+    <main className="min-h-screen bg-gradient-to-b from-white to-yellow-50 pt-20 pb-16 px-6 relative">
+      {/* 🔹 عنوان اصلی */}
+      <div className="text-center mb-12">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-4xl font-bold text-yellow-600 mb-3"
+        >
+          شبکه اجتماعی ژنینو 🌿
+        </motion.h1>
+        <p className="text-gray-600 text-sm max-w-md mx-auto">
+          وارد یکی از اتاق‌های گفتگو شو یا اتاق خودت رو بساز 💛
         </p>
-      </motion.div>
+      </div>
 
-      {/* 🖋 ساخت پست جدید */}
+      {/* 🧱 کارت‌ها */}
+      <div className="flex justify-center items-center gap-6 flex-wrap mb-8">
+        {rooms.map((room, index) => (
+          <motion.div
+            key={room.id}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: index * 0.1,
+              duration: 0.8,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+            onClick={() => setActiveRoom(room)}
+            className={`${room.color} cursor-pointer group relative rounded-3xl p-7 w-[250px] 
+                        border border-transparent hover:border-yellow-300 transition-all duration-300 
+                        shadow-sm hover:shadow-lg text-center`}
+          >
+            <div className="mb-4 flex justify-center">{room.icon}</div>
+            <h2 className="text-lg font-semibold text-gray-700 mb-1">{room.title}</h2>
+            <p className="text-gray-500 text-sm mb-3">{room.desc}</p>
+            <div className="flex items-center justify-center gap-1 text-yellow-600 text-xs font-medium">
+              <Users size={14} />
+              <span>۱۲ نفر آنلاین</span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* ✨ جداکننده طلایی */}
+      <GoldenDivider width="w-48" margin="my-12" />
+
+      {/* 🟡 دکمه ساخت اتاق جدید */}
       <motion.div
-        className="bg-white/95 backdrop-blur-lg border border-yellow-200 rounded-3xl shadow-[0_0_25px_rgba(212,175,55,0.15)] p-6 w-full max-w-xl mb-12"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="flex justify-center mt-8"
       >
-        <textarea
-          placeholder="یه لحظه خاص از کودک‌ت بنویس 💬"
-          className="w-full border border-yellow-200 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none shadow-inner"
-          rows={3}
-          value={newPost}
-          onChange={(e) => setNewPost(e.target.value)}
-        />
-        <motion.button
-          onClick={addPost}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
-          className="mt-4 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-semibold py-2.5 rounded-xl shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all"
+        <button
+          onClick={handleCreateRoom}
+          className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-7 py-2.5 rounded-full font-semibold shadow-md hover:shadow-lg hover:from-yellow-600 hover:to-yellow-500 transition-all"
         >
-          <PlusCircle className="w-5 h-5" />
-          ارسال پست
-        </motion.button>
+          <PlusCircle size={20} className="opacity-90" />
+          ساخت اتاق جدید
+        </button>
       </motion.div>
 
-      {/* 📜 لیست پست‌ها */}
-      <section className="flex flex-col gap-8 w-full max-w-xl z-10">
-        <AnimatePresence>
-          {posts.map((post) => (
+      {/* 🌟 پنجره چت */}
+      <AnimatePresence>
+        {activeRoom && (
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
             <motion.div
-              key={post.id}
-              className="bg-white/95 border border-yellow-100 rounded-3xl shadow-lg p-5 flex flex-col gap-3 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] transition-all"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 200 }}
+              className="relative bg-white rounded-3xl shadow-xl w-[90%] max-w-3xl h-[80vh] overflow-hidden border border-yellow-200"
             >
-              {/* 👤 اطلاعات کاربر */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-yellow-700">{post.user}</p>
-                  <p className="text-xs text-gray-500">{post.child}</p>
-                </div>
-                <span className="text-xs text-gray-400">🕒 لحظاتی پیش</span>
-              </div>
+              {/* دکمه بستن */}
+              <button
+                onClick={() => setActiveRoom(null)}
+                className="absolute top-3 right-3 p-2 rounded-full bg-yellow-100 hover:bg-yellow-200 text-yellow-700 transition"
+              >
+                <X size={20} />
+              </button>
 
-              {/* ✍️ متن پست */}
-              <p className="text-gray-700 text-[15px] leading-relaxed">{post.text}</p>
-
-              {/* 🖼 تصویر پست */}
-              {post.image && (
-                <motion.img
-                  src={post.image}
-                  alt="post"
-                  className="rounded-2xl mt-2 shadow-md"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                />
-              )}
-
-              {/* ❤️ لایک و 💬 کامنت */}
-              <div className="flex justify-around items-center border-t border-yellow-100 pt-3 mt-2 text-sm">
-                {/* ❤️ دکمه لایک */}
-                <motion.button
-                  whileTap={{ scale: 1.3 }}
-                  onClick={() => toggleLike(post.id)}
-                  className="flex items-center gap-1 text-yellow-600 hover:text-yellow-700 transition"
-                >
-                  <motion.span
-                    animate={{
-                      scale: post.liked ? [1, 1.5, 1] : 1,
-                      color: post.liked ? "#facc15" : "#ca8a04",
-                    }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Heart
-                      className={`w-5 h-5 ${
-                        post.liked
-                          ? "fill-yellow-400 text-yellow-500 drop-shadow-[0_0_8px_rgba(255,215,0,0.7)]"
-                          : ""
-                      }`}
-                    />
-                  </motion.span>
-                  <motion.span
-                    key={post.likes}
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {post.likes}
-                  </motion.span>
-                </motion.button>
-
-                {/* 💬 کامنت */}
-                <motion.button
-                  whileTap={{ scale: 1.2 }}
-                  className="flex items-center gap-1 text-yellow-600 hover:text-yellow-700 transition"
-                >
-                  <MessageCircle className="w-5 h-5" /> {post.comments}
-                </motion.button>
-              </div>
+              {/* چت روم داخل */}
+              <ChatRoom room={activeRoom} />
             </motion.div>
-          ))}
-        </AnimatePresence>
-      </section>
-
-      {/* 🔗 لینک پروفایل */}
-      <motion.div
-        className="mt-16"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-      >
-        <Link
-          to="/social/profile"
-          className="inline-block text-yellow-700 font-semibold hover:text-yellow-800 transition underline underline-offset-4"
-        >
-          مشاهده پروفایل من →
-        </Link>
-      </motion.div>
-
-      {/* ✨ ذرات طلایی آرام */}
-      {Array.from({ length: 15 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 bg-yellow-400 rounded-full shadow-[0_0_10px_rgba(255,215,0,0.6)]"
-          style={{
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -25, 0],
-            opacity: [0.5, 0.9, 0.5],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 4 + Math.random() * 3,
-            ease: "easeInOut",
-            delay: Math.random() * 2,
-          }}
-        />
-      ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

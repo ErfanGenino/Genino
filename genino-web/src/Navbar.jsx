@@ -19,7 +19,7 @@ function Navbar() {
   const links = [
     { to: "/", label: "خانه" },
     { to: "/shop", label: "فروشگاه" },
-    { to: "/dashboard", label: "داشبورد" },
+    { to: "/social", label: "شبکه اجتماعی ژنینو" },
     { to: "/settings", label: "تنظیمات" },
   ];
 

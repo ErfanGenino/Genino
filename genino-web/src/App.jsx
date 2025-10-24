@@ -29,6 +29,7 @@ import SingleWorld from "./pages/SingleWorld";
 import MyCycle from "./pages/MyCycle";
 import MyMenHealth from "./pages/MyMenHealth";
 import MyWomenHealthTest from "./pages/MyWomenHealthTest";
+import ChatRoom from "./pages/social/ChatRoom.jsx";
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import Shop from "./pages/Shop.jsx";
@@ -82,6 +83,7 @@ export default function App() {
         <Route path="/my-cycle" element={<MyCycle />} />
         <Route path="/my-men-health" element={<MyMenHealth />} />
         <Route path="/my-women-health-test" element={<MyWomenHealthTest />} />
+        <Route path="/social/room/:id" element={<ChatRoom />} />
       </Routes>
     </>
   );

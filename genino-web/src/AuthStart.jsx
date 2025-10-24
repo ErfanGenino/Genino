@@ -28,36 +28,7 @@ export default function AuthStart() {
   const features = [
   { icon: <Baby className="w-8 h-8 text-yellow-500 mb-3" />, title: "کودک من", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.", link: "/mychild" },
   { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "فروشگاه تخصصی", desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.", link: "/shop" },
-  { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker",color: "calorie",},  
-  { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنی‌های روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge" },
   {
-    icon: <UsersRound className="w-8 h-8 text-yellow-500 mb-3" />,
-    title: "شبکه اجتماعی ژنینو",
-    desc: "در ژنینو با والدین دیگر در ارتباط باشید، تجربه‌ها را به اشتراک بگذارید و از لحظات طلایی کودکی الهام بگیرید 💬✨",
-    link: "/social",
-  },
-  { icon: <Puzzle className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun" },
-  { icon: <PartyPopper className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما", link: "/events" },
-{
-  icon: (
-    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-200 shadow-md mb-3">
-      <Smile className="w-6 h-6 text-yellow-700" />
-    </div>
-  ),
-  title: "جهان مجردها",
-  desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو.", link: "/single-world",
-},
-{
-  icon: (
-    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-300 via-yellow-200 to-emerald-100 shadow-md mb-3">
-      <FileHeart className="w-7 h-7 text-yellow-700" />
-    </div>
-  ),
-  title: "پزشک من",
-  desc: "بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو.",
-  link: "/my-doctor",
-}, 
-{
   icon: (
     <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-pink-400 via-pink-300 to-pink-200 shadow-md mb-3">
       <Flower2 className="w-6 h-6 text-white" />
@@ -79,7 +50,36 @@ export default function AuthStart() {
   link: "/my-men-health",
   color: "men",
 },
-  { icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
+{
+  icon: (
+    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-300 via-yellow-200 to-emerald-100 shadow-md mb-3">
+      <FileHeart className="w-7 h-7 text-yellow-700" />
+    </div>
+  ),
+  title: "پزشک من",
+  desc: "بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو.",
+  link: "/my-doctor",
+},
+  { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker",color: "calorie",},  
+  { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنی‌های روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge" },
+  {
+    icon: <UsersRound className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "شبکه اجتماعی ژنینو",
+    desc: "در ژنینو با والدین دیگر در ارتباط باشید، تجربه‌ها را به اشتراک بگذارید و از لحظات طلایی کودکی الهام بگیرید 💬✨",
+    link: "/social",
+  },
+  { icon: <Puzzle className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun" },
+  { icon: <PartyPopper className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما", link: "/events" },
+{
+  icon: (
+    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-200 shadow-md mb-3">
+      <Smile className="w-6 h-6 text-yellow-700" />
+    </div>
+  ),
+  title: "جهان مجردها",
+  desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو.", link: "/single-world",
+},
+{ icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
   
 ];
 
