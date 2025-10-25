@@ -98,64 +98,67 @@ export default function MyMenHealth() {
     setForm({ height: "", weight: "" });
   };
 
-  // 🧠 لیست تست‌ها
+   // 🧠 لیست تست‌ها با رنگ‌بندی
   const tests = [
     {
       id: "bmi",
       icon: <Accessibility className="w-8 h-8 text-yellow-600" />,
       title: "تست BMI و ترکیب بدن ⚖️",
       desc: "محاسبه شاخص توده بدنی و درصد چربی برای بررسی تناسب اندام.",
+      bg: "bg-gradient-to-br from-yellow-50 to-white",
     },
     {
       id: "heart",
       icon: <Heart className="w-8 h-8 text-red-500" />,
       title: "تست سلامت قلب ❤️",
       desc: "بررسی استرس، نبض و سلامت عمومی قلب.",
+      bg: "bg-gradient-to-br from-red-50 to-white",
     },
     {
       id: "metabolism",
       icon: <Flame className="w-8 h-8 text-orange-500" />,
       title: "تست متابولیسم 🔥",
       desc: "تحلیل سوخت‌وساز و میزان کالری مورد نیاز بدن.",
+      bg: "bg-gradient-to-br from-orange-50 to-white",
     },
     {
       id: "hormone",
       icon: <Pill className="w-8 h-8 text-blue-500" />,
       title: "تست تعادل هورمونی 💊",
       desc: "بررسی علائم افت انرژی، تمرکز و تستوسترون.",
+      bg: "bg-gradient-to-br from-blue-50 to-white",
     },
     {
       id: "sleep",
       icon: <Moon className="w-8 h-8 text-indigo-500" />,
       title: "تست کیفیت خواب 😴",
       desc: "تحلیل خواب شبانه، انرژی صبحگاهی و استراحت ذهن.",
+      bg: "bg-gradient-to-br from-indigo-50 to-white",
     },
     {
       id: "focus",
       icon: <Brain className="w-8 h-8 text-green-600" />,
       title: "تست تمرکز و انگیزه 🧠",
       desc: "بررسی تعادل ذهن، تمرکز و سطح انگیزه کاری.",
+      bg: "bg-gradient-to-br from-green-50 to-white",
     },
   ];
-
-  // 🧭 استیت‌های فیلتر و حذف
+    // 🧩 فیلتر و حذف نتایج
   const [filterType, setFilterType] = useState("همه");
   const [filterExactDate, setFilterExactDate] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // 🧮 فیلتر و مرتب‌سازی گزارش‌ها (جدیدترین بالا)
+  // 📊 فیلتر کردن نتایج
   const filteredResults = results
-    .filter((r) => {
-      const typeMatch = filterType === "همه" || r.type.includes(filterType);
-      let dateMatch = true;
-      if (filterExactDate) {
-        // توجه: DatePicker با فرمت "YYYY/MM/DD" و تقویم/اعداد فارسی ست شده
-        dateMatch = r.date === filterExactDate.format("YYYY/MM/DD");
-      }
-      return typeMatch && dateMatch;
-    })
-    .sort((a, b) => b.id - a.id);
+    .filter((r) => (filterType === "همه" ? true : r.type.includes(filterType)))
+    .filter((r) =>
+      filterExactDate
+        ? r.date === filterExactDate.format("YYYY/MM/DD")
+        : true
+    )
+    .sort((a, b) => new Date(b.id) - new Date(a.id)); // آخرین گزارش بالا باشه
+
 
   return (
     <main
@@ -177,13 +180,13 @@ export default function MyMenHealth() {
         </p>
       </motion.div>
 
-      {/* 🧩 کارت تست‌ها */}
+      {/* 🧩 کارت تست‌ها با رنگ متفاوت */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl w-full">
         {tests.map((test) => (
           <motion.div
             key={test.id}
             whileHover={{ scale: 1.03 }}
-            className="bg-white/90 border border-yellow-100 rounded-2xl shadow-md p-5 text-right cursor-pointer hover:shadow-lg transition"
+            className={`${test.bg} border border-yellow-100 rounded-2xl shadow-md p-5 text-right cursor-pointer hover:shadow-lg transition`}
             onClick={() => setSelectedTest(test.id)}
           >
             <div className="flex items-center gap-3 mb-3">
@@ -1546,186 +1549,186 @@ export default function MyMenHealth() {
         </div>
       </GoldenModal>
 
-     {/* 📊 باکس نتایج پایین صفحه */}
-<motion.div
-  initial={{ opacity: 0, y: 40 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
-  className="mt-10 w-full max-w-5xl bg-white/95 border border-yellow-100 shadow-md
-           rounded-2xl p-6 text-sm text-gray-700"
->
-  <h3 className="text-yellow-700 font-semibold text-lg mb-4 text-center">
-    نتایج تست‌های من 🧾
-  </h3>
+      {/* 📊 باکس نتایج تست‌ها */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mt-12 w-full max-w-5xl bg-white/95 border border-yellow-100 shadow-md rounded-2xl p-6 text-sm text-gray-700"
+      >
+        <h3 className="text-yellow-700 font-semibold text-lg mb-4 text-center">
+          نتایج تست‌های من 🧾
+        </h3>
 
-  <div className="overflow-x-auto max-h-52 overflow-y-auto">
-    <table className="w-full text-sm text-gray-700 border-collapse">
-      <thead>
-        <tr className="bg-yellow-50 text-gray-800 border-b border-yellow-100">
-          <th className="py-2 px-3 text-right align-top">
-            📅 تاریخ ثبت
-            <div className="mt-1">
-              <DatePicker
-                value={filterExactDate}
-                onChange={(date) => setFilterExactDate(date)}
-                calendar={persian}
-                locale={persian_fa}
-                inputClass="border border-yellow-200 rounded-lg px-2 py-1 w-full text-xs focus:ring-2 focus:ring-yellow-300 outline-none"
-                placeholder="انتخاب تاریخ..."
-                format="YYYY/MM/DD"
-              />
-            </div>
-          </th>
-
-          <th className="py-2 px-3 text-right">
-            🧩 نوع تست
-            <div>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="mt-1 border border-yellow-200 rounded-lg px-2 py-1 w-full text-xs focus:ring-2 focus:ring-yellow-300 outline-none"
+        {/* 📱 نسخه موبایل (کارت‌ها) */}
+        <div className="mt-3 space-y-3 sm:hidden">
+          {filteredResults.length > 0 ? (
+            filteredResults.map((r) => (
+              <div
+                key={r.id}
+                className="bg-yellow-50/70 border border-yellow-100 rounded-xl p-4 text-sm shadow-sm"
               >
-                <option>همه</option>
-                <option>BMI</option>
-                <option>سلامت قلب</option>
-                <option>متابولیسم</option>
-                <option>هورمون</option>
-                <option>خواب</option>
-                <option>تمرکز</option>
-              </select>
-            </div>
-          </th>
-
-          <th className="py-2 px-3 text-right">📈 نتیجه</th>
-          <th className="py-2 px-3 text-right">📋 وضعیت</th>
-          <th className="py-2 px-3 text-right">💡 توصیه</th>
-          <th className="py-2 px-3 text-center">🗑️ حذف</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {filteredResults.length > 0 ? (
-          filteredResults.map((r) => (
-            <tr
-              key={r.id}
-              className="border-b border-yellow-50 hover:bg-yellow-50 transition"
-            >
-              <td className="py-2 px-3">{r.date}</td>
-              <td className="py-2 px-3 font-medium text-yellow-700">{r.type}</td>
-              <td className="py-2 px-3">{r.bmi}</td>
-              <td className="py-2 px-3">{r.status}</td>
-              <td className="py-2 px-3 text-gray-600">{r.tip}</td>
-              <td className="py-2 px-3 text-center">
-                <button
-                  onClick={() => {
-                    setDeleteTarget({ type: "single", id: r.id });
-                    setShowDeleteModal(true);
-                  }}
-                  className="text-red-600 hover:text-red-800 transition-colors"
-                  title="حذف این گزارش"
-                >
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td
-              colSpan="6"
-              className="text-center py-4 text-gray-500 italic"
-            >
+                <div className="flex justify-between mb-1">
+                  <span className="text-gray-700 font-medium">{r.type}</span>
+                  <span className="text-xs text-gray-500">{r.date}</span>
+                </div>
+                <p className="text-gray-600">
+                  <strong>نتیجه:</strong> {r.bmi}
+                </p>
+                <p className="text-gray-600">
+                  <strong>وضعیت:</strong> {r.status}
+                </p>
+                <p className="text-gray-600">
+                  <strong>توصیه:</strong> {r.tip}
+                </p>
+                <div className="text-left mt-2">
+                  <button
+                    onClick={() => {
+                      setDeleteTarget({ type: "single", id: r.id });
+                      setShowDeleteModal(true);
+                    }}
+                    className="text-red-500 text-xs hover:text-red-700"
+                  >
+                    حذف 🗑️
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 italic py-3">
               هنوز تستی ثبت نشده 💭
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
+            </p>
+          )}
+        </div>
 
-  {/* 🔘 دکمه حذف همه گزارش‌ها */}
-  <div className="flex justify-end mt-5">
-    <button
-      onClick={() => {
-        if (results.length === 0) return;
-        setDeleteTarget({ type: "all" });
-        setShowDeleteModal(true);
-      }}
-      className="text-red-600 border border-red-300 px-4 py-1.5 rounded-xl text-sm hover:bg-red-50 transition-all duration-200"
-    >
-      🗑️ حذف همه گزارش‌ها
-    </button>
-  </div>
+        {/* 💻 نسخه دسکتاپ (جدول) */}
+        <div className="hidden sm:block overflow-x-auto max-h-64 overflow-y-auto">
+          <table className="w-full text-sm text-gray-700 border-collapse">
+            <thead>
+              <tr className="bg-yellow-50 text-gray-800 border-b border-yellow-100">
+                <th className="py-2 px-3 text-right">📅 تاریخ ثبت</th>
+                <th className="py-2 px-3 text-right">🧩 نوع تست</th>
+                <th className="py-2 px-3 text-right">📈 نتیجه</th>
+                <th className="py-2 px-3 text-right">📋 وضعیت</th>
+                <th className="py-2 px-3 text-right">💡 توصیه</th>
+                <th className="py-2 px-3 text-center">🗑️ حذف</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredResults.length > 0 ? (
+                filteredResults.map((r) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-yellow-50 hover:bg-yellow-50 transition"
+                  >
+                    <td className="py-2 px-3">{r.date}</td>
+                    <td className="py-2 px-3 font-medium text-yellow-700">{r.type}</td>
+                    <td className="py-2 px-3">{r.bmi}</td>
+                    <td className="py-2 px-3">{r.status}</td>
+                    <td className="py-2 px-3 text-gray-600">{r.tip}</td>
+                    <td className="py-2 px-3 text-center">
+                      <button
+                        onClick={() => {
+                          setDeleteTarget({ type: "single", id: r.id });
+                          setShowDeleteModal(true);
+                        }}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center py-4 text-gray-500 italic">
+                    هنوز تستی ثبت نشده 💭
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-  {/* 🌟 مودال حذف (تکی یا کلی) */}
-  <GoldenModal
-    show={showDeleteModal}
-    title="❗ تأیید حذف"
-    description={
-      deleteTarget?.type === "all"
-        ? "آیا مطمئنی می‌خواهی تمام گزارش‌های ثبت‌شده را حذف کنی؟"
-        : "آیا مطمئنی می‌خواهی این گزارش را حذف کنی؟"
-    }
-    confirmLabel="بله، حذف کن"
-    onConfirm={() => {
-      if (deleteTarget?.type === "all") {
-        setResults([]);
-      } else if (deleteTarget?.type === "single" && deleteTarget.id) {
-        setResults((prev) =>
-          prev.filter((item) => item.id !== deleteTarget.id)
-        );
-      }
-      setShowDeleteModal(false);
-    }}
-    onCancel={() => setShowDeleteModal(false)}
-  >
-    <p className="text-sm text-gray-600 text-center">
-      حذف گزارش غیرقابل بازگشت است. لطفاً قبل از تأیید مطمئن شوید 💛
-    </p>
-  </GoldenModal>
-</motion.div>
+        {/* 🔘 دکمه حذف همه گزارش‌ها */}
+        <div className="flex justify-end mt-5">
+          <button
+            onClick={() => {
+              if (results.length === 0) return;
+              setDeleteTarget({ type: "all" });
+              setShowDeleteModal(true);
+            }}
+            className="text-red-600 border border-red-300 px-4 py-1.5 rounded-xl text-sm hover:bg-red-50 transition-all duration-200"
+          >
+            🗑️ حذف همه گزارش‌ها
+          </button>
+        </div>
 
-{/* 📘 توضیحات و منابع علمی — پایین جدول ولی خارج از باکس ثابت */}
-<motion.div
-  initial={{ opacity: 0, y: 30 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
-  className="mt-10 mb-16 max-w-5xl w-full bg-white/90 border border-yellow-100 rounded-2xl shadow-md p-6 text-sm text-gray-700 leading-relaxed"
->
-  <h4 className="font-bold text-yellow-700 mb-2 flex items-center gap-1">
-    📘 راهنمای تفسیر نتایج و منابع علمی
-  </h4>
+        {/* 🌟 مودال حذف */}
+        <GoldenModal
+          show={showDeleteModal}
+          title="❗ تأیید حذف"
+          description={
+            deleteTarget?.type === "all"
+              ? "آیا مطمئنی می‌خواهی تمام گزارش‌های ثبت‌شده را حذف کنی؟"
+              : "آیا مطمئنی می‌خواهی این گزارش را حذف کنی؟"
+          }
+          confirmLabel="بله، حذف کن"
+          onConfirm={() => {
+            if (deleteTarget?.type === "all") {
+              setResults([]);
+            } else if (deleteTarget?.type === "single" && deleteTarget.id) {
+              setResults((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+            }
+            setShowDeleteModal(false);
+          }}
+          onCancel={() => setShowDeleteModal(false)}
+        >
+          <p className="text-sm text-gray-600 text-center">
+            حذف گزارش غیرقابل بازگشت است. لطفاً قبل از تأیید مطمئن شوید 💛
+          </p>
+        </GoldenModal>
+      </motion.div>
 
-  <p className="mb-3">
-    نتایج تست‌ها بر اساس پاسخ‌های شما به‌صورت تقریبی محاسبه می‌شوند و جایگزین
-    تشخیص یا مشاوره پزشکی نیستند. هدف این ارزیابی‌ها افزایش آگاهی از وضعیت بدن
-    و ذهن است تا بتوانید سبک زندگی سالم‌تری انتخاب کنید.
-  </p>
+      {/* 📘 توضیحات و منابع علمی */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mt-10 mb-16 max-w-5xl w-full bg-white/90 border border-yellow-100 rounded-2xl shadow-md p-6 text-sm text-gray-700 leading-relaxed"
+      >
+        <h4 className="font-bold text-yellow-700 mb-2 flex items-center gap-1">
+          📘 راهنمای تفسیر نتایج و منابع علمی
+        </h4>
 
-  <h5 className="font-semibold text-yellow-700 mb-1">
-    💡 توصیه‌های کلی برای بهبود سلامت:
-  </h5>
-  <ul className="list-disc pr-5 space-y-1 mb-3">
-    <li>خواب کافی و منظم (حداقل ۷ ساعت در شب) داشته باشید.</li>
-    <li>فعالیت بدنی منظم مثل پیاده‌روی یا ورزش سبک را فراموش نکنید.</li>
-    <li>مصرف قند، چربی و دخانیات را کاهش دهید.</li>
-    <li>استرس روزانه را با مدیتیشن یا طبیعت‌گردی کاهش دهید.</li>
-    <li>در صورت مشاهده تغییرات غیرعادی، با پزشک مشورت کنید.</li>
-  </ul>
+        <p className="mb-3">
+          نتایج تست‌ها بر اساس پاسخ‌های شما به‌صورت تقریبی محاسبه می‌شوند و جایگزین
+          تشخیص یا مشاوره پزشکی نیستند. هدف این ارزیابی‌ها افزایش آگاهی از وضعیت بدن
+          و ذهن است تا بتوانید سبک زندگی سالم‌تری انتخاب کنید.
+        </p>
 
-  <h5 className="font-semibold text-yellow-700 mb-1">
-    📚 منابع علمی مورد استفاده:
-  </h5>
-  <ul className="list-disc pr-5 space-y-1 text-gray-600">
-    <li>World Health Organization (WHO) – BMI & Health Metrics 2023</li>
-    <li>American Heart Association – Lifestyle & Stress Research 2022</li>
-    <li>Harvard Medical School – Sleep & Cognitive Performance 2021</li>
-    <li>Mayo Clinic – Hormonal Health & Wellness 2023</li>
-    <li>National Institutes of Health (NIH) – Focus & Motivation Studies 2020–2024</li>
-  </ul>
-</motion.div>
+        <h5 className="font-semibold text-yellow-700 mb-1">
+          💡 توصیه‌های کلی برای بهبود سلامت:
+        </h5>
+        <ul className="list-disc pr-5 space-y-1 mb-3">
+          <li>خواب کافی و منظم (حداقل ۷ ساعت در شب) داشته باشید.</li>
+          <li>فعالیت بدنی منظم مثل پیاده‌روی یا ورزش سبک را فراموش نکنید.</li>
+          <li>مصرف قند، چربی و دخانیات را کاهش دهید.</li>
+          <li>استرس روزانه را با مدیتیشن یا طبیعت‌گردی کاهش دهید.</li>
+          <li>در صورت مشاهده تغییرات غیرعادی، با پزشک مشورت کنید.</li>
+        </ul>
 
-
+        <h5 className="font-semibold text-yellow-700 mb-1">
+          📚 منابع علمی مورد استفاده:
+        </h5>
+        <ul className="list-disc pr-5 space-y-1 text-gray-600">
+          <li>World Health Organization (WHO) – BMI & Health Metrics 2023</li>
+          <li>American Heart Association – Lifestyle & Stress Research 2022</li>
+          <li>Harvard Medical School – Sleep & Cognitive Performance 2021</li>
+          <li>Mayo Clinic – Hormonal Health & Wellness 2023</li>
+          <li>National Institutes of Health (NIH) – Focus & Motivation Studies 2020–2024</li>
+        </ul>
+      </motion.div>
     </main>
   );
 }
