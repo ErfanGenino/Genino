@@ -148,6 +148,7 @@ export default function MyMenHealth() {
   const [filterExactDate, setFilterExactDate] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
   // 📊 فیلتر کردن نتایج
   const filteredResults = results
@@ -1549,146 +1550,233 @@ export default function MyMenHealth() {
         </div>
       </GoldenModal>
 
-      {/* 📊 باکس نتایج تست‌ها */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="mt-12 w-full max-w-5xl bg-white/95 border border-yellow-100 shadow-md rounded-2xl p-6 text-sm text-gray-700"
-      >
-        <h3 className="text-yellow-700 font-semibold text-lg mb-4 text-center">
-          نتایج تست‌های من 🧾
-        </h3>
+     {/* 📊 باکس نتایج تست‌ها */}
+<motion.div
+  initial={{ opacity: 0, y: 40 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  className="mt-12 w-full max-w-5xl bg-white/95 border border-yellow-100 shadow-md rounded-2xl p-6 text-sm text-gray-700"
+>
+  <h3 className="text-yellow-700 font-semibold text-lg mb-4 text-center">
+    نتایج تست‌های من 🧾
+  </h3>
 
-        {/* 📱 نسخه موبایل (کارت‌ها) */}
-        <div className="mt-3 space-y-3 sm:hidden">
-          {filteredResults.length > 0 ? (
-            filteredResults.map((r) => (
-              <div
-                key={r.id}
-                className="bg-yellow-50/70 border border-yellow-100 rounded-xl p-4 text-sm shadow-sm"
-              >
-                <div className="flex justify-between mb-1">
-                  <span className="text-gray-700 font-medium">{r.type}</span>
-                  <span className="text-xs text-gray-500">{r.date}</span>
-                </div>
-                <p className="text-gray-600">
-                  <strong>نتیجه:</strong> {r.bmi}
-                </p>
-                <p className="text-gray-600">
-                  <strong>وضعیت:</strong> {r.status}
-                </p>
-                <p className="text-gray-600">
-                  <strong>توصیه:</strong> {r.tip}
-                </p>
-                <div className="text-left mt-2">
-                  <button
-                    onClick={() => {
-                      setDeleteTarget({ type: "single", id: r.id });
-                      setShowDeleteModal(true);
-                    }}
-                    className="text-red-500 text-xs hover:text-red-700"
-                  >
-                    حذف 🗑️
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-500 italic py-3">
-              هنوز تستی ثبت نشده 💭
-            </p>
-          )}
+  {/* 🔍 فیلترها برای موبایل */}
+  <div className="mb-4 sm:hidden bg-yellow-50/60 border border-yellow-100 rounded-xl p-3">
+    <button
+      onClick={() => setShowFiltersMobile(!showFiltersMobile)}
+      className="w-full text-yellow-700 font-semibold flex items-center justify-between"
+    >
+      <span>🔍 فیلتر نتایج</span>
+      <span>{showFiltersMobile ? "▲" : "▼"}</span>
+    </button>
+
+    {showFiltersMobile && (
+      <div className="mt-3 space-y-3 text-sm">
+        {/* فیلتر تاریخ */}
+        <div>
+          <label className="block mb-1 text-gray-700 text-xs">تاریخ ثبت:</label>
+          <DatePicker
+            value={filterExactDate}
+            onChange={(date) => setFilterExactDate(date)}
+            calendar={persian}
+            locale={persian_fa}
+            inputClass="border border-yellow-200 rounded-lg px-2 py-1 w-full text-xs focus:ring-2 focus:ring-yellow-300 outline-none"
+            placeholder="انتخاب تاریخ..."
+            format="YYYY/MM/DD"
+          />
         </div>
 
-        {/* 💻 نسخه دسکتاپ (جدول) */}
-        <div className="hidden sm:block overflow-x-auto max-h-64 overflow-y-auto">
-          <table className="w-full text-sm text-gray-700 border-collapse">
-            <thead>
-              <tr className="bg-yellow-50 text-gray-800 border-b border-yellow-100">
-                <th className="py-2 px-3 text-right">📅 تاریخ ثبت</th>
-                <th className="py-2 px-3 text-right">🧩 نوع تست</th>
-                <th className="py-2 px-3 text-right">📈 نتیجه</th>
-                <th className="py-2 px-3 text-right">📋 وضعیت</th>
-                <th className="py-2 px-3 text-right">💡 توصیه</th>
-                <th className="py-2 px-3 text-center">🗑️ حذف</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredResults.length > 0 ? (
-                filteredResults.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="border-b border-yellow-50 hover:bg-yellow-50 transition"
-                  >
-                    <td className="py-2 px-3">{r.date}</td>
-                    <td className="py-2 px-3 font-medium text-yellow-700">{r.type}</td>
-                    <td className="py-2 px-3">{r.bmi}</td>
-                    <td className="py-2 px-3">{r.status}</td>
-                    <td className="py-2 px-3 text-gray-600">{r.tip}</td>
-                    <td className="py-2 px-3 text-center">
-                      <button
-                        onClick={() => {
-                          setDeleteTarget({ type: "single", id: r.id });
-                          setShowDeleteModal(true);
-                        }}
-                        className="text-red-600 hover:text-red-800 transition-colors"
-                      >
-                        🗑️
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-4 text-gray-500 italic">
-                    هنوز تستی ثبت نشده 💭
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* 🔘 دکمه حذف همه گزارش‌ها */}
-        <div className="flex justify-end mt-5">
-          <button
-            onClick={() => {
-              if (results.length === 0) return;
-              setDeleteTarget({ type: "all" });
-              setShowDeleteModal(true);
-            }}
-            className="text-red-600 border border-red-300 px-4 py-1.5 rounded-xl text-sm hover:bg-red-50 transition-all duration-200"
+        {/* فیلتر نوع تست */}
+        <div>
+          <label className="block mb-1 text-gray-700 text-xs">نوع تست:</label>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="border border-yellow-200 rounded-lg px-2 py-1 w-full text-xs focus:ring-2 focus:ring-yellow-300 outline-none"
           >
-            🗑️ حذف همه گزارش‌ها
-          </button>
+            <option>همه</option>
+            <option>BMI</option>
+            <option>سلامت قلب</option>
+            <option>متابولیسم</option>
+            <option>هورمون</option>
+            <option>خواب</option>
+            <option>تمرکز</option>
+          </select>
         </div>
 
-        {/* 🌟 مودال حذف */}
-        <GoldenModal
-          show={showDeleteModal}
-          title="❗ تأیید حذف"
-          description={
-            deleteTarget?.type === "all"
-              ? "آیا مطمئنی می‌خواهی تمام گزارش‌های ثبت‌شده را حذف کنی؟"
-              : "آیا مطمئنی می‌خواهی این گزارش را حذف کنی؟"
-          }
-          confirmLabel="بله، حذف کن"
-          onConfirm={() => {
-            if (deleteTarget?.type === "all") {
-              setResults([]);
-            } else if (deleteTarget?.type === "single" && deleteTarget.id) {
-              setResults((prev) => prev.filter((item) => item.id !== deleteTarget.id));
-            }
-            setShowDeleteModal(false);
-          }}
-          onCancel={() => setShowDeleteModal(false)}
+        <button
+          onClick={() => setShowFiltersMobile(false)}
+          className="w-full mt-2 bg-yellow-500 text-white rounded-xl py-1.5 text-xs hover:bg-yellow-600 transition"
         >
-          <p className="text-sm text-gray-600 text-center">
-            حذف گزارش غیرقابل بازگشت است. لطفاً قبل از تأیید مطمئن شوید 💛
+          اعمال فیلتر ✅
+        </button>
+      </div>
+    )}
+  </div>
+
+  {/* 📱 نسخه موبایل (کارت‌ها) */}
+  <div className="space-y-3 sm:hidden">
+    {filteredResults.length > 0 ? (
+      filteredResults.map((r) => (
+        <div
+          key={r.id}
+          className="bg-yellow-50/70 border border-yellow-100 rounded-xl p-4 text-sm shadow-sm"
+        >
+          <div className="flex justify-between mb-1">
+            <span className="text-gray-700 font-medium">{r.type}</span>
+            <span className="text-xs text-gray-500">{r.date}</span>
+          </div>
+          <p className="text-gray-600">
+            <strong>نتیجه:</strong> {r.bmi}
           </p>
-        </GoldenModal>
-      </motion.div>
+          <p className="text-gray-600">
+            <strong>وضعیت:</strong> {r.status}
+          </p>
+          <p className="text-gray-600">
+            <strong>توصیه:</strong> {r.tip}
+          </p>
+          <div className="text-left mt-2">
+            <button
+              onClick={() => {
+                setDeleteTarget({ type: "single", id: r.id });
+                setShowDeleteModal(true);
+              }}
+              className="text-red-500 text-xs hover:text-red-700"
+            >
+              حذف 🗑️
+            </button>
+          </div>
+        </div>
+      ))
+    ) : (
+      <p className="text-center text-gray-500 italic py-3">
+        هنوز تستی ثبت نشده 💭
+      </p>
+    )}
+  </div>
+
+  {/* 💻 نسخه دسکتاپ (جدول) */}
+  <div className="hidden sm:block overflow-x-auto max-h-64 overflow-y-auto">
+    <table className="w-full text-sm text-gray-700 border-collapse">
+      <thead>
+        <tr className="bg-yellow-50 text-gray-800 border-b border-yellow-100">
+          <th className="py-2 px-3 text-right align-top">
+            📅 تاریخ ثبت
+            <div className="mt-1">
+              <DatePicker
+                value={filterExactDate}
+                onChange={(date) => setFilterExactDate(date)}
+                calendar={persian}
+                locale={persian_fa}
+                inputClass="border border-yellow-200 rounded-lg px-2 py-1 w-full text-xs focus:ring-2 focus:ring-yellow-300 outline-none"
+                placeholder="انتخاب تاریخ..."
+                format="YYYY/MM/DD"
+              />
+            </div>
+          </th>
+
+          <th className="py-2 px-3 text-right">
+            🧩 نوع تست
+            <div>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="mt-1 border border-yellow-200 rounded-lg px-2 py-1 w-full text-xs focus:ring-2 focus:ring-yellow-300 outline-none"
+              >
+                <option>همه</option>
+                <option>BMI</option>
+                <option>سلامت قلب</option>
+                <option>متابولیسم</option>
+                <option>هورمون</option>
+                <option>خواب</option>
+                <option>تمرکز</option>
+              </select>
+            </div>
+          </th>
+
+          <th className="py-2 px-3 text-right">📈 نتیجه</th>
+          <th className="py-2 px-3 text-right">📋 وضعیت</th>
+          <th className="py-2 px-3 text-right">💡 توصیه</th>
+          <th className="py-2 px-3 text-center">🗑️ حذف</th>
+        </tr>
+      </thead>
+      <tbody>
+        {filteredResults.length > 0 ? (
+          filteredResults.map((r) => (
+            <tr
+              key={r.id}
+              className="border-b border-yellow-50 hover:bg-yellow-50 transition"
+            >
+              <td className="py-2 px-3">{r.date}</td>
+              <td className="py-2 px-3 font-medium text-yellow-700">{r.type}</td>
+              <td className="py-2 px-3">{r.bmi}</td>
+              <td className="py-2 px-3">{r.status}</td>
+              <td className="py-2 px-3 text-gray-600">{r.tip}</td>
+              <td className="py-2 px-3 text-center">
+                <button
+                  onClick={() => {
+                    setDeleteTarget({ type: "single", id: r.id });
+                    setShowDeleteModal(true);
+                  }}
+                  className="text-red-600 hover:text-red-800 transition-colors"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="6" className="text-center py-4 text-gray-500 italic">
+              هنوز تستی ثبت نشده 💭
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+
+  {/* 🔘 دکمه حذف همه گزارش‌ها */}
+  <div className="flex justify-end mt-5">
+    <button
+      onClick={() => {
+        if (results.length === 0) return;
+        setDeleteTarget({ type: "all" });
+        setShowDeleteModal(true);
+      }}
+      className="text-red-600 border border-red-300 px-4 py-1.5 rounded-xl text-sm hover:bg-red-50 transition-all duration-200"
+    >
+      🗑️ حذف همه گزارش‌ها
+    </button>
+  </div>
+
+  {/* 🌟 مودال حذف */}
+  <GoldenModal
+    show={showDeleteModal}
+    title="❗ تأیید حذف"
+    description={
+      deleteTarget?.type === "all"
+        ? "آیا مطمئنی می‌خواهی تمام گزارش‌های ثبت‌شده را حذف کنی؟"
+        : "آیا مطمئنی می‌خواهی این گزارش را حذف کنی؟"
+    }
+    confirmLabel="بله، حذف کن"
+    onConfirm={() => {
+      if (deleteTarget?.type === "all") {
+        setResults([]);
+      } else if (deleteTarget?.type === "single" && deleteTarget.id) {
+        setResults((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+      }
+      setShowDeleteModal(false);
+    }}
+    onCancel={() => setShowDeleteModal(false)}
+  >
+    <p className="text-sm text-gray-600 text-center">
+      حذف گزارش غیرقابل بازگشت است. لطفاً قبل از تأیید مطمئن شوید 💛
+    </p>
+  </GoldenModal>
+</motion.div>
+
 
       {/* 📘 توضیحات و منابع علمی */}
       <motion.div
