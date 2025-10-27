@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/logo-genino.png";
+import ReminderBar from "../components/ReminderBar"; // ✅ اضافه شد
 
 export default function DashboardLayout({ title, children }) {
   return (
@@ -34,12 +35,18 @@ export default function DashboardLayout({ title, children }) {
 
       {/* 🔸 بخش محتوای اصلی */}
       <section className="flex-1 p-6 md:p-10">
+        {/* ✅ نوار یادآوری */}
+        <div className="mb-6">
+          <ReminderBar />
+        </div>
+
+        {/* 🔶 محتوای داشبورد */}
         <div className="bg-white rounded-3xl shadow-lg border border-yellow-100 p-6 md:p-8 min-h-[70vh] transition-all duration-300 hover:shadow-xl">
           {children}
         </div>
       </section>
 
-      {/* 🔻 نوار پایین (اختیاری) */}
+      {/* 🔻 نوار پایین */}
       <footer className="text-center py-4 text-xs text-gray-400 border-t border-yellow-100">
         © {new Date().getFullYear()} ژنینو | هر کودک، یک دنیا نوآوری 🌿
       </footer>

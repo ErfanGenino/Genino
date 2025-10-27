@@ -16,6 +16,7 @@ import {
   DollarSign,
 } from "lucide-react";
 
+
 export default function DashboardParent() {
   const user = { gender: "male", name: "عرفان" }; // فعلاً فرضی
 

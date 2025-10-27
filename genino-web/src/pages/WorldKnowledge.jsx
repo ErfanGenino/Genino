@@ -61,7 +61,8 @@ React.useEffect(() => {
       className="relative z-[10] min-h-screen bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 flex flex-col items-center pt-24 px-6 text-center overflow-hidden"
     >
       {/* 🌿 بک‌گراند DNA متحرک طلایی */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#fffdf8] to-[#f7f3e6] overflow-hidden z-[0]">
+{/* 🌿 بک‌گراند DNA متحرک طلایی */}
+<div className="absolute inset-0 bg-gradient-to-br from-[#fffdf8] to-[#f7f3e6] overflow-hidden z-[0] pointer-events-none">
         {Array.from({ length: 8 }).map((_, i) => (
           <motion.svg
             key={i}
@@ -174,37 +175,40 @@ React.useEffect(() => {
       {/* 🔸 کارت‌های بدن زنان و مردان */}
       <section className="relative z-[20] grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-5xl mb-20">
         {/* بدن زنان */}
-        <motion.div
-          whileHover={{ scale: 1.03, rotate: 1 }}
-          transition={{ type: "spring", stiffness: 180, damping: 12 }}
-          className={`bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
-  shine ? "shadow-[0_0_40px_rgba(255,105,180,0.6)] scale-[1.02]" : ""
-}`}
-        >
-          <motion.div
-            animate={{ rotate: [0, 360] }}
-            transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-20 h-20 text-pink-500 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 0v7m0 0h-3m3 0h3"
-              />
-            </svg>
-          </motion.div>
-          <h2 className="text-2xl font-bold text-pink-600 mb-2">بدن زنان</h2>
-          <p className="text-gray-600 text-sm text-center leading-relaxed max-w-xs">
-            شناخت فیزیولوژی و چرخه‌های طبیعی بدن زنانه، کلید درک عمیق‌تر از سلامت و احساسات.
-          </p>
-        </motion.div>
+<Link to="/articles/body-women">
+  <motion.div
+    whileHover={{ scale: 1.03, rotate: 1 }}
+    transition={{ type: "spring", stiffness: 180, damping: 12 }}
+    className={`bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
+      shine ? "shadow-[0_0_40px_rgba(255,105,180,0.6)] scale-[1.02]" : ""
+    }`}
+  >
+    <motion.div
+      animate={{ rotate: [0, 360] }}
+      transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-20 h-20 text-pink-500 mb-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 0v7m0 0h-3m3 0h3"
+        />
+      </svg>
+    </motion.div>
+    <h2 className="text-2xl font-bold text-pink-600 mb-2">بدن زنان</h2>
+    <p className="text-gray-600 text-sm text-center leading-relaxed max-w-xs">
+      شناخت فیزیولوژی و چرخه‌های طبیعی بدن زنانه، کلید درک عمیق‌تر از سلامت و احساسات.
+    </p>
+  </motion.div>
+</Link>
+
 
         {/* بدن مردان */}
         <motion.div
