@@ -210,39 +210,41 @@ React.useEffect(() => {
 </Link>
 
 
-        {/* بدن مردان */}
-        <motion.div
-          whileHover={{ scale: 1.03, rotate: -1 }}
-          transition={{ type: "spring", stiffness: 180, damping: 12 }}
-          className={`bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
-  shine ? "shadow-[0_0_40px_rgba(212,175,55,0.6)] scale-[1.02]" : ""
-}`}
+       {/* بدن مردان */}
+  <Link to="/articles/body-men">
+    <motion.div
+      whileHover={{ scale: 1.03, rotate: -1 }}
+      transition={{ type: "spring", stiffness: 180, damping: 12 }}
+      className={`bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
+        shine ? "shadow-[0_0_40px_rgba(70,130,180,0.6)] scale-[1.02]" : ""
+      }`}
+    >
+      <motion.div
+        animate={{ rotate: [0, -360] }}
+        transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-20 h-20 text-blue-500 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="1.5"
         >
-          <motion.div
-            animate={{ rotate: [0, -360] }}
-            transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-20 h-20 text-yellow-500 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16 8a4 4 0 1 0-8 0 4 4 0 0 0 8 0zm0 0v7m0 0h4m-4 0h-4"
-              />
-            </svg>
-          </motion.div>
-          <h2 className="text-2xl font-bold text-yellow-600 mb-2">بدن مردان</h2>
-          <p className="text-gray-600 text-sm text-center leading-relaxed max-w-xs">
-            درک ساختار، هورمون‌ها و عملکرد بدن مردانه برای تعادل سلامت جسم و ذهن.
-          </p>
-        </motion.div>
-      </section>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16 8a4 4 0 1 0-8 0 4 4 0 0 0 8 0zm0 0v7m0 0h4m-4 0h-4"
+          />
+        </svg>
+      </motion.div>
+      <h2 className="text-2xl font-bold text-blue-600 mb-2">بدن مردان</h2>
+      <p className="text-gray-600 text-sm text-center leading-relaxed max-w-xs">
+        درک ساختار، هورمون‌ها و عملکرد بدن مردانه برای تعادل سلامت جسم و ذهن.
+      </p>
+    </motion.div>
+  </Link>
+</section>
 
       {/* 🧍‍♀️🧍‍♂️ انیمیشن ظریف زن و مرد در پس‌زمینه */}
       <div className="absolute bottom-0 left-0 right-0 flex justify-between items-end px-8 z-[1] opacity-30">

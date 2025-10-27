@@ -33,6 +33,8 @@ import ChatRoom from "./pages/social/ChatRoom.jsx";
 import ParentsBehavior from "./pages/knowledge/ParentsBehavior";
 import FreePlayArticle from "./pages/articles/FreePlayArticle";
 import BodyWomenArticle from "./pages/articles/BodyWomenArticle.jsx";
+import BodyMenArticle from "./pages/articles/BodyMenArticle";
+
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import Shop from "./pages/Shop.jsx";
@@ -90,6 +92,7 @@ export default function App() {
         <Route path="/knowledge/parents-behavior" element={<ParentsBehavior />} />
         <Route path="/articles/freeplay" element={<FreePlayArticle />} />
         <Route path="/articles/body-women" element={<BodyWomenArticle />} />
+        <Route path="/articles/body-men" element={<BodyMenArticle />} />
       </Routes>
     </>
   );
