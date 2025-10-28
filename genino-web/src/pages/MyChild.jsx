@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import FamilyTree from "./FamilyTree";
 import AchievementsBar from "../components/AchievementsBar";
 import TodayCalendarBox from "../components/TodayCalendarBox";
+import GeninoAwarenessBox from "../components/GeninoAwarenessBox";
+
 
 export default function MyChild() {
   const [activeTab, setActiveTab] = useState("physical");
@@ -219,85 +221,23 @@ const daysLeft = Math.ceil((nextBirthday - today) / msInDay);
   </Link>
 </motion.div>
 
-{/* 🌟 باکس والد آگاه و رشد هوشمند کودک */}
+{/* 🧠 جعبه آگاهی ژنینو */}
 <motion.div
-  className="relative z-[6] mb-8 bg-gradient-to-br from-[#fff9d6] via-[#fff3b0] to-[#ffe97d]
-             border border-yellow-300 rounded-3xl shadow-lg p-8 text-center w-full max-w-2xl overflow-hidden"
+  className="relative z-[6] -mt-8 mb-10 w-full max-w-2xl"
   initial={{ opacity: 0, y: 30 }}
   animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.8 }}
+  transition={{ duration: 0.6 }}
 >
-  {/* ✨ نور طلایی عبوری روی کل باکس */}
-  <motion.div
-    className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-300/30 to-transparent"
-    animate={{ x: ["-100%", "100%"] }}
-    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+  <GeninoAwarenessBox
+    image="/images/awareness/mychild/1.jpg"
+    message="کودکان با هر نگاه، از ما یاد می‌گیرند 💛 آگاهی والد، روشنایی مسیر رشد کودک است."
+    buttons={[
+      { title: "بازی آزاد", link: "/articles/freeplay" },
+      { title: "قدرت همدلی در رشد کودک", link: "/articles/empathy" },
+    ]}
   />
-
-  {/* 🔥 تیتر با درخشش و لرزش نرم */}
-  <motion.h2
-  className="relative text-2xl sm:text-3xl font-extrabold text-yellow-700 mb-3 drop-shadow-[0_0_10px_rgba(255,220,80,0.6)]"
-  animate={{ scale: [1, 1.05, 1] }}
-  transition={{ repeat: Infinity, repeatDelay: 5, duration: 0.6 }}
->
-  والد آگاه، کودکی با آینده‌ای روشن
-</motion.h2>
-
-<p className="relative text-gray-700 mb-6 text-sm sm:text-base leading-relaxed z-[2]">
-  آگاهی یعنی درک احساسات کودک، نه فقط رفتار او. یعنی شنیدن، نه صرفاً گفتن.  
-  همین درک ساده، دنیای کودک را امن و پُر از اعتماد می‌کند.
-</p>
-<p className="relative text-gray-700 mb-6 text-sm sm:text-base leading-relaxed z-[2]">
-  در ژنینو باور داریم که آگاهی والدین، ریشه‌ی تمام رشدهای سالم است. 🌿
-</p>
-
-
-  {/* 🔗 دکمه‌های مسیرهای رشد */}
-  <div className="relative flex flex-wrap justify-center gap-3 mt-4 z-[3]">
-    <Link
-  to="/articles/freeplay"
-  className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-xl shadow-md text-sm font-semibold hover:scale-110 hover:shadow-[0_0_20px_rgba(212,175,55,0.6)] transition-all"
->
-  🎮 بازی آزاد
-</Link>
-
-
-    <Link
-      to="/freeplay"
-      className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-xl shadow-md text-sm font-semibold hover:scale-110 transition-all"
-    >
-      🧠 رشد مغزی
-    </Link>
-
-    <Link
-      to="/academy/emotions"
-      className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-xl shadow-md text-sm font-semibold hover:scale-110 transition-all"
-    >
-      💖 احساسات کودک
-    </Link>
-
-    <Link
-      to="/academy/parent-skills"
-      className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-xl shadow-md text-sm font-semibold hover:scale-110 transition-all"
-    >
-      📘 مهارت‌های والدگری
-    </Link>
-
-    <Link
-      to="/academy/mental"
-      className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-xl shadow-md text-sm font-semibold hover:scale-110 transition-all"
-    >
-      🌈 رشد ذهنی
-    </Link>
-
-    <Link
-      to="/academy/body"
-      className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-xl shadow-md text-sm font-semibold hover:scale-110 transition-all"
-    >
-      💪 رشد فیزیکی
-    </Link>
-  </div>
 </motion.div>
+
 
 
       {/* 🧠 باکس پرسشنامه تخصصی ژنینو */}
