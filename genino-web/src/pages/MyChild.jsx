@@ -233,7 +233,11 @@ const daysLeft = Math.ceil((nextBirthday - today) / msInDay);
     message="کودکان با هر نگاه، از ما یاد می‌گیرند 💛 آگاهی والد، روشنایی مسیر رشد کودک است."
     buttons={[
       { title: "بازی آزاد", link: "/articles/freeplay" },
-      { title: "قدرت همدلی در رشد کودک", link: "/articles/empathy" },
+      { title: "مقاله", link: "/articles/empathy" },
+      { title: "مقاله", link: "/articles/empathy" },
+      { title: "مقاله", link: "/articles/empathy" },
+      { title: "مقاله", link: "/articles/empathy" },
+      { title: "مقاله", link: "/articles/empathy" },
     ]}
   />
 </motion.div>
