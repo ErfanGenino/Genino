@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, PiggyBank } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"; 
 
 export default function FamilyFinance() {
     // 📅 انتخاب ماه و سال
@@ -42,6 +42,7 @@ const [yearlyData, setYearlyData] = useState([]);
   const [editForm, setEditForm] = useState({ value: "", reason: "" });
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState(null);
   const [allPerformances, setAllPerformances] = useState([]);
+  const [monthlyCosts, setMonthlyCosts] = useState([]);
 
   const assetTypes = [
     "ملک",
@@ -114,6 +115,14 @@ const [yearlyData, setYearlyData] = useState([]);
   const [newFixed, setNewFixed] = useState({ title: "", amount: "" });
   const totalFixedCosts = fixedCosts.reduce((sum, c) => sum + Number(c.amount || 0), 0);
   const [allAnalyses, setAllAnalyses] = useState([]);
+  // 💰 داده‌های درآمد ماهانه برای نمودار روند
+const [monthlyIncomes, setMonthlyIncomes] = useState([]);
+const [incomeTrend, setIncomeTrend] = useState({ status: "neutral", message: "" });
+// 💎 داده‌های سرمایه‌گذاری ماهانه و تحلیل روند
+const [monthlyInvests, setMonthlyInvests] = useState([]);
+const [investTrend, setInvestTrend] = useState({ status: "neutral", message: "" });
+const [costTrend, setCostTrend] = useState({ status: "neutral", message: "" });
+
 
   const addFixedCost = () => {
     if (!newFixed.title || !newFixed.amount) return;
@@ -275,11 +284,7 @@ const loadAllAnalyses = () => {
   setAllAnalyses(list);
 };
 
-// 📊 تحلیل روند درآمد ماهانه
-const [incomeTrend, setIncomeTrend] = useState({ status: "neutral", message: "" });
-const [monthlyIncomes, setMonthlyIncomes] = useState([]);
-
-// محاسبه روند درآمد بر اساس داده‌های ماه‌های گذشته
+// 📊 تحلیل روند درآمد ماهانه (بدون تجمیع، فقط ماه‌های دارای درآمد)
 const analyzeIncomeTrend = () => {
   const data = months.map((m) => {
     const finance = JSON.parse(localStorage.getItem(`finance-${selectedYear}-${m}`) || "{}");
@@ -287,29 +292,192 @@ const analyzeIncomeTrend = () => {
     return { month: m, amount: total };
   });
 
-  setMonthlyIncomes(data);
+  // فقط ماه‌هایی که درآمد دارند نمایش داده شوند
+  const filteredData = data.filter((d) => d.amount > 0);
 
-  // بررسی جهت روند
-  const last = data[data.length - 1]?.amount || 0;
-  const beforeLast = data[data.length - 2]?.amount || 0;
+  setMonthlyIncomes(filteredData);
+
+  if (filteredData.length < 2) {
+    setIncomeTrend({
+      status: "neutral",
+      message: "داده کافی برای تحلیل روند وجود ندارد 💬",
+    });
+    return;
+  }
+
+  const last = filteredData[filteredData.length - 1].amount;
+  const beforeLast = filteredData[filteredData.length - 2].amount;
+
   let status = "neutral";
   let message = "درآمد شما در وضعیت پایدار است 💬";
 
   if (last > beforeLast) {
     status = "up";
-    message = "درآمد شما روند صعودی دارد 🌿 عالی ادامه بده!";
+    message = "درآمد شما روند صعودی دارد 🌿 عالی پیش می‌روی!";
   } else if (last < beforeLast) {
     status = "down";
-    message = "درآمد شما نسبت به ماه قبل کاهش یافته ⚠️ مدیریت را بازبینی کن.";
+    message = "درآمد شما نسبت به ماه قبل کاهش یافته ⚠️ توجه کن به منابع درآمد.";
   }
 
   setIncomeTrend({ status, message });
 };
 
+
 // اجرای تحلیل هنگام تغییر ماه یا درآمد
 useEffect(() => {
   analyzeIncomeTrend();
 }, [selectedMonth, selectedYear, incomes]);
+
+
+
+// 📊 تحلیل روند سرمایه‌گذاری واقعی (فقط تا آخرین ماهی که داده دارد)
+const analyzeInvestTrend = () => {
+  // تمام ماه‌ها تا آخرین داده موجود
+  const allData = months.map((m) => {
+    const perf = JSON.parse(localStorage.getItem(`performance-${selectedYear}-${m}`) || "{}");
+    const amount = perf.invest ? Number(perf.invest) : 0;
+    return { month: m, amount };
+  });
+
+  // پیدا کردن آخرین ماهی که داده دارد
+  const lastIndex = allData.map(d => d.amount).lastIndexOf(
+    allData.findLast?.(d => d.amount > 0)?.amount || 0
+  );
+
+  // اگر هیچ داده‌ای نیست، کل نمودار خالی باشد
+  if (lastIndex < 0) {
+    setMonthlyInvests([]);
+    setInvestTrend({
+      status: "neutral",
+      message: "هیچ داده‌ای برای سرمایه‌گذاری ثبت نشده 💬",
+    });
+    return;
+  }
+
+  // فقط تا آخرین ماه دارای داده نمایش بده
+  const limitedData = allData.slice(0, lastIndex + 1);
+  setMonthlyInvests(limitedData);
+
+  // تحلیل روند بر اساس دو ماه آخر دارای داده
+  const validData = limitedData.filter((d) => d.amount > 0);
+  if (validData.length < 2) {
+    setInvestTrend({
+      status: "neutral",
+      message: "داده کافی برای تحلیل روند وجود ندارد 💬",
+    });
+    return;
+  }
+
+  const last = validData[validData.length - 1].amount;
+  const beforeLast = validData[validData.length - 2].amount;
+
+  let status = "neutral";
+  let message = "سرمایه‌گذاری شما در وضعیت پایدار است 💬";
+
+  if (last > beforeLast) {
+    status = "up";
+    message = "سرمایه‌گذاری شما روند صعودی دارد 💎 عالی پیش می‌روی!";
+  } else if (last < beforeLast) {
+    status = "down";
+    message = "سرمایه‌گذاری شما نسبت به ماه قبل کاهش یافته ⚠️ دقت کن به مدیریت پس‌انداز.";
+  }
+
+  setInvestTrend({ status, message });
+};
+
+
+// اجرای تحلیل هنگام تغییر ماه یا داده‌ها
+useEffect(() => {
+  analyzeInvestTrend();
+}, [selectedMonth, selectedYear, performance]);
+
+
+// 📊 تحلیل روند هزینه‌های ماهانه (فقط تا آخرین ماهی که داده دارد)
+const analyzeCostTrend = () => {
+  const allData = months.map((m) => {
+    const perf = JSON.parse(localStorage.getItem(`performance-${selectedYear}-${m}`) || "{}");
+    const finance = JSON.parse(localStorage.getItem(`finance-${selectedYear}-${m}`) || "{}");
+
+    const totalFixed = finance.fixedCosts?.reduce((s, c) => s + Number(c.amount || 0), 0) || 0;
+    const totalVariable =
+      Number(perf.food || 0) + Number(perf.health || 0) + Number(perf.other || 0);
+    const total = totalFixed + totalVariable;
+
+    return { month: m, amount: total };
+  });
+
+  // پیدا کردن آخرین ماهی که داده دارد (بزرگ‌تر از صفر)
+  const lastIndex = allData.map(d => d.amount).lastIndexOf(
+    allData.findLast?.(d => d.amount > 0)?.amount || 0
+  );
+
+  if (lastIndex < 0) {
+    setMonthlyCosts([]);
+    setCostTrend({
+      status: "neutral",
+      message: "هیچ داده‌ای برای هزینه‌ها ثبت نشده 💬",
+    });
+    return;
+  }
+
+  // فقط تا آخرین ماه دارای داده
+  const limitedData = allData.slice(0, lastIndex + 1);
+  setMonthlyCosts(limitedData);
+
+  // تحلیل روند بر اساس دو ماه آخر دارای داده
+  const validData = limitedData.filter((d) => d.amount > 0);
+  if (validData.length < 2) {
+    setCostTrend({
+      status: "neutral",
+      message: "داده کافی برای تحلیل روند هزینه‌ها وجود ندارد 💬",
+    });
+    return;
+  }
+
+  const last = validData[validData.length - 1].amount;
+  const beforeLast = validData[validData.length - 2].amount;
+
+  let status = "neutral";
+  let message = "هزینه‌های شما پایدار هستند 💬";
+
+  if (last > beforeLast) {
+    status = "up";
+    message = "هزینه‌های شما نسبت به ماه قبل افزایش یافته ⚠️ مراقب خرج‌ها باشید.";
+  } else if (last < beforeLast) {
+    status = "down";
+    message = "هزینه‌های شما کاهش یافته‌اند 👏 مدیریت عالی!";
+  }
+
+  setCostTrend({ status, message });
+};
+
+
+// اجرای تحلیل هنگام تغییر ماه یا داده‌ها
+useEffect(() => {
+  analyzeCostTrend();
+}, [selectedMonth, selectedYear, fixedCosts, performance]);
+// 💰 مجموع درآمد سال جاری تا این لحظه
+const totalYearIncome = months.reduce((sum, m) => {
+  const finance = JSON.parse(localStorage.getItem(`finance-${selectedYear}-${m}`) || "{}");
+  const total = finance.incomes?.reduce((s, i) => s + Number(i.amount || 0), 0) || 0;
+  return sum + total;
+}, 0);
+// 💎 مجموع سرمایه‌گذاری سال جاری
+const totalYearInvest = months.reduce((sum, m) => {
+  const perf = JSON.parse(localStorage.getItem(`performance-${selectedYear}-${m}`) || "{}");
+  return sum + (Number(perf.invest) || 0);
+}, 0);
+// 💰 مجموع هزینه‌های سال جاری تا این لحظه
+const totalYearCost = months.reduce((sum, m) => {
+  const perf = JSON.parse(localStorage.getItem(`performance-${selectedYear}-${m}`) || "{}");
+  const finance = JSON.parse(localStorage.getItem(`finance-${selectedYear}-${m}`) || "{}");
+
+  const totalFixed = finance.fixedCosts?.reduce((s, c) => s + Number(c.amount || 0), 0) || 0;
+  const totalVariable =
+    Number(perf.food || 0) + Number(perf.health || 0) + Number(perf.other || 0);
+  return sum + totalFixed + totalVariable;
+}, 0);
+
 
 
   return (
@@ -816,54 +984,227 @@ useEffect(() => {
   {/* مجموع درآمد */}
   <div className="mt-4 text-center">
     <p className="text-2xl font-extrabold text-yellow-800 mb-1">
-      {totalIncome.toLocaleString()} <span className="text-base font-normal text-gray-600">تومان</span>
+      {totalYearIncome.toLocaleString()} <span className="text-base font-normal text-gray-600">تومان</span>
     </p>
-    <p className="text-xs text-gray-500">جمع ورودی‌های ثبت‌شده ماه {selectedMonth}</p>
+    <p className="text-xs text-gray-500">
+  مجموع درآمد ثبت‌شده سال {selectedYear} تا این لحظه
+</p>
   </div>
 </motion.div>
 
     {/* 💎 پس‌انداز و سرمایه‌گذاری */}
-    <motion.div
-      whileHover={{ scale: 1.03 }}
-      className="p-5 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 border border-green-200 shadow-inner flex flex-col justify-between"
-    >
-      <h3 className="text-sm font-bold text-green-700 mb-2">💎 پس‌انداز و سرمایه‌گذاری</h3>
-      <p className="text-2xl font-extrabold text-green-800 mb-1">
-        {Number(performance.invest || 0).toLocaleString()} <span className="text-base font-normal text-gray-600">تومان</span>
-      </p>
-      <p className="text-xs text-gray-500">عملکرد واقعی در {selectedMonth} {selectedYear}</p>
-    </motion.div>
+    {/* 💎 پس‌انداز و سرمایه‌گذاری با نمودار */}
+<motion.div
+  whileHover={{ scale: 1.02 }}
+  className="p-5 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 border border-green-200 shadow-inner flex flex-col justify-between"
+>
+  <h3 className="text-sm font-bold text-green-700 mb-3 text-center">💎 پس‌انداز و سرمایه‌گذاری</h3>
+
+  {/* 📈 نمودار سرمایه‌گذاری ماهانه */}
+  {monthlyInvests.length > 0 ? (
+    <ResponsiveContainer width="100%" height={150}>
+      <LineChart data={monthlyInvests} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#dcfce7" />
+        <XAxis dataKey="month" hide />
+        <YAxis hide />
+        <Tooltip formatter={(v) => `${v.toLocaleString()} تومان`} />
+        <Line
+          type="monotone"
+          dataKey="amount"
+          connectNulls={true} // 👈 حالا همه ماه‌ها پیوسته هستن
+          stroke={
+            investTrend.status === "up"
+              ? "#22c55e"
+              : investTrend.status === "down"
+              ? "#ef4444"
+              : "#10b981"
+          }
+          strokeWidth={3}
+          dot={{ r: 3 }}
+          activeDot={{ r: 6 }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  ) : (
+    <p className="text-sm text-gray-500 text-center my-8">هنوز سرمایه‌گذاری‌ای ثبت نشده است.</p>
+  )}
+
+  {/* 💬 پیام تحلیل روند */}
+  <p
+    className={`text-center mt-3 text-sm font-medium ${
+      investTrend.status === "up"
+        ? "text-green-700"
+        : investTrend.status === "down"
+        ? "text-red-700"
+        : "text-gray-600"
+    }`}
+  >
+    {investTrend.message}
+  </p>
+
+ {/* مجموع سرمایه‌گذاری سال */}
+  <div className="mt-4 text-center">
+    <p className="text-2xl font-extrabold text-yellow-800 mb-1">
+      {totalYearInvest.toLocaleString()} <span className="text-base font-normal text-gray-600">تومان</span>
+    </p>
+    <p className="text-xs text-gray-500">
+  مجموع سرمایه‌گذاری ثبت‌شده سال {selectedYear} تا این لحظه
+</p>
+  </div>
+
+</motion.div>
+
 
     {/* 💸 هزینه‌ها */}
-    <motion.div
-      whileHover={{ scale: 1.03 }}
-      className="p-5 rounded-2xl bg-gradient-to-br from-red-50 to-orange-50 border border-orange-200 shadow-inner flex flex-col justify-between"
-    >
-      <h3 className="text-sm font-bold text-orange-700 mb-2">💸 مجموع هزینه‌ها</h3>
-      <p className="text-2xl font-extrabold text-orange-800 mb-1">
-        {(
-          totalFixedCosts +
-          Number(performance.food || 0) +
-          Number(performance.health || 0) +
-          Number(performance.other || 0)
-        ).toLocaleString()}{" "}
-        <span className="text-base font-normal text-gray-600">تومان</span>
-      </p>
-      <p className="text-xs text-gray-500">جمع کل هزینه‌های ثابت و متغیر ماه {selectedMonth}</p>
-    </motion.div>
+    {/* 💸 مجموع هزینه‌ها با نمودار */}
+<motion.div
+  whileHover={{ scale: 1.02 }}
+  className="p-5 rounded-2xl bg-gradient-to-br from-red-50 to-orange-50 border border-orange-200 shadow-inner flex flex-col justify-between"
+>
+  <h3 className="text-sm font-bold text-orange-700 mb-3 text-center">💸 مجموع هزینه‌ها</h3>
+
+  {/* 📉 نمودار هزینه ماهانه */}
+  {monthlyCosts.length > 0 ? (
+    <ResponsiveContainer width="100%" height={150}>
+      <LineChart data={monthlyCosts} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#fee2e2" />
+        <XAxis dataKey="month" hide />
+        <YAxis hide />
+        <Tooltip formatter={(v) => `${v.toLocaleString()} تومان`} />
+        <Line
+          type="monotone"
+          dataKey="amount"
+          stroke={
+            costTrend.status === "up"
+              ? "#ef4444"
+              : costTrend.status === "down"
+              ? "#22c55e"
+              : "#f59e0b"
+          }
+          strokeWidth={3}
+          dot={{ r: 3 }}
+          activeDot={{ r: 6 }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  ) : (
+    <p className="text-sm text-gray-500 text-center my-8">هنوز هزینه‌ای برای تحلیل ثبت نشده است.</p>
+  )}
+
+  {/* 💬 پیام تحلیل روند هزینه‌ها */}
+  <p
+    className={`text-center mt-3 text-sm font-medium ${
+      costTrend.status === "down"
+        ? "text-green-700"
+        : costTrend.status === "up"
+        ? "text-red-700"
+        : "text-gray-600"
+    }`}
+  >
+    {costTrend.message}
+  </p>
+
+  {/* 💰 مجموع هزینه‌های سال جاری */}  
+<div className="mt-4 text-center">
+  <p className="text-2xl font-extrabold text-orange-800 mb-1">
+    {totalYearCost.toLocaleString()}{" "}
+    <span className="text-base font-normal text-gray-600">تومان</span>
+  </p>
+  <p className="text-xs text-gray-500">
+    مجموع هزینه‌های ثبت‌شده سال {selectedYear} تا این لحظه
+  </p>
+</div>
+</motion.div>
 
     {/* 🏦 وضعیت دارایی */}
-    <motion.div
-      whileHover={{ scale: 1.03 }}
-      className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 shadow-inner flex flex-col justify-between"
-    >
-      <h3 className="text-sm font-bold text-blue-700 mb-2">🏦 وضعیت دارایی‌ها</h3>
-      <p className="text-2xl font-extrabold text-blue-800 mb-1">
-        {totalValue.toLocaleString()} <span className="text-base font-normal text-gray-600">تومان</span>
-      </p>
-      <p className="text-xs text-gray-500">آخرین مجموع دارایی‌های ثبت‌شده</p>
-    </motion.div>
+    {/* 🏦 وضعیت دارایی‌ها با نمودار و لیست دارایی‌ها */}
+<motion.div
+  whileHover={{ scale: 1.02 }}
+  className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 shadow-inner flex flex-col justify-between items-center"
+>
+  <h3 className="text-sm font-bold text-blue-700 mb-3 text-center">🏦 وضعیت دارایی‌ها</h3>
+
+  {/* 📊 نمودار دایره‌ای کوچک */}
+  {pieData.length > 0 ? (
+    <>
+      <div className="w-[160px] h-[160px]">
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              innerRadius={45}
+              outerRadius={70}
+              paddingAngle={2}
+              dataKey="value"
+              startAngle={90}
+              endAngle={450}
+            >
+              {pieData.map((entry, index) => (
+                <Cell
+                  key={index}
+                  fill={COLORS[index % COLORS.length]}
+                  stroke="none"
+                />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* 🏷️ لیست نوع دارایی‌ها */}
+      <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-1 text-[12px] text-gray-700">
+        {pieData.map((item, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: COLORS[i % COLORS.length] }}
+            />
+            <span className="truncate">{item.name}</span>
+            <span className="ml-auto text-gray-500">
+              {((item.value / totalValue) * 100).toFixed(1)}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </>
+  ) : (
+    <p className="text-sm text-gray-500 text-center my-8">
+      هنوز دارایی‌ای ثبت نشده است.
+    </p>
+  )}
+
+  {/* 💰 مجموع ارزش دارایی‌ها */}
+  <div className="mt-4 text-center">
+    <p className="text-2xl font-extrabold text-blue-800 mb-1">
+      {totalValue.toLocaleString()}{" "}
+      <span className="text-base font-normal text-gray-600">تومان</span>
+    </p>
+    <p className="text-xs text-gray-500">مجموع کل دارایی‌های ثبت‌شده</p>
   </div>
+</motion.div>
+  </div>
+  {/* 💬 تحلیل خلاصه عملکرد اقتصادی */}
+<div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-2xl p-4 text-center shadow-inner">
+  {(() => {
+    const diff = totalYearIncome - (totalYearInvest + totalYearCost);
+    if (totalYearIncome === 0) {
+      return <p className="text-gray-500 text-sm">هنوز هیچ داده‌ای برای تحلیل مالی ثبت نشده است 💬</p>;
+    }
+
+    let message = "";
+    if (diff > 0) {
+      message = `شما تاکنون ${totalYearIncome.toLocaleString()} تومان درآمد داشته‌اید. از این مقدار، ${totalYearInvest.toLocaleString()} تومان را به سرمایه‌گذاری و پس‌انداز اختصاص داده‌اید و ${totalYearCost.toLocaleString()} تومان را هزینه کرده‌اید. 💚 در نتیجه کمتر از درآمدتان خرج کرده‌اید و این نشانه‌ی مدیریت مالی خوب است.`;
+    } else if (diff < 0) {
+      message = `شما تاکنون ${totalYearIncome.toLocaleString()} تومان درآمد داشته‌اید. اما جمع سرمایه‌گذاری (${totalYearInvest.toLocaleString()} تومان) و هزینه‌ها (${totalYearCost.toLocaleString()} تومان) از درآمدتان بیشتر است. ⚠️ یعنی بیشتر از درآمد خود خرج کرده‌اید.`;
+    } else {
+      message = `شما تاکنون ${totalYearIncome.toLocaleString()} تومان درآمد داشته‌اید و دقیقاً به اندازه‌ی درآمدتان (${(totalYearInvest + totalYearCost).toLocaleString()} تومان) خرج کرده‌اید. ⚖️ عملکرد شما متعادل است.`;
+    }
+
+    return <p className="text-sm text-gray-700 leading-relaxed">{message}</p>;
+  })()}
+</div>
 </section>
 
 
