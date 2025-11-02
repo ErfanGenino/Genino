@@ -306,7 +306,7 @@ useEffect(() => {
 
 
 
-      {/* 🔸 کارت‌های ویژگی */}
+      {/* 🔸 کارت‌های ویژگی (افکت برای کارتهای ویژگی) */}
       <motion.section
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl mb-20 relative z-[5] items-stretch"
         initial="hidden"
@@ -350,13 +350,15 @@ useEffect(() => {
       }
       transition={{ duration: 2, ease: "easeInOut" }}
       className={`relative group p-6 rounded-2xl border transition-all text-center h-full flex flex-col justify-between cursor-pointer
-        ${
-          item.title === "کودک من"
-            ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
-            : item.title === "کالری شمار"
-            ? "bg-gradient-to-br from-[#b5f2c0] via-[#fff8e8] to-[#ffb6b6] border-[#ffd6a5] shadow-[0_0_15px_rgba(255,150,150,0.3)] hover:shadow-[0_0_25px_rgba(255,150,150,0.4)] hover:-translate-y-1 transition-all"
-            : "bg-white/80 backdrop-blur-sm border-yellow-100 hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100 hover:shadow-xl hover:-translate-y-1"
-        }`}
+  ${
+    item.title === "کودک من"
+      ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
+      : item.title === "کالری شمار"
+      ? "bg-gradient-to-br from-[#b5f2c0] via-[#fff8e8] to-[#ffb6b6] border-[#ffd6a5] shadow-[0_0_15px_rgba(255,150,150,0.3)] hover:shadow-[0_0_25px_rgba(255,150,150,0.4)] hover:-translate-y-1 transition-all"
+      : item.title === "اقتصاد و حسابداری خانواده"
+      ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_15px_rgba(212,175,55,0.15)] hover:shadow-[0_0_30px_rgba(212,175,55,0.35)] hover:-translate-y-1 bg-[length:200%_200%] transition-all duration-500"
+      : "bg-white/80 backdrop-blur-sm border-yellow-100 hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100 hover:shadow-xl hover:-translate-y-1"
+  }`}
     >
       {/* 🌟 ستاره‌های طلایی مخصوص دانستنی‌های روز دنیا */}
       {item.title === "دانستنی‌های روز دنیا" && (
@@ -384,6 +386,29 @@ useEffect(() => {
           ))}
         </>
       )}
+      {item.title === "اقتصاد و حسابداری خانواده" && (
+  <motion.div
+    className="absolute top-0 left-0 w-full h-full rounded-2xl overflow-hidden z-0"
+  >
+    <motion.div
+      className="absolute top-0 left-0 w-full h-full rounded-2xl bg-gradient-to-r from-transparent via-yellow-300/25 to-transparent"
+      animate={{ x: ["-120%", "120%"] }}
+      transition={{
+        duration: 2.8,
+        repeat: Infinity,
+        repeatDelay: 8,
+        ease: "easeInOut",
+      }}
+      style={{
+        backgroundSize: "200% 100%",
+        maskImage:
+          "linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)",
+        WebkitMaskImage:
+          "linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)",
+      }}
+    />
+  </motion.div>
+)}
 
       <div className="flex flex-col items-center relative z-10">
         {item.title === "کودک من" ? (
