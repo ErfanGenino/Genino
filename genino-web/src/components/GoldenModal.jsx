@@ -1,4 +1,3 @@
-// 📄 src/components/GoldenModal.jsx
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect } from "react";
@@ -9,7 +8,7 @@ export default function GoldenModal({
   description = "",
   children,
   confirmLabel = "تأیید",
-  cancelLabel = "انصراف",
+  cancelLabel, // ❌ بدون مقدار پیش‌فرض
   onConfirm,
   onCancel,
   confirmColor = "yellow", // "yellow" | "red"
@@ -36,15 +35,28 @@ export default function GoldenModal({
           transition={{ duration: 0.25 }}
           onClick={onCancel}
         >
+          {/* ✨ باکس مودال ژنینویی */}
           <motion.div
             onClick={(e) => e.stopPropagation()}
-            className="relative bg-gradient-to-br from-yellow-50 to-white rounded-3xl shadow-2xl 
-                       border border-yellow-200 p-6 text-center max-w-lg w-[92%]"
+            className="relative bg-gradient-to-b from-yellow-50 via-white to-yellow-50 rounded-3xl shadow-2xl border border-yellow-200 p-6 text-center max-w-lg w-[92%] overflow-hidden"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ type: 'spring', stiffness: 180, damping: 20 }}
           >
+            {/* ✨ نور درخشان ژنینویی در پس‌زمینه */}
+            <motion.div
+              aria-hidden="true"
+              className="absolute inset-0 pointer-events-none"
+              initial={{ x: '-150%' }}
+              animate={{ x: ['-150%', '150%'] }}
+              transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }}
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)',
+              }}
+            />
+
             {/* ✖️ دکمه بستن */}
             <button
               onClick={onCancel}
@@ -57,7 +69,9 @@ export default function GoldenModal({
 
             {/* 🧠 تیتر مودال */}
             {!!title && (
-              <h2 className="text-xl sm:text-2xl font-bold text-yellow-700 mb-3">{title}</h2>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-yellow-700 mb-3 drop-shadow-[0_0_10px_rgba(250,204,21,0.3)]">
+                {title}
+              </h2>
             )}
 
             {/* 💬 توضیحات کوتاه */}
@@ -74,28 +88,34 @@ export default function GoldenModal({
               </div>
             )}
 
-            {/* 🎛 دکمه‌ها */}
-            <div className="flex justify-center gap-4">
-              {cancelLabel && (
+            {/* 🎛 دکمه‌های پایین مودال */}
+            <div
+              className={`relative z-10 mt-4 flex ${
+                cancelLabel?.trim() ? 'justify-end gap-3' : 'justify-center'
+              }`}
+            >
+              {cancelLabel?.trim() && (
                 <button
                   onClick={onCancel}
-                  className="bg-gradient-to-r from-yellow-400 to-yellow-300 text-white px-5 py-2 
-                             rounded-xl shadow hover:from-yellow-500 hover:to-yellow-400 transition-all"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded-xl text-sm transition"
                 >
                   {cancelLabel}
                 </button>
               )}
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={onConfirm}
-                className={`px-5 py-2 rounded-xl shadow font-medium text-white transition-all ${
-                  confirmColor === "red"
-                    ? "bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-500"
-                    : "bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500"
-                }`}
+                className={`px-6 py-2 rounded-xl text-sm font-medium shadow-md transition 
+                  ${
+                    confirmColor === 'red'
+                      ? 'bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-500 text-white'
+                      : 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 hover:from-yellow-500 hover:to-yellow-500 text-white'
+                  }`}
               >
                 {confirmLabel}
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

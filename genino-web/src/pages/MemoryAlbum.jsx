@@ -1,125 +1,338 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Image as ImageIcon } from "lucide-react";
+import { FolderPlus, Heart, Trash2, ImagePlus } from "lucide-react";
+import GoldenModal from "../components/GoldenModal";
+import GoldenDivider from "../components/GoldenDivider";
+import GeninoDNABackground from "../components/GeninoDNABackground"; // 🌟 اضافه شد
 
 export default function MemoryAlbum() {
-  const floatingFrames = [
-    { id: 1, top: "15%", left: "10%", rotate: -8, delay: 0.5 },
-    { id: 2, top: "20%", right: "12%", rotate: 6, delay: 1 },
-    { id: 3, bottom: "15%", left: "15%", rotate: 4, delay: 1.5 },
-    { id: 4, bottom: "20%", right: "10%", rotate: -5, delay: 2 },
-  ];
+  const [albums, setAlbums] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [newAlbum, setNewAlbum] = useState({ title: "", desc: "" });
+  const [confirmDelete, setConfirmDelete] = useState({
+    show: false,
+    albumId: null,
+    photoIndex: null,
+  });
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+
+  // 📦 بارگذاری از localStorage
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("albums") || "[]");
+    setAlbums(saved);
+  }, []);
+
+  // 💾 ذخیره در localStorage
+  const saveAlbums = (updated) => {
+    setAlbums(updated);
+    localStorage.setItem("albums", JSON.stringify(updated));
+  };
+
+  // 🎞 ساخت آلبوم جدید
+  const handleCreateAlbum = () => {
+    if (!newAlbum.title.trim()) return;
+    const newOne = {
+      id: Date.now(),
+      title: newAlbum.title.trim(),
+      desc: newAlbum.desc.trim(),
+      folder: newAlbum.title.replace(/\s+/g, "_"),
+      likes: 0,
+      comments: [],
+      photos: [],
+    };
+    const updated = [newOne, ...albums];
+    saveAlbums(updated);
+    setNewAlbum({ title: "", desc: "" });
+    setShowModal(false);
+  };
+
+  // ❤️ افزایش لایک
+  const handleLike = (id) => {
+    const updated = albums.map((a) =>
+      a.id === id ? { ...a, likes: (a.likes || 0) + 1 } : a
+    );
+    saveAlbums(updated);
+  };
+
+  // 💬 افزودن کامنت
+  const handleAddComment = (id, comment) => {
+    if (!comment.trim()) return;
+    const updated = albums.map((a) =>
+      a.id === id
+        ? { ...a, comments: [...(a.comments || []), comment.trim()] }
+        : a
+    );
+    saveAlbums(updated);
+  };
+
+  // 📸 افزودن عکس جدید
+  const handleAddPhoto = (albumId, file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
+      const updated = albums.map((a) => {
+        if (a.id === albumId) {
+          if ((a.photos?.length || 0) >= 30) {
+            alert("حداکثر ۳۰ عکس برای هر آلبوم مجاز است.");
+            return a;
+          }
+          return { ...a, photos: [...(a.photos || []), base64] };
+        }
+        return a;
+      });
+      saveAlbums(updated);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 🗑 حذف عکس
+  const handleDeletePhoto = () => {
+    const { albumId, photoIndex } = confirmDelete;
+    const updated = albums.map((a) => {
+      if (a.id === albumId) {
+        const newPhotos = [...(a.photos || [])];
+        newPhotos.splice(photoIndex, 1);
+        return { ...a, photos: newPhotos };
+      }
+      return a;
+    });
+    saveAlbums(updated);
+    setConfirmDelete({ show: false, albumId: null, photoIndex: null });
+  };
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#fff5cc] via-[#ffe88a] to-[#ffd95c] text-gray-800 overflow-hidden">
-      
-      {/* ☀️ نور طلایی بالا */}
-      <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-[#fff8dc]/90 to-transparent z-[1] blur-2xl pointer-events-none" />
-
-      {/* 🧬 DNA طلایی چرخان */}
-      <div className="absolute inset-0 z-0">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <motion.svg
-            key={i}
-            viewBox="0 0 100 200"
-            xmlns="http://www.w3.org/2000/svg"
-            className="absolute opacity-25"
-            style={{
-              top: `${Math.random() * 90}%`,
-              left: `${Math.random() * 90}%`,
-              transformOrigin: "center",
-            }}
-            animate={{ rotate: [0, i % 2 === 0 ? 360 : -360] }}
-            transition={{
-              duration: 70 + Math.random() * 30,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          >
-            <defs>
-              <linearGradient id={`dnaGrad-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ffd700" />
-                <stop offset="100%" stopColor="#b8860b" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M30,10 C50,30 50,70 30,90 C10,110 10,150 30,170"
-              stroke={`url(#dnaGrad-${i})`}
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <path
-              d="M70,10 C50,30 50,70 70,90 C90,110 90,150 70,170"
-              stroke={`url(#dnaGrad-${i})`}
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          </motion.svg>
-        ))}
-      </div>
-
-      {/* 🖼 قاب‌های خاطرات شناور */}
-      {floatingFrames.map((frame) => (
-        <motion.div
-          key={frame.id}
-          className="absolute w-36 h-44 bg-white/70 border-2 border-yellow-300 rounded-xl shadow-[0_0_25px_rgba(212,175,55,0.4)] overflow-hidden backdrop-blur-sm"
-          style={{ top: frame.top, bottom: frame.bottom, left: frame.left, right: frame.right, rotate: frame.rotate }}
-          animate={{
-            y: [0, -15, 0],
-            rotate: [frame.rotate, frame.rotate + 2, frame.rotate - 2, frame.rotate],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 6,
-            ease: "easeInOut",
-            delay: frame.delay,
-          }}
-        >
-          <div className="w-full h-full bg-gradient-to-br from-yellow-100 to-yellow-50 flex items-center justify-center">
-            <ImageIcon className="w-10 h-10 text-yellow-500 opacity-70" />
-          </div>
-        </motion.div>
-      ))}
-
-      {/* 📸 آیکون مرکزی */}
-      <motion.div
-        className="relative z-10 flex flex-col items-center"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1 }}
+    <GeninoDNABackground> {/* 🧬 پس‌زمینه طلایی ژنینو */}
+      <main
+        dir="rtl"
+        className="relative min-h-screen flex flex-col items-center text-gray-800 overflow-hidden pt-28 pb-24"
       >
-        <motion.div
-          animate={{ rotate: [0, 10, -10, 0] }}
-          transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-          className="flex items-center justify-center w-32 h-32 rounded-full bg-white/70 backdrop-blur-md border border-yellow-300 shadow-[0_0_40px_rgba(212,175,55,0.5)] mb-6"
+        {/* ✨ تیتر و دکمه بالا */}
+        <div className="z-10 flex flex-col items-center gap-4 mb-10">
+          <h1 className="text-4xl font-extrabold text-yellow-800 drop-shadow-[0_0_12px_rgba(255,220,100,0.7)]">
+            آلبوم خاطرات ژنینو
+          </h1>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 
+                       text-white px-6 py-2 rounded-xl font-semibold shadow hover:from-yellow-600 hover:to-yellow-500 transition-all"
+          >
+            <FolderPlus className="w-5 h-5" />
+            ایجاد آلبوم جدید
+          </button>
+        </div>
+
+        {/* 📸 مودال ایجاد آلبوم */}
+        <GoldenModal
+          show={showModal}
+          title="🎞 ایجاد آلبوم جدید"
+          description="نام و توضیح کوتاهی برای آلبوم بنویسید"
+          confirmLabel="ثبت"
+          cancelLabel="انصراف"
+          onCancel={() => setShowModal(false)}
+          onConfirm={handleCreateAlbum}
         >
-          <ImageIcon className="w-16 h-16 text-yellow-600" />
-        </motion.div>
+          <div className="space-y-4 text-right">
+            <input
+              type="text"
+              placeholder="نام آلبوم..."
+              value={newAlbum.title}
+              onChange={(e) =>
+                setNewAlbum({ ...newAlbum, title: e.target.value })
+              }
+              className="w-full border-b border-yellow-400 bg-transparent py-2 text-gray-700 focus:outline-none focus:border-yellow-600 transition"
+            />
+            <textarea
+              placeholder="توضیح کوتاه درباره آلبوم..."
+              value={newAlbum.desc}
+              onChange={(e) =>
+                setNewAlbum({ ...newAlbum, desc: e.target.value })
+              }
+              className="w-full border-b border-yellow-300 bg-transparent py-2 text-gray-700 focus:outline-none focus:border-yellow-600 transition"
+            />
+          </div>
+        </GoldenModal>
 
-        {/* ✨ متن مرکزی */}
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-yellow-700 drop-shadow-[0_0_10px_rgba(255,220,100,0.8)] mb-3">
-          آلبوم خاطرات
-        </h1>
-        <p className="text-gray-700 text-sm sm:text-base mb-1">به زودی راه‌اندازی می‌شود...</p>
-        <p className="text-yellow-600 font-semibold text-lg tracking-widest">
-          Coming Soon ✨
-        </p>
-      </motion.div>
+        {/* 🗑 مودال تأیید حذف عکس */}
+        <GoldenModal
+          show={confirmDelete.show}
+          title="❌ حذف عکس"
+          description="آیا از حذف این عکس مطمئن هستید؟ این عمل قابل بازگشت نیست."
+          confirmLabel="بله، حذف شود"
+          confirmColor="red"
+          onConfirm={handleDeletePhoto}
+          onCancel={() =>
+            setConfirmDelete({ show: false, albumId: null, photoIndex: null })
+          }
+        />
 
-      {/* 🌟 درخشش طلایی نرم پشت آیکون */}
-      <motion.div
-        className="absolute w-72 h-72 rounded-full bg-gradient-to-r from-yellow-200/50 to-yellow-400/40 blur-3xl z-0"
-        animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.5, 0.9, 0.5],
-        }}
-        transition={{
-          repeat: Infinity,
-          duration: 6,
-          ease: "easeInOut",
-        }}
-      />
-    </main>
+        {/* 🎞 نمایش آلبوم‌ها */}
+        <div className="w-full max-w-5xl px-6">
+          {albums.length === 0 && (
+            <p className="text-gray-600 text-sm text-center mt-8">
+              هنوز هیچ آلبومی ساخته نشده 💛
+            </p>
+          )}
+
+          {albums.map((album, index) => (
+            <motion.div
+              key={album.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="px-6 py-10 mb-6"
+            >
+              {/* 🏷 عنوان آلبوم */}
+              <h2 className="text-2xl font-bold text-yellow-800 text-center mb-5 drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]">
+                {album.title}
+              </h2>
+
+              {/* ➕ دکمه افزودن عکس */}
+              <div className="flex justify-center mb-4">
+                <label className="flex items-center gap-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-4 py-2 rounded-full shadow-sm cursor-pointer transition">
+                  <ImagePlus className="w-5 h-5" /> افزودن عکس
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) =>
+                      handleAddPhoto(album.id, e.target.files[0])
+                    }
+                  />
+                </label>
+              </div>
+
+              {/* 🖼 گالری عکس‌ها */}
+              <div className="flex overflow-x-auto gap-3 pb-3 px-1 justify-center">
+                {album.photos?.length > 0 ? (
+                  album.photos.map((src, i) => (
+                    <div
+                      key={i}
+                      className="relative flex-shrink-0 w-32 h-24 rounded-xl overflow-hidden border border-yellow-300 shadow-sm group"
+                    >
+                      <img
+                        src={src}
+                        alt={`photo-${i}`}
+                        className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                        onClick={() =>
+                          setSelectedPhoto({ src, albumId: album.id })
+                        }
+                      />
+                      <button
+                        onClick={() =>
+                          setConfirmDelete({
+                            show: true,
+                            albumId: album.id,
+                            photoIndex: i,
+                          })
+                        }
+                        className="absolute top-1 left-1 bg-red-500/80 hover:bg-red-600 text-white rounded-full p-1 shadow transition"
+                        title="حذف عکس"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-600 text-sm italic px-4">
+                    هیچ عکسی برای نمایش وجود ندارد 💛
+                  </p>
+                )}
+              </div>
+
+              {/* 📝 توضیح آلبوم */}
+              {album.desc && (
+                <p className="text-gray-800 text-sm text-center mt-4 leading-relaxed">
+                  {album.desc}
+                </p>
+              )}
+
+              {/* ❤️ لایک و 💬 کامنت */}
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
+                <button
+                  onClick={() => handleLike(album.id)}
+                  className="flex items-center gap-1 text-yellow-800 bg-yellow-100 px-4 py-2 rounded-full hover:bg-yellow-200 transition"
+                >
+                  <Heart className="w-4 h-4" /> <span>{album.likes}</span>
+                </button>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const comment = e.target.comment.value;
+                    handleAddComment(album.id, comment);
+                    e.target.reset();
+                  }}
+                  className="flex items-center bg-yellow-50 border border-yellow-200 rounded-full px-4 py-2 shadow-sm w-full max-w-sm"
+                >
+                  <input
+                    name="comment"
+                    placeholder="نظر خود را بنویسید..."
+                    className="bg-transparent flex-1 text-sm focus:outline-none text-gray-700"
+                  />
+                  <button
+                    type="submit"
+                    className="text-yellow-700 font-semibold hover:text-yellow-800 transition"
+                  >
+                    ارسال
+                  </button>
+                </form>
+              </div>
+
+              {/* 💬 لیست کامنت‌ها */}
+              {album.comments?.length > 0 && (
+                <div className="mt-4 bg-yellow-50/60 border border-yellow-100 rounded-xl p-3 text-sm text-gray-700 leading-relaxed max-h-40 overflow-y-auto">
+                  {album.comments.map((c, i) => (
+                    <p
+                      key={i}
+                      className="border-b border-yellow-100 pb-2 mb-2 last:border-none"
+                    >
+                      💬 {c}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {/* ✨ جداکننده طلایی بین آلبوم‌ها */}
+              <GoldenDivider />
+            </motion.div>
+          ))}
+        </div>
+
+        {/* 🔍 مودال نمایش عکس بزرگ */}
+        {selectedPhoto && (
+          <motion.div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[999]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedPhoto(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="relative"
+            >
+              <div className="absolute inset-0 rounded-2xl border-4 border-yellow-300 shadow-[0_0_25px_rgba(212,175,55,0.5)] pointer-events-none"></div>
+
+              <img
+                src={selectedPhoto.src}
+                alt="نمایش بزرگ"
+                className="max-w-[90vw] max-h-[85vh] rounded-2xl shadow-2xl border border-yellow-200"
+              />
+
+              <button
+                onClick={() => setSelectedPhoto(null)}
+                className="absolute -top-6 right-0 text-white text-3xl font-bold hover:text-yellow-300 transition"
+              >
+                ×
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </main>
+    </GeninoDNABackground>
   );
 }

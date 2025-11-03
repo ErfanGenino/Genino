@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Baby, Brain, Heart, Activity } from "lucide-react";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import FamilyTree from "./FamilyTree";
 import AchievementsBar from "../components/AchievementsBar";
@@ -9,6 +8,8 @@ import GeninoAwarenessBox from "../components/GeninoAwarenessBox";
 import GeninoConfirmModal from "../components/GeninoConfirmModal";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import GoldenModal from "../components/GoldenModal";
+import { useState, useEffect } from "react";
+
 
 
 export default function MyChild() {
@@ -313,6 +314,35 @@ const [openAccordion, setOpenAccordion] = useState(null);
 const toggleAccordion = (key) => {
   setOpenAccordion(openAccordion === key ? null : key);
 };
+// 🎲 مودال آموزشی تصادفی هنگام ورود
+const [showWelcomeModal, setShowWelcomeModal] = useState(true);
+const [randomLesson, setRandomLesson] = useState(null);
+
+// ✨ لیست آموزش‌ها (فقط خلاصه و الهام‌بخش)
+const lessons = [
+  {
+    title: "🍎 تغذیه متعادل کودک",
+    content: "تنوع غذایی کلید رشد است. هر وعده کودک باید شامل پروتئین، لبنیات و سبزیجات تازه باشد. از تنقلات پرنمک و نوشابه پرهیز کنید 💛"
+  },
+  {
+    title: "😴 خواب کافی و آرامش ذهنی",
+    content: "هورمون رشد کودک در خواب شب ترشح می‌شود. خواب منظم از ساعت ۹ شب، تمرکز و رشد فکری را افزایش می‌دهد 🌙"
+  },
+  {
+    title: "💬 گفت‌وگوی مهربان با کودک",
+    content: "به جای دستور دادن، از کودک نظر بخواهید. این کار حس استقلال و اعتماد‌به‌نفسش را تقویت می‌کند 🤝"
+  },
+  {
+    title: "🌈 تشخیص احساسات کودک",
+    content: "وقتی کودک احساساتش را بیان کند، از خشم و ترسش کاسته می‌شود. والد آگاه گوش می‌دهد، نه فقط قضاوت 💛"
+  }
+];
+
+// 🎲 انتخاب تصادفی یک آموزش هنگام بارگذاری صفحه
+useEffect(() => {
+  const randomIndex = Math.floor(Math.random() * lessons.length);
+  setRandomLesson(lessons[randomIndex]);
+}, []);
 
 
 
@@ -1253,6 +1283,19 @@ const toggleAccordion = (key) => {
       </div>
     ))}
   </div>
+</GoldenModal>
+
+{/* مودال نکته روزانه */}
+<GoldenModal
+  show={showWelcomeModal}
+  title={randomLesson?.title}
+  description="🌟 نکته امروز ژنینو برای رشد سالم و آگاهانه کودک شما"
+  onConfirm={() => setShowWelcomeModal(false)}
+  confirmLabel="متوجه شدم"
+>
+  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+    {randomLesson?.content}
+  </p>
 </GoldenModal>
 
 
