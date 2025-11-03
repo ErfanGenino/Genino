@@ -1,20 +1,20 @@
-// src/components/GoldenModal.jsx
+// 📄 src/components/GoldenModal.jsx
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect } from "react";
 
 export default function GoldenModal({
-  show,
+  show = false,
   title = "",
   description = "",
   children,
   confirmLabel = "تأیید",
-  cancelLabel, // ✅ جدید
+  cancelLabel = "انصراف",
   onConfirm,
-  onCancel, // ✅ جدید
-  confirmColor = "yellow", // ✅ امکان انتخاب رنگ تأیید (زرد یا قرمز)
+  onCancel,
+  confirmColor = "yellow", // "yellow" | "red"
 }) {
-  // جلوگیری از اسکرول پس‌زمینه
+  // 🛑 جلوگیری از اسکرول پس‌زمینه
   useEffect(() => {
     if (show) {
       const prev = document.body.style.overflow;
@@ -29,85 +29,69 @@ export default function GoldenModal({
     <AnimatePresence>
       {show && (
         <motion.div
-          key="golden-overlay"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999] flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          onClick={onCancel || onConfirm} // کلیک روی پس‌زمینه، مودال بسته می‌شود
-          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          style={{ isolation: "isolate" }}
+          onClick={onCancel}
         >
-          {/* جعبه مودال */}
           <motion.div
-            initial={{ scale: 0.88, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-gradient-to-br from-yellow-50 to-white rounded-3xl shadow-2xl 
+                       border border-yellow-200 p-6 text-center max-w-lg w-[92%]"
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.88, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 220, damping: 22 }}
-            onClick={(e) => e.stopPropagation()} // جلوگیری از بستن با کلیک روی باکس
-            role="dialog"
-            aria-modal="true"
-            className="relative w-[92%] max-w-lg rounded-2xl border border-yellow-200
-                       bg-gradient-to-b from-[#fffefc] to-[#fff8e0]
-                       shadow-[0_0_25px_rgba(212,175,55,0.25)]
-                       p-6 text-right text-gray-800"
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.25 }}
           >
-            {/* رد درخشان ظریف */}
-            <motion.div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              initial={{ x: "-150%" }}
-              animate={{ x: ["-150%", "150%"] }}
-              transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)",
-              }}
-            />
-
-            {/* دکمه بستن */}
+            {/* ✖️ دکمه بستن */}
             <button
-              onClick={onCancel || onConfirm}
+              onClick={onCancel}
               aria-label="بستن"
-              className="absolute top-3 left-3 w-8 h-8 rounded-full bg-yellow-100 text-yellow-700
-                         hover:bg-yellow-200 flex items-center justify-center shadow-sm transition"
+              className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center 
+                         bg-yellow-100 text-yellow-700 rounded-full shadow-sm hover:bg-yellow-200 transition"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* عنوان و توضیح */}
+            {/* 🧠 تیتر مودال */}
             {!!title && (
-              <h2 className="relative z-10 text-2xl font-bold text-yellow-700 mb-2">
-                {title}
-              </h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-yellow-700 mb-3">{title}</h2>
             )}
+
+            {/* 💬 توضیحات کوتاه */}
             {!!description && (
-              <p className="relative z-10 text-gray-600 text-sm mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-5 leading-relaxed whitespace-pre-line">
                 {description}
               </p>
             )}
 
-            {/* محتوای مودال */}
-            <div className="relative z-10 max-h-[65vh] overflow-y-auto pr-2">
-              {children}
-            </div>
+            {/* 📋 محتوای مودال (قابل اسکرول) */}
+            {children && (
+              <div className="text-sm text-gray-700 leading-relaxed max-h-[60vh] overflow-y-auto pr-1 mb-6">
+                {children}
+              </div>
+            )}
 
-            {/* دکمه‌های پایین مودال */}
-            <div className="relative z-10 mt-6 flex justify-end gap-3">
+            {/* 🎛 دکمه‌ها */}
+            <div className="flex justify-center gap-4">
               {cancelLabel && (
                 <button
                   onClick={onCancel}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded-xl text-sm transition"
+                  className="bg-gradient-to-r from-yellow-400 to-yellow-300 text-white px-5 py-2 
+                             rounded-xl shadow hover:from-yellow-500 hover:to-yellow-400 transition-all"
                 >
                   {cancelLabel}
                 </button>
               )}
+
               <button
                 onClick={onConfirm}
-                className={`px-6 py-2 rounded-xl text-sm font-medium shadow-md transition ${
+                className={`px-5 py-2 rounded-xl shadow font-medium text-white transition-all ${
                   confirmColor === "red"
-                    ? "bg-red-500 hover:bg-red-600 text-white"
-                    : "bg-yellow-500 hover:bg-yellow-600 text-white"
+                    ? "bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-500"
+                    : "bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500"
                 }`}
               >
                 {confirmLabel}

@@ -39,7 +39,6 @@ import BodyMenArticle from "./pages/articles/BodyMenArticle";
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import Shop from "./pages/Shop.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
-import ChildAssessment from "./pages/ChildAssessment";
 import ChildProfile from "./pages/ChildProfile";
 
 
@@ -70,7 +69,6 @@ export default function App() {
         <Route path="/world-knowledge" element={<WorldKnowledge />} />
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
         <Route path="/mychild" element={<MyChild />} />
-        <Route path="/child-assessment" element={<ChildAssessment />} />
         <Route path="/social" element={<Feed />} />
         <Route path="/social/profile" element={<Profile />} />
         <Route path="/social/create" element={<CreatePost />} />
