@@ -5,18 +5,18 @@
 import { motion } from "framer-motion";
 
 export default function GeninoDNABackground({
-  strands = 8,           // تعداد رشته‌های DNA
-  opacity = 0.3,         // شفافیت کلی
-  color1 = "#d4af37",    // رنگ طلایی اصلی
-  color2 = "#b88a1a",    // رنگ طلایی تیره‌تر
-  duration = 80,         // سرعت چرخش
-  className = "",        // کلاس اضافی (مثلاً absolute یا fixed)
-  children,              // 👈 اضافه شد
+  strands = 8,
+  opacity = 0.3,
+  color1 = "#d4af37",
+  color2 = "#b88a1a",
+  duration = 80,
+  className = "",
+  children,
 }) {
   return (
-    <div className={`relative min-h-screen overflow-hidden ${className}`}>
+    <div className={`relative min-h-screen w-full overflow-hidden z-0 ${className}`}>
       {/* 🧬 لایه بک‌گراند DNA */}
-      <div className="absolute inset-0 overflow-hidden z-0">
+      <div className="absolute inset-0 overflow-hidden -z-10 pointer-events-none">
         {Array.from({ length: strands }).map((_, i) => (
           <motion.svg
             key={i}
@@ -26,7 +26,7 @@ export default function GeninoDNABackground({
             style={{
               top: `${Math.random() * 90}%`,
               left: `${Math.random() * 90}%`,
-              opacity: opacity,
+              opacity,
               transformOrigin: "center",
             }}
             animate={{ rotate: [0, i % 2 === 0 ? 360 : -360] }}
@@ -43,7 +43,6 @@ export default function GeninoDNABackground({
               </linearGradient>
             </defs>
 
-            {/* دو رشته اصلی DNA */}
             <path
               d="M30,10 C50,30 50,70 30,90 C10,110 10,150 30,170"
               stroke={`url(#dnaGrad-${i})`}
@@ -59,7 +58,6 @@ export default function GeninoDNABackground({
               strokeLinecap="round"
             />
 
-            {/* نردبان‌های بین دو رشته */}
             {Array.from({ length: 6 }).map((_, j) => (
               <line
                 key={j}
@@ -76,8 +74,9 @@ export default function GeninoDNABackground({
         ))}
       </div>
 
-      {/* ✨ محتوای صفحه (کودک در آغوش DNA) */}
-      <div className="relative z-10">{children}</div>
+      {/* ✨ محتوای صفحه (در بالاترین لایه) */}
+      <div className="relative z-[5]">{children}</div>
     </div>
   );
 }
+

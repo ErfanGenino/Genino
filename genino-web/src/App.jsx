@@ -34,6 +34,17 @@ import ParentsBehavior from "./pages/knowledge/ParentsBehavior";
 import FreePlayArticle from "./pages/articles/FreePlayArticle";
 import BodyWomenArticle from "./pages/articles/BodyWomenArticle.jsx";
 import BodyMenArticle from "./pages/articles/BodyMenArticle";
+import ChildHealthCheck from "./pages/ChildHealthCheck/ChildHealthCheck";
+import VisionCheck from "./pages/ChildHealthCheck/VisionCheck";
+import HearingCheck from "./pages/ChildHealthCheck/HearingCheck";
+import DentalCheck from "./pages/ChildHealthCheck/DentalCheck";
+import DigestionCheck from "./pages/ChildHealthCheck/DigestionCheck";
+import MovementCheck from "./pages/ChildHealthCheck/MovementCheck";
+import EmotionsCheck from "./pages/ChildHealthCheck/EmotionsCheck";
+import FocusCheck from "./pages/ChildHealthCheck/FocusCheck";
+import SocialCheck from "./pages/ChildHealthCheck/SocialCheck";
+import BodyMetricsCheck from "./pages/ChildHealthCheck/BodyMetricsCheck";
+
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
@@ -91,6 +102,16 @@ export default function App() {
         <Route path="/articles/freeplay" element={<FreePlayArticle />} />
         <Route path="/articles/body-women" element={<BodyWomenArticle />} />
         <Route path="/articles/body-men" element={<BodyMenArticle />} />
+        <Route path="/child-health-check" element={<ChildHealthCheck />} />
+        <Route path="/child-health-check/vision" element={<VisionCheck />} />
+        <Route path="/child-health-check/hearing" element={<HearingCheck />} />
+        <Route path="/child-health-check/dental" element={<DentalCheck />} />
+        <Route path="/child-health-check/digestion" element={<DigestionCheck />} />
+        <Route path="/child-health-check/movement" element={<MovementCheck />} />
+        <Route path="/child-health-check/emotions" element={<EmotionsCheck />} />
+        <Route path="/child-health-check/focus" element={<FocusCheck />} />
+        <Route path="/child-health-check/social" element={<SocialCheck />} />
+        <Route path="/child-health-check/bodymetrics" element={<BodyMetricsCheck />} />
       </Routes>
     </>
   );

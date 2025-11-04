@@ -9,6 +9,7 @@ import GeninoConfirmModal from "../components/GeninoConfirmModal";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import GoldenModal from "../components/GoldenModal";
 import { useState, useEffect } from "react";
+import GeninoHealthButton from "../components/GeninoHealthButton";
 
 
 
@@ -525,6 +526,19 @@ useEffect(() => {
   />
 </motion.div>
 
+{/* 🌕 دکمه سکه‌ای پایش سلامت کودک */}
+<motion.div
+  className="relative z-[6] mt-6 mb-12 flex justify-center"
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+>
+  <Link to="/child-health-check" className="block">
+    <GeninoHealthButton />
+  </Link>
+</motion.div>
+
+
 {/* 🩺 داشبورد سلامت کودک */}
 <motion.section
   className="relative z-[6] mt-12 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 px-4 sm:px-8"
@@ -681,13 +695,6 @@ useEffect(() => {
     <p className="whitespace-pre-line">{bmiAdvice}</p>
   </motion.div>
 )}
-
-<button
-  onClick={saveGrowthRecord}
-  className="mt-3 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-6 py-2 rounded-xl font-semibold shadow hover:from-yellow-600 hover:to-yellow-500 transition-all"
->
-  💾 ذخیره در جدول رشد
-</button>
     </>
   ) : (
     <p className="text-gray-400 text-sm mt-2">
@@ -696,39 +703,7 @@ useEffect(() => {
   )}
 </motion.div>
 
-{/* 🌙 کارت خواب هوشمند ژنینو */}
-<motion.div
-  whileHover={{ scale: 1.03 }}
-  className="col-span-2 bg-gradient-to-br from-yellow-50 to-white border border-yellow-200 rounded-2xl p-4 text-center shadow-sm"
->
-  <p className="text-sm text-gray-500 mb-2">خواب کودک</p>
 
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.6 }}
-    className="text-[13px] text-gray-700 leading-relaxed bg-gradient-to-br from-yellow-50 to-white border border-yellow-200 rounded-xl p-3 shadow-inner text-right"
-  >
-    <p className="whitespace-pre-line">{sleepAdvice}</p>
-  </motion.div>
-</motion.div>
-
-{/* 🏃‍♀️ کارت فعالیت فیزیکی ژنینویی */}
-<motion.div
-  whileHover={{ scale: 1.03 }}
-  className="col-span-2 bg-gradient-to-br from-yellow-50 to-white border border-yellow-200 rounded-2xl p-4 text-center shadow-sm"
->
-  <p className="text-sm text-gray-500 mb-2">فعالیت فیزیکی کودک</p>
-
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.6 }}
-    className="text-[13px] text-gray-700 leading-relaxed bg-gradient-to-br from-yellow-50 to-white border border-yellow-200 rounded-xl p-3 shadow-inner text-right"
-  >
-    <p className="whitespace-pre-line">{activityAdvice}</p>
-  </motion.div>
-</motion.div>
 
 
   {/* 🏋️ سایر کارت‌ها */}
@@ -749,72 +724,7 @@ useEffect(() => {
 </div>
 
 
-   {/* 📊 جدول رشد ثبت‌شده */}
-{growthRecords.length > 0 && (
-  <div className="mt-6 bg-white/70 backdrop-blur-sm border border-yellow-200 rounded-2xl p-4 shadow-inner">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-yellow-800 font-bold text-center flex-1">📈 جدول رشد ثبت‌شده</h3>
-
-      {/* 🗑 دکمه پاک‌کردن */}
-      <button
-        onClick={clearGrowthRecords}
-        className="text-red-500 text-sm font-medium hover:text-red-700 transition"
-        title="پاک کردن همه رکوردها"
-      >
-        🗑 پاک‌کردن همه
-      </button>
-    </div>
-
-    <table className="w-full text-sm text-center text-gray-700">
-      <thead>
-        <tr className="bg-yellow-100">
-          <th className="p-2">تاریخ</th>
-          <th className="p-2">قد (cm)</th>
-          <th className="p-2">وزن (kg)</th>
-          <th className="p-2">BMI</th>
-          <th className="p-2">وضعیت</th>
-          <th className="p-2">حذف</th>
-        </tr>
-      </thead>
-      <tbody>
-        {growthRecords.map((r, i) => (
-          <tr key={i} className="border-t border-yellow-100 hover:bg-yellow-50 transition">
-            <td className="p-2">{r.date}</td>
-            <td className="p-2">{r.height}</td>
-            <td className="p-2">{r.weight}</td>
-            <td className="p-2">{r.bmi}</td>
-            <td
-              className={`p-2 font-semibold ${
-                r.status.includes("نرمال")
-                  ? "text-green-600"
-                  : r.status.includes("کم")
-                  ? "text-red-600"
-                  : "text-orange-500"
-              }`}
-            >
-              {r.status}
-              
-            </td>
-            <td className="p-2">
-  <button
-    onClick={() => {
-      setRecordToDelete(i);
-      setShowDeleteModal(true);
-    }}
-    className="text-red-500 hover:text-red-700 transition"
-    title="حذف رکورد"
-  >
-    🗑
-  </button>
-</td>
-          </tr>
-          
-        ))}
-      </tbody>
-    </table>
-    
-  </div>
-)}
+   
 {/* 📘 آموزش سلامت فیزیکی کودک */}
 <motion.div
   initial={{ opacity: 0, y: 20 }}
