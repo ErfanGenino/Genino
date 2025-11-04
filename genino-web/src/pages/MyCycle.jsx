@@ -314,7 +314,7 @@ export default function MyCycle() {
           className="bg-white/80 backdrop-blur-sm border border-pink-100 rounded-2xl shadow-md p-6 max-w-md w-full text-right"
         >
           <label className="block text-sm text-gray-700 mb-2">
-            تاریخ آخرین قاعدگی:
+            تاریخ شروع آخرین قاعدگی:
           </label>
           <DatePicker
             calendar={persian}
