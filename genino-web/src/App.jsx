@@ -44,6 +44,7 @@ import EmotionsCheck from "./pages/ChildHealthCheck/EmotionsCheck";
 import FocusCheck from "./pages/ChildHealthCheck/FocusCheck";
 import SocialCheck from "./pages/ChildHealthCheck/SocialCheck";
 import BodyMetricsCheck from "./pages/ChildHealthCheck/BodyMetricsCheck";
+import VisionReport from "./pages/ChildHealthCheck/VisionReport";
 
 
 
@@ -112,6 +113,7 @@ export default function App() {
         <Route path="/child-health-check/focus" element={<FocusCheck />} />
         <Route path="/child-health-check/social" element={<SocialCheck />} />
         <Route path="/child-health-check/bodymetrics" element={<BodyMetricsCheck />} />
+        <Route path="/child-health-check/vision-report" element={<VisionReport />} />
       </Routes>
     </>
   );
