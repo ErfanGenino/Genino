@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "framer-motion": "^12.23.24",
-    "lucide-react": "^0.545.0",
+    "lucide-react": "^0.552.0",
     "react": "^19.1.1",
     "react-date-object": "^2.1.9",
     "react-datepicker-jalali": "^0.0.4",

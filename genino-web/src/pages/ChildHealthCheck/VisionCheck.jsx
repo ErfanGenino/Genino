@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import GeninoDNABackground from "../../components/GeninoDNABackground";
 import { Eye } from "lucide-react";
 
+
+
+
 /* 🎨 مرحله ۱ - تست رنگ‌ها */
 function ColorTest({ onComplete }) {
   const [round, setRound] = useState(1);
@@ -67,7 +70,7 @@ function ColorTest({ onComplete }) {
           <motion.div
             key={c.code}
             onClick={() => handleColorClick(c)}
-            className="w-20 h-20 rounded-full shadow-md border-2 border-gray-200 cursor-pointer transition-transform"
+            className="w-20 h-20 lg:w-28 lg:h-28 rounded-full shadow-md border-2 border-gray-200 cursor-pointer transition-transform"
             style={{ backgroundColor: c.code }}
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
@@ -158,7 +161,7 @@ function ShapeTest({ onComplete }) {
           <motion.div
             key={s.type}
             onClick={() => handleShapeClick(s)}
-            className="w-20 h-20 flex items-center justify-center bg-yellow-400 shadow-md border-2 border-yellow-100 cursor-pointer transition-transform"
+            className="w-20 h-20 lg:w-28 lg:h-28 flex items-center justify-center bg-yellow-400 shadow-md border-2 border-yellow-100 cursor-pointer transition-transform"
             style={{
               clipPath:
                 s.type === "circle"
@@ -203,7 +206,13 @@ function ArrowDirectionTest({ onComplete }) {
   const [feedback, setFeedback] = useState(null);
 
   const directions = ["⬆️", "⬇️", "⬅️", "➡️"];
-  const sizes = ["text-7xl", "text-6xl", "text-5xl", "text-4xl", "text-3xl"];
+  const sizes = [
+  "text-7xl lg:text-8xl",
+  "text-6xl lg:text-7xl",
+  "text-5xl lg:text-6xl",
+  "text-4xl lg:text-5xl",
+  "text-3xl lg:text-4xl"
+];
   const labels = ["خیلی بزرگ", "بزرگ", "متوسط", "کوچک", "خیلی کوچک"];
 
   // 🎯 تولید فلش جدید تصادفی
@@ -304,7 +313,9 @@ function ArrowDirectionTest({ onComplete }) {
 export default function VisionCheck() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-
+    const [colorResults, setColorResults] = useState([]);
+  const [shapeResults, setShapeResults] = useState([]);
+  const [arrowSuccess, setArrowSuccess] = useState(null);
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => Math.max(0, prev - 1));
 
@@ -360,7 +371,10 @@ export default function VisionCheck() {
               transition={{ duration: 0.6 }}
               className="flex flex-col items-center text-center"
             >
-              <ColorTest onComplete={nextStep} />
+              <ColorTest onComplete={(results) => { 
+  setColorResults(results); 
+  nextStep(); 
+}} />
             </motion.section>
           )}
 
@@ -374,7 +388,10 @@ export default function VisionCheck() {
               transition={{ duration: 0.6 }}
               className="flex flex-col items-center text-center"
             >
-              <ShapeTest onComplete={nextStep} />
+              <ShapeTest onComplete={(results) => { 
+  setShapeResults(results); 
+  nextStep(); 
+}} />
             </motion.section>
           )}
 
@@ -394,74 +411,162 @@ export default function VisionCheck() {
       سپس همین کار را برای <strong>چشم چپ</strong> تکرار کنید.
     </p>
     <ArrowDirectionTest
-      onComplete={(success) =>
-        success ? setStep(4) : setStep(99) // 99 برای توقف در نتیجه خاص
-      }
-    />
+  onComplete={(success) => {
+    setArrowSuccess(success);
+    setStep(4);
+  }}
+/>
   </motion.section>
 )}
 
           {/* مرحله ۴: نتیجه نهایی */}
+{/* مرحله ۴: نتیجه نهایی */}
 {step === 4 && (
   <motion.section
-  key="result"
-  initial={{ opacity: 0, scale: 0.9 }}
-  animate={{ opacity: 1, scale: 1 }}
-  transition={{ duration: 0.6 }}
-  className="flex flex-col items-center text-center bg-gradient-to-br from-yellow-50 via-white to-yellow-100 
-             rounded-3xl shadow-[0_0_40px_rgba(255,215,80,0.4)] p-10 mx-4 max-w-3xl border border-yellow-200"
->
-  <Eye className="w-16 h-16 mb-4 text-yellow-600 drop-shadow-[0_0_12px_rgba(255,200,0,0.6)]" />
-  
-  <h2 className="text-3xl font-extrabold text-yellow-700 mb-4">
-    گزارش پایش بینایی کودک 👁️
-  </h2>
-
-  <p className="text-gray-700 text-base leading-relaxed mb-8 max-w-2xl">
-    نتایج نشان می‌دهند که کودک شما در سه بخش زیر ارزیابی شد:
-  </p>
-
-  <div className="grid sm:grid-cols-3 gap-6 w-full mb-8 text-center">
-    <div className="bg-white rounded-2xl shadow-md p-4 border border-yellow-100">
-      <h3 className="text-yellow-700 font-bold mb-2">🎨 تشخیص رنگ‌ها</h3>
-      <p className="text-gray-700 text-sm">عملکرد طبیعی و دقیق</p>
-    </div>
-    <div className="bg-white rounded-2xl shadow-md p-4 border border-yellow-100">
-      <h3 className="text-yellow-700 font-bold mb-2">🔺 تشخیص اشکال</h3>
-      <p className="text-gray-700 text-sm">در محدوده‌ی طبیعی</p>
-    </div>
-    <div className="bg-white rounded-2xl shadow-md p-4 border border-yellow-100">
-      <h3 className="text-yellow-700 font-bold mb-2">👁️ تشخیص جهت‌ها</h3>
-      <p className="text-gray-700 text-sm">در سطح بسیار خوب</p>
-    </div>
-  </div>
-
-  <div className="bg-gradient-to-r from-yellow-100 via-white to-yellow-50 rounded-2xl p-6 border border-yellow-200 mb-8">
-    <h4 className="text-lg font-bold text-yellow-700 mb-2">تحلیل کلی:</h4>
-    <p className="text-gray-700 leading-relaxed text-sm">
-      بر اساس نتایج سه مرحله، سیستم ژنینو نشان می‌دهد که بینایی کودک شما 
-      در محدوده‌ی نرمال قرار دارد. پیشنهاد می‌شود برای اطمینان، 
-      حداقل سالی یک‌بار معاینه‌ی تخصصی توسط چشم‌پزشک انجام شود.
-    </p>
-  </div>
-
-  <div className="bg-yellow-50 px-8 py-4 rounded-full border border-yellow-200 shadow-inner mb-8">
-    <span className="text-lg font-bold text-yellow-800">
-      🌟 امتیاز بینایی کودک: ۹۸ / ۱۰۰
-    </span>
-  </div>
-
-  <motion.button
-    onClick={() => navigate("/child-health-check")}
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    className="px-8 py-3 bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 text-white 
-               font-bold rounded-full shadow-[0_0_25px_rgba(255,220,80,0.7)]"
+    key="result"
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.6 }}
+    className="flex flex-col items-center text-center bg-gradient-to-br from-yellow-50 via-white to-yellow-100 
+               rounded-3xl shadow-[0_0_40px_rgba(255,215,80,0.4)] p-10 mx-4 max-w-3xl border border-yellow-200"
   >
-    بازگشت به صفحه پایش سلامت کودک
-  </motion.button>
-</motion.section>
+    <Eye className="w-16 h-16 mb-4 text-yellow-600 drop-shadow-[0_0_12px_rgba(255,200,0,0.6)]" />
 
+    <h2 className="text-3xl font-extrabold text-yellow-700 mb-4">
+      گزارش پایش بینایی کودک 👁️
+    </h2>
+
+    <p className="text-gray-700 text-base leading-relaxed mb-8 max-w-2xl">
+      ژنینو در این آزمون سه بخش مهم بینایی کودک را بررسی کرده است 👇
+    </p>
+
+    <div className="grid sm:grid-cols-3 gap-6 w-full mb-8 text-center">
+      {/* 🎨 رنگ‌ها */}
+      <div className="bg-white rounded-2xl shadow-md p-5 border border-yellow-100 flex flex-col items-center">
+        <h3 className="text-yellow-700 font-bold mb-2">🎨 تشخیص رنگ‌ها</h3>
+        <p className="text-gray-700 text-sm mb-2">عملکرد طبیعی و دقیق</p>
+        <p className="text-gray-500 text-xs leading-relaxed">
+          این بخش برای بررسی <strong>تشخیص رنگ‌ها و کوررنگی</strong> طراحی شده است.  
+          توانایی کودک در تفکیک رنگ‌های اصلی مانند قرمز، سبز و آبی بررسی می‌شود.
+        </p>
+      </div>
+
+      {/* 🔺 اشکال */}
+      <div className="bg-white rounded-2xl shadow-md p-5 border border-yellow-100 flex flex-col items-center">
+        <h3 className="text-yellow-700 font-bold mb-2">🔺 تشخیص اشکال</h3>
+        <p className="text-gray-700 text-sm mb-2">در محدوده‌ی طبیعی</p>
+        <p className="text-gray-500 text-xs leading-relaxed">
+          این بخش برای بررسی <strong>درک شکل و تقارن دید</strong> است.  
+          نتایج غیرعادی می‌تواند نشانه‌ای از <strong>آستیگماتیسم</strong> یا خطای تمرکز باشد.
+        </p>
+      </div>
+
+      {/* 👁️ جهت‌ها */}
+      <div className="bg-white rounded-2xl shadow-md p-5 border border-yellow-100 flex flex-col items-center">
+        <h3 className="text-yellow-700 font-bold mb-2">👁️ تشخیص جهت‌ها</h3>
+        <p className="text-gray-700 text-sm mb-2">در سطح بسیار خوب</p>
+        <p className="text-gray-500 text-xs leading-relaxed">
+          در این مرحله <strong>قدرت دید از فاصله دور</strong> بررسی می‌شود.  
+          پاسخ‌های دقیق نشان‌دهنده سلامت بینایی در تشخیص جهت و احتمالاً عدم <strong>نزدیک‌بینی</strong> است.
+        </p>
+      </div>
+    </div>
+
+    <div className="bg-gradient-to-r from-yellow-100 via-white to-yellow-50 rounded-2xl p-6 border border-yellow-200 mb-8">
+      <h4 className="text-lg font-bold text-yellow-700 mb-2">تحلیل کلی ژنینو:</h4>
+      <p className="text-gray-700 leading-relaxed text-sm">
+        بر اساس نتایج این سه مرحله، بینایی کودک شما در محدوده‌ی طبیعی قرار دارد 💛  
+        با این حال، پیشنهاد می‌شود حداقل سالی یک‌بار معاینه‌ی تخصصی چشم انجام شود.
+      </p>
+    </div>
+
+    <div className="bg-yellow-50 px-8 py-4 rounded-full border border-yellow-200 shadow-inner mb-8">
+      <span className="text-lg font-bold text-yellow-800">
+        🌟 امتیاز بینایی کودک: ۹۸ / ۱۰۰
+      </span>
+    </div>
+
+    <motion.button
+      onClick={() =>
+        navigate("/child-health-check/vision-report", {
+          state: {
+            report: {
+              name: "حنا سمواتی",
+              date: new Date().toLocaleDateString("fa-IR"),
+              colors: 3,
+              shapes: 2,
+              arrows: 12,
+              score: 90,
+              analysis:
+                "بینایی طبیعی است، پیشنهاد می‌شود سالی یک‌بار معاینه تخصصی انجام شود.",
+            },
+          },
+        })
+      }
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="px-8 py-3 bg-gradient-to-r from-yellow-500 via-yellow-600 to-amber-600 
+                 text-white font-bold rounded-full shadow-[0_0_25px_rgba(255,220,80,0.7)] mt-4"
+    >
+      مشاهده گزارش رسمی ژنینو 🧾
+    </motion.button>
+
+    <motion.button
+      onClick={() => navigate("/child-health-check")}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="px-8 py-3 bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 text-white 
+                 font-bold rounded-full shadow-[0_0_25px_rgba(255,220,80,0.7)] mt-4"
+    >
+      بازگشت به صفحه پایش سلامت کودک
+    </motion.button>
+  </motion.section>
+)}
+
+
+
+{/* مرحله ۹۹: نتیجه ناموفق / نیاز به بررسی بیشتر */}
+{step === 99 && (
+  <motion.section
+    key="result-fail"
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className="flex flex-col items-center text-center bg-gradient-to-br from-red-50 via-white to-yellow-50 
+               rounded-3xl shadow-[0_0_40px_rgba(255,150,80,0.3)] p-10 mx-4 max-w-2xl border border-red-200"
+  >
+    <p className="text-4xl mb-4">⚠️</p>
+    <h2 className="text-2xl font-extrabold text-red-600 mb-4">
+      پایش نیاز به بررسی بیشتر دارد
+    </h2>
+
+    <p className="text-gray-700 mb-6 leading-relaxed">
+      در مرحلهٔ تشخیص جهت‌ها، پاسخ‌های کودک به‌طور کامل صحیح نبود.  
+      توصیه می‌شود آزمایش در محیطی روشن‌تر و با فاصلهٔ مناسب تکرار شود  
+      یا برای اطمینان، به چشم‌پزشک مراجعه گردد.
+    </p>
+
+    <div className="flex gap-3 flex-wrap justify-center">
+      <motion.button
+        onClick={() => setStep(3)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="px-6 py-3 bg-yellow-500 text-white rounded-full font-bold shadow"
+      >
+        تکرار تست جهت‌ها 🔁
+      </motion.button>
+
+      <motion.button
+        onClick={() => navigate("/child-health-check")}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="px-6 py-3 bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 text-white 
+                   rounded-full font-bold shadow"
+      >
+        بازگشت به صفحه پایش سلامت کودک
+      </motion.button>
+    </div>
+  </motion.section>
 )}
 
         </AnimatePresence>
@@ -476,30 +581,6 @@ export default function VisionCheck() {
           </motion.button> 
         )}
         
-        <motion.button
-  onClick={() =>
-    navigate("/child-health-check/vision-report", {
-      state: {
-        report: {
-          name: "حنا سمواتی",
-          date: new Date().toLocaleDateString("fa-IR"),
-          colors: 3,        // فعلاً نمونه
-          shapes: 2,        // فعلاً نمونه
-          arrows: 12,       // فعلاً نمونه
-          score: 90,        // امتیاز فرضی
-          analysis: "بینایی طبیعی است، پیشنهاد می‌شود سالی یک‌بار معاینه تخصصی انجام شود.",
-        },
-      },
-    })
-  }
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
-  className="px-8 py-3 bg-gradient-to-r from-yellow-500 via-yellow-600 to-amber-600 
-             text-white font-bold rounded-full shadow-[0_0_25px_rgba(255,220,80,0.7)] mt-4"
->
-  مشاهده گزارش رسمی ژنینو 🧾
-</motion.button>
-
 
       </main>
     </GeninoDNABackground>
