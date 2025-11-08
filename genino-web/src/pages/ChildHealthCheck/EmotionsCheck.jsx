@@ -1,7 +1,7 @@
 // 📄 src/pages/ChildHealthCheck/EmotionsCheck.jsx
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import GeninoDNABackground from "../../components/GeninoDNABackground";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import { ArrowRight } from "lucide-react";
 
 export default function EmotionsCheck() {

@@ -1,7 +1,7 @@
 // 📄 src/components/HealthTestModal.jsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import GoldenModal from "./GoldenModal";
+import GoldenModal from "@components/Core/GoldenModal";
 
 // 🧠 کامپوننت عمومی تست سلامت
 export default function HealthTestModal({

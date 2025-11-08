@@ -1,5 +1,5 @@
 import React from "react";
-import ArticleTemplate from "../../components/ArticleTemplate";
+import ArticleTemplate from "@components/Awareness/ArticleTemplate";
 
 export default function FreePlayArticle() {
   return (

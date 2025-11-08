@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FolderPlus, Heart, Trash2, ImagePlus } from "lucide-react";
-import GoldenModal from "../components/GoldenModal";
-import GoldenDivider from "../components/GoldenDivider";
-import GeninoDNABackground from "../components/GeninoDNABackground"; // 🌟 اضافه شد
+import GoldenModal from "@components/Core/GoldenModal";
+import GoldenDivider from "@components/Core/GoldenDivider";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground"; // 🌟 اضافه شد
 
 export default function MemoryAlbum() {
   const [albums, setAlbums] = useState([]);

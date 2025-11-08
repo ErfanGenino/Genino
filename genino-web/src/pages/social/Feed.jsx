@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, PlusCircle, MessageSquare, Heart, Baby, User, X } from "lucide-react";
-import GoldenDivider from "../../components/GoldenDivider.jsx";
+import GoldenDivider from "@components/Core/GoldenDivider.jsx";
 import ChatRoom from "./ChatRoom.jsx";
 
 export default function Feed() {

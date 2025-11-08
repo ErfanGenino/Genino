@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import GoldenDivider from "./GoldenDivider";
-import HorizontalScrollGalleryNeutral from "./HorizontalScrollGallery";
+import GoldenDivider from "@components/Core/GoldenDivider";
+import HorizontalScrollGallery from "@components/Social/HorizontalScrollGallery";
 import { useLocation, Link } from "react-router-dom";
 // import ReactMarkdown from "react-markdown"; // فعلاً خاموش
 
@@ -88,7 +88,7 @@ export default function ArticleTemplate({
           {/* گالری افقی */}
           {section.folder && (
             <div className="mb-6">
-              <HorizontalScrollGalleryNeutral folder={section.folder} />
+              <HorizontalScrollGallery folder={section.folder} />
             </div>
           )}
 

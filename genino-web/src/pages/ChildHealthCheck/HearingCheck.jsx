@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import GeninoDNABackground from "../../components/GeninoDNABackground";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import { Ear, Volume2, Headphones, Bell, Mic2, AlertCircle } from "lucide-react";
 
 /* 🌟 دکمه هماهنگ */

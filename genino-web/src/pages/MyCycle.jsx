@@ -7,7 +7,7 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
 import { Heart, Flower2, Sun, Moon, Droplet, CalendarDays } from "lucide-react";
-import GoldenModal from "../components/GoldenModal";
+import GoldenModal from "@components/Core/GoldenModal";
 import { Link } from "react-router-dom";
 
 const LS_KEY = "myCycle:v1";

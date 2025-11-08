@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
 import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
-import PromoSlider from "./components/PromoSlider.jsx";
+import PromoSlider from "@components/Social/PromoSlider";
 
 
     

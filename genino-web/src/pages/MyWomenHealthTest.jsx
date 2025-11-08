@@ -5,8 +5,8 @@ import DateObject from "react-date-object";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
-import HorizontalScrollGallery from "../components/HorizontalScrollGallery";
-import HealthTestModal from "../components/HealthTestModal";
+import HorizontalScrollGallery from "@components/Social/HorizontalScrollGallery";
+import HealthTestModal from "@components/Assessments/HealthTestModal";
 
 
 export default function MyWomenHealthTest() {

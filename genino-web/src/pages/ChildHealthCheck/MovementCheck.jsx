@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import GeninoDNABackground from "../../components/GeninoDNABackground";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import { Footprints, Hand, Move, Scale, Dumbbell, AlertCircle } from "lucide-react";
 
 /* 🎨 دکمه استاندارد ژنینو */

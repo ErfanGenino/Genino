@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Activity } from "lucide-react";
-import GeninoDNABackground from "../../components/GeninoDNABackground";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 
 export default function BodyMetricsCheck() {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 // src/pages/articles/BodyMenArticle.jsx
 import React from "react";
-import ArticleTemplate from "../../components/ArticleTemplate";
-import HorizontalScrollGallery from "../../components/HorizontalScrollGallery";
+import ArticleTemplate from "@components/Awareness/ArticleTemplate";
+import HorizontalScrollGallery from "@components/Social/HorizontalScrollGallery";
 
 export default function BodyMenArticle() {
   return (

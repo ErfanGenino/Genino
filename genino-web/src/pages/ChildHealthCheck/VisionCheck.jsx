@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import GeninoDNABackground from "../../components/GeninoDNABackground";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import { Eye } from "lucide-react";
 
 
@@ -326,39 +326,32 @@ export default function VisionCheck() {
         className="relative z-10 flex flex-col items-center px-6 py-16 text-gray-800"
       >
         <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-3xl sm:text-4xl font-extrabold text-yellow-700 mb-20 text-center drop-shadow-[0_0_12px_rgba(255,220,80,0.4)]"
-        >
-          پایش بینایی کودک
-        </motion.h1>
-
-        <AnimatePresence mode="wait">
-          {/* مرحله معرفی */}
-          {step === 0 && (
-            <motion.section
-              key="intro"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl text-center"
-            >
-              <p className="text-gray-700 leading-relaxed mb-20">
-                این آزمون شامل چند بخش ساده برای بررسی توانایی دید کودک است.  
-                لطفاً توجه داشته باشید که این آزمون جایگزین معاینه تخصصی نیست.
-              </p>
-              <motion.button
-                onClick={nextStep}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-10 py-4 bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 text-white 
-                           font-bold rounded-full shadow-[0_0_25px_rgba(255,220,100,0.6)]"
-              >
-                شروع پایش بینایی
-              </motion.button>
-            </motion.section>
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="text-3xl sm:text-4xl font-extrabold text-emerald-700 mb-20 text-center drop-shadow-[0_0_12px_rgba(16,185,129,0.35)]"
+                >
+                  پایش گوارش و بلع کودک
+                </motion.h1>
+        
+                <AnimatePresence mode="wait">
+                  {/* آموزش مقدماتی */}
+                  {step === -1 && (
+                    <motion.section
+                      key="edu"
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -30 }}
+                      transition={{ duration: 0.6 }}
+                      className="max-w-3xl text-center"
+                    >
+                      <p className="text-gray-700 leading-relaxed mb-20">
+                        این پایش به شما کمک می‌کند بدانید آیا کودک <strong>غذا را درست می‌جود و می‌بلعد</strong>،
+                        <strong> الگوی دفع و گوارش</strong> طبیعی دارد یا خیر، و <strong>عادات تغذیه‌ای</strong> او سالم است یا نه.  
+                        روی هر سؤال، دکمهٔ <strong>ℹ️ چرا این سؤال؟</strong> را بزنید تا هدف و معنای پاسخ‌ها را ببینید.
+                      </p>
+                      <Btn onClick={() => setStep(0)}>شروع پایش گوارش و بلع</Btn>
+                    </motion.section>
           )}
 
           {/* مرحله ۱: رنگ‌ها */}

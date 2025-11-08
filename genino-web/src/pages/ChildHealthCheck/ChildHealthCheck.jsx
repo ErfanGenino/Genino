@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import GeninoDNABackground from "../../components/GeninoDNABackground";
-import GoldenModal from "../../components/GoldenModal";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
+import GoldenModal from "@components/Core/GoldenModal";
 import { Link } from "react-router-dom";
 import { HeartPulse, Brain, Activity, Eye, Ear, Smile, Utensils, Move } from "lucide-react";
 

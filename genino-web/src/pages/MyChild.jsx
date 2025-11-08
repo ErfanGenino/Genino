@@ -2,15 +2,15 @@ import { motion } from "framer-motion";
 import { Baby, Brain, Heart, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import FamilyTree from "./FamilyTree";
-import AchievementsBar from "../components/AchievementsBar";
-import TodayCalendarBox from "../components/TodayCalendarBox";
-import GeninoAwarenessBox from "../components/GeninoAwarenessBox";
-import GeninoConfirmModal from "../components/GeninoConfirmModal";
+import AchievementsBar from "@components/Dashboard/AchievementsBar";
+import TodayCalendarBox from "@components/Dashboard/TodayCalendarBox";
+import GeninoAwarenessBox from "@components/Awareness/GeninoAwarenessBox";
+import GeninoConfirmModal from "@components/Shared/GeninoConfirmModal";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import GoldenModal from "../components/GoldenModal";
+import GoldenModal from "@components/Core/GoldenModal";
 import { useState, useEffect } from "react";
-import GeninoHealthButton from "../components/GeninoHealthButton";
-import GeninoAssessmentStart from "@components/GeninoAssessmentStart";
+import GeninoHealthButton from "@components/Assessments/GeninoHealthButton";
+import GeninoAssessmentStart from "@components/Assessments/GeninoAssessmentStart";
 
 
 

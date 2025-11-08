@@ -1,4 +1,4 @@
-import SidebarVendor from "../../components/SidebarVendor";
+import SidebarVendor from "@components/SidebarVendor";
 
 export default function VendorDashboard() {
   return (

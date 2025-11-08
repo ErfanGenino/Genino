@@ -10,7 +10,7 @@ import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
-import GoldenModal from "../components/GoldenModal";
+import GoldenModal from "@components/Core/GoldenModal";
 import "../App.css"; // اگه هنوز این خط نیست
 import { useEffect } from "react";
 

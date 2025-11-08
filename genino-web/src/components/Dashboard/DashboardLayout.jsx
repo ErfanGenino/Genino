@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import logo from "../assets/logo-genino.png";
-import ReminderBar from "../components/ReminderBar"; // ✅ اضافه شد
+import logo from "../../assets/logo-genino.png";
+import ReminderBar from "@components/Dashboard/ReminderBar"; // ✅ اضافه شد
 
 export default function DashboardLayout({ title, children }) {
   return (

@@ -5,7 +5,7 @@ import { ShoppingBag } from "lucide-react";
 import logo from "../assets/logo-genino.png";
 import { useCart } from "../context/CartContext.jsx";
 import { useNavigate } from "react-router-dom";
-import PromoSlider from "../components/PromoSlider.jsx";
+import PromoSlider from "@components/Social/PromoSlider.jsx";
 
 export default function Shop() {
   const [flyingItems, setFlyingItems] = useState([]);

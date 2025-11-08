@@ -1,7 +1,7 @@
 // 📄 src/pages/ChildHealthCheck/VisionReport.jsx
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import GeninoDNABackground from "../../components/GeninoDNABackground";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import { Eye, Download, Share2, BookOpenCheck } from "lucide-react";
 
 export default function VisionReport() {

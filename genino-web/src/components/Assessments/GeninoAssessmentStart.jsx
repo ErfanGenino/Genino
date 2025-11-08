@@ -1,6 +1,6 @@
 // 📄 src/components/GeninoAssessmentStart.jsx
 import { motion, AnimatePresence } from "framer-motion";
-import GeninoButton from "@components/GeninoButton"; // ✅ دکمه جدید ژنینو
+import GeninoButton from "@components/Core/GeninoButton"; // ✅ دکمه جدید ژنینو
 
 export default function GeninoAssessmentStart({
   step,

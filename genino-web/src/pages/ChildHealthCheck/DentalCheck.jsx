@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { SmilePlus as Tooth } from "lucide-react";
-import GeninoDNABackground from "../../components/GeninoDNABackground";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 
 /* 🦷 مرحله ۱ - بررسی رشد و رویش دندان‌ها */
 function ToothGrowthTest({ onComplete }) {
