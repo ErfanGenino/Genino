@@ -329,7 +329,7 @@ export default function VisionCheck() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-3xl sm:text-4xl font-extrabold text-yellow-700 mb-10 text-center drop-shadow-[0_0_12px_rgba(255,220,80,0.4)]"
+          className="text-3xl sm:text-4xl font-extrabold text-yellow-700 mb-20 text-center drop-shadow-[0_0_12px_rgba(255,220,80,0.4)]"
         >
           پایش بینایی کودک
         </motion.h1>
@@ -345,7 +345,7 @@ export default function VisionCheck() {
               transition={{ duration: 0.6 }}
               className="max-w-2xl text-center"
             >
-              <p className="text-gray-700 leading-relaxed mb-8">
+              <p className="text-gray-700 leading-relaxed mb-20">
                 این آزمون شامل چند بخش ساده برای بررسی توانایی دید کودک است.  
                 لطفاً توجه داشته باشید که این آزمون جایگزین معاینه تخصصی نیست.
               </p>

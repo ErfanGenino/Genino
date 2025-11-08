@@ -10,6 +10,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import GoldenModal from "../components/GoldenModal";
 import { useState, useEffect } from "react";
 import GeninoHealthButton from "../components/GeninoHealthButton";
+import GeninoAssessmentStart from "@components/GeninoAssessmentStart";
 
 
 

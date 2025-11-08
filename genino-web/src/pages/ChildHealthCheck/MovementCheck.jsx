@@ -317,9 +317,9 @@ export default function MovementCheck() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-3xl sm:text-4xl font-extrabold text-emerald-700 mb-10 text-center drop-shadow-[0_0_15px_rgba(13,148,136,0.3)]"
+          className="text-3xl sm:text-4xl font-extrabold text-emerald-700 mb-20 text-center drop-shadow-[0_0_15px_rgba(13,148,136,0.3)]"
         >
-          پایش رشد حرکتی و تعادل ⚖️
+          پایش رشد حرکتی و تعادل
         </motion.h1>
 
         {step >= 0 && step <= 2 && <ProgressBar step={step} />}
@@ -333,13 +333,13 @@ export default function MovementCheck() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.6 }}
-              className="max-w-3xl text-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 rounded-3xl shadow-[0_0_25px_rgba(13,148,136,0.2)] p-8 border border-emerald-100"
+              className="max-w-3xl text-center"
             >
-              <p className="text-gray-700 leading-relaxed mb-6">
+              <p className="text-gray-700 leading-relaxed mb-20">
                 این پایش به شما کمک می‌کند وضعیت رشد، تعادل و کنترل حرکتی کودک را بشناسید.  
                 روی هر سؤال، دکمهٔ <strong>ℹ️ چرا این سؤال؟</strong> را بزنید تا هدف، دلیل علمی و راهکار ژنینو را ببینید.
               </p>
-              <Btn onClick={() => setStep(0)}>شروع پایش</Btn>
+              <Btn onClick={() => setStep(0)}>شروع پایش رشد حرکتی و تعادل</Btn>
             </motion.section>
           )}
 
@@ -386,7 +386,7 @@ export default function MovementCheck() {
 
               <Btn
                 onClick={() =>
-                  navigate("/child-health-check/motor-report", {
+                  navigate("/child-health-check/movement-report", {
                     state: {
                       report: {
                         name: "حنا سمواتی",

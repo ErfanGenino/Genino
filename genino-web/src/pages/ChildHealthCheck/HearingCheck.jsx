@@ -331,9 +331,9 @@ export default function HearingCheck() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-3xl sm:text-4xl font-extrabold text-sky-700 mb-10 text-center drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+          className="text-3xl sm:text-4xl font-extrabold text-sky-700 mb-20 text-center drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]"
         >
-          پایش شنوایی کودک 🎧
+          پایش شنوایی کودک 
         </motion.h1>
 
         <AnimatePresence mode="wait">
@@ -345,13 +345,13 @@ export default function HearingCheck() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.6 }}
-              className="max-w-3xl text-center bg-gradient-to-br from-sky-50 via-white to-indigo-50 rounded-3xl shadow-[0_0_25px_rgba(56,189,248,0.2)] p-8 border border-sky-100"
+              className="max-w-3xl text-center"
             >
-              <p className="text-gray-700 leading-relaxed mb-6">
+              <p className="text-gray-700 leading-relaxed mb-20">
                 این پایش کمک می‌کند بدانید <strong>گوش‌ها، مسیر شنوایی و واکنش‌های کودک</strong> طبیعی هستند یا نیاز به بررسی تخصصی دارند.  
                 روی هر سؤال، دکمهٔ <strong>ℹ️ چرا این سؤال؟</strong> را بزنید تا هدف، دلیل علمی و راهکار را ببینید.
               </p>
-              <Btn onClick={() => setStep(0)}>شروع پایش</Btn>
+              <Btn onClick={() => setStep(0)}>شروع پایش شنوایی</Btn>
             </motion.section>
           )}
 

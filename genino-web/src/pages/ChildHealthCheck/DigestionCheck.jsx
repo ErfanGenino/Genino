@@ -486,9 +486,9 @@ export default function DigestionCheck() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-3xl sm:text-4xl font-extrabold text-emerald-700 mb-10 text-center drop-shadow-[0_0_12px_rgba(16,185,129,0.35)]"
+          className="text-3xl sm:text-4xl font-extrabold text-emerald-700 mb-20 text-center drop-shadow-[0_0_12px_rgba(16,185,129,0.35)]"
         >
-          پایش گوارش و بلع کودک 🌿
+          پایش گوارش و بلع کودک
         </motion.h1>
 
         <AnimatePresence mode="wait">
@@ -500,14 +500,14 @@ export default function DigestionCheck() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.6 }}
-              className="max-w-3xl text-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 rounded-3xl shadow-[0_0_25px_rgba(16,185,129,0.15)] p-8 border border-emerald-100"
+              className="max-w-3xl text-center"
             >
-              <p className="text-gray-700 leading-relaxed mb-6">
+              <p className="text-gray-700 leading-relaxed mb-20">
                 این پایش به شما کمک می‌کند بدانید آیا کودک <strong>غذا را درست می‌جود و می‌بلعد</strong>،
                 <strong> الگوی دفع و گوارش</strong> طبیعی دارد یا خیر، و <strong>عادات تغذیه‌ای</strong> او سالم است یا نه.  
                 روی هر سؤال، دکمهٔ <strong>ℹ️ چرا این سؤال؟</strong> را بزنید تا هدف و معنای پاسخ‌ها را ببینید.
               </p>
-              <Btn onClick={() => setStep(0)}>شروع پایش</Btn>
+              <Btn onClick={() => setStep(0)}>شروع پایش گوارش و بلع</Btn>
             </motion.section>
           )}
 
