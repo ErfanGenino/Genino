@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import { Eye } from "lucide-react";
+import GeninoAssessmentStart from "@components/Assessments/GeninoAssessmentStart";
 
 
 
@@ -312,7 +313,7 @@ function ArrowDirectionTest({ onComplete }) {
 /* 👁️ صفحه اصلی پایش بینایی */
 export default function VisionCheck() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(-1);
     const [colorResults, setColorResults] = useState([]);
   const [shapeResults, setShapeResults] = useState([]);
   const [arrowSuccess, setArrowSuccess] = useState(null);
@@ -325,37 +326,19 @@ export default function VisionCheck() {
         dir="rtl"
         className="relative z-10 flex flex-col items-center px-6 py-16 text-gray-800"
       >
-        <motion.h1
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="text-3xl sm:text-4xl font-extrabold text-emerald-700 mb-20 text-center drop-shadow-[0_0_12px_rgba(16,185,129,0.35)]"
-                >
-                  پایش گوارش و بلع کودک
-                </motion.h1>
-        
-                <AnimatePresence mode="wait">
-                  {/* آموزش مقدماتی */}
-                  {step === -1 && (
-                    <motion.section
-                      key="edu"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -30 }}
-                      transition={{ duration: 0.6 }}
-                      className="max-w-3xl text-center"
-                    >
-                      <p className="text-gray-700 leading-relaxed mb-20">
-                        این پایش به شما کمک می‌کند بدانید آیا کودک <strong>غذا را درست می‌جود و می‌بلعد</strong>،
-                        <strong> الگوی دفع و گوارش</strong> طبیعی دارد یا خیر، و <strong>عادات تغذیه‌ای</strong> او سالم است یا نه.  
-                        روی هر سؤال، دکمهٔ <strong>ℹ️ چرا این سؤال؟</strong> را بزنید تا هدف و معنای پاسخ‌ها را ببینید.
-                      </p>
-                      <Btn onClick={() => setStep(0)}>شروع پایش گوارش و بلع</Btn>
-                    </motion.section>
-          )}
+        <GeninoAssessmentStart
+  step={step}
+  setStep={setStep}
+  title="پایش بینایی کودک 👁️"
+  description={`این پایش به شما کمک می‌کند وضعیت بینایی، تشخیص رنگ‌ها و جهت‌ها در کودک را ارزیابی کنید.
+  روی هر سؤال، دکمهٔ ℹ️ «چرا این سؤال؟» را بزنید تا هدف و دلیل علمی آن را ببینید.`}
+  color="sky"
+  buttonLabel="شروع پایش بینایی"
+/>
+
 
           {/* مرحله ۱: رنگ‌ها */}
-          {step === 1 && (
+          {step === 0 && (
             <motion.section
               key="color-test"
               initial={{ opacity: 0, y: 30 }}
@@ -372,7 +355,7 @@ export default function VisionCheck() {
           )}
 
           {/* مرحله ۲: اشکال هندسی */}
-          {step === 2 && (
+          {step === 1 && (
             <motion.section
               key="shape-test"
               initial={{ opacity: 0, y: 30 }}
@@ -389,7 +372,7 @@ export default function VisionCheck() {
           )}
 
           {/* مرحله ۳: تشخیص جهت فلش‌ها */}
-{step === 3 && (
+{step === 2 && (
   <motion.section
     key="arrow-test"
     initial={{ opacity: 0, y: 30 }}
@@ -406,7 +389,7 @@ export default function VisionCheck() {
     <ArrowDirectionTest
   onComplete={(success) => {
     setArrowSuccess(success);
-    setStep(4);
+    setStep(3);
   }}
 />
   </motion.section>
@@ -414,7 +397,7 @@ export default function VisionCheck() {
 
           {/* مرحله ۴: نتیجه نهایی */}
 {/* مرحله ۴: نتیجه نهایی */}
-{step === 4 && (
+{step === 3 && (
   <motion.section
     key="result"
     initial={{ opacity: 0, scale: 0.9 }}
@@ -562,7 +545,7 @@ export default function VisionCheck() {
   </motion.section>
 )}
 
-        </AnimatePresence>
+       
 
         {step > 0 && step < 3 && (
           <motion.button
