@@ -259,12 +259,18 @@ useEffect(() => {
         ))}
       </div>
 
-      {/* 🔸 اسلایدر */}
-      <motion.div
-  className="relative w-full max-w-3xl h-72 sm:h-80 lg:h-96 mb-16 rounded-3xl overflow-hidden shadow-xl z-10"
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ duration: 0.8 }}
+
+      {/* 🔸 اسلایدر اصلی صفحه ورود ژنینو */}
+<motion.div
+  className="relative w-full max-w-3xl aspect-[16/9] mb-16 rounded-3xl overflow-hidden z-20"
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, ease: 'easeOut' }}
+  style={{
+    background: "transparent", // 🚫 هیچ رنگ زمینه‌ای
+    boxShadow: "none",         // 🚫 هیچ سایه‌ای
+    border: "none",            // 🚫 هیچ کادر یا لبه‌ای
+  }}
 >
   <PromoSlider
     variant="golden"
@@ -272,37 +278,38 @@ useEffect(() => {
     slides={[
       {
         id: 1,
-        text: "هر کودک، یک دنیا نوآوری ",
+        text: "هر کودک، یک دنیا نوآوری 🌿",
         sub: "ژنینو، همراه رشد و خلاقیت فرزندتان.",
         image: "/images/slides/authstart/1.jpg",
       },
       {
         id: 2,
-        text: "سلامت بانوان",
+        text: "سلامت بانوان 💛",
         sub: "با تحلیل داده‌ها و پیشنهادهای تخصصی.",
         image: "/images/slides/authstart/2.jpg",
       },
       {
         id: 3,
-        text: "سلامت آقایان",
-        sub: "همراه شما برای ساخت آینده ای سالم",
+        text: "سلامت آقایان 💪",
+        sub: "همراه شما برای ساخت آینده‌ای سالم.",
         image: "/images/slides/authstart/3.jpg",
       },
       {
         id: 4,
-        text: "پزشک من",
-        sub: "بایگانی پرونده های پزشکی شما",
+        text: "پزشک من 🩺",
+        sub: "بایگانی پرونده‌های پزشکی شما در ژنینو.",
         image: "/images/slides/authstart/4.jpg",
       },
       {
         id: 5,
-        text: "فروشگاه تخصصی",
-        sub: "خرید آسان و تخصصی کالاها و خدمات مورد نیاز شما",
+        text: "فروشگاه تخصصی 🛍️",
+        sub: "خرید آسان و تخصصی کالاها و خدمات مورد نیاز شما.",
         image: "/images/slides/authstart/5.jpg",
       },
     ]}
   />
 </motion.div>
+
 
 
 

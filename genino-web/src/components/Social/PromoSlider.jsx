@@ -5,7 +5,7 @@ export default function PromoSlider({
   slides = [],
   variant = "neutral",
   interval = 5,
-  height = "h-64", // 🔧 ارتفاع پیش‌فرض اضافه شد
+  height = "h-64",
   className = "",
 }) {
   const [index, setIndex] = useState(0);
@@ -60,9 +60,13 @@ export default function PromoSlider({
 
   return (
     <div
-      className={`relative w-full ${height} overflow-hidden rounded-3xl group select-none ${className}`} // 🔧 ارتفاع و کلاس سفارشی اضافه شد
+      className={`relative w-full ${height} overflow-hidden rounded-3xl select-none ${className}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      style={{
+        background: "transparent", // ☑️ کاملاً شفاف
+        boxShadow: "none", // ☑️ حذف سایه باکس
+      }}
     >
       <AnimatePresence initial={false} mode="wait" custom={direction}>
         <motion.div
@@ -79,29 +83,20 @@ export default function PromoSlider({
           style={{
             backgroundImage: slides[index].image
               ? `url(${slides[index].image})`
-              : slides[index].bg
-              ? `linear-gradient(to bottom right, ${slides[index].bg})`
               : "none",
             backgroundSize: "cover",
             backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
           }}
         >
-          {/* 🔹 افکت بک‌گراند طلایی */}
-          {variant === "golden" && slides[index].image && (
-            <>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-yellow-300/25 via-transparent to-yellow-200/15" />
-            </>
-          )}
-
-          {/* ✨ متن */}
+          {/* 🔹 حذف افکت‌های پس‌زمینه — فقط متن باقی می‌ماند */}
           <div className="relative z-10 px-6">
             <motion.h2
               key={slides[index].text}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 drop-shadow-[0_0_12px_rgba(255,215,0,0.4)]"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]"
             >
               {slides[index].text}
             </motion.h2>
@@ -110,11 +105,7 @@ export default function PromoSlider({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.1 }}
-              className={`text-base sm:text-lg md:text-xl font-light ${
-                variant === "golden"
-                  ? "text-yellow-50 drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]"
-                  : "text-gray-600"
-              }`}
+              className="text-base sm:text-lg md:text-xl font-light text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.6)]"
             >
               {slides[index].sub}
             </motion.p>
@@ -122,44 +113,34 @@ export default function PromoSlider({
         </motion.div>
       </AnimatePresence>
 
-      {/* 🔸 دکمه‌ها */}
+      {/* 🔸 دکمه‌ها بدون زمینه — فقط آیکون نیمه‌شفاف */}
       <div className="absolute bottom-6 flex justify-between w-full px-6 z-20">
         <button
           onClick={prevSlide}
-          className={`p-2 ${
-            variant === "golden" ? "bg-white/50" : "bg-white/80"
-          } hover:bg-white text-yellow-700 rounded-full shadow-md transition-all`}
+          className="p-2 text-white/80 hover:text-white bg-transparent"
         >
           ‹
         </button>
         <button
           onClick={nextSlide}
-          className={`p-2 ${
-            variant === "golden" ? "bg-white/50" : "bg-white/80"
-          } hover:bg-white text-yellow-700 rounded-full shadow-md transition-all`}
+          className="p-2 text-white/80 hover:text-white bg-transparent"
         >
           ›
         </button>
       </div>
 
-      {/* 🔸 نقاط وضعیت */}
+      {/* 🔸 نقاط وضعیت (شفاف و مینیمال) */}
       <div className="absolute bottom-3 flex gap-2 justify-center w-full z-20">
         {slides.map((_, i) => (
           <motion.div
             key={i}
             animate={{
-              scale: i === index ? [1, 1.2, 1] : 1,
-              opacity: i === index ? 1 : 0.5,
+              scale: i === index ? [1, 1.3, 1] : 1,
+              opacity: i === index ? 1 : 0.4,
             }}
             transition={{ duration: 0.6 }}
             className={`w-2.5 h-2.5 rounded-full ${
-              i === index
-                ? variant === "golden"
-                  ? "bg-yellow-400"
-                  : "bg-yellow-500"
-                : variant === "golden"
-                ? "bg-white/40"
-                : "bg-gray-300"
+              i === index ? "bg-yellow-400" : "bg-white/40"
             }`}
           />
         ))}
