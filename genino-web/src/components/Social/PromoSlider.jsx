@@ -1,7 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 
-export default function PromoSlider({ slides = [], variant = "neutral", interval = 5 }) {
+export default function PromoSlider({
+  slides = [],
+  variant = "neutral",
+  interval = 5,
+  height = "h-64", // 🔧 ارتفاع پیش‌فرض اضافه شد
+  className = "",
+}) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const timeoutRef = useRef(null);
@@ -31,7 +37,6 @@ export default function PromoSlider({ slides = [], variant = "neutral", interval
     setIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  // 🎯 کنترل سوایپ لمسی
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -55,7 +60,7 @@ export default function PromoSlider({ slides = [], variant = "neutral", interval
 
   return (
     <div
-      className="relative w-full h-full overflow-hidden rounded-3xl group select-none"
+      className={`relative w-full ${height} overflow-hidden rounded-3xl group select-none ${className}`} // 🔧 ارتفاع و کلاس سفارشی اضافه شد
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -81,7 +86,7 @@ export default function PromoSlider({ slides = [], variant = "neutral", interval
             backgroundPosition: "center",
           }}
         >
-          {/* 🔹 افکت بک‌گراند طلایی و فید نرم */}
+          {/* 🔹 افکت بک‌گراند طلایی */}
           {variant === "golden" && slides[index].image && (
             <>
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
@@ -89,14 +94,14 @@ export default function PromoSlider({ slides = [], variant = "neutral", interval
             </>
           )}
 
-          {/* ✨ محتوای متنی */}
+          {/* ✨ متن */}
           <div className="relative z-10 px-6">
             <motion.h2
               key={slides[index].text}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="text-3xl sm:text-4xl font-bold mb-3 drop-shadow-[0_0_12px_rgba(255,215,0,0.4)]"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 drop-shadow-[0_0_12px_rgba(255,215,0,0.4)]"
             >
               {slides[index].text}
             </motion.h2>
@@ -105,7 +110,7 @@ export default function PromoSlider({ slides = [], variant = "neutral", interval
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.1 }}
-              className={`text-lg sm:text-xl font-light ${
+              className={`text-base sm:text-lg md:text-xl font-light ${
                 variant === "golden"
                   ? "text-yellow-50 drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]"
                   : "text-gray-600"
@@ -117,7 +122,7 @@ export default function PromoSlider({ slides = [], variant = "neutral", interval
         </motion.div>
       </AnimatePresence>
 
-      {/* 🔸 دکمه‌های پایین‌تر */}
+      {/* 🔸 دکمه‌ها */}
       <div className="absolute bottom-6 flex justify-between w-full px-6 z-20">
         <button
           onClick={prevSlide}
@@ -137,7 +142,7 @@ export default function PromoSlider({ slides = [], variant = "neutral", interval
         </button>
       </div>
 
-      {/* 🔸 نقاط وضعیت پایین */}
+      {/* 🔸 نقاط وضعیت */}
       <div className="absolute bottom-3 flex gap-2 justify-center w-full z-20">
         {slides.map((_, i) => (
           <motion.div

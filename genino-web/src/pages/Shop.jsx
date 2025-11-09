@@ -349,6 +349,8 @@ export default function Shop() {
 <PromoSlider
   variant="golden"
   interval={7}
+  height="h-64 sm:h-80 md:h-96" // 👈 واکنش‌گرا
+  className="relative z-[60] my-10 shadow-lg"
   slides={[
     {
       id: 1,
@@ -370,6 +372,7 @@ export default function Shop() {
     },
   ]}
 />
+
 
 
       {/* 🟡 کارت‌های محصول */}
