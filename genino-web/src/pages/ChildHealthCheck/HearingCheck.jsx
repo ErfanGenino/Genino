@@ -354,16 +354,26 @@ useEffect(() => {
       target.style.opacity = "1";
       target.style.backgroundColor = "#ffffff";
 
-      // 📏 وضوح کنترل‌شده برای موبایل و لپ‌تاپ
-      const scale = window.devicePixelRatio > 2 ? 2.5 : 2;
-      const canvas = await html2canvas(target, {
-        scale,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        scrollX: 0,
-        scrollY: 0,
-      });
+      // 📏 وضوح کنترل‌شده و پایدار برای همه دستگاه‌ها
+const scale = Math.min(2, window.devicePixelRatio || 1.5);
+
+await document.fonts.ready; // ⏳ صبر کن تا فونت‌ها و استایل‌ها کامل لود بشن
+await new Promise((r) => setTimeout(r, 600)); // ⏳ تأخیر کوتاه برای اطمینان از رندر کامل
+
+const canvas = await html2canvas(target, {
+  scale,
+  useCORS: true,
+  backgroundColor: "#ffffff",
+  logging: false,
+  removeContainer: true,
+  scrollX: 0,
+  scrollY: 0,
+  width: target.scrollWidth,   // 🖼️ عرض واقعی محتوا
+  height: target.scrollHeight, // 🖼️ ارتفاع واقعی محتوا
+  windowWidth: document.documentElement.clientWidth,   // ✅ مخصوص موبایل
+  windowHeight: document.documentElement.clientHeight, // ✅ مخصوص موبایل
+});
+
 
       // ♻️ برگرداندن حالت قبلی صفحه
       dnaLayers.forEach((el) => (el.style.display = ""));
