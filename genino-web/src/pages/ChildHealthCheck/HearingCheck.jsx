@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import { Ear, Volume2, Headphones, Bell, Mic2, AlertCircle } from "lucide-react";
 import GeninoAssessmentStart from "@components/Assessments/GeninoAssessmentStart";
-import html2canvas from "html2canvas";
+import GeninoReportBox from "@components/Reports/GeninoReportBox";
 
 /* 🌟 دکمه هماهنگ */
 const Btn = ({ children, className = "", ...rest }) => (
@@ -333,79 +333,6 @@ export default function HearingCheck() {
   const level = total >= 25 ? "طبیعی" : total >= 18 ? "نسبتاً مطلوب" : "نیازمند بررسی";
 
 
-// ✅ ذخیره تصویر گزارش با تاخیر ایمن بعد از رندر
-useEffect(() => {
-  if (step !== 3 || savedOnce) return; // فقط وقتی به مرحله ۳ رسیدیم
-
-  const timer = setTimeout(async () => {
-    try {
-      const target = reportRef.current;
-      if (!target) return; // اگه هنوز رندر نشده بود، خروج
-
-      console.log("📸 شروع گرفتن عکس گزارش...");
-
-      // 🧩 حذف موقت DNA و افکت‌های شفاف برای جلوگیری از سیاهی
-      const dnaLayers = document.querySelectorAll(".genino-dna");
-      dnaLayers.forEach((el) => (el.style.display = "none"));
-
-      const oldFilter = target.style.backdropFilter;
-      const oldOpacity = target.style.opacity;
-      target.style.backdropFilter = "none";
-      target.style.opacity = "1";
-      target.style.backgroundColor = "#ffffff";
-
-      // 📏 وضوح کنترل‌شده و پایدار برای همه دستگاه‌ها
-const scale = Math.min(2, window.devicePixelRatio || 1.5);
-
-await document.fonts.ready; // ⏳ صبر کن تا فونت‌ها و استایل‌ها کامل لود بشن
-await new Promise((r) => setTimeout(r, 600)); // ⏳ تأخیر کوتاه برای اطمینان از رندر کامل
-
-const canvas = await html2canvas(target, {
-  scale,
-  useCORS: true,
-  backgroundColor: "#ffffff",
-  logging: false,
-  removeContainer: true,
-  scrollX: 0,
-  scrollY: 0,
-  width: target.scrollWidth,   // 🖼️ عرض واقعی محتوا
-  height: target.scrollHeight, // 🖼️ ارتفاع واقعی محتوا
-  windowWidth: document.documentElement.clientWidth,   // ✅ مخصوص موبایل
-  windowHeight: document.documentElement.clientHeight, // ✅ مخصوص موبایل
-});
-
-
-      // ♻️ برگرداندن حالت قبلی صفحه
-      dnaLayers.forEach((el) => (el.style.display = ""));
-      target.style.backdropFilter = oldFilter;
-      target.style.opacity = oldOpacity;
-
-      // ✂️ حذف حاشیه‌های سفید
-      const trimmed = trimWhite(canvas);
-      const image = trimmed.toDataURL("image/jpeg", 0.95);
-
-      // 🧠 ذخیره در localStorage
-      const label = `شنوایی ${new Date().toLocaleDateString("fa-IR")}`;
-      const newReport = {
-        id: crypto.randomUUID(), // 👈 شناسه یکتا
-        label,
-        image,
-        date: new Date().toISOString(),
-        meta: { ear, sound, env, total, level },
-      };
-
-      const prev = JSON.parse(localStorage.getItem("hearingReports") || "[]");
-      localStorage.setItem("hearingReports", JSON.stringify([newReport, ...prev]));
-
-      setSavedOnce(true);
-      console.log("✅ گزارش ذخیره شد:", newReport);
-    } catch (e) {
-      console.error("🚨 خطا در ذخیره گزارش:", e);
-    }
-  }, 1500);
-
-  return () => clearTimeout(timer);
-}, [step, savedOnce, ear, sound, env, total, level]);
 
 
 
@@ -454,84 +381,73 @@ const canvas = await html2canvas(target, {
           )}
 
           {step === 3 && (
-            <motion.section
-              ref={reportRef}
-              key="result"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-col items-center text-center bg-gradient-to-br from-sky-50 via-white to-indigo-50 rounded-3xl shadow-[0_0_40px_rgba(56,189,248,0.2)] p-10 mx-4 max-w-3xl border border-sky-100"
-            >
-              <Ear className="w-16 h-16 mb-4 text-sky-600 drop-shadow-[0_0_10px_rgba(56,189,248,0.35)]" />
-              <h2 className="text-3xl font-extrabold text-sky-700 mb-4">گزارش هوشمند شنوایی ژنینو 🎧</h2>
+  <div key="result" className="w-full flex flex-col items-center">
+    <GeninoReportBox
+      title="شنوایی کودک"
+      color="sky"
+      sections={[
+        {
+          title: "👂 ساختار گوش",
+          score: ear,
+          max: 15,
+          status: ear >= 12 ? "طبیعی" : ear >= 9 ? "نسبتاً طبیعی" : "نیاز به بررسی",
+          desc: "این مرحله سلامت فیزیکی گوش (مانند التهاب، ترشح، جرم و تعادل) را ارزیابی می‌کند.",
+        },
+        {
+          title: "🔊 واکنش به صدا و گفتار",
+          score: sound,
+          max: 9,
+          status: sound >= 7 ? "طبیعی" : sound >= 5 ? "نسبتاً طبیعی" : "نیاز به بررسی",
+          desc: "این مرحله تمرکز و حساسیت شنیداری کودک نسبت به صداهای محیطی را بررسی می‌کند.",
+        },
+        {
+          title: "🛡️ عادات و محیط شنوایی",
+          score: env,
+          max: 6,
+          status: env >= 5 ? "ایمن" : env >= 4 ? "قابل بهبود" : "در معرض خطر",
+          desc: "این مرحله میزان مواجههٔ کودک با صداهای بلند یا محیط‌های پرنویز را تحلیل می‌کند.",
+        },
+      ]}
+      summary={`مجموع امتیاز ${total}/30 است و وضعیت کلی کودک "${level}" ارزیابی می‌شود.`}
+      tips={[
+        ...(ear < 12
+          ? ["گوش کودک را از نظر جرم زیاد یا ترشح بررسی کنید. در صورت قرمزی یا ترشح مداوم به پزشک مراجعه شود."]
+          : []),
+        ...(sound < 7
+          ? ["واکنش کودک به صداهای آرام و مکالمات روزمره را زیر نظر بگیرید. در صورت تداوم افت، ادیومتری انجام شود."]
+          : []),
+        ...(env < 5
+          ? ["مدت و شدت استفاده از هدفون را محدود کنید. قانون ۶۰/۶۰ (حداکثر ۶۰ دقیقه با صدای زیر ۶۰٪) رعایت شود."]
+          : []),
+      ]}
+      reportDate={new Date()}
+      onSnapshot={() => {
+  const newReport = {
+    id: crypto.randomUUID(),
+    type: "hearing",
+    label: `شنوایی ${new Date().toLocaleDateString("fa-IR")}`,
+    date: new Date().toISOString(),
+    data: {
+      ear,
+      sound,
+      env,
+      total,
+      level,
+    },
+  };
 
-              <p className="text-gray-700 mb-6 leading-relaxed text-justify">
-                در این پایش سه مرحله‌ای، وضعیت شنوایی کودک بر اساس <strong>ساختار گوش، واکنش به صدا و عادات محیطی</strong> بررسی شد.
-                هدف این تست، شناسایی زودهنگام مشکلات احتمالی گوش میانی یا کاهش حساسیت به صداست.
-                <br />
-                نتایج زیر بر اساس پاسخ‌های شما تحلیل شده است:
-              </p>
+  const prev = JSON.parse(localStorage.getItem("childReports") || "[]");
+  localStorage.setItem("childReports", JSON.stringify([newReport, ...prev]));
 
-              <div className="grid sm:grid-cols-3 gap-6 w-full mb-8 text-right">
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-sky-100">
-                  <h3 className="text-sky-700 font-bold mb-2">👂 ساختار گوش</h3>
-                  <p className="text-gray-700 text-sm">
-                    امتیاز: {ear}/15 —{" "}
-                    {ear >= 12 ? <span className="text-green-600 font-semibold">طبیعی</span> : ear >= 9 ? <span className="text-yellow-600 font-semibold">نسبتاً طبیعی</span> : <span className="text-red-600 font-semibold">نیاز به بررسی</span>}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    این مرحله سلامت فیزیکی گوش (مانند التهاب، ترشح، جرم و تعادل) را ارزیابی می‌کند. امتیاز پایین در این بخش معمولاً نشانگر
-                    التهاب گوش بیرونی یا عملکرد نامناسب شیپور استاش است.
-                    <br />
-                    <em className="text-gray-400">(شیپور استاش: مجرایی که فشار گوش میانی را با محیط تنظیم می‌کند.)</em>
-                  </p>
-                </div>
+  console.log("✅ گزارش داده‌ای ذخیره شد:", newReport);
+}}
+    />
 
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-sky-100">
-                  <h3 className="text-sky-700 font-bold mb-2">🔊 واکنش به صدا و گفتار</h3>
-                  <p className="text-gray-700 text-sm">
-                    امتیاز: {sound}/9 —{" "}
-                    {sound >= 7 ? <span className="text-green-600 font-semibold">طبیعی</span> : sound >= 5 ? <span className="text-yellow-600 font-semibold">نسبتاً طبیعی</span> : <span className="text-red-600 font-semibold">نیاز به بررسی</span>}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    این بخش توانایی تشخیص و تمرکز کودک بر صداهای محیطی را می‌سنجد؛ از واکنش به صداهای معمول تا حساسیت به صداهای آرام.
-                    امتیاز پایین ممکن است نشانگر کاهش حساسیت دوطرفهٔ شنوایی باشد.
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-sky-100">
-                  <h3 className="text-sky-700 font-bold mb-2">🛡️ عادات و محیط شنوایی</h3>
-                  <p className="text-gray-700 text-sm">
-                    امتیاز: {env}/6 —{" "}
-                    {env >= 5 ? <span className="text-green-600 font-semibold">ایمن</span> : env >= 4 ? <span className="text-yellow-600 font-semibold">قابل بهبود</span> : <span className="text-red-600 font-semibold">در معرض خطر</span>}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    این مرحله، عادات صوتی کودک (مثل استفاده از هدفون یا حضور در محیط‌های پر سروصدا) را بررسی می‌کند. مواجههٔ مداوم با صداهای بالای ۸۵ دسی‌بل
-                    می‌تواند باعث آسیب سلول‌های مویی گوش داخلی شود.
-                    <br />
-                    <em className="text-gray-400">(dB: واحد شدت صدا؛ خیابان شلوغ ≈ ۸۵dB)</em>
-                  </p>
-                </div>
-              </div>
-
-              <div className="w-full text-right bg-white rounded-2xl border border-sky-100 shadow-sm p-6 mb-8">
-                <h4 className="text-sky-700 font-bold mb-3">🔍 تفسیر نهایی وضعیت شنوایی کودک:</h4>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  مجموع امتیاز این پایش <strong>{total}/30</strong> است که بیانگر وضعیت{" "}
-                  <strong className="text-sky-700">{level}</strong> می‌باشد.
-                  {level === "طبیعی" && <> شنوایی کودک در محدودهٔ سالم است و عملکرد گوش داخلی و میانی مناسب است.</>}
-                  {level === "نسبتاً مطلوب" && <> بعضی از شاخص‌ها نیاز به توجه بیشتر دارند. بهتر است طی دو ماه آینده دوباره بررسی شود.</>}
-                  {level === "نیازمند بررسی" && <> توصیه می‌شود جهت بررسی تخصصی‌تر، تست ادیومتری (Audiometry) انجام شود تا حساسیت فرکانسی گوش کودک ارزیابی گردد.</>}
-                </p>
-              </div>
-
-              <AdviceBox ear={ear} sound={sound} env={env} />
-
-              <Btn className="mt-2" onClick={() => navigate("/reports/child-health")}>
-                رفتن به بایگانی گزارش‌های کودک 📁
-              </Btn>
-            </motion.section>
-          )}
+    <Btn className="mt-6" onClick={() => navigate("/reports/child-health")}>
+      رفتن به بایگانی گزارش‌های کودک 📁
+    </Btn>
+  </div>
+)}
         </AnimatePresence>
 
         {step >= 0 && step <= 2 && (
