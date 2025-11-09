@@ -332,55 +332,71 @@ export default function HearingCheck() {
   const total = (ear || 0) + (sound || 0) + (env || 0);
   const level = total >= 25 ? "طبیعی" : total >= 18 ? "نسبتاً مطلوب" : "نیازمند بررسی";
 
-  // وقتی به مرحله ۳ رسیدیم، یک بار از گزارش عکس بگیریم و ذخیره کنیم
-  useEffect(() => {
-  if (step === 3 && !savedOnce) {
-    console.log("🩵 شروع ذخیره گزارش شنوایی...");
 
-    const timeout = setTimeout(async () => {
-      try {
-        // والد متحرک (DNA) رو پیدا و transform رو موقتاً حذف کن
-        const dna = document.querySelector(".genino-dna-bg");
-        if (dna) dna.style.transform = "none";
+// ✅ ذخیره تصویر گزارش با تاخیر ایمن بعد از رندر
+useEffect(() => {
+  if (step !== 3 || savedOnce) return; // فقط وقتی به مرحله ۳ رسیدیم
 
-        await new Promise((r) => setTimeout(r, 1000)); // صبر برای رندر کامل
+  const timer = setTimeout(async () => {
+    try {
+      const target = reportRef.current;
+      if (!target) return; // اگه هنوز رندر نشده بود، خروج
 
-        const target = document.querySelector("main");
-        const canvas = await html2canvas(target, {
-  scale: 2,
-  useCORS: true,
-  backgroundColor: "#ffffff",
-  x: target.offsetLeft + 20,
-  y: target.offsetTop + 20,
-  width: target.offsetWidth - 40,
-  height: target.offsetHeight - 40,
-});
+      console.log("📸 شروع گرفتن عکس گزارش...");
 
+      // 🧩 حذف موقت DNA و افکت‌های شفاف برای جلوگیری از سیاهی
+      const dnaLayers = document.querySelectorAll(".genino-dna");
+      dnaLayers.forEach((el) => (el.style.display = "none"));
 
-        // بعد از گرفتن عکس، transform رو برگردون
-        if (dna) dna.style.transform = "";
+      const oldFilter = target.style.backdropFilter;
+      const oldOpacity = target.style.opacity;
+      target.style.backdropFilter = "none";
+      target.style.opacity = "1";
+      target.style.backgroundColor = "#ffffff";
 
-        const image = canvas.toDataURL("image/jpeg", 0.92);
-        const label = `شنوایی ${new Date().toLocaleDateString("fa-IR")}`;
-        const newReport = {
-          label,
-          image,
-          date: new Date().toISOString(),
-          meta: { ear, sound, env, total, level },
-        };
+      // 📏 وضوح کنترل‌شده برای موبایل و لپ‌تاپ
+      const scale = window.devicePixelRatio > 2 ? 2.5 : 2;
+      const canvas = await html2canvas(target, {
+        scale,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+      });
 
-        const prev = JSON.parse(localStorage.getItem("hearingReports") || "[]");
-        localStorage.setItem("hearingReports", JSON.stringify([newReport, ...prev]));
-        setSavedOnce(true);
-        console.log("✅ گزارش شنوایی ذخیره شد:", newReport);
-      } catch (e) {
-        console.error("🚨 خطا در ذخیره گزارش:", e);
-      }
-    }, 1500);
+      // ♻️ برگرداندن حالت قبلی صفحه
+      dnaLayers.forEach((el) => (el.style.display = ""));
+      target.style.backdropFilter = oldFilter;
+      target.style.opacity = oldOpacity;
 
-    return () => clearTimeout(timeout);
-  }
-}, [step, savedOnce, ear, sound, env, level]);
+      // ✂️ حذف حاشیه‌های سفید
+      const trimmed = trimWhite(canvas);
+      const image = trimmed.toDataURL("image/jpeg", 0.95);
+
+      // 🧠 ذخیره در localStorage
+      const label = `شنوایی ${new Date().toLocaleDateString("fa-IR")}`;
+      const newReport = {
+        id: crypto.randomUUID(), // 👈 شناسه یکتا
+        label,
+        image,
+        date: new Date().toISOString(),
+        meta: { ear, sound, env, total, level },
+      };
+
+      const prev = JSON.parse(localStorage.getItem("hearingReports") || "[]");
+      localStorage.setItem("hearingReports", JSON.stringify([newReport, ...prev]));
+
+      setSavedOnce(true);
+      console.log("✅ گزارش ذخیره شد:", newReport);
+    } catch (e) {
+      console.error("🚨 خطا در ذخیره گزارش:", e);
+    }
+  }, 1500);
+
+  return () => clearTimeout(timer);
+}, [step, savedOnce, ear, sound, env, total, level]);
+
 
 
   return (
@@ -544,4 +560,55 @@ function AdviceBox({ ear, sound, env }) {
     </div>
   );
 }
+// ✂️ تابع حذف حاشیه‌های سفید از تصویر
+function trimWhite(canvas) {
+  const ctx = canvas.getContext("2d");
+  const { width, height } = canvas;
+  const pixels = ctx.getImageData(0, 0, width, height).data;
+
+  let top = 0, left = 0, right = width, bottom = height;
+  const isWhite = (i) =>
+    pixels[i] > 245 && pixels[i + 1] > 245 && pixels[i + 2] > 245 && pixels[i + 3] > 0;
+
+  // بالا
+  outer: for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!isWhite((y * width + x) * 4)) break outer;
+    }
+    top++;
+  }
+
+  // پایین
+  outer: for (let y = height - 1; y >= 0; y--) {
+    for (let x = 0; x < width; x++) {
+      if (!isWhite((y * width + x) * 4)) break outer;
+    }
+    bottom--;
+  }
+
+  // چپ
+  outer: for (let x = 0; x < width; x++) {
+    for (let y = top; y < bottom; y++) {
+      if (!isWhite((y * width + x) * 4)) break outer;
+    }
+    left++;
+  }
+
+  // راست
+  outer: for (let x = width - 1; x >= 0; x--) {
+    for (let y = top; y < bottom; y++) {
+      if (!isWhite((y * width + x) * 4)) break outer;
+    }
+    right--;
+  }
+
+  const w = Math.max(1, right - left);
+  const h = Math.max(1, bottom - top);
+  const out = document.createElement("canvas");
+  out.width = w;
+  out.height = h;
+  out.getContext("2d").drawImage(canvas, left, top, w, h, 0, 0, w, h);
+  return out;
+}
+
 

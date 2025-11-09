@@ -6,18 +6,17 @@ import { createPortal } from "react-dom";
 export default function ChildReportCategoryBox({ title, reports = [], storageKey }) {
   const [selected, setSelected] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [localReports, setLocalReports] = useState(reports); // ← فقط نگهدار محلی برای رندر مجدد
+  const [localReports, setLocalReports] = useState(reports);
 
-  // ✅ حذف گزارش از localStorage (بدون از بین رفتن کل دیتا)
-  const handleDelete = (label) => {
-    const updated = localReports.filter((r) => r.label !== label);
+  // ✅ حذف گزارش با شناسه یکتا
+  const handleDelete = (id) => {
+    const updated = localReports.filter((r) => r.id !== id);
     setLocalReports(updated);
 
     try {
-      // فقط اگر storageKey داده شده بود، توی localStorage هم بروزرسانی کن
       if (storageKey) {
         const existing = JSON.parse(localStorage.getItem(storageKey) || "[]");
-        const filtered = existing.filter((r) => r.label !== label);
+        const filtered = existing.filter((r) => r.id !== id);
         localStorage.setItem(storageKey, JSON.stringify(filtered));
       }
     } catch (err) {
@@ -29,12 +28,11 @@ export default function ChildReportCategoryBox({ title, reports = [], storageKey
 
   return (
     <section className="w-full max-w-6xl mb-12">
-      {/* 🎗️ تیتر دسته */}
       <h2 className="text-xl sm:text-2xl font-extrabold text-yellow-700 mb-5 drop-shadow-[0_0_10px_rgba(255,220,80,0.4)]">
         {title}
       </h2>
 
-      {/* 🖼️ گالری افقی */}
+      {/* 🖼️ گالری */}
       <div className="flex overflow-x-auto gap-5 pb-4 scrollbar-thin scrollbar-thumb-yellow-400/80 scrollbar-track-yellow-100/50">
         {localReports.length === 0 && (
           <p className="text-gray-500 text-sm italic">
@@ -42,9 +40,9 @@ export default function ChildReportCategoryBox({ title, reports = [], storageKey
           </p>
         )}
 
-        {localReports.map((r, i) => (
+        {localReports.map((r) => (
           <motion.div
-            key={i}
+            key={r.id}
             whileHover={{ scale: 1.05 }}
             className="relative flex-shrink-0 w-56 h-44 sm:w-64 sm:h-52 rounded-3xl overflow-hidden border border-yellow-200/80 shadow-[0_0_15px_rgba(255,215,0,0.15)] bg-white cursor-pointer transition"
             onClick={() => setSelected(r)}
@@ -55,7 +53,6 @@ export default function ChildReportCategoryBox({ title, reports = [], storageKey
               className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             />
 
-            {/* 🎛️ دکمه‌های اشتراک و حذف */}
             <div className="absolute bottom-2 right-2 flex gap-2">
               <button
                 onClick={(e) => {
@@ -84,7 +81,7 @@ export default function ChildReportCategoryBox({ title, reports = [], storageKey
         ))}
       </div>
 
-      {/* 🔍 مودال نمایش بزرگ تصویر */}
+      {/* 🔍 مودال تصویر */}
       {createPortal(
         <AnimatePresence>
           {selected && (
@@ -157,7 +154,7 @@ export default function ChildReportCategoryBox({ title, reports = [], storageKey
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => handleDelete(confirmDelete.label)}
+                    onClick={() => handleDelete(confirmDelete.id)}
                     className="bg-gradient-to-r from-red-500 to-red-400 text-white px-5 py-2 rounded-xl shadow-md font-semibold hover:from-red-600 hover:to-red-500"
                   >
                     بله، حذف کن
