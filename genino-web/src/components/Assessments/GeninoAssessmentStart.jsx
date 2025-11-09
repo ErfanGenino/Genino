@@ -1,6 +1,6 @@
 // 📄 src/components/GeninoAssessmentStart.jsx
 import { motion, AnimatePresence } from "framer-motion";
-import GeninoButton from "@components/Core/GeninoButton"; // ✅ دکمه جدید ژنینو
+import GeninoButton from "@components/Core/GeninoButton";
 
 export default function GeninoAssessmentStart({
   step,
@@ -10,16 +10,27 @@ export default function GeninoAssessmentStart({
   color = "emerald",
   buttonLabel = "شروع پایش",
 }) {
+  // 🎨 رنگ متن تیتر
   const colorMap = {
     emerald: "text-emerald-700 drop-shadow-[0_0_15px_rgba(13,148,136,0.3)]",
     sky: "text-sky-700 drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]",
     rose: "text-rose-700 drop-shadow-[0_0_15px_rgba(244,63,94,0.3)]",
     amber: "text-amber-700 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]",
+    genino: "text-genino-700 drop-shadow-[0_0_15px_rgba(255,215,0,0.3)]",
+  };
+
+  // 🎨 رنگ دکمه (یکدست با تیتر)
+  const buttonColorMap = {
+    emerald: "bg-emerald-500 hover:bg-emerald-600 shadow-[0_0_20px_rgba(13,148,136,0.3)]",
+    sky: "bg-sky-500 hover:bg-sky-600 shadow-[0_0_20px_rgba(56,189,248,0.35)]",
+    rose: "bg-rose-500 hover:bg-rose-600 shadow-[0_0_20px_rgba(244,63,94,0.35)]",
+    amber: "bg-amber-500 hover:bg-amber-600 shadow-[0_0_20px_rgba(245,158,11,0.35)]",
+    genino: "bg-genino-500 hover:bg-genino-600 shadow-[0_0_20px_rgba(255,215,0,0.4)]",
   };
 
   return (
     <>
-      {/* 🌟 تیتر بخش */}
+      {/* 🌟 تیتر */}
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -42,8 +53,12 @@ export default function GeninoAssessmentStart({
           >
             <p className="text-gray-700 leading-relaxed mb-20">{description}</p>
 
-            {/* ✅ استفاده از دکمه برند ژنینو */}
-            <GeninoButton onClick={() => setStep(0)}>
+            {/* ✅ دکمه با رنگ انتخابی بدون تداخل */}
+            <GeninoButton
+              onClick={() => setStep(0)}
+              className={`${buttonColorMap[color]} text-white font-bold px-8 py-3 rounded-full transition`}
+              noDefaultStyle
+            >
               {buttonLabel}
             </GeninoButton>
           </motion.section>

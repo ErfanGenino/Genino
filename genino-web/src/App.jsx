@@ -45,6 +45,12 @@ import FocusCheck from "./pages/ChildHealthCheck/FocusCheck";
 import SocialCheck from "./pages/ChildHealthCheck/SocialCheck";
 import BodyMetricsCheck from "./pages/ChildHealthCheck/BodyMetricsCheck";
 import VisionReport from "./pages/ChildHealthCheck/VisionReport";
+import GeneralReportsDashboard from "./pages/Reports/GeneralReportsDashboard";
+import ChildHealthReports from "./pages/Reports/ChildHealthReports";
+import FamilyHealthReports from "./pages/Reports/FamilyHealthReports";
+import MenHealthReports from "./pages/Reports/MenHealthReports";
+import WomenHealthReports from "./pages/Reports/WomenHealthReports";
+
 
 
 
@@ -114,6 +120,12 @@ export default function App() {
         <Route path="/child-health-check/social" element={<SocialCheck />} />
         <Route path="/child-health-check/bodymetrics" element={<BodyMetricsCheck />} />
         <Route path="/child-health-check/vision-report" element={<VisionReport />} />
+        <Route path="/reports" element={<GeneralReportsDashboard />} />
+        <Route path="/reports/child-health" element={<ChildHealthReports />} />
+        <Route path="/reports/family-health" element={<FamilyHealthReports />} />
+        <Route path="/reports/men-health" element={<MenHealthReports />} />
+        <Route path="/reports/women-health" element={<WomenHealthReports />} />
+
       </Routes>
     </>
   );

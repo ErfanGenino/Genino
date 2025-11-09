@@ -4,9 +4,12 @@ import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import GoldenModal from "@components/Core/GoldenModal";
 import { Link } from "react-router-dom";
 import { HeartPulse, Brain, Activity, Eye, Ear, Smile, Utensils, Move } from "lucide-react";
+import GeninoReportButton from "@components/Core/GeninoReportButton";
+import { useNavigate } from "react-router-dom";
 
 export default function ChildHealthCheck() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const navigate = useNavigate(); // 👈 این خط ضروریه
 
   // 🌕 داده‌های سکه‌ها
   const physicalChecks = [
@@ -112,6 +115,15 @@ export default function ChildHealthCheck() {
             ))}
           </div>
         </section>
+
+        {/* 📊 دکمه مشاهده گزارش‌ها */}
+<div className="mt-10">
+  <GeninoReportButton
+    label="📊 مشاهده گزارش پایش‌های انجام‌شده"
+    onClick={() => navigate("/reports/child-health")}
+  />
+</div>
+
 
         {/* ⚖️ یادآوری کوچک پایین صفحه */}
         <p className="text-xs text-gray-600 text-center max-w-lg leading-relaxed border-t border-yellow-100 pt-6">

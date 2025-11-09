@@ -14,7 +14,7 @@ export default function GeninoDNABackground({
   children,
 }) {
   return (
-    <div className={`relative min-h-screen w-full overflow-hidden z-0 ${className}`}>
+    <div className={`relative min-h-screen w-full overflow-hidden z-0 genino-dna-bg ${className}`}>
       {/* 🧬 لایه بک‌گراند DNA */}
       <div className="absolute inset-0 overflow-hidden -z-10 pointer-events-none">
         {Array.from({ length: strands }).map((_, i) => (
