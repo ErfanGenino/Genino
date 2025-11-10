@@ -1,38 +1,36 @@
-// 📄 src/pages/Reports/ChildHealthReports.jsx
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import HorizontalScrollReports from "@components/Reports/HorizontalScrollReports";
 import MiniReportBox from "@components/Reports/MiniReportBox";
-import ReportDetailModal from "@components/Reports/ReportDetailModal"; // ✅ اضافه شد
-import { FileHeart } from "lucide-react";
+import ReportDetailModal from "@components/Reports/ReportDetailModal";
 import GeninoDNABackground from "@components/Core/GeninoDNABackground";
+import { FileHeart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function ChildHealthReports() {
   const [reports, setReports] = useState([]);
-  const [selectedReport, setSelectedReport] = useState(null); // ✅ مودال جزئیات
+  const [selectedReport, setSelectedReport] = useState(null);
 
-  // 📦 خواندن داده از localStorage
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("childReports") || "[]");
-      setReports(saved);
-    } catch (e) {
-      console.error("❌ خطا در خواندن گزارش‌ها:", e);
-    }
+    const saved = JSON.parse(localStorage.getItem("childReports") || "[]");
+    setReports(saved);
   }, []);
 
-  // 🗑️ حذف گزارش
+  // فیلتر گزارش‌ها بر اساس نوع
+  const hearingReports = reports.filter((r) => r.type === "hearing");
+  const visionReports = reports.filter((r) => r.type === "vision");
+  const dentalReports = reports.filter((r) => r.type === "dental");
+
   const handleDelete = (r) => {
     const updated = reports.filter((x) => x.id !== r.id);
     setReports(updated);
     localStorage.setItem("childReports", JSON.stringify(updated));
   };
 
-  // 🔗 اشتراک‌گذاری
   const handleShare = (r) => {
-    const text = `📋 گزارش ${r.label}\n\nوضعیت: ${r.data.level}\nامتیاز کل: ${r.data.total}/30`;
-    navigator.share
-      ? navigator.share({ text })
-      : alert(text);
+    const text = `📋 گزارش ${r.label}\nوضعیت: ${r.data.level}\nامتیاز کل: ${
+      r.data.total || r.data.score
+    }`;
+    navigator.share ? navigator.share({ text }) : alert(text);
   };
 
   return (
@@ -44,7 +42,8 @@ export default function ChildHealthReports() {
         <motion.h1
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl sm:text-4xl font-extrabold text-yellow-700 mb-10 drop-shadow-[0_0_10px_rgba(255,215,0,0.4)]"
+          className="text-3xl sm:text-4xl font-extrabold text-yellow-700 mb-10 
+                     drop-shadow-[0_0_10px_rgba(255,215,0,0.4)]"
         >
           📁 بایگانی گزارش‌های سلامت کودک
         </motion.h1>
@@ -62,26 +61,93 @@ export default function ChildHealthReports() {
             </motion.p>
           ) : (
             <motion.div
-              key="list"
+              key="groups"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-wrap gap-5 justify-center w-full max-w-6xl"
+              className="w-full max-w-6xl space-y-10"
             >
-              {reports.map((r) => (
-                <MiniReportBox
-                  key={r.id}
-                  report={r}
-                  onShare={handleShare}
-                  onDelete={handleDelete}
-                  onOpen={() => setSelectedReport(r)} // ✅ باز کردن مودال
-                />
-              ))}
+              {/* 🟡 پایش بینایی */}
+              {visionReports.length > 0 && (
+                <section>
+                  <h3 className="font-extrabold text-amber-700 mb-3">
+                    👁️ پایش بینایی
+                  </h3>
+                  <HorizontalScrollReports color="amber">
+  {visionReports.map((r) => (
+    <div
+      key={r.id}
+      className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+      style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+    >
+      <MiniReportBox
+        report={r}
+        onShare={handleShare}
+        onDelete={handleDelete}
+        onOpen={() => setSelectedReport(r)}
+      />
+    </div>
+  ))}
+</HorizontalScrollReports>
+
+                </section>
+              )}
+
+              {/* 🔵 پایش شنوایی */}
+              {hearingReports.length > 0 && (
+                <section>
+                  <h3 className="font-extrabold text-sky-700 mb-3">
+                    🎧 پایش شنوایی
+                  </h3>
+                  <HorizontalScrollReports color="sky">
+  {hearingReports.map((r) => (
+    <div
+      key={r.id}
+      className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+      style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+    >
+      <MiniReportBox
+        report={r}
+        onShare={handleShare}
+        onDelete={handleDelete}
+        onOpen={() => setSelectedReport(r)}
+      />
+    </div>
+  ))}
+</HorizontalScrollReports>
+                </section>
+              )}
+
+              {/* 🌸 پایش سلامت دندان‌ها */}
+{dentalReports.length > 0 && (
+  <section>
+    <h3 className="font-extrabold text-rose-700 mb-3">
+      🦷 پایش سلامت دندان‌ها
+    </h3>
+    <HorizontalScrollReports color="rose">
+      {dentalReports.map((r) => (
+        <div
+          key={r.id}
+          className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+          style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+        >
+          <MiniReportBox
+            report={r}
+            onShare={handleShare}
+            onDelete={handleDelete}
+            onOpen={() => setSelectedReport(r)}
+          />
+        </div>
+      ))}
+    </HorizontalScrollReports>
+  </section>
+)}
+
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ✅ مودال جزئیات گزارش */}
+        {/* ✅ مودال جزئیات */}
         <ReportDetailModal
           report={selectedReport}
           onClose={() => setSelectedReport(null)}
@@ -95,10 +161,7 @@ export default function ChildHealthReports() {
           className="mt-12 text-center text-gray-500 text-sm flex flex-col items-center gap-2"
         >
           <FileHeart className="w-6 h-6 text-yellow-500" />
-          <p>
-            گزارش‌های شما به‌صورت آفلاین ذخیره می‌شوند و فقط برای شما قابل
-            مشاهده‌اند.
-          </p>
+          <p>گزارش‌های شما به‌صورت آفلاین ذخیره می‌شوند و فقط برای شما قابل مشاهده‌اند.</p>
         </motion.div>
       </main>
     </GeninoDNABackground>

@@ -1,4 +1,4 @@
-// 📄 src/components/HorizontalScrollGalleryNeutral.jsx
+// 📄 src/components/HorizontalScrollGallery.jsx
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 

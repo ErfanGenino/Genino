@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { SmilePlus as Tooth } from "lucide-react";
 import GeninoDNABackground from "@components/Core/GeninoDNABackground";
+import GeninoReportBox from "@components/Reports/GeninoReportBox";
+
 
 /* 🦷 مرحله ۱ - بررسی رشد و رویش دندان‌ها */
 function ToothGrowthTest({ onComplete }) {
@@ -59,8 +61,8 @@ function ToothGrowthTest({ onComplete }) {
             whileTap={{ scale: 0.97 }}
             className={`p-4 rounded-2xl border text-sm sm:text-base transition-all ${
   selected?.id === opt.id
-    ? "bg-blue-100 border-blue-400 text-blue-900 font-semibold"
-    : "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100"
+    ? "bg-rose-100 border-rose-400 text-rose-900 font-semibold"
+    : "bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100"
 }`}
           >
             {opt.title}
@@ -120,8 +122,8 @@ function ToothConditionTest({ onComplete }) {
             whileTap={{ scale: 0.97 }}
             className={`p-4 rounded-2xl border text-sm sm:text-base transition-all ${
               selected?.id === opt.id
-                ? "bg-blue-100 border-blue-400 text-blue-800 font-semibold"
-                : "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100"
+                ? "bg-rose-100 border-rose-400 text-rose-800 font-semibold"
+                : "bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100"
 
             }`}
           >
@@ -182,8 +184,8 @@ function OralHygieneTest({ onComplete }) {
               onClick={() => handle("brush", opt.value)}
               className={`${buttonStyle} ${
                 answers.brush === opt.value
-                  ? "bg-blue-200 border-blue-400 text-blue-900 font-semibold shadow-inner"
-                  : "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
+                  ? "bg-rose-200 border-rose-400 text-rose-900 font-semibold shadow-inner"
+                  : "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:border-rose-300"
               }`}
             >
               {opt.label}
@@ -205,8 +207,8 @@ function OralHygieneTest({ onComplete }) {
               onClick={() => handle("fluoride", opt.value)}
               className={`${buttonStyle} ${
                 answers.fluoride === opt.value
-                  ? "bg-blue-200 border-blue-400 text-blue-900 font-semibold shadow-inner"
-                  : "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
+                  ? "bg-rose-200 border-rose-400 text-rose-900 font-semibold shadow-inner"
+                  : "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:border-rose-300"
               }`}
             >
               {opt.label}
@@ -228,8 +230,8 @@ function OralHygieneTest({ onComplete }) {
               onClick={() => handle("sweets", opt.value)}
               className={`${buttonStyle} ${
                 answers.sweets === opt.value
-                  ? "bg-blue-200 border-blue-400 text-blue-900 font-semibold shadow-inner"
-                  : "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
+                  ? "bg-rose-200 border-rose-400 text-rose-900 font-semibold shadow-inner"
+                  : "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:border-rose-300"
               }`}
             >
               {opt.label}
@@ -252,8 +254,8 @@ function OralHygieneTest({ onComplete }) {
               onClick={() => handle("dentist", opt.value)}
               className={`${buttonStyle} ${
                 answers.dentist === opt.value
-                  ? "bg-blue-200 border-blue-400 text-blue-900 font-semibold shadow-inner"
-                  : "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
+                  ? "bg-rose-200 border-rose-400 text-rose-900 font-semibold shadow-inner"
+                  : "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:border-rose-300"
               }`}
             >
               {opt.label}
@@ -298,7 +300,7 @@ export default function DentalCheck() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-3xl sm:text-4xl font-extrabold text-blue-700 mb-10 text-center drop-shadow-[0_0_12px_rgba(80,150,255,0.4)]"
+          className="text-3xl sm:text-4xl font-extrabold text-rose-700 mb-10 text-center drop-shadow-[0_0_12px_rgba(244,114,182,0.4)]"
         >
           پایش سلامت دهان و دندان کودک 🦷
         </motion.h1>
@@ -311,9 +313,9 @@ export default function DentalCheck() {
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -30 }}
     transition={{ duration: 0.6 }}
-    className="max-w-3xl text-center bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-3xl shadow-[0_0_25px_rgba(100,180,255,0.2)] p-10 border border-blue-200"
+    className="max-w-3xl text-center bg-gradient-to-br from-rose-50 via-white to-rose-100 rounded-3xl shadow-[0_0_25px_rgba(244,114,182,0.2)] p-10 border border-rose-200"
   >
-    <h2 className="text-2xl font-bold text-blue-700 mb-4">
+    <h2 className="text-2xl font-bold text-rose-700 mb-4">
        آگاهی پیش از پایش دندان کودک
     </h2>
 
@@ -322,7 +324,7 @@ export default function DentalCheck() {
       آگاهی از این روند به شما کمک می‌کند بدانید آیا رشد دندانی کودک در مسیر طبیعی قرار دارد یا نه.
     </p>
 
-    <div className="text-right bg-white rounded-2xl shadow-md p-5 border border-blue-100 mb-6">
+    <div className="text-right bg-white rounded-2xl shadow-md p-5 border border-rose-100 mb-6">
       <ul className="text-gray-700 leading-relaxed text-sm sm:text-base list-disc pr-5 space-y-2">
         <li>👶 <strong>۶ تا ۱۰ ماهگی:</strong> شروع رویش دندان‌های جلویی پایین. 🔹 تعداد دندان‌ها:
 
@@ -403,8 +405,8 @@ export default function DentalCheck() {
       onClick={() => setStep(0)}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="px-10 py-4 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white 
-                 font-bold rounded-full shadow-[0_0_25px_rgba(100,180,255,0.4)]"
+      className="px-10 py-4 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 text-white 
+                 font-bold rounded-full shadow-[0_0_25px_rgba(244,114,182,0.4)]"
     >
       متوجه شدم، بریم سراغ پایش 🧾
     </motion.button>
@@ -427,8 +429,8 @@ export default function DentalCheck() {
                 onClick={nextStep}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-10 py-4 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white 
-                           font-bold rounded-full shadow-[0_0_25px_rgba(100,180,255,0.6)]"
+                className="px-10 py-4 bg-gradient-to-r from-rose-400 via-rose-500 to-rose-600 text-white 
+                           font-bold rounded-full shadow-[0_0_25px_rgba(244,114,182,0.6)]"
               >
                 شروع پایش سلامت دهان
               </motion.button>
@@ -448,68 +450,113 @@ export default function DentalCheck() {
           )}
 
           {step === 4 && (
-            <motion.section
-              key="report"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-col items-center text-center bg-gradient-to-br from-blue-50 via-white to-blue-100 
-                         rounded-3xl shadow-[0_0_40px_rgba(100,180,255,0.3)] p-10 mx-4 max-w-3xl border border-blue-200"
-            >
-              <Tooth className="w-16 h-16 mb-4 text-blue-600 drop-shadow-[0_0_12px_rgba(100,180,255,0.5)]" />
-              <h2 className="text-3xl font-extrabold text-blue-700 mb-4">
-                گزارش هوشمند سلامت دهان و دندان ژنینو 🦷
-              </h2>
+  <motion.section
+    key="report"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className="w-full max-w-3xl flex flex-col items-center"
+  >
+    <GeninoReportBox
+      title="سلامت دهان و دندان کودک"
+      color="rose"
+      sections={[
+        {
+          title: "🦷 رشد دندان‌ها",
+          score: growth?.score ?? 0,
+          max: 3,
+          status:
+            (growth?.score ?? 0) >= 3
+              ? "طبیعی"
+              : (growth?.score ?? 0) >= 2
+              ? "قابل‌قبول"
+              : "نیاز به بررسی",
+          desc: growth?.desc || "وضعیت رشد دندانی کودک بررسی شد.",
+        },
+        {
+          title: "🍭 سلامت ظاهری دندان‌ها",
+          score: condition?.score ?? 0,
+          max: 3,
+          status:
+            (condition?.score ?? 0) >= 3
+              ? "سالم"
+              : (condition?.score ?? 0) >= 2
+              ? "قابل‌قبول"
+              : "نیازمند توجه",
+          desc: condition?.label || "ظاهر دندان‌ها از نظر لک و پوسیدگی بررسی شد.",
+        },
+        {
+          title: "🪥 عادات بهداشتی دهان",
+          score: hygiene ?? 0,
+          max: 12,
+          status:
+            (hygiene ?? 0) >= 10
+              ? "عالی"
+              : (hygiene ?? 0) >= 7
+              ? "قابل‌قبول"
+              : "نیازمند بهبود",
+          desc: "مسواک، فلوراید، مصرف قند و مراجعهٔ دوره‌ای بررسی شدند.",
+        },
+      ]}
+      summary={`مجموع امتیاز ${totalScore}/100 — وضعیت کلی کودک "${
+        totalScore >= 85 ? "عالی" : totalScore >= 60 ? "قابل‌قبول" : "نیازمند توجه"
+      }" ارزیابی می‌شود.`}
+      tips={[
+        ...(growth?.score < 3
+          ? [
+              "در صورت تأخیر محسوس در رویش دندان‌ها یا ناهماهنگی آشکار، مشاوره با دندان‌پزشک کودکان توصیه می‌شود.",
+            ]
+          : []),
+        ...(condition?.score < 3
+          ? [
+              "وجود لک سفید یا قهوه‌ای در سطح دندان ممکن است نشانهٔ آغاز پوسیدگی باشد؛ بررسی تخصصی انجام شود.",
+            ]
+          : []),
+        ...(hygiene < 10
+          ? [
+              "مسواک روزی دو بار با خمیردندان فلورایددار، کاهش مصرف میان‌وعده‌های شیرین، و ویزیت دوره‌ای دندان‌پزشک پیشنهاد می‌شود.",
+            ]
+          : []),
+      ]}
+      reportDate={new Date()}
+      onSnapshot={() => {
+        // ✅ ذخیره در localStorage (مثل گام قبل)
+        const newReport = {
+          id: crypto.randomUUID(),
+          type: "dental",
+          label: `دندان ${new Date().toLocaleDateString("fa-IR")}`,
+          date: new Date().toISOString(),
+          data: {
+            growth: growth?.score ?? 0,
+            condition: condition?.score ?? 0,
+            hygiene: hygiene ?? 0,
+            total: totalScore,
+            level:
+              totalScore >= 85
+                ? "عالی"
+                : totalScore >= 60
+                ? "قابل‌قبول"
+                : "نیازمند توجه",
+          },
+        };
+        const prev = JSON.parse(localStorage.getItem("childReports") || "[]");
+        localStorage.setItem("childReports", JSON.stringify([newReport, ...prev]));
+        console.log("✅ گزارش سلامت دندان ذخیره شد:", newReport);
+      }}
+    />
 
-              <div className="grid sm:grid-cols-3 gap-6 w-full mb-8 text-center">
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-blue-100">
-                  <h3 className="text-blue-700 font-bold mb-2">🦷 رشد دندان‌ها</h3>
-                  <p className="text-gray-700 text-sm mb-2">{growth?.desc}</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-blue-100">
-                  <h3 className="text-blue-700 font-bold mb-2">🍭 سلامت ظاهری</h3>
-                  <p className="text-gray-700 text-sm mb-2">{condition?.label}</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-blue-100">
-                  <h3 className="text-blue-700 font-bold mb-2">🪥 عادات بهداشتی</h3>
-                  <p className="text-gray-700 text-sm mb-2">
-                    امتیاز عادت‌های بهداشتی: {hygiene}/12
-                  </p>
-                </div>
-              </div>
+    <motion.button
+      onClick={() => navigate("/reports/child-health")}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="mt-6 px-8 py-3 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 
+                 text-white font-bold rounded-full shadow-[0_0_25px_rgba(244,114,182,0.5)]"
+    >
+      رفتن به بایگانی گزارش‌های کودک 📁
+    </motion.button>
+  </motion.section>
+)}
 
-              <div className="bg-blue-50 px-8 py-4 rounded-full border border-blue-200 shadow-inner mb-8">
-                <span className="text-lg font-bold text-blue-800">
-                  🌟 امتیاز سلامت دهان کودک: {totalScore}/100
-                </span>
-              </div>
-
-              <p className="text-gray-700 text-base leading-relaxed mb-8 max-w-2xl">
-                {report}
-              </p>
-
-              <motion.button
-                onClick={() =>
-                  navigate("/child-health-check/dental-report", {
-                    state: {
-                      report: {
-                        name: "حنا سمواتی",
-                        date: new Date().toLocaleDateString("fa-IR"),
-                        score: totalScore,
-                        analysis: report,
-                      },
-                    },
-                  })
-                }
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
-                           text-white font-bold rounded-full shadow-[0_0_25px_rgba(100,180,255,0.6)] mt-4"
-              >
-                مشاهده گزارش رسمی ژنینو 🧾
-              </motion.button>
-            </motion.section>
-          )}
         </AnimatePresence>
       </main>
     </GeninoDNABackground>

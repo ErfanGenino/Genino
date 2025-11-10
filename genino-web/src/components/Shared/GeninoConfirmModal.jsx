@@ -1,5 +1,5 @@
-// 📄 src/components/GeninoConfirmModal.jsx
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 export default function GeninoConfirmModal({
   show = false,
@@ -10,11 +10,14 @@ export default function GeninoConfirmModal({
   onConfirm,
   onCancel,
 }) {
-  return (
+  // اگر محیط مرورگر در دسترس نباشد (مثلاً SSR یا تست)، مودال را نرندر نکن
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <AnimatePresence>
       {show && (
         <motion.div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -54,6 +57,7 @@ export default function GeninoConfirmModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
