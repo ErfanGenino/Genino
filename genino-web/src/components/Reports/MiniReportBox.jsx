@@ -10,7 +10,7 @@ export default function MiniReportBox({ report, onShare, onDelete, onOpen }) {
 
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // 🎨 رنگ وضعیت
+  // 🎨 رنگ وضعیت بر اساس سطح
   const getColor = () => {
     switch (data.level) {
       case "طبیعی":
@@ -26,33 +26,25 @@ export default function MiniReportBox({ report, onShare, onDelete, onOpen }) {
     }
   };
 
-  // 🧠 تشخیص نوع و حداکثر امتیاز کل
+  // 🧮 محاسبه امتیاز کل و حداکثر برای هر نوع پایش
   const { totalValue, totalMax } = useMemo(() => {
-    if (type === "hearing") {
-      return { totalValue: data.total ?? 0, totalMax: 30 };
-    }
-    if (type === "vision") {
-      return { totalValue: data.score ?? 0, totalMax: 100 };
-    }
-    // سایر انواع (فیوچر-پروف)
+    if (type === "hearing") return { totalValue: data.total ?? 0, totalMax: 30 };
+    if (type === "vision") return { totalValue: data.score ?? 0, totalMax: 100 };
+    if (type === "movement") return { totalValue: data.total ?? 0, totalMax: 27 }; // ✅ جدید
     return { totalValue: data.total ?? data.score ?? 0, totalMax: 100 };
   }, [type, data]);
 
-  // 👁️ استخراج امن جزئیات بینایی (پشتیبانی از نسخه‌های قدیمی)
+  // 👁️ جزئیات اختصاصی بینایی (برای نسخه‌های قدیمی و جدید)
   const visionDetails = useMemo(() => {
     if (type !== "vision") return null;
-
-    // نسخه جدید
-    const colors = typeof data.colors === "number" ? data.colors : undefined; // 0..3
-    const shapes = typeof data.shapes === "number" ? data.shapes : undefined; // 0..3
+    const colors = typeof data.colors === "number" ? data.colors : undefined;
+    const shapes = typeof data.shapes === "number" ? data.shapes : undefined;
     const dirScore =
       typeof data?.direction?.score5 === "number"
         ? data.direction.score5
-        : // fallback: اگر stagesPassed بود تبدیل به امتیاز 0..5
-          typeof data?.direction?.stagesPassed === "number"
-          ? Math.max(0, Math.min(5, data.direction.stagesPassed))
-          : undefined;
-
+        : typeof data?.direction?.stagesPassed === "number"
+        ? Math.max(0, Math.min(5, data.direction.stagesPassed))
+        : undefined;
     return { colors, shapes, dirScore };
   }, [type, data]);
 
@@ -77,14 +69,13 @@ export default function MiniReportBox({ report, onShare, onDelete, onOpen }) {
         وضعیت کلی: {data.level ?? "—"}
       </div>
 
-      {/* 📊 جزئیات */}
+      {/* 📊 جزئیات عددی */}
       <div className="text-sm text-gray-700 leading-relaxed space-y-1">
-        {/* امتیاز کل (با حداکثر درست) */}
         <p>
           امتیاز کل: <span className="font-bold">{totalValue}</span> از {totalMax}
         </p>
 
-        {/* 🎧 شنیداری */}
+        {/* 🎧 پایش شنوایی */}
         {type === "hearing" && (
           <>
             <p>ساختار گوش: {Number.isFinite(data.ear) ? data.ear : "—"}/15</p>
@@ -93,12 +84,39 @@ export default function MiniReportBox({ report, onShare, onDelete, onOpen }) {
           </>
         )}
 
-        {/* 👁️ بینایی */}
+        {/* 👁️ پایش بینایی */}
         {type === "vision" && (
           <>
             <p>تشخیص رنگ‌ها: {Number.isFinite(visionDetails?.colors) ? visionDetails.colors : "—"}/3</p>
             <p>تشخیص اشکال: {Number.isFinite(visionDetails?.shapes) ? visionDetails.shapes : "—"}/3</p>
             <p>تشخیص جهت‌ها: {Number.isFinite(visionDetails?.dirScore) ? visionDetails.dirScore : "—"}/5</p>
+          </>
+        )}
+
+        {/* 🦷 سلامت دهان و دندان */}
+        {type === "dental" && (
+          <>
+            <p>رشد دندان‌ها: {data?.growth?.score ? `${data.growth.score}/3` : "—"}</p>
+            <p>سلامت ظاهری: {data?.condition?.score ? `${data.condition.score}/3` : "—"}</p>
+            <p>عادات بهداشتی: {typeof data?.hygiene === "number" ? `${data.hygiene}/12` : "—"}</p>
+          </>
+        )}
+
+        {/* 🌿 گوارش و بلع */}
+        {type === "digestion" && (
+          <>
+            <p>بلع و جویدن: {data?.swallowing ?? "—"}/12</p>
+            <p>گوارش عمومی: {data?.bowel ?? "—"}/12</p>
+            <p>عادات تغذیه: {data?.habits ?? "—"}/12</p>
+          </>
+        )}
+
+        {/* ⚖️ رشد حرکتی و تعادل (جدید) */}
+        {type === "movement" && (
+          <>
+            <p>حرکت درشت: {Number.isFinite(data.gross) ? data.gross : "—"}/9</p>
+            <p>حرکت ظریف: {Number.isFinite(data.fine) ? data.fine : "—"}/9</p>
+            <p>تعادل: {Number.isFinite(data.balance) ? data.balance : "—"}/9</p>
           </>
         )}
       </div>

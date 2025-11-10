@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import { Utensils, Salad, CupSoda, Apple, Info, Smile } from "lucide-react";
+import GeninoAssessmentStart from "@components/Assessments/GeninoAssessmentStart";
+import GeninoReportBox from "@components/Reports/GeninoReportBox";
+
 
 /** ✅ یک باتن استاندارد (سایز/رنگ هماهنگ) */
 const Btn = ({ children, className = "", ...rest }) => (
@@ -597,75 +600,93 @@ export default function DigestionCheck() {
 
           {/* نتیجه نهایی */}
           {step === 3 && (
-            <motion.section
-              key="result"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-col items-center text-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 
-                         rounded-3xl shadow-[0_0_40px_rgba(16,185,129,0.2)] p-10 mx-4 max-w-3xl border border-emerald-100"
-            >
-              <Utensils className="w-16 h-16 mb-4 text-emerald-600 drop-shadow-[0_0_10px_rgba(16,185,129,0.35)]" />
-              <h2 className="text-3xl font-extrabold text-emerald-700 mb-2">
-                گزارش هوشمند گوارش و بلع ژنینو 🌿
-              </h2>
+  <div key="result" className="w-full flex flex-col items-center">
+    <GeninoReportBox
+      title="گزارش گوارش و بلع کودک"
+      color="emerald"
+      sections={[
+        {
+          title: "🍽️ بلع و جویدن",
+          score: swallowing?.sumScore,
+          max: 12,
+          status:
+            swallowing?.sumScore >= 10
+              ? "طبیعی"
+              : swallowing?.sumScore >= 7
+              ? "نسبتاً مطلوب"
+              : "نیازمند توجه",
+          desc: "این بخش هماهنگی دهان و گلو در بلع غذا، قدرت جویدن و کنترل بزاق را ارزیابی می‌کند.",
+        },
+        {
+          title: "🌿 گوارش عمومی",
+          score: bowel?.sumScore,
+          max: 12,
+          status:
+            bowel?.sumScore >= 10
+              ? "طبیعی"
+              : bowel?.sumScore >= 7
+              ? "نسبتاً مطلوب"
+              : "نیازمند توجه",
+          desc: "تناوب و قوام اجابت مزاج، دل‌درد، نفخ و تهوع بررسی می‌شود تا سلامت روده‌ها سنجیده شود.",
+        },
+        {
+          title: "🥦 عادات تغذیه",
+          score: habits?.sumScore,
+          max: 12,
+          status:
+            habits?.sumScore >= 10
+              ? "طبیعی"
+              : habits?.sumScore >= 7
+              ? "نسبتاً مطلوب"
+              : "نیازمند توجه",
+          desc: "این بخش نظم وعده‌ها، نوشیدن آب و میزان مصرف میوه و سبزی را بررسی می‌کند.",
+        },
+      ]}
+      summary={`مجموع امتیاز ${totalScore}/36 است و وضعیت کلی کودک "${level}" ارزیابی می‌شود.`}
+      tips={[
+        ...(swallowing?.sumScore < 10
+          ? [
+              "اگر کودک هنگام خوردن سرفه می‌کند یا غذا را در دهان نگه می‌دارد، با گفتاردرمانگر مشورت کنید.",
+            ]
+          : []),
+        ...(bowel?.sumScore < 10
+          ? [
+              "مصرف آب و فیبر (میوه، سبزیجات، غلات کامل) را افزایش دهید تا گوارش بهبود یابد.",
+            ]
+          : []),
+        ...(habits?.sumScore < 10
+          ? [
+              "وعده‌های غذایی را منظم کنید، از صفحه‌نمایش حین غذا خوردن پرهیز کنید و عادات سالم را تقویت نمایید.",
+            ]
+          : []),
+      ]}
+      reportDate={new Date()}
+      onSnapshot={() => {
+        const newReport = {
+          id: crypto.randomUUID(),
+          type: "digestion",
+          label: `گوارش و بلع ${new Date().toLocaleDateString("fa-IR")}`,
+          date: new Date().toISOString(),
+          data: {
+            swallowing: swallowing?.sumScore,
+            bowel: bowel?.sumScore,
+            habits: habits?.sumScore,
+            total: totalScore,
+            level,
+          },
+        };
 
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                مجموع امتیاز شما: <span className="font-bold text-emerald-700">{totalScore}/36</span> — وضعیت کلی:{" "}
-                <span className="font-bold text-emerald-700">{level}</span>
-              </p>
+        const prev = JSON.parse(localStorage.getItem("childReports") || "[]");
+        localStorage.setItem("childReports", JSON.stringify([newReport, ...prev]));
+        console.log("✅ گزارش گوارش و بلع ذخیره شد:", newReport);
+      }}
+    />
 
-              <div className="grid sm:grid-cols-3 gap-6 w-full mb-8 text-right">
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-emerald-100">
-                  <h3 className="text-emerald-700 font-bold mb-2">🍽️ بلع و جویدن</h3>
-                  <p className="text-gray-700 text-sm">امتیاز: {swallowing?.sumScore}/12</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-emerald-100">
-                  <h3 className="text-emerald-700 font-bold mb-2">🌱 گوارش عمومی</h3>
-                  <p className="text-gray-700 text-sm">امتیاز: {bowel?.sumScore}/12</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-emerald-100">
-                  <h3 className="text-emerald-700 font-bold mb-2">🧠 عادات تغذیه</h3>
-                  <p className="text-gray-700 text-sm">امتیاز: {habits?.sumScore}/12</p>
-                </div>
-              </div>
-
-              {!!mergedAdvice.length && (
-                <div className="w-full text-right bg-white rounded-2xl border border-emerald-100 shadow-sm p-5 mb-8">
-                  <h4 className="text-emerald-700 font-bold mb-3">پیشنهادهای اختصاصی ژنینو:</h4>
-                  <ul className="list-disc pr-5 space-y-2 text-gray-700 text-sm leading-relaxed">
-                    {mergedAdvice.map((a, i) => (
-                      <li key={i}>{a}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <Btn
-                onClick={() =>
-                  navigate("/child-health-check/digestion-report", {
-                    state: {
-                      report: {
-                        name: "حنا سمواتی",
-                        date: new Date().toLocaleDateString("fa-IR"),
-                        scores: {
-                          swallowing: swallowing?.sumScore,
-                          bowel: bowel?.sumScore,
-                          habits: habits?.sumScore,
-                          total: totalScore,
-                        },
-                        level,
-                        advice: mergedAdvice,
-                      },
-                    },
-                  })
-                }
-                className="mt-2"
-              >
-                مشاهده گزارش رسمی ژنینو 🧾
-              </Btn>
-            </motion.section>
-          )}
+    <Btn className="mt-6" onClick={() => navigate("/reports/child-health")}>
+      رفتن به بایگانی گزارش‌های کودک 📁
+    </Btn>
+  </div>
+)}
         </AnimatePresence>
 
         {/* ناوبری ساده به عقب در مراحل ۰..۲ */}

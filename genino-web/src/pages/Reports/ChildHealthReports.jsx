@@ -1,3 +1,4 @@
+// 📄 src/pages/ChildHealthReports.jsx
 import HorizontalScrollReports from "@components/Reports/HorizontalScrollReports";
 import MiniReportBox from "@components/Reports/MiniReportBox";
 import ReportDetailModal from "@components/Reports/ReportDetailModal";
@@ -15,17 +16,21 @@ export default function ChildHealthReports() {
     setReports(saved);
   }, []);
 
-  // فیلتر گزارش‌ها بر اساس نوع
+  // 🔎 فیلتر گزارش‌ها بر اساس نوع
   const hearingReports = reports.filter((r) => r.type === "hearing");
   const visionReports = reports.filter((r) => r.type === "vision");
   const dentalReports = reports.filter((r) => r.type === "dental");
+  const digestionReports = reports.filter((r) => r.type === "digestion");
+  const movementReports = reports.filter((r) => r.type === "movement"); // ✅ اضافه شد
 
+  // 🗑️ حذف گزارش
   const handleDelete = (r) => {
     const updated = reports.filter((x) => x.id !== r.id);
     setReports(updated);
     localStorage.setItem("childReports", JSON.stringify(updated));
   };
 
+  // 📤 اشتراک‌گذاری گزارش
   const handleShare = (r) => {
     const text = `📋 گزارش ${r.label}\nوضعیت: ${r.data.level}\nامتیاز کل: ${
       r.data.total || r.data.score
@@ -67,91 +72,128 @@ export default function ChildHealthReports() {
               exit={{ opacity: 0 }}
               className="w-full max-w-6xl space-y-10"
             >
-              {/* 🟡 پایش بینایی */}
+              {/* 👁️ پایش بینایی */}
               {visionReports.length > 0 && (
                 <section>
-                  <h3 className="font-extrabold text-amber-700 mb-3">
-                    👁️ پایش بینایی
-                  </h3>
+                  <h3 className="font-extrabold text-amber-700 mb-3">👁️ پایش بینایی</h3>
                   <HorizontalScrollReports color="amber">
-  {visionReports.map((r) => (
-    <div
-      key={r.id}
-      className="snap-start shrink-0 w-[18rem] flex justify-center relative"
-      style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
-    >
-      <MiniReportBox
-        report={r}
-        onShare={handleShare}
-        onDelete={handleDelete}
-        onOpen={() => setSelectedReport(r)}
-      />
-    </div>
-  ))}
-</HorizontalScrollReports>
-
+                    {visionReports.map((r) => (
+                      <div
+                        key={r.id}
+                        className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+                        style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+                      >
+                        <MiniReportBox
+                          report={r}
+                          onShare={handleShare}
+                          onDelete={handleDelete}
+                          onOpen={() => setSelectedReport(r)}
+                        />
+                      </div>
+                    ))}
+                  </HorizontalScrollReports>
                 </section>
               )}
 
-              {/* 🔵 پایش شنوایی */}
+              {/* 🎧 پایش شنوایی */}
               {hearingReports.length > 0 && (
                 <section>
-                  <h3 className="font-extrabold text-sky-700 mb-3">
-                    🎧 پایش شنوایی
-                  </h3>
+                  <h3 className="font-extrabold text-sky-700 mb-3">🎧 پایش شنوایی</h3>
                   <HorizontalScrollReports color="sky">
-  {hearingReports.map((r) => (
-    <div
-      key={r.id}
-      className="snap-start shrink-0 w-[18rem] flex justify-center relative"
-      style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
-    >
-      <MiniReportBox
-        report={r}
-        onShare={handleShare}
-        onDelete={handleDelete}
-        onOpen={() => setSelectedReport(r)}
-      />
-    </div>
-  ))}
-</HorizontalScrollReports>
+                    {hearingReports.map((r) => (
+                      <div
+                        key={r.id}
+                        className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+                        style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+                      >
+                        <MiniReportBox
+                          report={r}
+                          onShare={handleShare}
+                          onDelete={handleDelete}
+                          onOpen={() => setSelectedReport(r)}
+                        />
+                      </div>
+                    ))}
+                  </HorizontalScrollReports>
                 </section>
               )}
 
-              {/* 🌸 پایش سلامت دندان‌ها */}
-{dentalReports.length > 0 && (
-  <section>
-    <h3 className="font-extrabold text-rose-700 mb-3">
-      🦷 پایش سلامت دندان‌ها
-    </h3>
-    <HorizontalScrollReports color="rose">
-      {dentalReports.map((r) => (
-        <div
-          key={r.id}
-          className="snap-start shrink-0 w-[18rem] flex justify-center relative"
-          style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
-        >
-          <MiniReportBox
-            report={r}
-            onShare={handleShare}
-            onDelete={handleDelete}
-            onOpen={() => setSelectedReport(r)}
-          />
-        </div>
-      ))}
-    </HorizontalScrollReports>
-  </section>
-)}
+              {/* 🦷 پایش سلامت دندان‌ها */}
+              {dentalReports.length > 0 && (
+                <section>
+                  <h3 className="font-extrabold text-rose-700 mb-3">🦷 پایش سلامت دندان‌ها</h3>
+                  <HorizontalScrollReports color="rose">
+                    {dentalReports.map((r) => (
+                      <div
+                        key={r.id}
+                        className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+                        style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+                      >
+                        <MiniReportBox
+                          report={r}
+                          onShare={handleShare}
+                          onDelete={handleDelete}
+                          onOpen={() => setSelectedReport(r)}
+                        />
+                      </div>
+                    ))}
+                  </HorizontalScrollReports>
+                </section>
+              )}
 
+              {/* 🌿 پایش گوارش و بلع */}
+              {digestionReports.length > 0 && (
+                <section>
+                  <h3 className="font-extrabold text-emerald-700 mb-3">🌿 پایش گوارش و بلع</h3>
+                  <HorizontalScrollReports color="emerald">
+                    {digestionReports.map((r) => (
+                      <div
+                        key={r.id}
+                        className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+                        style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+                      >
+                        <MiniReportBox
+                          report={r}
+                          onShare={handleShare}
+                          onDelete={handleDelete}
+                          onOpen={() => setSelectedReport(r)}
+                        />
+                      </div>
+                    ))}
+                  </HorizontalScrollReports>
+                </section>
+              )}
+
+              {/* 🧠 پایش رشد حرکتی و تعادل ✅ جدید */}
+              {movementReports.length > 0 && (
+                <section>
+                  <h3 className="font-extrabold text-emerald-600 mb-3">
+                    ⚖️ رشد حرکتی و تعادل
+                  </h3>
+                  <HorizontalScrollReports color="emerald">
+                    {movementReports.map((r) => (
+                      <div
+                        key={r.id}
+                        className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+                        style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+                      >
+                        <MiniReportBox
+                          report={r}
+                          onShare={handleShare}
+                          onDelete={handleDelete}
+                          onOpen={() => setSelectedReport(r)}
+                        />
+                      </div>
+                    ))}
+                  </HorizontalScrollReports>
+                </section>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* ✅ مودال جزئیات */}
-        <ReportDetailModal
-          report={selectedReport}
-          onClose={() => setSelectedReport(null)}
-        />
+        <ReportDetailModal report={selectedReport} onClose={() => setSelectedReport(null)} />
 
         {/* 💡 نکته انتهایی */}
         <motion.div

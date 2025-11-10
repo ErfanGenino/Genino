@@ -1,7 +1,10 @@
+// 📄 src/pages/ChildHealthCheck/MovementCheck.jsx
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import GeninoDNABackground from "@components/Core/GeninoDNABackground";
+import GeninoAssessmentStart from "@components/Assessments/GeninoAssessmentStart";
+import GeninoReportBox from "@components/Reports/GeninoReportBox";
 import { Footprints, Hand, Move, Scale, Dumbbell, AlertCircle } from "lucide-react";
 
 /* 🎨 دکمه استاندارد ژنینو */
@@ -16,11 +19,13 @@ const Btn = ({ children, className = "", ...rest }) => (
   </motion.button>
 );
 
-/* 🧩 کارت سؤال با توضیحات هدف و دلیل علمی */
+/* 🧩 کارت سؤال ژنینو */
 function QuestionCard({ icon, title, goal, reason, advice, options, value, onChange }) {
   const [showInfo, setShowInfo] = useState(false);
-  const base = "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300 transition-all";
-  const active = "bg-emerald-200 border-emerald-400 text-emerald-900 font-semibold shadow-inner";
+  const base =
+    "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300 transition-all";
+  const active =
+    "bg-emerald-200 border-emerald-400 text-emerald-900 font-semibold shadow-inner";
 
   return (
     <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-5">
@@ -69,42 +74,22 @@ function QuestionCard({ icon, title, goal, reason, advice, options, value, onCha
           </button>
         ))}
       </div>
-    </div>
-  );
-}
 
-/* ✅ نوار پیشرفت ژنینو */
-function ProgressBar({ step }) {
-  const progress = ((step + 1) / 3) * 100;
-  const labels = ["حرکت درشت", "حرکت ظریف", "تعادل بدن"];
-
-  return (
-    <div className="w-full max-w-3xl mx-auto mb-8 text-center">
-      <div className="flex justify-between text-xs sm:text-sm text-emerald-700 font-semibold mb-1 px-2">
-        {labels.map((label, i) => (
-          <span key={i} className={i <= step ? "text-emerald-800" : "text-emerald-400"}>
-            {`مرحله ${i + 1}`} — {label}
-          </span>
-        ))}
-      </div>
-      <div className="relative w-full h-3 bg-emerald-100 rounded-full overflow-hidden">
+      {value && (
         <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.6 }}
-          className="absolute top-0 left-0 h-full bg-gradient-to-r from-teal-400 via-emerald-500 to-green-500 shadow-[0_0_10px_rgba(13,148,136,0.4)] rounded-full"
-        ></motion.div>
-      </div>
-      <p className="text-xs text-emerald-600 mt-2">
-        {step === -1 ? "شروع نشده" : step === 3 ? "تکمیل شده ✅" : `در حال انجام: ${Math.round(progress)}٪`}
-      </p>
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-3 text-[13px] leading-relaxed bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-3"
+        >
+          <span className="font-semibold">پیشنهاد ژنینو: </span>
+          {value?.advice || "خوب پیش می‌روید!"}
+        </motion.div>
+      )}
     </div>
   );
 }
 
-/* ——————————————————————————————————
-   ✅ مرحله ۱: مهارت‌های حرکتی درشت
-—————————————————————————————————— */
+/* ——— مرحله ۱ ——— */
 function GrossMotorStep({ onDone }) {
   const [answers, setAnswers] = useState({});
   const questions = [
@@ -148,9 +133,11 @@ function GrossMotorStep({ onDone }) {
       ],
     },
   ];
-
   const completed = questions.every((q) => !!answers[q.key]);
-  const sumScore = useMemo(() => questions.reduce((s, q) => s + (answers[q.key]?.score || 0), 0), [answers]);
+  const sumScore = useMemo(
+    () => questions.reduce((s, q) => s + (answers[q.key]?.score || 0), 0),
+    [answers]
+  );
 
   return (
     <section className="w-full max-w-3xl mx-auto flex flex-col items-center">
@@ -160,16 +147,19 @@ function GrossMotorStep({ onDone }) {
         ))}
       </div>
       <div className="flex items-center justify-between mt-6 w-full">
-        <p className="text-sm text-gray-500">امتیاز مرحله: <span className="font-bold text-emerald-700">{sumScore}/9</span></p>
-        <Btn disabled={!completed} onClick={() => onDone(sumScore)}>ادامه</Btn>
+        <p className="text-sm text-gray-500">
+          امتیاز مرحله:{" "}
+          <span className="font-bold text-emerald-700">{sumScore}/9</span>
+        </p>
+        <Btn disabled={!completed} onClick={() => onDone(sumScore)}>
+          ادامه
+        </Btn>
       </div>
     </section>
   );
 }
 
-/* ——————————————————————————————————
-   ✅ مرحله ۲: مهارت‌های حرکتی ظریف
-—————————————————————————————————— */
+/* ——— مرحله ۲ ——— */
 function FineMotorStep({ onDone }) {
   const [answers, setAnswers] = useState({});
   const questions = [
@@ -213,9 +203,11 @@ function FineMotorStep({ onDone }) {
       ],
     },
   ];
-
   const completed = questions.every((q) => !!answers[q.key]);
-  const sumScore = useMemo(() => questions.reduce((s, q) => s + (answers[q.key]?.score || 0), 0), [answers]);
+  const sumScore = useMemo(
+    () => questions.reduce((s, q) => s + (answers[q.key]?.score || 0), 0),
+    [answers]
+  );
 
   return (
     <section className="w-full max-w-3xl mx-auto flex flex-col items-center">
@@ -225,16 +217,19 @@ function FineMotorStep({ onDone }) {
         ))}
       </div>
       <div className="flex items-center justify-between mt-6 w-full">
-        <p className="text-sm text-gray-500">امتیاز مرحله: <span className="font-bold text-emerald-700">{sumScore}/9</span></p>
-        <Btn disabled={!completed} onClick={() => onDone(sumScore)}>ادامه</Btn>
+        <p className="text-sm text-gray-500">
+          امتیاز مرحله:{" "}
+          <span className="font-bold text-emerald-700">{sumScore}/9</span>
+        </p>
+        <Btn disabled={!completed} onClick={() => onDone(sumScore)}>
+          ادامه
+        </Btn>
       </div>
     </section>
   );
 }
 
-/* ——————————————————————————————————
-   ✅ مرحله ۳: تعادل و هماهنگی بدن
-—————————————————————————————————— */
+/* ——— مرحله ۳ ——— */
 function BalanceStep({ onDone }) {
   const [answers, setAnswers] = useState({});
   const questions = [
@@ -278,9 +273,11 @@ function BalanceStep({ onDone }) {
       ],
     },
   ];
-
   const completed = questions.every((q) => !!answers[q.key]);
-  const sumScore = useMemo(() => questions.reduce((s, q) => s + (answers[q.key]?.score || 0), 0), [answers]);
+  const sumScore = useMemo(
+    () => questions.reduce((s, q) => s + (answers[q.key]?.score || 0), 0),
+    [answers]
+  );
 
   return (
     <section className="w-full max-w-3xl mx-auto flex flex-col items-center">
@@ -290,152 +287,109 @@ function BalanceStep({ onDone }) {
         ))}
       </div>
       <div className="flex items-center justify-between mt-6 w-full">
-        <p className="text-sm text-gray-500">امتیاز مرحله: <span className="font-bold text-emerald-700">{sumScore}/9</span></p>
-        <Btn disabled={!completed} onClick={() => onDone(sumScore)}>مشاهده نتیجه</Btn>
+        <p className="text-sm text-gray-500">
+          امتیاز مرحله:{" "}
+          <span className="font-bold text-emerald-700">{sumScore}/9</span>
+        </p>
+        <Btn disabled={!completed} onClick={() => onDone(sumScore)}>
+          مشاهده نتیجه
+        </Btn>
       </div>
     </section>
   );
 }
 
-/* ——————————————————————————————————
-   ✅ صفحه اصلی پایش حرکتی و تعادل
-—————————————————————————————————— */
+/* ——— صفحه اصلی پایش رشد حرکتی ——— */
 export default function MovementCheck() {
   const navigate = useNavigate();
   const [step, setStep] = useState(-1);
   const [gross, setGross] = useState(null);
   const [fine, setFine] = useState(null);
   const [balance, setBalance] = useState(null);
-
-  const total = (gross || 0) + (fine || 0) + (balance || 0); // از 27
-  const level = total >= 24 ? "طبیعی" : total >= 18 ? "نسبتاً مطلوب" : "نیازمند بررسی";
+  const total = (gross || 0) + (fine || 0) + (balance || 0);
+  const level =
+    total >= 24 ? "طبیعی" : total >= 18 ? "نسبتاً مطلوب" : "نیازمند بررسی";
 
   return (
     <GeninoDNABackground strands={10} opacity={0.25} duration={90}>
-      <main dir="rtl" className="relative z-10 flex flex-col items-center px-6 py-16 text-gray-800">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-3xl sm:text-4xl font-extrabold text-emerald-700 mb-20 text-center drop-shadow-[0_0_15px_rgba(13,148,136,0.3)]"
-        >
-          پایش رشد حرکتی و تعادل
-        </motion.h1>
-
-        {step >= 0 && step <= 2 && <ProgressBar step={step} />}
-
+      <main dir="rtl" className="relative z-10 flex flex-col items-center justify-center px-6 py-16 text-gray-800">
         <AnimatePresence mode="wait">
-          {/* آموزش مقدماتی */}
-          {step === -1 && (
-            <motion.section
-              key="edu"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl text-center"
-            >
-              <p className="text-gray-700 leading-relaxed mb-20">
-                این پایش به شما کمک می‌کند وضعیت رشد، تعادل و کنترل حرکتی کودک را بشناسید.  
-                روی هر سؤال، دکمهٔ <strong>ℹ️ چرا این سؤال؟</strong> را بزنید تا هدف، دلیل علمی و راهکار ژنینو را ببینید.
-              </p>
-              <Btn onClick={() => setStep(0)}>شروع پایش رشد حرکتی و تعادل</Btn>
-            </motion.section>
-          )}
+          <GeninoAssessmentStart
+            step={step}
+            setStep={setStep}
+            title="پایش رشد حرکتی و تعادل"
+            description={`این پایش به شما کمک می‌کند وضعیت رشد، تعادل و کنترل حرکتی کودک را بشناسید.
+روی هر سؤال، دکمهٔ ℹ️ «چرا این سؤال؟» را بزنید تا هدف، دلیل علمی و راهکار ژنینو را ببینید.`}
+            color="emerald"
+            buttonLabel="شروع پایش رشد حرکتی و تعادل"
+          />
 
-          {/* مرحله‌ها */}
           {step === 0 && <GrossMotorStep onDone={(r) => { setGross(r); setStep(1); }} />}
           {step === 1 && <FineMotorStep onDone={(r) => { setFine(r); setStep(2); }} />}
           {step === 2 && <BalanceStep onDone={(r) => { setBalance(r); setStep(3); }} />}
 
-          {/* نتیجه نهایی */}
           {step === 3 && (
-            <motion.section
-              key="result"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-col items-center text-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 rounded-3xl shadow-[0_0_40px_rgba(13,148,136,0.2)] p-10 mx-4 max-w-3xl border border-emerald-100"
-            >
-              <Move className="w-16 h-16 mb-4 text-emerald-600 drop-shadow-[0_0_10px_rgba(13,148,136,0.35)]" />
-              <h2 className="text-3xl font-extrabold text-emerald-700 mb-2">
-                گزارش هوشمند رشد حرکتی و تعادل ژنینو ⚖️
-              </h2>
+            <motion.div key="result" className="w-full flex flex-col items-center">
+              <GeninoReportBox
+                title="رشد حرکتی و تعادل کودک"
+                color="emerald"
+                sections={[
+                  {
+                    title: "🏃‍♀️ حرکت درشت",
+                    score: gross,
+                    max: 9,
+                    status: gross >= 7 ? "طبیعی" : gross >= 5 ? "نسبتاً مطلوب" : "نیازمند توجه",
+                    desc: "ارزیابی مهارت‌های پا، تنه و دویدن برای سنجش کنترل کلی بدن.",
+                  },
+                  {
+                    title: "✋ حرکت ظریف",
+                    score: fine,
+                    max: 9,
+                    status: fine >= 7 ? "طبیعی" : fine >= 5 ? "نسبتاً مطلوب" : "نیازمند توجه",
+                    desc: "بررسی هماهنگی چشم و دست در کارهای ظریف مثل نقاشی یا بستن دکمه.",
+                  },
+                  {
+                    title: "⚖️ تعادل بدن",
+                    score: balance,
+                    max: 9,
+                    status: balance >= 7 ? "خوب" : balance >= 5 ? "قابل بهبود" : "ضعیف",
+                    desc: "ارزیابی توانایی حفظ تعادل و کنترل وضعیت بدن.",
+                  },
+                ]}
+                summary={`مجموع امتیاز ${total}/27 است و وضعیت کلی کودک "${level}" ارزیابی می‌شود.`}
+                tips={[
+                  ...(gross < 7 ? ["تمرین‌های حرکتی درشت مثل دویدن و بالا رفتن از پله انجام شود."] : []),
+                  ...(fine < 7 ? ["بازی‌های ظریف دستی مانند پازل و خمیر بازی انجام شود."] : []),
+                  ...(balance < 7 ? ["تمرین تعادل روی خط یا توپ پیشنهاد می‌شود."] : []),
+                ]}
+                reportDate={new Date()}
+                onSnapshot={() => {
+                  const newReport = {
+                    id: crypto.randomUUID(),
+                    type: "movement",
+                    label: `رشد حرکتی ${new Date().toLocaleDateString("fa-IR")}`,
+                    date: new Date().toISOString(),
+                    data: { gross, fine, balance, total, level },
+                  };
+                  const prev = JSON.parse(localStorage.getItem("childReports") || "[]");
+                  localStorage.setItem("childReports", JSON.stringify([newReport, ...prev]));
+                  console.log("✅ گزارش رشد حرکتی ذخیره شد:", newReport);
+                }}
+              />
 
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                مجموع امتیاز شما: <span className="font-bold text-emerald-700">{total}/27</span> — وضعیت کلی:{" "}
-                <span className="font-bold text-emerald-700">{level}</span>
-              </p>
-
-              <div className="grid sm:grid-cols-3 gap-6 w-full mb-8 text-right">
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-emerald-100">
-                  <h3 className="text-emerald-700 font-bold mb-2">🏃‍♀️ حرکت درشت</h3>
-                  <p className="text-gray-700 text-sm">امتیاز: {gross}/9</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-emerald-100">
-                  <h3 className="text-emerald-700 font-bold mb-2">✋ حرکت ظریف</h3>
-                  <p className="text-gray-700 text-sm">امتیاز: {fine}/9</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-md p-5 border border-emerald-100">
-                  <h3 className="text-emerald-700 font-bold mb-2">⚖️ تعادل</h3>
-                  <p className="text-gray-700 text-sm">امتیاز: {balance}/9</p>
-                </div>
-              </div>
-
-              <AdviceBox gross={gross} fine={fine} balance={balance} />
-
-              <Btn
-                onClick={() =>
-                  navigate("/child-health-check/movement-report", {
-                    state: {
-                      report: {
-                        name: "حنا سمواتی",
-                        date: new Date().toLocaleDateString("fa-IR"),
-                        scores: { gross, fine, balance, total },
-                        level,
-                      },
-                    },
-                  })
-                }
-                className="mt-2"
-              >
-                مشاهده گزارش رسمی ژنینو 🧾
+              <Btn className="mt-6" onClick={() => navigate("/reports/child-health")}>
+                رفتن به بایگانی گزارش‌های کودک 📁
               </Btn>
-            </motion.section>
+            </motion.div>
           )}
         </AnimatePresence>
 
         {step >= 0 && step <= 2 && (
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            className="mt-8 text-sm text-emerald-700 underline"
-            onClick={() => setStep((s) => Math.max(-1, s - 1))}
-          >
+          <motion.button whileHover={{ scale: 1.03 }} className="mt-8 text-sm text-emerald-700 underline" onClick={() => setStep((s) => Math.max(-1, s - 1))}>
             بازگشت به مرحله قبل
           </motion.button>
         )}
       </main>
     </GeninoDNABackground>
-  );
-}
-
-/* 🎯 توصیه‌های اختصاصی ژنینو */
-function AdviceBox({ gross, fine, balance }) {
-  const tips = [];
-  if (gross < 7) tips.push("تمرین‌های روزانه برای تقویت پاها و هماهنگی حرکات درشت انجام دهید.");
-  if (fine < 7) tips.push("خمیر بازی، پازل و فعالیت‌های دستی برای تقویت مهارت‌های ظریف توصیه می‌شود.");
-  if (balance < 7) tips.push("بازی‌های تعادلی مانند ایستادن روی خط یا توپ‌ بازی انجام شود.");
-
-  if (!tips.length) return null;
-
-  return (
-    <div className="w-full text-right bg-white rounded-2xl border border-emerald-100 shadow-sm p-5 mb-8">
-      <h4 className="text-emerald-700 font-bold mb-3">پیشنهادهای اختصاصی ژنینو:</h4>
-      <ul className="list-disc pr-5 space-y-2 text-gray-700 text-sm leading-relaxed">
-        {tips.map((t, i) => (
-          <li key={i}>{t}</li>
-        ))}
-      </ul>
-    </div>
   );
 }
