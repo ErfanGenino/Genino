@@ -13,8 +13,8 @@ import DateObject from "react-date-object";
 import GoldenModal from "@components/Core/GoldenModal";
 import "../App.css"; // اگه هنوز این خط نیست
 import { useEffect } from "react";
-
-
+import ScrollService from "../components/Core/ScrollService";
+import logo from "../assets/logo-genino.png";
 
 
 export default function MyDoctor() {
@@ -217,6 +217,18 @@ const [showFilters, setShowFilters] = useState(true);
           بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو 
         </p>
       </motion.div>
+
+      <ScrollService
+  title="پزشکان متخصص ژنینو"
+  color="yellow"
+  items={[
+    { id: 1, name: "دکتر نازنین شریفی", specialty: "متخصص کودکان", image: logo },
+    { id: 2, name: "دکتر آرش طاهری", specialty: "متخصص تغذیه", image: logo },
+    { id: 3, name: "دکتر الهام قنبری", specialty: "روان‌شناس کودک", image: logo },
+    { id: 4, name: "دکتر سارا کریمی", specialty: "چشم‌پزشک", image: logo },
+  ]}
+/>
+
 
      {/* 🔍 فیلتر بالا با حالت باز و بسته شونده */}
 <div className="max-w-6xl mx-auto mb-6 sm:mb-10">

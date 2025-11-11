@@ -7,7 +7,8 @@ import { Link } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
 import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
 import PromoSlider from "@components/Social/PromoSlider";
-import ScrollProduct from "@components/Core/ScrollProduct";
+import ScrollProduct from "./components/Core/ScrollProduct";
+
 
 
     
@@ -373,12 +374,11 @@ useEffect(() => {
   ${
     item.title === "کودک من"
       ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
-      : item.title === "کالری شمار"
-      ? "bg-gradient-to-br from-[#b5f2c0] via-[#fff8e8] to-[#ffb6b6] border-[#ffd6a5] shadow-[0_0_15px_rgba(255,150,150,0.3)] hover:shadow-[0_0_25px_rgba(255,150,150,0.4)] hover:-translate-y-1 transition-all"
-      : item.title === "اقتصاد و حسابداری خانواده"
-      ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_15px_rgba(212,175,55,0.15)] hover:shadow-[0_0_30px_rgba(212,175,55,0.35)] hover:-translate-y-1 bg-[length:200%_200%] transition-all duration-500"
-      : "bg-white/80 backdrop-blur-sm border-yellow-100 hover:bg-gradient-to-br hover:from-yellow-50 hover:to-yellow-100 hover:shadow-xl hover:-translate-y-1"
+      : item.title === "فروشگاه تخصصی"
+      ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md hover:shadow-lg hover:-translate-y-1"
+      : "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_15px_rgba(212,175,55,0.15)] hover:shadow-[0_0_30px_rgba(212,175,55,0.35)] hover:-translate-y-1 bg-[length:200%_200%] transition-all duration-500"
   }`}
+
     >
       {/* 🌟 ستاره‌های طلایی مخصوص دانستنی‌های روز دنیا */}
       {item.title === "دانستنی‌های روز دنیا" && (
