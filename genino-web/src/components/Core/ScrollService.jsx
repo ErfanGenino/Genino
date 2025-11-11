@@ -2,37 +2,31 @@
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 /**
- * 🌟 ScrollService
- * ------------------------
- * اسکرول افقی مخصوص خدمات (پزشکان، مشاوران، مراکز درمانی و غیره)
- * ایمن‌سازی‌شده برای جلوگیری از ارور 500 در خارج از BrowserRouter
+ * 🌟 ScrollService – نسخه طلایی و فاصله‌دار ژنینویی
  */
 export default function ScrollService({
-  title = "خدمات ویژه",
+  title = "پزشکان متخصص ژنینو",
   items = [],
   autoScroll = true,
-  interval = 6000,
+  interval = 7000,
   color = "yellow",
 }) {
   const scrollRef = useRef(null);
-  const navigate = useNavigate?.();
-  const location = useLocation?.();
+  const navigate = useNavigate();
 
   // 🎞️ اسکرول خودکار
   useEffect(() => {
     if (!autoScroll) return;
     const timer = setInterval(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
-      }
+      scrollRef.current?.scrollBy({ left: 240, behavior: "smooth" });
     }, interval);
     return () => clearInterval(timer);
   }, [autoScroll, interval]);
 
-  // 🎨 رنگ‌ها
+  // 🎨 رنگ تم
   const colorClasses =
     color === "pink"
       ? "text-pink-600 border-pink-100"
@@ -41,41 +35,41 @@ export default function ScrollService({
       : "text-yellow-600 border-yellow-100";
 
   return (
-    <section className="relative z-10 w-full max-w-6xl mx-auto text-center mb-14">
+    <section className="relative z-10 w-full max-w-6xl mx-auto text-center mb-14 px-3">
       {/* 🏷️ تیتر و فلش‌ها */}
-      <div className="relative flex items-center justify-center mb-6">
+      <div className="relative flex items-center justify-center mb-5">
         <button
           onClick={() =>
-            scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" })
+            scrollRef.current.scrollBy({ left: -240, behavior: "smooth" })
           }
-          className={`absolute right-0 sm:right-8 p-2 rounded-full bg-white border ${colorClasses} hover:bg-yellow-50 transition shadow-sm`}
+          className={`absolute right-0 sm:right-6 p-1.5 rounded-full bg-white border ${colorClasses} 
+                     hover:bg-yellow-50 transition shadow-sm hidden sm:block`}
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-4 h-4" />
         </button>
 
         <h2
-          className={`text-xl font-bold ${
-            colorClasses?.split(" ")[0] || "text-yellow-600"
-          }`}
+          className={`text-lg sm:text-xl font-bold ${colorClasses.split(" ")[0]} drop-shadow-[0_0_6px_rgba(255,220,100,0.3)]`}
         >
           {title}
         </h2>
 
         <button
           onClick={() =>
-            scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })
+            scrollRef.current.scrollBy({ left: 240, behavior: "smooth" })
           }
-          className={`absolute left-0 sm:left-8 p-2 rounded-full bg-white border ${colorClasses} hover:bg-yellow-50 transition shadow-sm`}
+          className={`absolute left-0 sm:left-6 p-1.5 rounded-full bg-white border ${colorClasses} 
+                     hover:bg-yellow-50 transition shadow-sm hidden sm:block`}
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
       </div>
 
-      {/* 🔄 لیست خدمات */}
+      {/* 🔄 لیست کارت‌ها */}
       <div
         ref={scrollRef}
         dir="ltr"
-        className="overflow-x-auto snap-x snap-mandatory no-scrollbar touch-pan-x"
+        className="overflow-x-auto no-scrollbar touch-pan-x"
         style={{
           WebkitOverflowScrolling: "touch",
           scrollBehavior: "smooth",
@@ -83,40 +77,37 @@ export default function ScrollService({
         }}
       >
         <div
-          className="grid grid-flow-col auto-cols-[75%] sm:auto-cols-[45%] md:auto-cols-[30%] lg:auto-cols-[22%]
-                     gap-6 px-4 justify-center mx-auto"
+          className="flex items-stretch gap-5 sm:gap-7 px-3"
           style={{ width: "max-content" }}
         >
           {items.map((service) => (
             <motion.div
               key={service.id}
               whileHover={{
-                y: -5,
-                scale: 1.02,
-                boxShadow: "0 10px 25px rgba(212,175,55,0.2)",
+                y: -4,
+                scale: 1.03,
+                boxShadow: "0 8px 22px rgba(212,175,55,0.25)",
               }}
-              transition={{ duration: 0.3 }}
-              onClick={() =>
-                navigate && navigate(`/service/${service.id}`)
-              }
-              className="group bg-gradient-to-b from-[#fffef9] to-[#fff7d1] rounded-2xl shadow-sm
-                         overflow-hidden hover:shadow-lg transition-all border border-yellow-100
-                         cursor-pointer snap-start"
+              transition={{ duration: 0.25 }}
+              onClick={() => navigate(`/service/${service.id}`)}
+              className="group bg-gradient-to-b from-[#fffaf0] via-[#fff8e1] to-[#fef7da]
+                         rounded-2xl border border-yellow-100 hover:border-yellow-300
+                         hover:shadow-[0_6px_20px_rgba(255,220,100,0.25)]
+                         transition-all cursor-pointer flex flex-col items-center justify-center
+                         p-4 sm:p-5 min-w-[180px] sm:min-w-[200px]"
             >
-              <div className="flex flex-col items-center justify-center p-4">
-                <img
-                  src={service.image}
-                  alt={service.name}
-                  className="w-20 h-20 rounded-full object-cover border-2 border-yellow-200 mb-3
-                             transition-transform duration-500 group-hover:scale-110 group-hover:border-yellow-400"
-                />
-                <h3 className="text-sm font-semibold text-gray-700 mb-1 line-clamp-1">
-                  {service.name}
-                </h3>
-                <p className="text-[12px] text-gray-500 line-clamp-2">
-                  {service.specialty || service.desc || "—"}
-                </p>
-              </div>
+              <img
+                src={service.image}
+                alt={service.name}
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover mb-3 border border-yellow-200 
+                           transition-transform duration-500 group-hover:scale-110 group-hover:border-yellow-400"
+              />
+              <h3 className="text-sm sm:text-base font-semibold text-gray-700 mb-0.5 line-clamp-1">
+                {service.name}
+              </h3>
+              <p className="text-[11px] sm:text-xs text-gray-600 line-clamp-2 leading-snug">
+                {service.specialty || service.desc || "—"}
+              </p>
             </motion.div>
           ))}
         </div>
