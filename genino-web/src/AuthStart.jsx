@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
 import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
 import PromoSlider from "@components/Social/PromoSlider";
+import ScrollProduct from "@components/Core/ScrollProduct";
 
 
     
@@ -262,7 +263,7 @@ useEffect(() => {
 
       {/* 🔸 اسلایدر اصلی صفحه ورود ژنینو */}
 <motion.div
-  className="relative w-full max-w-3xl aspect-[16/9] mb-16 rounded-3xl overflow-hidden z-20"
+  className="relative w-full max-w-3xl aspect-[16/9] mb-4 rounded-3xl overflow-hidden z-20"
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -310,6 +311,18 @@ useEffect(() => {
   />
 </motion.div>
 
+{/* 🛍️ آخرین محصولات فروشگاه ژنینو */}
+<ScrollProduct
+  title="🛍️ آخرین محصولات فروشگاه ژنینو"
+  color="yellow"
+  items={Array.from({ length: 25 }).map((_, i) => ({
+    id: i + 1,
+    name: `محصول جدید ${i + 1}`,
+    price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
+    image: logo,
+    category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
+  }))}
+/>
 
 
 
@@ -445,6 +458,21 @@ useEffect(() => {
 ))}
 
       </motion.section>
+      {/* 🔥 محصولات تخفیف‌خورده */}
+<ScrollProduct
+  title="🔥 محصولات تخفیف‌خورده"
+  color="amber"
+  items={Array.from({ length: 25 }).map((_, i) => ({
+    id: 100 + i,
+    name: `محصول تخفیف‌خورده ${i + 1}`,
+    price: `${(Math.floor(Math.random() * 250) + 80) * 1000} تومان`,
+    oldPrice: `${(Math.floor(Math.random() * 350) + 150) * 1000} تومان`,
+    discount: `${Math.floor(Math.random() * 50) + 10}%`,
+    image: logo,
+    category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
+  }))}
+/>
+
 
             <Footer className="relative z-[2]" />
     </main>
