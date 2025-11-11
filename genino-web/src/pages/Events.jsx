@@ -1,71 +1,112 @@
+// 📄 src/pages/Events.jsx
 import { motion } from "framer-motion";
-import { CalendarDays, PartyPopper } from "lucide-react";
+import { PartyPopper, CalendarDays } from "lucide-react";
+import GeninoDNABackground from "@components/Core/GeninoDNABackground";
+import TodayCalendarBox from "@components/Dashboard/TodayCalendarBox";
 
 export default function Events() {
+  const events = Array.from({ length: 20 }).map((_, i) => ({
+    id: i + 1,
+    title: `رویداد ${i + 1}`,
+    organizer: "ژنینو",
+    date: "25 آذر 1404",
+    image: `/images/events/${(i % 5) + 1}.jpg`,
+  }));
+
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center text-gray-800 bg-gradient-to-b from-[#fffaf0] via-[#fff5d8] to-[#fff0c8] overflow-hidden">
-      {/* ✨ افکت نور طلایی */}
-      <motion.div
-        className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-[#fff8dc]/80 to-transparent blur-2xl"
-        animate={{ opacity: [0.5, 0.9, 0.5] }}
-        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-      />
-
-      {/* 🎉 آیکون متحرک */}
-      <motion.div
-        className="flex items-center justify-center mb-6 z-10"
-        animate={{ rotate: [0, 5, -5, 0] }}
-        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-      >
-        <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-[0_0_40px_rgba(212,175,55,0.5)] border-4 border-yellow-300 flex items-center justify-center">
-          <PartyPopper className="w-16 h-16 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
-        </div>
-      </motion.div>
-
-      {/* 💬 متن اصلی */}
-      <motion.div
-        className="text-center z-10 px-6"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-yellow-700 mb-4 drop-shadow-[0_0_12px_rgba(255,220,100,0.6)]">
-          رویدادها و جشن‌های ژنینو 🎈
-        </h1>
-        <p className="text-gray-700 text-lg max-w-md mx-auto leading-relaxed">
-          به‌زودی، تقویم هوشمند ژنینو با معرفی جشن‌ها، رویدادهای آموزشی و
-          کارگاه‌های ویژه‌ی والدین و کودکان فعال خواهد شد.  
-        </p>
-        <motion.p
-          className="mt-6 text-2xl font-bold text-yellow-600 tracking-widest"
-          animate={{ opacity: [0.6, 1, 0.6] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-        >
-          Coming Soon ✨
-        </motion.p>
-      </motion.div>
-
-      {/* ✨ ذرات طلایی در پس‌زمینه */}
-      {Array.from({ length: 15 }).map((_, i) => (
+    <GeninoDNABackground opacity={0.45} strands={10} duration={70}>
+      <main className="relative min-h-screen flex flex-col items-center justify-start text-gray-800 pt-24 pb-24">
+        {/* 🎉 تیتر صفحه */}
         <motion.div
-          key={i}
-          className="absolute w-2 h-2 bg-yellow-400 rounded-full shadow-[0_0_10px_rgba(255,215,0,0.6)]"
-          style={{
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -25, 0],
-            opacity: [0.5, 0.9, 0.5],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 4 + Math.random() * 3,
-            ease: "easeInOut",
-            delay: Math.random() * 2,
-          }}
-        />
-      ))}
-    </main>
+          className="text-center mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-yellow-700 drop-shadow-[0_0_12px_rgba(255,220,100,0.6)]">
+            رویدادها و جشن‌های ژنینو
+          </h1>
+          <div className="mt-2 flex justify-center items-center gap-2 text-yellow-600 font-semibold text-lg">
+            <PartyPopper className="w-6 h-6" />
+            <span>هر روز، فرصتی برای شادی و یادگیری 🌟</span>
+          </div>
+        </motion.div>
+
+        {/* 📅 تقویم امروز */}
+        <motion.div
+          className="w-full flex justify-center mb-12"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <div className="w-full max-w-xl px-4">
+            <TodayCalendarBox color="yellow" />
+          </div>
+        </motion.div>
+
+        {/* 🧩 باکس رویدادهای ژنینویی */}
+        <section className="w-full max-w-7xl px-6">
+          <h2 className="text-2xl font-bold text-yellow-700 mb-6 text-center">
+            رویدادهای ژنینویی 💫
+          </h2>
+
+          {/* 🎟️ شبکه کارت‌ها */}
+          <div
+            className="
+              grid
+              grid-cols-2 gap-4
+              sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5
+              place-items-center
+            "
+          >
+            {events.map((event) => (
+              <motion.div
+                key={event.id}
+                className="w-full max-w-[220px] bg-white/80 backdrop-blur-md rounded-2xl shadow-md overflow-hidden border border-yellow-100 hover:shadow-lg hover:-translate-y-1 transition-all"
+                whileHover={{ scale: 1.03 }}
+              >
+                {/* عنوان */}
+                <div className="text-center text-yellow-700 font-semibold text-base py-2 px-2 truncate">
+                  {event.title}
+                </div>
+
+                {/* عکس */}
+                <div className="w-full h-32 bg-gray-100 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="object-cover w-full h-full"
+                    onError={(e) => (e.target.style.display = 'none')}
+                  />
+                </div>
+
+                {/* برگزارکننده و تاریخ */}
+                <div className="flex flex-col items-center py-2 text-sm text-gray-700">
+                  <span className="font-medium">{event.organizer}</span>
+                  <div className="flex items-center gap-1 text-gray-600 mt-1">
+                    <CalendarDays className="w-4 h-4 text-yellow-600" />
+                    <span>{event.date}</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* 📄 دکمه‌های صفحه‌گردان */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12">
+            <button className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-full shadow-md transition-all flex items-center gap-2">
+              <span className="text-lg">⏩</span>
+              <span>صفحه قبل</span>
+              
+            </button>
+
+            <button className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-full shadow-md transition-all flex items-center gap-2">
+              <span>صفحه بعد</span>
+              <span className="text-lg">⏪</span>
+            </button>
+          </div>
+        </section>
+      </main>
+    </GeninoDNABackground>
   );
 }
