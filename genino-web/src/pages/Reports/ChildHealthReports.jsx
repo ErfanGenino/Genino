@@ -22,6 +22,7 @@ export default function ChildHealthReports() {
   const dentalReports = reports.filter((r) => r.type === "dental");
   const digestionReports = reports.filter((r) => r.type === "digestion");
   const movementReports = reports.filter((r) => r.type === "movement"); // ✅ اضافه شد
+  const bodyReports = reports.filter((r) => r.type === "bodymetrics");
 
   // 🗑️ حذف گزارش
   const handleDelete = (r) => {
@@ -32,11 +33,19 @@ export default function ChildHealthReports() {
 
   // 📤 اشتراک‌گذاری گزارش
   const handleShare = (r) => {
-    const text = `📋 گزارش ${r.label}\nوضعیت: ${r.data.level}\nامتیاز کل: ${
-      r.data.total || r.data.score
-    }`;
-    navigator.share ? navigator.share({ text }) : alert(text);
-  };
+  let text = "";
+  if (r.type === "bodymetrics") {
+    const d = r.data || {};
+    text =
+      `📋 گزارش ${r.label}\n` +
+      `BMI: ${d.bmi ?? "—"}\n` +
+      `وضعیت: ${d.status ?? "—"}\n` +
+      `سن: ${d.age ?? "—"}، قد: ${d.height ?? "—"}cm، وزن: ${d.weight ?? "—"}kg`;
+  } else {
+    text = `📋 گزارش ${r.label}\nوضعیت: ${r.data.level}\nامتیاز کل: ${r.data.total || r.data.score}`;
+  }
+  navigator.share ? navigator.share({ text }) : alert(text);
+};
 
   return (
     <GeninoDNABackground strands={8} opacity={0.2} duration={90}>
@@ -188,6 +197,30 @@ export default function ChildHealthReports() {
                   </HorizontalScrollReports>
                 </section>
               )}
+
+                {/* ⚖️ رشد بدنی و BMI */}
+{bodyReports.length > 0 && (
+  <section>
+    <h3 className="font-extrabold text-yellow-700 mb-3">⚖️ رشد بدنی و BMI</h3>
+    <HorizontalScrollReports color="yellow">
+      {bodyReports.map((r) => (
+        <div
+          key={r.id}
+          className="snap-start shrink-0 w-[18rem] flex justify-center relative"
+          style={{ scrollSnapAlign: "start", marginRight: "8px", zIndex: 1 }}
+        >
+          <MiniReportBox
+            report={r}
+            onShare={handleShare}
+            onDelete={handleDelete}
+            onOpen={() => setSelectedReport(r)}
+          />
+        </div>
+      ))}
+    </HorizontalScrollReports>
+  </section>
+)}
+
             </motion.div>
           )}
         </AnimatePresence>

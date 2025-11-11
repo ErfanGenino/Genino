@@ -12,19 +12,16 @@ export default function MiniReportBox({ report, onShare, onDelete, onOpen }) {
 
   // 🎨 رنگ وضعیت بر اساس سطح
   const getColor = () => {
-    switch (data.level) {
-      case "طبیعی":
-        return "text-green-600 border-green-200 bg-green-50";
-      case "نسبتاً مطلوب":
-      case "قابل قبول":
-        return "text-yellow-700 border-yellow-200 bg-yellow-50";
-      case "نیازمند بررسی":
-      case "نیاز به بررسی":
-        return "text-red-600 border-red-200 bg-red-50";
-      default:
-        return "text-gray-600 border-gray-200 bg-gray-50";
-    }
-  };
+  const lvl = (data.level || "").replace(/\s+/g, " "); // نرمال‌سازی فاصله‌ها
+  if (lvl.includes("طبیعی"))
+    return "text-green-600 border-green-200 bg-green-50";
+  if (lvl.includes("قابل قبول") || lvl.includes("قابل‌قبول") || lvl.includes("نسبتاً مطلوب"))
+    return "text-yellow-700 border-yellow-200 bg-yellow-50";
+  if (lvl.includes("نیازمند بررسی") || lvl.includes("نیاز به بررسی") || lvl.includes("نیازمند توجه"))
+    return "text-red-600 border-red-200 bg-red-50";
+  return "text-gray-600 border-gray-200 bg-gray-50";
+};
+
 
   // 🧮 محاسبه امتیاز کل و حداکثر برای هر نوع پایش
   const { totalValue, totalMax } = useMemo(() => {
@@ -119,6 +116,19 @@ export default function MiniReportBox({ report, onShare, onDelete, onOpen }) {
             <p>تعادل: {Number.isFinite(data.balance) ? data.balance : "—"}/9</p>
           </>
         )}
+
+        {/* ⚖️ رشد بدنی و BMI */}
+{type === "bodymetrics" && (
+  <>
+    <p>
+      BMI: <span className="font-bold">{data?.bmi ?? "—"}</span> —{" "}
+      {data?.status ?? "—"}
+    </p>
+    <p>سن: {data?.age ?? "—"} سال</p>
+    <p>قد: {data?.height ?? "—"} سانتی‌متر</p>
+    <p>وزن: {data?.weight ?? "—"} کیلوگرم</p>
+  </>
+)}
       </div>
 
       {/* ⚙️ دکمه‌ها */}
