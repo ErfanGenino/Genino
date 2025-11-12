@@ -50,7 +50,8 @@ import ChildHealthReports from "./pages/Reports/ChildHealthReports";
 import FamilyHealthReports from "./pages/Reports/FamilyHealthReports";
 import MenHealthReports from "./pages/Reports/MenHealthReports";
 import WomenHealthReports from "./pages/Reports/WomenHealthReports";
-
+import GeneticSecrets from "./pages/knowledge/GeneticSecrets.jsx";
+import WhatIsGene from "./pages/articles/WhatIsGene.jsx";
 
 
 
@@ -125,6 +126,8 @@ export default function App() {
         <Route path="/reports/family-health" element={<FamilyHealthReports />} />
         <Route path="/reports/men-health" element={<MenHealthReports />} />
         <Route path="/reports/women-health" element={<WomenHealthReports />} />
+        <Route path="/knowledge/genetic-secrets" element={<GeneticSecrets />} />
+        <Route path="/articles/what-is-gene" element={<WhatIsGene />} />
 
       </Routes>
     </>
