@@ -470,15 +470,13 @@ const cardColors = {
     title="🔥 محصولات تخفیف‌خورده"
     color="amber"
     items={Array.from({ length: 25 }).map((_, i) => ({
-      id: 100 + i,
-      name: `محصول تخفیف‌خورده ${i + 1}`,
-      price: `${(Math.floor(Math.random() * 250) + 80) * 1000} تومان`,
-      oldPrice: `${(Math.floor(Math.random() * 350) + 150) * 1000} تومان`,
-      discount: `${Math.floor(Math.random() * 50) + 10}%`,
-      image: logo,
-      category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
-    }))}
-  />
+    id: i + 1,
+    name: `محصول جدید ${i + 1}`,
+    price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
+    image: logo,
+    category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
+  }))}
+/>
 </div>
 
 

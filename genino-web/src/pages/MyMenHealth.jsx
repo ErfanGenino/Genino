@@ -13,6 +13,11 @@ import GoldenModal from "@components/Core/GoldenModal";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
+import GeninoHealthButton from "@components/Assessments/GeninoHealthButton";
+import { HeartPulse } from "lucide-react";
+import { Link } from "react-router-dom";
+
+
 
 export default function MyMenHealth() {
   const [selectedTest, setSelectedTest] = useState(null);
@@ -180,6 +185,18 @@ export default function MyMenHealth() {
           بررسی علمی و شخصی سلامت جسم، ذهن و هورمون‌ها — مخصوص آقایان.
         </p>
       </motion.div>
+
+      {/* 🔘 تست خانگی سلامت دستگاه تناسلی آقایان */}
+      <div className="mb-10">
+        <Link to="/articles/men-genital-self-check">
+        <GeninoHealthButton
+  title="تست خانگی سلامت دستگاه تناسلی آقایان"
+  icon={HeartPulse}
+  onClick={() => setSelectedTest("menReproductive")}
+/>
+        </Link>
+</div>
+
 
       {/* 🧩 کارت تست‌ها با رنگ متفاوت */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl w-full">

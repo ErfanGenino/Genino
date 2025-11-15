@@ -52,7 +52,7 @@ import MenHealthReports from "./pages/Reports/MenHealthReports";
 import WomenHealthReports from "./pages/Reports/WomenHealthReports";
 import GeneticSecrets from "./pages/knowledge/GeneticSecrets.jsx";
 import WhatIsGene from "./pages/articles/WhatIsGene.jsx";
-
+import MenGenitalSelfCheckArticle from "./pages/articles/MenGenitalSelfCheckArticle.jsx";
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
@@ -128,6 +128,8 @@ export default function App() {
         <Route path="/reports/women-health" element={<WomenHealthReports />} />
         <Route path="/knowledge/genetic-secrets" element={<GeneticSecrets />} />
         <Route path="/articles/what-is-gene" element={<WhatIsGene />} />
+        <Route path="/articles/men-genital-self-check" element={<MenGenitalSelfCheckArticle />} />
+
 
       </Routes>
     </>

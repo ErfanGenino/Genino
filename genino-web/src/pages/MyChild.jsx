@@ -11,6 +11,7 @@ import GoldenModal from "@components/Core/GoldenModal";
 import { useState, useEffect } from "react";
 import GeninoHealthButton from "@components/Assessments/GeninoHealthButton";
 import GeninoAssessmentStart from "@components/Assessments/GeninoAssessmentStart";
+import { HeartPulse } from "lucide-react";
 
 
 
@@ -529,15 +530,19 @@ useEffect(() => {
 
 {/* 🌕 دکمه سکه‌ای پایش سلامت کودک */}
 <motion.div
-  className="relative z-[6] mt-6 mb-12 flex justify-center"
+  className="relative z-[10] mt-6 mb-12 flex justify-center"
   initial={{ opacity: 0, y: 30 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.6 }}
 >
   <Link to="/child-health-check" className="block">
-    <GeninoHealthButton />
+    <GeninoHealthButton
+      title="پایش سلامت کودک"
+      icon={HeartPulse}
+    />
   </Link>
 </motion.div>
+
 
 
 {/* 🩺 داشبورد سلامت کودک */}
