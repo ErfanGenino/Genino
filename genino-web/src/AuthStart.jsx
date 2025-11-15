@@ -39,7 +39,7 @@ export default function AuthStart() {
   title: "سلامت بانوان",
   desc: "پیگیری چرخه قاعدگی، شناخت بدن و دریافت پیشنهادهای آرام‌بخش روزانه",
   link: "/my-cycle",
-  color: "women",
+  color: "pink",
 },
 {
   icon: (
@@ -50,7 +50,7 @@ export default function AuthStart() {
   title: "سلامت آقایان",
   desc: "بررسی علمی وضعیت جسمی، ذهنی و هورمونی آقایان با تست‌های تخصصی و شخصی‌سازی‌شده",
   link: "/my-men-health",
-  color: "men",
+  color: "blue",
 },
 {
   icon: (
@@ -61,17 +61,19 @@ export default function AuthStart() {
   title: "پزشک من",
   desc: "بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو.",
   link: "/my-doctor",
+  color: "green",
 },
   { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker",color: "calorie",},  
-  { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنی‌های روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge" },
+  { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنی‌های روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge", color: "yellow", },
   {
     icon: <UsersRound className="w-8 h-8 text-yellow-500 mb-3" />,
     title: "شبکه اجتماعی ژنینو",
     desc: "در ژنینو با والدین دیگر در ارتباط باشید، تجربه‌ها را به اشتراک بگذارید و از لحظات طلایی کودکی الهام بگیرید 💬✨",
     link: "/social",
+    color: "blue",
   },
-  { icon: <Puzzle className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun" },
-  { icon: <PartyPopper className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما", link: "/events" },
+  { icon: <Puzzle className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun", color: "pink", },
+  { icon: <PartyPopper className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما", link: "/events", color: "green", },
 {
   icon: (
     <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-200 shadow-md mb-3">
@@ -79,7 +81,7 @@ export default function AuthStart() {
     </div>
   ),
   title: "جهان مجردها",
-  desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو.", link: "/single-world",
+  desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو.", link: "/single-world", color: "yellow",
 },
 { icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
   
@@ -103,6 +105,15 @@ useEffect(() => {
   }, 6000); // هر ۶ ثانیه یک‌بار
   return () => clearInterval(interval);
 }, []);
+
+const cardColors = {
+  default: "bg-[#f8fafc] border-[#e2e8f0] text-gray-700", // خاکستری آبی روشن
+  blue: "bg-[#e0f2fe] border-[#bae6fd] text-[#075985]",   // آبی ملایم
+  green: "bg-[#dcfce7] border-[#bbf7d0] text-[#166534]",  // سبز ملایم
+  pink: "bg-[#ffe4e6] border-[#fecdd3] text-[#9d174d]",   // صورتی
+  yellow: "bg-[#fef9c3] border-[#fef08a] text-[#92400e]", // زرد ملایم
+};
+
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-20 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
@@ -328,58 +339,52 @@ useEffect(() => {
 
 
       {/* 🔸 کارت‌های ویژگی (افکت برای کارتهای ویژگی) */}
-      <motion.section
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl mb-20 relative z-[5] items-stretch"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={{
-          hidden: { opacity: 0, y: 30 },
-          visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.2, duration: 0.6 } },
-        }}
-      >
-        {features.map((item, i) => (
-  <Link key={i} to={item.link || "#"}>
-    <motion.div
-      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      animate={
-        item.title === "فروشگاه تخصصی" && highlight
-          ? {
-              scale: [1, 1.08, 0.98, 1.06, 1],
-              rotate: [0, -4, 4, -2, 2, 0],
-              background: [
-                "linear-gradient(to bottom right, #fffaf0, #fffdf8)",
-                "linear-gradient(to bottom right, #fceabb, #f8b500)",
-                "linear-gradient(to bottom right, #fffaf0, #fffdf8)",
-              ],
-              boxShadow: [
-                "0 0 0px rgba(212,175,55,0)",
-                "0 0 25px rgba(212,175,55,0.9)",
-                "0 0 0px rgba(212,175,55,0)",
-              ],
-            }
-          : item.title === "کودک من" && pulse
-          ? {
-              scale: [1, 1.03, 1],
-              boxShadow: [
-                "0 0 0px rgba(212,175,55,0)",
-                "0 0 25px rgba(212,175,55,0.6)",
-                "0 0 0px rgba(212,175,55,0)",
-              ],
-            }
-          : {}
-      }
-      transition={{ duration: 2, ease: "easeInOut" }}
-      className={`relative group p-6 rounded-2xl border transition-all text-center h-full flex flex-col justify-between cursor-pointer
-  ${
-    item.title === "کودک من"
-      ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
-      : item.title === "فروشگاه تخصصی"
-      ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md hover:shadow-lg hover:-translate-y-1"
-      : "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_15px_rgba(212,175,55,0.15)] hover:shadow-[0_0_30px_rgba(212,175,55,0.35)] hover:-translate-y-1 bg-[length:200%_200%] transition-all duration-500"
-  }`}
+{/* 🔸 کارت‌های ویژگی (container) */}
+<motion.section
+  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full mt-10 z-20"
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true }}
+  variants={{
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.08, duration: 0.35 } },
+  }}
+>
+  {features.map((item, i) => (
+    <Link key={i} to={item.link || "#"}>
 
-    >
+      <motion.div
+        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+        animate={
+          item.title === "فروشگاه تخصصی" && highlight
+            ? {
+                scale: [1, 1.08, 0.98, 1.06, 1],
+                rotate: [0, -4, 4, -2, 2, 0],
+              }
+            : item.title === "کودک من" && pulse
+            ? {
+                scale: [1, 1.03, 1],
+              }
+            : {}
+        }
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+
+        /* 🎯 کارت بهینه و کوچک‌شده */
+        className={`relative group p-4 rounded-2xl border transition-all text-center 
+          h-full min-h-[170px] lg:min-h-[190px] 
+          flex flex-col justify-between cursor-pointer
+
+          ${
+            item.title === "کودک من"
+              ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
+              : item.title === "فروشگاه تخصصی"
+              ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md hover:shadow-lg hover:-translate-y-1"
+              : item.title === "اقتصاد و حسابداری خانواده"
+              ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_12px_rgba(212,175,55,0.15)] hover:shadow-[0_0_20px_rgba(212,175,55,0.35)] hover:-translate-y-1"
+              : cardColors[item.color] || cardColors.default
+          }
+        `}
+      >
       {/* 🌟 ستاره‌های طلایی مخصوص دانستنی‌های روز دنیا */}
       {item.title === "دانستنی‌های روز دنیا" && (
         <>
@@ -456,22 +461,25 @@ useEffect(() => {
     </motion.div>
   </Link>
 ))}
-
       </motion.section>
+
+
       {/* 🔥 محصولات تخفیف‌خورده */}
-<ScrollProduct
-  title="🔥 محصولات تخفیف‌خورده"
-  color="amber"
-  items={Array.from({ length: 25 }).map((_, i) => ({
-    id: 100 + i,
-    name: `محصول تخفیف‌خورده ${i + 1}`,
-    price: `${(Math.floor(Math.random() * 250) + 80) * 1000} تومان`,
-    oldPrice: `${(Math.floor(Math.random() * 350) + 150) * 1000} تومان`,
-    discount: `${Math.floor(Math.random() * 50) + 10}%`,
-    image: logo,
-    category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
-  }))}
-/>
+<div className="mt-14"> 
+  <ScrollProduct
+    title="🔥 محصولات تخفیف‌خورده"
+    color="amber"
+    items={Array.from({ length: 25 }).map((_, i) => ({
+      id: 100 + i,
+      name: `محصول تخفیف‌خورده ${i + 1}`,
+      price: `${(Math.floor(Math.random() * 250) + 80) * 1000} تومان`,
+      oldPrice: `${(Math.floor(Math.random() * 350) + 150) * 1000} تومان`,
+      discount: `${Math.floor(Math.random() * 50) + 10}%`,
+      image: logo,
+      category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
+    }))}
+  />
+</div>
 
 
             <Footer className="relative z-[2]" />
