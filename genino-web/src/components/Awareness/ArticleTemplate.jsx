@@ -12,6 +12,7 @@ export default function ArticleTemplate({
   sections = [],
   useMarkdown = false, // 🔄 سوئیچ بین حالت ساده و Markdown
   endingNote = "",     // 🟡 پیام پایانی اختیاری
+  preImageNote = "", 
 }) {
   // ✅ هوک‌ها باید داخل تابع باشند
   const location = useLocation();
@@ -48,6 +49,19 @@ export default function ArticleTemplate({
       >
         {title}
       </motion.h1>
+
+      {/* 🟡 متن سفارشی قبل از عکس (اختیاری) */}
+{preImageNote && (
+  <motion.p
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className="text-xl font-semibold text-yellow-700 mb-4 max-w-3xl text-center"
+  >
+    {preImageNote}
+  </motion.p>
+)}
+
 
       {/* 🖼️ عکس اصلی */}
       <motion.img
