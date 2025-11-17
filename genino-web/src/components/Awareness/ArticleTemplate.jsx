@@ -12,7 +12,8 @@ export default function ArticleTemplate({
   sections = [],
   useMarkdown = false, // 🔄 سوئیچ بین حالت ساده و Markdown
   endingNote = "",     // 🟡 پیام پایانی اختیاری
-  preImageNote = "", 
+  preImageNote = "",
+  children, 
 }) {
   // ✅ هوک‌ها باید داخل تابع باشند
   const location = useLocation();
@@ -82,6 +83,13 @@ export default function ArticleTemplate({
       >
         {summary}
       </motion.p>
+
+      {/* 🔥 محتوای children (برای مقالات جدید) */}
+{React.Children.count(children) > 0 && (
+  <div className="w-full max-w-3xl my-10 text-gray-700 leading-relaxed text-justify">
+    {children}
+  </div>
+)}
 
       <GoldenDivider />
 

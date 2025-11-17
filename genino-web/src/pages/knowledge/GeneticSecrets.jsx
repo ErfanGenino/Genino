@@ -11,9 +11,9 @@ const articles = [
   },
   {
     id: 2,
-    title: "وراثت؛ شباهت یا تکرار؟",
+    title: "تمرکز لیزری",
     image: "/images/knowledge/genetics/2.jpg",
-    slug: "inheritance",
+    slug: "laser-focus",
   },
   {
     id: 3,
