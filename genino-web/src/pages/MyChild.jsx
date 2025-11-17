@@ -519,7 +519,7 @@ useEffect(() => {
     message="کودکان با هر نگاه، از ما یاد می‌گیرند 💛 آگاهی والد، روشنایی مسیر رشد کودک است."
     buttons={[
       { title: "بازی آزاد", link: "/articles/freeplay" },
-      { title: "مقاله", link: "/articles/empathy" },
+      { title: "ژن های طلایی کودکی", link: "/articles/golden-child-genes" },
       { title: "مقاله", link: "/articles/empathy" },
       { title: "مقاله", link: "/articles/empathy" },
       { title: "مقاله", link: "/articles/empathy" },

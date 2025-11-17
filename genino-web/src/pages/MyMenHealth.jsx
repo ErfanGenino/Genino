@@ -16,6 +16,7 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import GeninoHealthButton from "@components/Assessments/GeninoHealthButton";
 import { HeartPulse } from "lucide-react";
 import { Link } from "react-router-dom";
+import GeninoAwarenessBox from "@components/Awareness/GeninoAwarenessBox";
 
 
 
@@ -1834,6 +1835,27 @@ export default function MyMenHealth() {
           <li>National Institutes of Health (NIH) – Focus & Motivation Studies 2020–2024</li>
         </ul>
       </motion.div>
+      {/* 🧠 جعبه آگاهی ژنینو */}
+      <motion.div
+        className="relative z-[6] -mt-8 mb-2 w-full max-w-2xl"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <GeninoAwarenessBox
+          image="/images/awareness/man/1.jpg"
+          message="آگاهی، نیروی آرامِ مردان قدرتمند است."
+          buttons={[
+            { title: "تمرکز لیزری", link: "/articles/laser-focus" },
+            { title: "بدن مردان", link: "/articles/body-men" },
+            { title: "بدن زنان", link: "/articles/body-women" },
+            { title: "ژن چیست؟", link: "/articles/what-is-gene" },
+            { title: "مقاله", link: "/articles/empathy" },
+            { title: "مقاله", link: "/articles/empathy" },
+          ]}
+        />
+      </motion.div>
+
     </main>
   );
 }

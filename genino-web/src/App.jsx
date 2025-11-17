@@ -54,6 +54,7 @@ import GeneticSecrets from "./pages/knowledge/GeneticSecrets.jsx";
 import WhatIsGene from "./pages/articles/WhatIsGene.jsx";
 import MenGenitalSelfCheckArticle from "./pages/articles/MenGenitalSelfCheckArticle.jsx";
 import LaserFocusArticle from "./pages/articles/LaserFocusArticle";
+import GoldenGenesChildArticle from "./pages/articles/GoldenGenesChildArticle";
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
@@ -131,6 +132,7 @@ export default function App() {
         <Route path="/articles/what-is-gene" element={<WhatIsGene />} />
         <Route path="/articles/men-genital-self-check" element={<MenGenitalSelfCheckArticle />} />
         <Route path="/articles/laser-focus" element={<LaserFocusArticle />} />
+        <Route path="/articles/golden-child-genes" element={<GoldenGenesChildArticle />} />
 
       </Routes>
     </>
