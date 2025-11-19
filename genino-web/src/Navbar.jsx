@@ -55,7 +55,7 @@ function Navbar() {
                 overflow-hidden hover:scale-110 transition-all duration-300">
   
   {/* حلقه درخشش سفارشی ژنینویی */}
-  <div className="relative w-16 h-16 rounded-full flex items-center justify-center
+  <div className="relative w-14 h-14   rounded-full flex items-center justify-center
                 bg-white border-2 border-yellow-400 shadow-sm overflow-hidden"></div>
 
   {/* خود لوگو */}

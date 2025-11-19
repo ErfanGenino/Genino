@@ -57,9 +57,14 @@ export default function ScrollProduct({
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        <h2 className={`text-xl font-bold ${colorClasses.split(" ")[0]}`}>
-          {title}
-        </h2>
+        <h2
+  className={`text-lg sm:text-xl font-bold ${
+    colorClasses.split(" ")[0]
+  }`}
+>
+  {title}
+</h2>
+
 
         <button
           onClick={() =>
@@ -76,7 +81,12 @@ export default function ScrollProduct({
         ref={scrollRef}
         className="overflow-x-auto snap-x snap-mandatory no-scrollbar touch-pan-x"
       >
-        <div className="grid grid-flow-col auto-cols-[70%] sm:auto-cols-[45%] md:auto-cols-[30%] lg:auto-cols-[22%] gap-5 px-2">
+        <div className="grid grid-flow-col 
+                auto-cols-[60%] 
+                sm:auto-cols-[40%] 
+                md:auto-cols-[28%] 
+                lg:auto-cols-[22%] 
+                gap-4 px-2">
           {items.map((item) => (
             <motion.div
               key={item.id}
@@ -86,13 +96,17 @@ export default function ScrollProduct({
               }}
               transition={{ duration: 0.3 }}
               onClick={() => navigate(`/product/${item.id}`)}
-              className="group bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all border border-yellow-100 cursor-pointer snap-start"
+              className="group bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm 
+           overflow-hidden hover:shadow-md transition-all 
+           border border-yellow-100 cursor-pointer snap-start"
             >
               <img
-                src={item.image}
-                alt={item.name}
-                className="w-20 h-20 mx-auto mt-4 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110"
-              />
+  src={item.image}
+  alt={item.name}
+  className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mt-4 
+             object-contain transition-transform duration-500 
+             group-hover:scale-110 group-hover:brightness-110"
+/>
               <div className="p-3 text-center">
                 {item.category && (
                   <div className="text-[11px] text-gray-500 mb-1">
