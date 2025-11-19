@@ -15,6 +15,11 @@ export default {
     'text-genino-700',
     'text-genino-800',
     'text-genino-900',
+
+    // ⭐ افکت‌های hover که Tailwind پاک‌شون می‌کنه
+    'group-hover:scale-[1.04]',
+    'group-hover:-translate-y-1',
+    'group-hover:shadow-[0_0_20px_rgba(212,175,55,0.32)]',
   ],
   theme: {
     extend: {
@@ -33,7 +38,8 @@ export default {
         },
       },
       backgroundImage: {
-        "genino-gradient": "linear-gradient(to bottom right, #f9e26e, #FFD700, #b99700)",
+        "genino-gradient":
+          "linear-gradient(to bottom right, #f9e26e, #FFD700, #b99700)",
       },
     },
   },

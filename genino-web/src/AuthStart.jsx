@@ -341,7 +341,7 @@ const cardColors = {
       {/* 🔸 کارت‌های ویژگی (افکت برای کارتهای ویژگی) */}
 {/* 🔸 کارت‌های ویژگی (container) */}
 <motion.section
-  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full mt-10 z-20"
+  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full mt-4 z-20"
   initial="hidden"
   whileInView="visible"
   viewport={{ once: true }}
@@ -351,40 +351,39 @@ const cardColors = {
   }}
 >
   {features.map((item, i) => (
-    <Link key={i} to={item.link || "#"}>
+    <Link key={i} to={item.link || "#"} className="group">
+  <motion.div
+    whileHover={{
+      scale: 1.05,
+      y: -4,
+      boxShadow: "0 0 20px rgba(212,175,55,0.32)"
+    }}
+    animate={
+      item.title === "فروشگاه تخصصی" && highlight
+        ? { scale: [1, 1.08, 1], rotate: [0, -3, 0] }
+        : item.title === "کودک من" && pulse
+        ? { scale: [1, 1.03, 1] }
+        : {}
+    }
+    transition={{ duration: 0.35, ease: "easeOut" }}
+    className={`
+      relative p-4 rounded-2xl border 
+      h-full min-h-[170px] lg:min-h-[190px]
+      flex flex-col justify-between cursor-pointer
+      transition-all duration-300
 
-      <motion.div
-        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-        animate={
-          item.title === "فروشگاه تخصصی" && highlight
-            ? {
-                scale: [1, 1.08, 0.98, 1.06, 1],
-                rotate: [0, -4, 4, -2, 2, 0],
-              }
-            : item.title === "کودک من" && pulse
-            ? {
-                scale: [1, 1.03, 1],
-              }
-            : {}
-        }
-        transition={{ duration: 1.5, ease: "easeInOut" }}
+      ${
+        item.title === "کودک من"
+          ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
+          : item.title === "فروشگاه تخصصی"
+          ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md"
+          : item.title === "اقتصاد و حسابداری خانواده"
+          ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+          : cardColors[item.color] || cardColors.default
+      }
+    `}
+  >
 
-        /* 🎯 کارت بهینه و کوچک‌شده */
-        className={`relative group p-4 rounded-2xl border transition-all text-center 
-          h-full min-h-[170px] lg:min-h-[190px] 
-          flex flex-col justify-between cursor-pointer
-
-          ${
-            item.title === "کودک من"
-              ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
-              : item.title === "فروشگاه تخصصی"
-              ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md hover:shadow-lg hover:-translate-y-1"
-              : item.title === "اقتصاد و حسابداری خانواده"
-              ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_12px_rgba(212,175,55,0.15)] hover:shadow-[0_0_20px_rgba(212,175,55,0.35)] hover:-translate-y-1"
-              : cardColors[item.color] || cardColors.default
-          }
-        `}
-      >
       {/* 🌟 ستاره‌های طلایی مخصوص دانستنی‌های روز دنیا */}
       {item.title === "دانستنی‌های روز دنیا" && (
         <>
