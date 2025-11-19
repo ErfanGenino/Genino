@@ -50,22 +50,31 @@ function Navbar() {
           {/* 🔸 لوگو راست */}
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center gap-2">
-              <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-300/40 to-white/0 blur-xl animate-pulse"></div>
-                <img
-                  src={logo}
-                  alt="Genino Logo"
-                  className="relative w-14 h-14 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-transform duration-500 hover:scale-110"
-                />
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-base font-bold text-yellow-600">
-                  ژنینو 🌿
-                </span>
-                <span className="text-[11px] text-gray-500">
-                  دستیار هوشمند
-                </span>
-              </div>
+              <div className="relative w-14 h-14 rounded-full flex items-center justify-center
+                bg-white border-2 border-yellow-400 shadow-sm
+                overflow-hidden hover:scale-110 transition-all duration-300">
+  
+  {/* حلقه درخشش سفارشی ژنینویی */}
+  <div className="relative w-16 h-16 rounded-full flex items-center justify-center
+                bg-white border-2 border-yellow-400 shadow-sm overflow-hidden"></div>
+
+  {/* خود لوگو */}
+  <img
+    src={logo}
+    alt="Genino Logo"
+    className="relative z-10 w-20 h-20 object-contain bg-white"
+  />
+</div>
+              <div className="flex flex-col items-center leading-tight mt-0.5">
+  <span className="text-[15px] font-semibold text-yellow-700">
+    ژنینو
+  </span>
+
+  <span className="text-[10.5px] text-gray-500 mt-0.5 tracking-tight">
+    دستیار هوشمند
+  </span>
+</div>
+
             </Link>
           </div>
 
@@ -102,19 +111,27 @@ function Navbar() {
             ) : (
               <>
                 <Link
-                  to="/login"
-                  className="flex items-center gap-1.5 text-gray-700 border border-gray-200 px-3 py-1.5 rounded-xl text-sm font-medium hover:border-yellow-400 hover:text-yellow-600 transition-all shadow-sm hover:shadow-md"
-                >
-                  <LogIn size={17} className="opacity-80" />
-                  <span>ورود</span>
-                </Link>
+  to="/login"
+  className="flex items-center gap-1.5 
+             border border-yellow-300 text-yellow-700
+             px-3 py-1.5 rounded-xl text-sm font-medium
+             hover:bg-yellow-50 transition-all"
+>
+  <LogIn size={17} className="opacity-80" />
+  <span>ورود</span>
+</Link>
+
                 <Link
-                  to="/signup"
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-3.5 py-1.5 rounded-xl text-sm font-medium hover:from-yellow-600 hover:to-yellow-500 shadow-sm hover:shadow-md transition-all"
-                >
-                  <UserPlus size={17} className="opacity-90" />
-                  <span>ثبت‌نام</span>
-                </Link>
+  to="/signup"
+  className="flex items-center gap-1.5 
+             bg-yellow-500 text-white
+             px-3.5 py-1.5 rounded-xl text-sm font-medium
+             hover:bg-yellow-600 transition-all shadow"
+>
+  <UserPlus size={17} className="opacity-90" />
+  <span>ثبت‌نام</span>
+</Link>
+
               </>
             )}
           </div>
@@ -134,59 +151,60 @@ function Navbar() {
 
         {/* 🔹 منوی موبایل */}
         {menuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 py-4 px-5 flex flex-col gap-4 text-right shadow-md animate-fadeIn">
-            {links.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => setMenuOpen(false)}
-                className={({ isActive }) =>
-                  [
-                    "text-base transition-all",
-                    isActive
-                      ? "text-yellow-600 font-semibold"
-                      : "text-gray-700 hover:text-yellow-600",
-                  ].join(" ")
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
+          <div className="md:hidden bg-white border-t border-gray-100 py-4 px-5 
+                flex flex-col gap-3 text-right">
 
-            <hr className="my-2 border-gray-100" />
+  {links.map((item) => (
+    <NavLink
+      key={item.to}
+      to={item.to}
+      onClick={() => setMenuOpen(false)}
+      className={({ isActive }) =>
+        [
+          "text-sm py-1 transition-all",
+          isActive
+            ? "text-yellow-600 font-semibold"
+            : "text-gray-700 hover:text-yellow-600",
+        ].join(" ")
+      }
+    >
+      {item.label}
+    </NavLink>
+  ))}
 
-            {inDashboard ? (
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  setShowLogoutConfirm(true);
-                }}
-                className="flex items-center justify-end gap-2 text-red-500 hover:text-red-600 text-sm"
-              >
-                <span>خروج</span>
-                <LogOut size={17} />
-              </button>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-end gap-2 text-gray-700 hover:text-yellow-600 text-sm"
-                >
-                  <span>ورود</span>
-                  <LogIn size={17} />
-                </Link>
-                <Link
-                  to="/signup"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-end gap-2 bg-yellow-500 text-white px-3 py-1.5 rounded-xl text-sm hover:bg-yellow-600 transition"
-                >
-                  <span>ثبت‌نام</span>
-                  <UserPlus size={17} />
-                </Link>
-              </>
-            )}
-          </div>
+  <hr className="my-2 border-gray-200" />
+
+  {!inDashboard && (
+    <div className="flex flex-col gap-2">
+
+      {/* ورود */}
+      <Link
+        to="/login"
+        onClick={() => setMenuOpen(false)}
+        className="flex items-center justify-between
+                   border border-yellow-300 text-yellow-700
+                   px-3 py-2 rounded-lg text-sm hover:bg-yellow-50"
+      >
+        <span>ورود</span>
+        <LogIn size={17} />
+      </Link>
+
+      {/* ثبت‌نام */}
+      <Link
+        to="/signup"
+        onClick={() => setMenuOpen(false)}
+        className="flex items-center justify-between
+                   bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm
+                   hover:bg-yellow-600 shadow"
+      >
+        <span>ثبت‌نام</span>
+        <UserPlus size={17} />
+      </Link>
+
+    </div>
+  )}
+</div>
+
         )}
       </header>
 
