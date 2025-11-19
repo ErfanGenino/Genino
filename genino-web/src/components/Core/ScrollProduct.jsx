@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 export default function ScrollProduct({
   title = "لیست محصولات",
   items = [],
-  autoScroll = true,
+  autoScroll = false,   // ⬅️ از این به بعد اسکرول خودکار غیرفعال است
   interval = 6000,
   color = "yellow",
 }) {

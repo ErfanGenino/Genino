@@ -275,7 +275,7 @@ const cardColors = {
 
       {/* 🔸 اسلایدر اصلی صفحه ورود ژنینو */}
 <motion.div
-  className="relative w-full max-w-3xl aspect-[16/9] mb-4 rounded-3xl overflow-hidden z-20"
+  className="relative w-full max-w-3xl aspect-[16/9] mb-2 rounded-3xl overflow-hidden z-20"
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -465,7 +465,7 @@ const cardColors = {
 
 
       {/* 🔥 محصولات تخفیف‌خورده */}
-
+<div className="mt-8"> 
   <ScrollProduct
     title=" محصولات تخفیف‌خورده"
     color="amber"
@@ -477,7 +477,7 @@ const cardColors = {
     category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
   }))}
 />
-
+</div>
 
 
             <Footer className="relative z-[2]" />
