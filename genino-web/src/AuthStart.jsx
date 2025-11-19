@@ -465,7 +465,7 @@ const cardColors = {
 
 
       {/* 🔥 محصولات تخفیف‌خورده */}
-<div className="mt-8"> 
+
   <ScrollProduct
     title=" محصولات تخفیف‌خورده"
     color="amber"
@@ -477,7 +477,7 @@ const cardColors = {
     category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
   }))}
 />
-</div>
+
 
 
             <Footer className="relative z-[2]" />
