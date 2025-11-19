@@ -325,7 +325,7 @@ const cardColors = {
 
 {/* 🛍️ آخرین محصولات فروشگاه ژنینو */}
 <ScrollProduct
-  title="🛍️ آخرین محصولات فروشگاه ژنینو"
+  title=" آخرین محصولات فروشگاه ژنینو"
   color="yellow"
   items={Array.from({ length: 25 }).map((_, i) => ({
     id: i + 1,
@@ -465,9 +465,9 @@ const cardColors = {
 
 
       {/* 🔥 محصولات تخفیف‌خورده */}
-<div className="mt-14"> 
+
   <ScrollProduct
-    title="🔥 محصولات تخفیف‌خورده"
+    title=" محصولات تخفیف‌خورده"
     color="amber"
     items={Array.from({ length: 25 }).map((_, i) => ({
     id: i + 1,
@@ -477,7 +477,7 @@ const cardColors = {
     category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
   }))}
 />
-</div>
+
 
 
             <Footer className="relative z-[2]" />
