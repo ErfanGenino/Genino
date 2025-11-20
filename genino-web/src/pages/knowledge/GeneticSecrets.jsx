@@ -17,9 +17,9 @@ const articles = [
   },
   {
     id: 3,
-    title: "اپی‌ژنتیک؛ تأثیر احساس و رفتار بر ژن‌ها",
+    title: "اپی‌ژنتیک رفتاری؛ رازی که می‌تواند زندگی‌تان را متحول کند",
     image: "/images/knowledge/genetics/3.jpg",
-    slug: "epigenetics",
+    slug: "behavioral-epigenetics",
   },
   {
     id: 4,
