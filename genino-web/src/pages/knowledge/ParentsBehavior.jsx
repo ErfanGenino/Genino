@@ -17,8 +17,9 @@ const articles = [
   },
   {
     id: 3,
-    title: "تنبیه مؤثر یا گفت‌وگوی سازنده؟",
+    title: "ژن‌های مرتبط با هوش کودکان، حافظه، یادگیری و تمرکز",
     image: "/images/knowledge/parentsbehavior/3.jpg",
+    slug: "child-intelligence-genes",
   },
   {
     id: 4,

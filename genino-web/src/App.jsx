@@ -56,7 +56,7 @@ import MenGenitalSelfCheckArticle from "./pages/articles/MenGenitalSelfCheckArti
 import LaserFocusArticle from "./pages/articles/LaserFocusArticle";
 import GoldenGenesChildArticle from "./pages/articles/GoldenGenesChildArticle";
 import BehavioralEpigeneticsArticle from "./pages/articles/BehavioralEpigeneticsArticle";
-
+import ChildIntelligenceGenesArticle from "./pages/articles/ChildIntelligenceGenesArticle.jsx";
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import Shop from "./pages/Shop.jsx";
@@ -135,6 +135,7 @@ export default function App() {
         <Route path="/articles/laser-focus" element={<LaserFocusArticle />} />
         <Route path="/articles/golden-child-genes" element={<GoldenGenesChildArticle />} />
         <Route path="/articles/behavioral-epigenetics" element={<BehavioralEpigeneticsArticle />} />
+        <Route path="/articles/child-intelligence-genes" element={<ChildIntelligenceGenesArticle />} />
 
       </Routes>
     </>

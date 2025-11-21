@@ -1850,7 +1850,7 @@ export default function MyMenHealth() {
             { title: "بدن مردان", link: "/articles/body-men" },
             { title: "بدن زنان", link: "/articles/body-women" },
             { title: "ژن چیست؟", link: "/articles/what-is-gene" },
-            { title: "مقاله", link: "/articles/empathy" },
+            { title: "اپی‌ژنتیک رفتاری", link: "/articles/behavioral-epigenetics" },
             { title: "مقاله", link: "/articles/empathy" },
           ]}
         />
