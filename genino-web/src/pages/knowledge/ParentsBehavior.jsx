@@ -25,6 +25,7 @@ const articles = [
     id: 4,
     title: "محبت بدون شرط؛ راز امنیت روانی کودک",
     image: "/images/knowledge/parentsbehavior/4.jpg",
+    slug: "unconditional-love",
   },
   {
     id: 5,

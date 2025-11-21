@@ -521,7 +521,7 @@ useEffect(() => {
       { title: "بازی آزاد", link: "/articles/freeplay" },
       { title: "ژن های طلایی کودکی", link: "/articles/golden-child-genes" },
       { title: "ژن‌های مرتبط با هوش کودکان", link: "/articles/child-intelligence-genes" },
-      { title: "مقاله", link: "/articles/empathy" },
+      { title: "محبت بدون شرط", link: "/articles/unconditional-love" },
       { title: "مقاله", link: "/articles/empathy" },
       { title: "مقاله", link: "/articles/empathy" },
     ]}
