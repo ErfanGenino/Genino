@@ -522,8 +522,8 @@ useEffect(() => {
       { title: "ژن های طلایی کودکی", link: "/articles/golden-child-genes" },
       { title: "ژن‌های مرتبط با هوش کودکان", link: "/articles/child-intelligence-genes" },
       { title: "محبت بدون شرط", link: "/articles/unconditional-love" },
-      { title: "مقاله", link: "/articles/empathy" },
-      { title: "مقاله", link: "/articles/empathy" },
+      { title: "الگوی رفتاری والدین در خانه", link: "/articles/parenting-behavior-at-home" },
+      { title: "کنار آمدن با ترس‌ها و اضطراب کودک", link: "/articles/child-anxiety-and-fear-management" },
     ]}
   />
 </motion.div>

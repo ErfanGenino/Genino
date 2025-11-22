@@ -31,11 +31,13 @@ const articles = [
     id: 5,
     title: "چطور با ترس‌ها و اضطراب کودک کنار بیایم؟",
     image: "/images/knowledge/parentsbehavior/5.jpg",
+    slug: "child-anxiety-and-fear-management",
   },
   {
     id: 6,
     title: "الگوی رفتاری والدین در خانه",
     image: "/images/knowledge/parentsbehavior/6.jpg",
+    slug: "parenting-behavior-at-home",
   },
   {
     id: 7,

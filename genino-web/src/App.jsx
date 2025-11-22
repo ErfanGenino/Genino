@@ -58,6 +58,8 @@ import GoldenGenesChildArticle from "./pages/articles/GoldenGenesChildArticle";
 import BehavioralEpigeneticsArticle from "./pages/articles/BehavioralEpigeneticsArticle";
 import ChildIntelligenceGenesArticle from "./pages/articles/ChildIntelligenceGenesArticle.jsx";
 import UnconditionalLoveChildArticle from "./pages/articles/UnconditionalLoveChildArticle.jsx";
+import ParentingBehaviorAtHomeArticle from "@pages/articles/ParentingBehaviorAtHomeArticle";
+import ChildAnxietyAndFearManagementArticle from "@pages/articles/ChildAnxietyAndFearManagementArticle";
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import Shop from "./pages/Shop.jsx";
@@ -138,7 +140,8 @@ export default function App() {
         <Route path="/articles/behavioral-epigenetics" element={<BehavioralEpigeneticsArticle />} />
         <Route path="/articles/child-intelligence-genes" element={<ChildIntelligenceGenesArticle />} />
         <Route path="/articles/unconditional-love" element={<UnconditionalLoveChildArticle />} />
-
+        <Route path="/articles/parenting-behavior-at-home" element={<ParentingBehaviorAtHomeArticle />} />
+        <Route path="/articles/child-anxiety-and-fear-management" element={<ChildAnxietyAndFearManagementArticle />} />
 
       </Routes>
     </>
