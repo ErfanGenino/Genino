@@ -43,21 +43,25 @@ const articles = [
     id: 7,
     title: "تشویق هوشمندانه؛ مرز بین انگیزه و وابستگی",
     image: "/images/knowledge/parentsbehavior/7.jpg",
+    slug: "smart-encouragement",
   },
   {
     id: 8,
     title: "احترام متقابل در گفت‌وگو با کودک",
     image: "/images/knowledge/parentsbehavior/8.jpg",
+    slug: "mutual-respect",
   },
   {
     id: 9,
     title: "نقش پدر در رشد هیجانی فرزند",
     image: "/images/knowledge/parentsbehavior/9.jpg",
+    slug: "father-emotional-role",
   },
   {
     id: 10,
     title: "مدیریت خشم والدین هنگام تربیت کودک",
     image: "/images/knowledge/parentsbehavior/10.jpg",
+    slug: "parent-anger-management",
   },
   {
     id: 11,

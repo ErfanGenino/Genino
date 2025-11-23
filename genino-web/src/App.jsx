@@ -60,6 +60,11 @@ import ChildIntelligenceGenesArticle from "./pages/articles/ChildIntelligenceGen
 import UnconditionalLoveChildArticle from "./pages/articles/UnconditionalLoveChildArticle.jsx";
 import ParentingBehaviorAtHomeArticle from "@pages/articles/ParentingBehaviorAtHomeArticle";
 import ChildAnxietyAndFearManagementArticle from "@pages/articles/ChildAnxietyAndFearManagementArticle";
+import SmartEncouragementArticle from "@pages/articles/SmartEncouragementArticle";
+import MutualRespectArticle from "@pages/articles/MutualRespectArticle";
+import FatherEmotionalRoleArticle from "@pages/articles/FatherEmotionalRoleArticle";
+import ParentAngerManagementArticle from "@pages/articles/ParentAngerManagementArticle";
+
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import Shop from "./pages/Shop.jsx";
@@ -142,6 +147,13 @@ export default function App() {
         <Route path="/articles/unconditional-love" element={<UnconditionalLoveChildArticle />} />
         <Route path="/articles/parenting-behavior-at-home" element={<ParentingBehaviorAtHomeArticle />} />
         <Route path="/articles/child-anxiety-and-fear-management" element={<ChildAnxietyAndFearManagementArticle />} />
+        <Route path="/articles/smart-encouragement" element={<SmartEncouragementArticle />} />
+        <Route path="/articles/mutual-respect" element={<MutualRespectArticle />} />
+        <Route path="/articles/father-emotional-role" element={<FatherEmotionalRoleArticle />} />
+        <Route path="/articles/parent-anger-management" element={<ParentAngerManagementArticle />} />
+
+
+
 
       </Routes>
     </>
