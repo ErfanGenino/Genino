@@ -64,6 +64,8 @@ import SmartEncouragementArticle from "@pages/articles/SmartEncouragementArticle
 import MutualRespectArticle from "@pages/articles/MutualRespectArticle";
 import FatherEmotionalRoleArticle from "@pages/articles/FatherEmotionalRoleArticle";
 import ParentAngerManagementArticle from "@pages/articles/ParentAngerManagementArticle";
+import ChildTrustArticle from "@pages/articles/ChildTrustArticle";
+import QualityTimeArticle from "@pages/articles/QualityTimeArticle";
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
@@ -151,9 +153,8 @@ export default function App() {
         <Route path="/articles/mutual-respect" element={<MutualRespectArticle />} />
         <Route path="/articles/father-emotional-role" element={<FatherEmotionalRoleArticle />} />
         <Route path="/articles/parent-anger-management" element={<ParentAngerManagementArticle />} />
-
-
-
+        <Route path="/articles/child-trust" element={<ChildTrustArticle />} />
+        <Route path="/articles/quality-time" element={<QualityTimeArticle />} />
 
       </Routes>
     </>

@@ -67,11 +67,13 @@ const articles = [
     id: 11,
     title: "چطور اعتماد کودک را حفظ کنیم؟",
     image: "/images/knowledge/parentsbehavior/11.jpg",
+    slug: "child-trust",
   },
   {
     id: 12,
     title: "زمانِ با کیفیت؛ مهم‌تر از زمان زیاد",
     image: "/images/knowledge/parentsbehavior/12.jpg",
+    slug: "quality-time",
   },
 ];
 
