@@ -69,6 +69,17 @@ import QualityTimeArticle from "@pages/articles/QualityTimeArticle";
 import PrePregnancyKnowledge from "./pages/knowledge/PrePregnancyKnowledge";
 import PrePregnancyCheckupsArticle from "@pages/articles/pre-pregnancy/PrePregnancyCheckupsArticle";
 import PrePregnancyVitaminsArticle from "@pages/articles/pre-pregnancy/PrePregnancyVitaminsArticle";
+import EggSpermQualityArticle from "@pages/articles/pre-pregnancy/EggSpermQualityArticle";
+import PrePregnancyEpigeneticsArticle from "@pages/articles/pre-pregnancy/PrePregnancyEpigeneticsArticle";
+import PrePregnancyStressManagementArticle from "@pages/articles/pre-pregnancy/PrePregnancyStressManagementArticle";
+import PrePregnancyBodyWeightArticle from "@pages/articles/pre-pregnancy/PrePregnancyBodyWeightArticle";
+import PrePregnancyToxinsArticle from "@pages/articles/pre-pregnancy/PrePregnancyToxinsArticle";
+import PrePregnancyParentalAgeArticle from "@pages/articles/pre-pregnancy/PrePregnancyParentalAgeArticle";
+import PrePregnancyOvulationCycleArticle from "@pages/articles/pre-pregnancy/PrePregnancyOvulationCycleArticle";
+import PrePregnancyMaleSexualHealthArticle from "@pages/articles/pre-pregnancy/PrePregnancyMaleSexualHealthArticle";
+import PrePregnancySleepAndFertilityArticle from "@pages/articles/pre-pregnancy/PrePregnancySleepAndFertilityArticle";
+import PrePregnancyMedicationsArticle from "@pages/articles/pre-pregnancy/PrePregnancyMedicationsArticle";
+
 
 
 
@@ -162,7 +173,16 @@ export default function App() {
         <Route path="/knowledge/pre-pregnancy" element={<PrePregnancyKnowledge />} />
         <Route path="/articles/pre-pregnancy/checkups" element={<PrePregnancyCheckupsArticle />} />
         <Route path="/articles/pre-pregnancy/vitamins" element={<PrePregnancyVitaminsArticle />} />
-
+        <Route path="/articles/pre-pregnancy/egg-sperm-quality" element={<EggSpermQualityArticle />} />
+        <Route path="/articles/pre-pregnancy/epigenetics" element={<PrePregnancyEpigeneticsArticle />} />
+        <Route path="/articles/pre-pregnancy/stress-management" element={<PrePregnancyStressManagementArticle />}/>
+        <Route path="/articles/pre-pregnancy/body-weight" element={<PrePregnancyBodyWeightArticle />} />
+        <Route path="/articles/pre-pregnancy/toxins" element={<PrePregnancyToxinsArticle />} />
+        <Route path="/articles/pre-pregnancy/parental-age" element={<PrePregnancyParentalAgeArticle />} />
+        <Route path="/articles/pre-pregnancy/ovulation-cycle" element={<PrePregnancyOvulationCycleArticle />} />
+        <Route path="/articles/pre-pregnancy/male-sexual-health" element={<PrePregnancyMaleSexualHealthArticle />} />
+        <Route path="/articles/pre-pregnancy/sleep-and-fertility" element={<PrePregnancySleepAndFertilityArticle />} />
+        <Route path="/articles/pre-pregnancy/medications" element={<PrePregnancyMedicationsArticle />} />
 
       </Routes>
     </>
