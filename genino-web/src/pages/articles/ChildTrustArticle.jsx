@@ -77,7 +77,7 @@ export default function ChildTrustArticle() {
           <li>
             <strong>آمیگدالا (مرکز تهدید)</strong>  
             وقتی والد قابل‌پیش‌بینی و آرام باشد، آمیگدالا خاموش می‌شود  
-            → کودک احساس امنیت می‌کند.
+            ← کودک احساس امنیت می‌کند.
           </li>
 
           <li>
@@ -124,7 +124,7 @@ export default function ChildTrustArticle() {
 
           <li>
             <strong>۲) گوش دادن واقعی</strong>  
-            نگاه، سکوت کوتاه، و توجه → کودک را شنیده و ارزشمند می‌کند.
+            نگاه، سکوت کوتاه، و توجه ← کودک را شنیده و ارزشمند می‌کند.
           </li>
 
           <li>
@@ -274,7 +274,7 @@ export default function ChildTrustArticle() {
         <ul className="list-disc pr-6 space-y-2">
           <li>اعتماد در تجربه‌های کوچک شکل می‌گیرد.</li>
           <li>رفتار والد هزار برابر مهم‌تر از کلمات است.</li>
-          <li>پایداری، آرامش و احترام → پایه‌های اعتماد هستند.</li>
+          <li>پایداری، آرامش و احترام ← پایه‌های اعتماد هستند.</li>
         </ul>
 
         <div className="bg-gradient-to-r from-yellow-100 to-yellow-50 border border-yellow-300 rounded-2xl shadow-md p-6 text-center">

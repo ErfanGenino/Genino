@@ -66,6 +66,10 @@ import FatherEmotionalRoleArticle from "@pages/articles/FatherEmotionalRoleArtic
 import ParentAngerManagementArticle from "@pages/articles/ParentAngerManagementArticle";
 import ChildTrustArticle from "@pages/articles/ChildTrustArticle";
 import QualityTimeArticle from "@pages/articles/QualityTimeArticle";
+import PrePregnancyKnowledge from "./pages/knowledge/PrePregnancyKnowledge";
+import PrePregnancyCheckupsArticle from "@pages/articles/pre-pregnancy/PrePregnancyCheckupsArticle";
+import PrePregnancyVitaminsArticle from "@pages/articles/pre-pregnancy/PrePregnancyVitaminsArticle";
+
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
@@ -155,6 +159,10 @@ export default function App() {
         <Route path="/articles/parent-anger-management" element={<ParentAngerManagementArticle />} />
         <Route path="/articles/child-trust" element={<ChildTrustArticle />} />
         <Route path="/articles/quality-time" element={<QualityTimeArticle />} />
+        <Route path="/knowledge/pre-pregnancy" element={<PrePregnancyKnowledge />} />
+        <Route path="/articles/pre-pregnancy/checkups" element={<PrePregnancyCheckupsArticle />} />
+        <Route path="/articles/pre-pregnancy/vitamins" element={<PrePregnancyVitaminsArticle />} />
+
 
       </Routes>
     </>
