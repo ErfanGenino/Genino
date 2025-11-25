@@ -79,7 +79,15 @@ import PrePregnancyOvulationCycleArticle from "@pages/articles/pre-pregnancy/Pre
 import PrePregnancyMaleSexualHealthArticle from "@pages/articles/pre-pregnancy/PrePregnancyMaleSexualHealthArticle";
 import PrePregnancySleepAndFertilityArticle from "@pages/articles/pre-pregnancy/PrePregnancySleepAndFertilityArticle";
 import PrePregnancyMedicationsArticle from "@pages/articles/pre-pregnancy/PrePregnancyMedicationsArticle";
-
+import PositiveGenesArticle from "@pages/articles/genetic-secrets/PositiveGenesArticle";
+import GeneEditingFutureArticle from "@pages/articles/genetic-secrets/GeneEditingFutureArticle";
+import InheritanceAndGoodnessArticle from "@pages/articles/genetic-secrets/InheritanceAndGoodnessArticle";
+import HumanDiversitySecretsArticle from "@pages/articles/genetic-secrets/HumanDiversitySecretsArticle";
+import DNAToEmotionArticle from "@pages/articles/genetic-secrets/DNAToEmotionArticle";
+import GenesAndBeautyArticle from "@pages/articles/genetic-secrets/GenesAndBeautyArticle";
+import GeneticMedicineFutureArticle from "@pages/articles/genetic-secrets/GeneticMedicineFutureArticle";
+import DoGenesDefineDestinyArticle from "@pages/articles/genetic-secrets/DoGenesDefineDestinyArticle";
+import EmotionalInheritanceArticle from "@pages/articles/genetic-secrets/EmotionalInheritanceArticle";
 
 
 
@@ -183,10 +191,20 @@ export default function App() {
         <Route path="/articles/pre-pregnancy/male-sexual-health" element={<PrePregnancyMaleSexualHealthArticle />} />
         <Route path="/articles/pre-pregnancy/sleep-and-fertility" element={<PrePregnancySleepAndFertilityArticle />} />
         <Route path="/articles/pre-pregnancy/medications" element={<PrePregnancyMedicationsArticle />} />
+        <Route path="/articles/genetic-secrets/positive-genes" element={<PositiveGenesArticle />} />
+        <Route path="/articles/genetic-secrets/gene-editing-future" element={<GeneEditingFutureArticle />} />
+        <Route path="/articles/genetic-secrets/inheritance-and-goodness" element={<InheritanceAndGoodnessArticle />} />
+        <Route path="/articles/genetic-secrets/human-diversity-secrets" element={<HumanDiversitySecretsArticle />} />
+        <Route path="/articles/genetic-secrets/dna-to-emotion" element={<DNAToEmotionArticle />} />
+        <Route path="/articles/genetic-secrets/genes-and-beauty" element={<GenesAndBeautyArticle />} />
+        <Route path="/articles/genetic-secrets/genetic-medicine-future" element={<GeneticMedicineFutureArticle />} />
+        <Route path="/articles/genetic-secrets/do-genes-define-destiny" element={<DoGenesDefineDestinyArticle />} />
+        <Route path="/articles/genetic-secrets/emotional-inheritance" element={<EmotionalInheritanceArticle />} />
+
 
       </Routes>
     </>
   );
 }
 {/* <Navbar /> */}
-// test redeploy
+// test redeploy →  ←  ↑  ↓  «   »  …
