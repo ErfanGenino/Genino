@@ -171,74 +171,115 @@ export default function WorldKnowledge() {
       {/* کارت‌های بدن زنان و مردان */}
       <section className="relative z-[20] grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-5xl mb-20">
         {/* بدن زنان */}
-        <Link to="/articles/body-women">
-          <motion.div
-            whileHover={{ scale: 1.03, rotate: 1 }}
-            transition={{ type: "spring", stiffness: 180, damping: 12 }}
-            className={`bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
-              shine ? "shadow-[0_0_40px_rgba(255,105,180,0.6)] scale-[1.02]" : ""
-            }`}
-          >
-            <motion.div
-              animate={{ rotate: [0, 360] }}
-              transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-20 h-20 text-pink-500 mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 0v7m0 0h-3m3 0h3"
-                />
-              </svg>
-            </motion.div>
-            <h2 className="text-2xl font-bold text-pink-600 mb-2">بدن زنان</h2>
-            <p className="text-gray-600 text-sm text-center leading-relaxed max-w-xs">
-              شناخت فیزیولوژی و چرخه‌های طبیعی بدن زنانه، کلید درک عمیق‌تر از سلامت و احساسات.
-            </p>
-          </motion.div>
-        </Link>
+        {/* بدن زنان */}
+<Link to="/articles/body-women">
+  <motion.div
+    whileHover={{ scale: 1.03, rotate: 1 }}
+    transition={{ type: "spring", stiffness: 180, damping: 12 }}
+    className={`relative bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
+      shine ? "shadow-[0_0_40px_rgba(255,105,180,0.6)] scale-[1.02]" : ""
+    } overflow-hidden`}
+  >
+
+    {/* 📸 بک‌گراند عکس + فیلتر صورتی */}
+    <div
+      className="absolute inset-0 z-0 opacity-30"
+      style={{
+        backgroundImage: "url('/images/bg/woman-body.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        filter: "hue-rotate(300deg) saturate(1.3)",
+      }}
+    />
+
+    {/* لایه رنگ صورتی ملایم */}
+    <div className="absolute inset-0 bg-pink-100 opacity-30 z-0"></div>
+
+    {/* محتوا */}
+    <div className="relative z-10 flex flex-col items-center">
+      <motion.div
+        animate={{ rotate: [0, 360] }}
+        transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-20 h-20 text-pink-500 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 0v7m0 0h-3m3 0h3"
+          />
+        </svg>
+      </motion.div>
+
+      <h2 className="text-2xl font-bold text-pink-600 mb-2">بدن زنان</h2>
+      <p className="text-gray-600 text-sm text-center leading-relaxed max-w-xs">
+        شناخت فیزیولوژی و چرخه‌های طبیعی بدن زنانه، کلید درک عمیق‌تر از سلامت و احساسات.
+      </p>
+    </div>
+  </motion.div>
+</Link>
+
 
         {/* بدن مردان */}
-        <Link to="/articles/body-men">
-          <motion.div
-            whileHover={{ scale: 1.03, rotate: -1 }}
-            transition={{ type: "spring", stiffness: 180, damping: 12 }}
-            className={`bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
-              shine ? "shadow-[0_0_40px_rgba(70,130,180,0.6)] scale-[1.02]" : ""
-            }`}
-          >
-            <motion.div
-              animate={{ rotate: [0, -360] }}
-              transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-20 h-20 text-blue-500 mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16 8a4 4 0 1 0-8 0 4 4 0 0 0 8 0zm0 0v7m0 0h4m-4 0h-4"
-                />
-              </svg>
-            </motion.div>
-            <h2 className="text-2xl font-bold text-blue-600 mb-2">بدن مردان</h2>
-            <p className="text-gray-600 text-sm text-center leading-relaxed max-w-xs">
-              درک ساختار، هورمون‌ها و عملکرد بدن مردانه برای تعادل سلامت جسم و ذهن.
-            </p>
-          </motion.div>
-        </Link>
+        {/* بدن مردان */}
+<Link to="/articles/body-men">
+  <motion.div
+    whileHover={{ scale: 1.03, rotate: -1 }}
+    transition={{ type: "spring", stiffness: 180, damping: 12 }}
+    className={`relative bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-3xl shadow-md p-10 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all ${
+      shine ? "shadow-[0_0_40px_rgba(70,130,180,0.6)] scale-[1.02]" : ""
+    } overflow-hidden`}
+  >
+
+    {/* 📸 بک‌گراند عکس + فیلتر آبی */}
+    <div
+      className="absolute inset-0 z-0 opacity-30"
+      style={{
+        backgroundImage: "url('/images/bg/men-body.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        filter: "hue-rotate(200deg) saturate(1.3)",
+      }}
+    />
+
+    {/* لایه رنگ آبی ملایم */}
+    <div className="absolute inset-0 bg-blue-100 opacity-30 z-0"></div>
+
+    {/* محتوا */}
+    <div className="relative z-10 flex flex-col items-center">
+      <motion.div
+        animate={{ rotate: [0, -360] }}
+        transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-20 h-20 text-blue-500 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16 8a4 4 0 1 0-8 0 4 4 0 0 0 8 0zm0 0v7m0 0h4m-4 0h-4"
+          />
+        </svg>
+      </motion.div>
+
+      <h2 className="text-2xl font-bold text-blue-600 mb-2">بدن مردان</h2>
+      <p className="text-gray-600 text-sm text-center leading-relaxed max-w-xs">
+        درک ساختار، هورمون‌ها و عملکرد بدن مردانه برای تعادل سلامت جسم و ذهن.
+      </p>
+    </div>
+  </motion.div>
+</Link>
       </section>
     </main>
   );

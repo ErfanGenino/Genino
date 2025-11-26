@@ -64,7 +64,30 @@ export default function AuthStart() {
   color: "green",
 },
   { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker",color: "calorie",},  
-  { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: " مجله ژنینو", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge", color: "yellow", },
+  {
+  specialMagazineCard: true,
+  icon: (
+    <div className="relative w-14 h-14 flex items-center justify-center mb-3">
+      {/* 🔥 حلقه طلایی چرخان */}
+      <motion.div
+        className="absolute inset-0 rounded-full border-2 border-yellow-400"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        style={{ boxShadow: "0 0 12px rgba(212,175,55,0.35)" }}
+      />
+
+      {/* 🌟 قرص مرکزی */}
+      <div className="relative z-10 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-200 flex items-center justify-center shadow-md">
+        <BookCheck className="w-7 h-7 text-white drop-shadow" />
+      </div>
+    </div>
+  ),
+  title: "مجله ژنینو",
+  desc: "مرجع علمی رشد، آگاهی و والدگری مدرن — DNA طلایی ذهن شما.",
+  link: "/world-knowledge",
+  color: "yellow",
+},
+
   {
     icon: <UsersRound className="w-8 h-8 text-yellow-500 mb-3" />,
     title: "شبکه اجتماعی ژنینو",
@@ -367,22 +390,31 @@ const cardColors = {
     }
     transition={{ duration: 0.35, ease: "easeOut" }}
     className={`
-      relative p-4 rounded-2xl border 
-      h-full min-h-[170px] lg:min-h-[190px]
-      flex flex-col justify-between cursor-pointer
-      transition-all duration-300
+  relative p-4 rounded-2xl border 
+  h-full min-h-[170px] lg:min-h-[190px]
+  flex flex-col justify-between cursor-pointer
+  transition-all duration-300
 
-      ${
-        item.title === "کودک من"
-          ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
-          : item.title === "فروشگاه تخصصی"
-          ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md"
-          : item.title === "اقتصاد و حسابداری خانواده"
-          ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_12px_rgba(212,175,55,0.15)]"
-          : cardColors[item.color] || cardColors.default
-      }
-    `}
+  ${item.specialMagazineCard ? `
+    bg-gradient-to-br from-[#fffbe8] via-[#fff7d1] to-white
+    border-yellow-300 shadow-[0_0_22px_rgba(212,175,55,0.25)]
+    overflow-hidden
+  ` : ""}
+  ${item.specialMagazineCard ? "bg-[#fff9d9] border-yellow-300 shadow-lg" : ""}
+
+  ${
+    item.title === "کودک من"
+      ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
+      : item.title === "فروشگاه تخصصی"
+      ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md"
+      : item.title === "اقتصاد و حسابداری خانواده"
+      ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+      : cardColors[item.color] || cardColors.default
+  }
+`}
   >
+    
+    
 
       {/* 🌟 ستاره‌های طلایی مخصوص دانستنی‌های روز دنیا */}
       {item.title === "دانستنی‌های روز دنیا" && (
