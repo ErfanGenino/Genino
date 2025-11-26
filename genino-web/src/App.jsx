@@ -103,6 +103,15 @@ import ChildPickyEatingArticle from "@pages/articles/child-nutrition/ChildPickyE
 import SleepAndNutritionImpactArticle from "@pages/articles/child-nutrition/SleepAndNutritionImpactArticle";
 import ProteinRoleInChildGrowthArticle from "@pages/articles/child-nutrition/ProteinRoleInChildGrowthArticle";
 import FiveGoldenRulesNutritionArticle from "@pages/articles/child-nutrition/FiveGoldenRulesNutritionArticle";
+import MutualRespectInMarriageArticle from "@pages/articles/family-relations/MutualRespectInMarriageArticle";
+import HealthyFamilyCommunicationArticle from "@pages/articles/family-relations/HealthyFamilyCommunicationArticle";
+import EmotionalNeedsUnderstandingArticle from "@pages/articles/family-relations/EmotionalNeedsUnderstandingArticle";
+import ResolvingMinorConflictsArticle from "@pages/articles/family-relations/ResolvingMinorConflictsArticle";
+import RoleOfTrustInEmotionalSecurityArticle from "@pages/articles/family-relations/RoleOfTrustInEmotionalSecurityArticle";
+import DailyAffectionAsRelationshipFuelArticle from "@pages/articles/family-relations/DailyAffectionAsRelationshipFuelArticle";
+import RolesAndResponsibilitiesInModernFamilyArticle from "@pages/articles/family-relations/RolesAndResponsibilitiesInModernFamilyArticle";
+import HowToProvideEmotionalSupportArticle from "@pages/articles/family-relations/HowToProvideEmotionalSupportArticle";
+import BehavioralRedFlagsArticle from "@pages/articles/family-relations/BehavioralRedFlagsArticle";
 
 
 
@@ -231,6 +240,18 @@ export default function App() {
         <Route path="/articles/child-nutrition/sleep-and-nutrition-impact" element={<SleepAndNutritionImpactArticle />} />
         <Route path="/articles/child-nutrition/protein-role-in-child-growth" element={<ProteinRoleInChildGrowthArticle />} />
         <Route path="/articles/child-nutrition/five-golden-rules" element={<FiveGoldenRulesNutritionArticle />} />
+        <Route path="/articles/family-relations/mutual-respect-in-marriage" element={<MutualRespectInMarriageArticle />} />
+        <Route path="/articles/family-relations/healthy-family-communication" element={<HealthyFamilyCommunicationArticle />} />
+        <Route path="/articles/family-relations/emotional-needs-of-spouse" element={<EmotionalNeedsUnderstandingArticle />} />
+        <Route path="/articles/family-relations/resolve-minor-conflicts" element={<ResolvingMinorConflictsArticle />} />
+        <Route path="/articles/family-relations/role-of-trust-in-emotional-security" element={<RoleOfTrustInEmotionalSecurityArticle />} />
+        <Route path="/articles/family-relations/daily-affection-as-relationship-fuel" element={<DailyAffectionAsRelationshipFuelArticle />} />
+        <Route path="/articles/family-relations/roles-and-responsibilities-in-modern-family" element={<RolesAndResponsibilitiesInModernFamilyArticle />} />
+        <Route path="/articles/family-relations/how-to-provide-emotional-support" element={<HowToProvideEmotionalSupportArticle />} />
+        <Route path="/articles/family-relations/behavioral-red-flags" element={<BehavioralRedFlagsArticle />} />
+
+
+
 
       </Routes>
     </>

@@ -64,7 +64,7 @@ export default function AuthStart() {
   color: "green",
 },
   { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker",color: "calorie",},  
-  { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: "دانستنی‌های روز دنیا", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge", color: "yellow", },
+  { icon: <BookCheck className="w-8 h-8 text-yellow-500 mb-3" />, title: " مجله ژنینو", desc: "رشد آگاهی، بالاترین گنجینه بشریت.", link: "/world-knowledge", color: "yellow", },
   {
     icon: <UsersRound className="w-8 h-8 text-yellow-500 mb-3" />,
     title: "شبکه اجتماعی ژنینو",
