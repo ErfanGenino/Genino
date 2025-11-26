@@ -91,6 +91,18 @@ import EmotionalInheritanceArticle from "@pages/articles/genetic-secrets/Emotion
 import ChildNutritionKnowledge from "./pages/knowledge/ChildNutritionKnowledge";
 import ChildCareKnowledge from "./pages/knowledge/ChildCareKnowledge";
 import FamilyRelationsKnowledge from "./pages/knowledge/FamilyRelationsKnowledge";
+import ChildNutrition0to2Article from "@pages/articles/child-nutrition/ChildNutrition0to2Article";
+import BrainBoostingFoodsArticle from "@pages/articles/child-nutrition/BrainBoostingFoodsArticle";
+import ForbiddenFoodsUnder5Article from "@pages/articles/child-nutrition/ForbiddenFoodsUnder5Article";
+import EssentialNutrientsForFocusArticle from "@pages/articles/child-nutrition/EssentialNutrientsForFocusArticle";
+import ChildImmunityNutritionArticle from "@pages/articles/child-nutrition/ChildImmunityNutritionArticle";
+import HealthyPlateForKidsArticle from "@pages/articles/child-nutrition/HealthyPlateForKidsArticle";
+import EssentialVitaminsForKidsArticle from "@pages/articles/child-nutrition/EssentialVitaminsForKidsArticle";
+import ChildObesityPreventionArticle from "@pages/articles/child-nutrition/ChildObesityPreventionArticle";
+import ChildPickyEatingArticle from "@pages/articles/child-nutrition/ChildPickyEatingArticle";
+import SleepAndNutritionImpactArticle from "@pages/articles/child-nutrition/SleepAndNutritionImpactArticle";
+import ProteinRoleInChildGrowthArticle from "@pages/articles/child-nutrition/ProteinRoleInChildGrowthArticle";
+import FiveGoldenRulesNutritionArticle from "@pages/articles/child-nutrition/FiveGoldenRulesNutritionArticle";
 
 
 
@@ -207,7 +219,18 @@ export default function App() {
         <Route path="/knowledge/child-nutrition" element={<ChildNutritionKnowledge />} />
         <Route path="/knowledge/child-care" element={<ChildCareKnowledge />} />
         <Route path="/knowledge/family-relations" element={<FamilyRelationsKnowledge />} />
-
+        <Route path="/articles/child-nutrition/0-2" element={<ChildNutrition0to2Article />} />
+        <Route path="/articles/child-nutrition/brain-boosting-foods" element={<BrainBoostingFoodsArticle />} />
+        <Route path="/articles/child-nutrition/forbidden-under-5" element={<ForbiddenFoodsUnder5Article />} />
+        <Route path="/articles/child-nutrition/essential-nutrients-for-focus" element={<EssentialNutrientsForFocusArticle />} />
+        <Route path="/articles/child-nutrition/immunity" element={<ChildImmunityNutritionArticle />} />
+        <Route path="/articles/child-nutrition/healthy-plate" element={<HealthyPlateForKidsArticle />} />
+        <Route path="/articles/child-nutrition/essential-vitamins" element={<EssentialVitaminsForKidsArticle />} />
+        <Route path="/articles/child-nutrition/child-obesity-prevention" element={<ChildObesityPreventionArticle />} />
+        <Route path="/articles/child-nutrition/picky-eating" element={<ChildPickyEatingArticle />} />
+        <Route path="/articles/child-nutrition/sleep-and-nutrition-impact" element={<SleepAndNutritionImpactArticle />} />
+        <Route path="/articles/child-nutrition/protein-role-in-child-growth" element={<ProteinRoleInChildGrowthArticle />} />
+        <Route path="/articles/child-nutrition/five-golden-rules" element={<FiveGoldenRulesNutritionArticle />} />
 
       </Routes>
     </>
