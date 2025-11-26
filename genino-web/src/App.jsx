@@ -88,6 +88,10 @@ import GenesAndBeautyArticle from "@pages/articles/genetic-secrets/GenesAndBeaut
 import GeneticMedicineFutureArticle from "@pages/articles/genetic-secrets/GeneticMedicineFutureArticle";
 import DoGenesDefineDestinyArticle from "@pages/articles/genetic-secrets/DoGenesDefineDestinyArticle";
 import EmotionalInheritanceArticle from "@pages/articles/genetic-secrets/EmotionalInheritanceArticle";
+import ChildNutritionKnowledge from "./pages/knowledge/ChildNutritionKnowledge";
+import ChildCareKnowledge from "./pages/knowledge/ChildCareKnowledge";
+import FamilyRelationsKnowledge from "./pages/knowledge/FamilyRelationsKnowledge";
+
 
 
 
@@ -200,6 +204,9 @@ export default function App() {
         <Route path="/articles/genetic-secrets/genetic-medicine-future" element={<GeneticMedicineFutureArticle />} />
         <Route path="/articles/genetic-secrets/do-genes-define-destiny" element={<DoGenesDefineDestinyArticle />} />
         <Route path="/articles/genetic-secrets/emotional-inheritance" element={<EmotionalInheritanceArticle />} />
+        <Route path="/knowledge/child-nutrition" element={<ChildNutritionKnowledge />} />
+        <Route path="/knowledge/child-care" element={<ChildCareKnowledge />} />
+        <Route path="/knowledge/family-relations" element={<FamilyRelationsKnowledge />} />
 
 
       </Routes>

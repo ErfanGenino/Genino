@@ -21,13 +21,13 @@ export default function WorldKnowledge() {
       icon: <Smile className="w-10 h-10 text-yellow-500 mb-3" />,
       title: "مراقبت از کودکان",
       desc: "رشد شناختی، خلاقیت و پرورش استقلال در دوران طلایی کودکی.",
-      link: "/knowledge/under-3",
+      link: "/knowledge/child-care",
     },
     {
       icon: <Utensils className="w-10 h-10 text-yellow-500 mb-3" />,
       title: "تغذیه کودکان",
       desc: "تغذیه سالم، انرژی و رشد پایدار برای ذهن و بدن کودک.",
-      link: "/knowledge/nutrition",
+      link: "/knowledge/child-nutrition",
     },
     {
       icon: <Users className="w-10 h-10 text-yellow-500 mb-3" />,
