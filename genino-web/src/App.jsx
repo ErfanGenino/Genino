@@ -115,6 +115,10 @@ import BehavioralRedFlagsArticle from "@pages/articles/family-relations/Behavior
 import AngerManagementInRelationshipsArticle from "@pages/articles/family-relations/AngerManagementInRelationshipsArticle";
 import HowParentalRelationshipAffectsChildDevelopmentArticle from "@pages/articles/family-relations/HowParentalRelationshipAffectsChildDevelopmentArticle";
 import CommonRelationshipMistakesCouplesShouldAvoidArticle from "@pages/articles/family-relations/CommonRelationshipMistakesCouplesShouldAvoidArticle";
+import EssentialCareForChildren0To3Article from "@pages/articles/child-care/EssentialCareForChildren0To3Article";
+import CognitiveDevelopmentFromBirthToEarlyYearsArticle from "@pages/articles/child-care/CognitiveDevelopmentFromBirthToEarlyYearsArticle";
+import PlayTherapyAndChildBrainDevelopmentArticle from "@pages/articles/child-care/PlayTherapyAndChildBrainDevelopmentArticle";
+import HealthyIndependenceInChildrenArticle from "@pages/articles/child-care/HealthyIndependenceInChildrenArticle";
 
 
 
@@ -255,7 +259,10 @@ export default function App() {
         <Route path="/articles/family-relations/anger-management-in-relationships" element={<AngerManagementInRelationshipsArticle />} />
         <Route path="/articles/family-relations/how-parental-relationship-affects-child-development" element={<HowParentalRelationshipAffectsChildDevelopmentArticle />} />
         <Route path="/articles/family-relations/common-relationship-mistakes-couples-should-avoid" element={<CommonRelationshipMistakesCouplesShouldAvoidArticle />} />
-
+        <Route path="/articles/child-care/essential-care-for-children-0-to-3" element={<EssentialCareForChildren0To3Article />} />
+        <Route path="/articles/child-care/cognitive-development-from-birth-to-early-years" element={<CognitiveDevelopmentFromBirthToEarlyYearsArticle />} />
+        <Route path="/articles/child-care/play-therapy-and-child-brain-development" element={<PlayTherapyAndChildBrainDevelopmentArticle />} />
+        <Route path="/articles/child-care/healthy-independence-in-children" element={<HealthyIndependenceInChildrenArticle />} />
 
 
 
