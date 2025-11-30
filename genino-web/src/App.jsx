@@ -112,6 +112,9 @@ import DailyAffectionAsRelationshipFuelArticle from "@pages/articles/family-rela
 import RolesAndResponsibilitiesInModernFamilyArticle from "@pages/articles/family-relations/RolesAndResponsibilitiesInModernFamilyArticle";
 import HowToProvideEmotionalSupportArticle from "@pages/articles/family-relations/HowToProvideEmotionalSupportArticle";
 import BehavioralRedFlagsArticle from "@pages/articles/family-relations/BehavioralRedFlagsArticle";
+import AngerManagementInRelationshipsArticle from "@pages/articles/family-relations/AngerManagementInRelationshipsArticle";
+import HowParentalRelationshipAffectsChildDevelopmentArticle from "@pages/articles/family-relations/HowParentalRelationshipAffectsChildDevelopmentArticle";
+import CommonRelationshipMistakesCouplesShouldAvoidArticle from "@pages/articles/family-relations/CommonRelationshipMistakesCouplesShouldAvoidArticle";
 
 
 
@@ -249,6 +252,9 @@ export default function App() {
         <Route path="/articles/family-relations/roles-and-responsibilities-in-modern-family" element={<RolesAndResponsibilitiesInModernFamilyArticle />} />
         <Route path="/articles/family-relations/how-to-provide-emotional-support" element={<HowToProvideEmotionalSupportArticle />} />
         <Route path="/articles/family-relations/behavioral-red-flags" element={<BehavioralRedFlagsArticle />} />
+        <Route path="/articles/family-relations/anger-management-in-relationships" element={<AngerManagementInRelationshipsArticle />} />
+        <Route path="/articles/family-relations/how-parental-relationship-affects-child-development" element={<HowParentalRelationshipAffectsChildDevelopmentArticle />} />
+        <Route path="/articles/family-relations/common-relationship-mistakes-couples-should-avoid" element={<CommonRelationshipMistakesCouplesShouldAvoidArticle />} />
 
 
 

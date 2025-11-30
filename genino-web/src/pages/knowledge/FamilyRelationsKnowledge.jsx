@@ -62,19 +62,19 @@ const articles = [
     id: 10,
     title: "مدیریت خشم در رابطه زوجین",
     image: "/images/knowledge/family/10.jpg",
-    slug: null,
+    slug: "family-relations/anger-management-in-relationships",
   },
   {
     id: 11,
     title: "چگونه رابطه زن و شوهر بر رشد کودک اثر می‌گذارد؟",
     image: "/images/knowledge/family/11.jpg",
-    slug: null,
+    slug: "family-relations/how-parental-relationship-affects-child-development",
   },
   {
     id: 12,
     title: "اشتباهات رایج زوجین که باید از آن‌ها دوری کرد",
     image: "/images/knowledge/family/12.jpg",
-    slug: null,
+    slug: "family-relations/common-relationship-mistakes-couples-should-avoid",
   },
 ];
 
