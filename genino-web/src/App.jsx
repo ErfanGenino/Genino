@@ -119,6 +119,15 @@ import EssentialCareForChildren0To3Article from "@pages/articles/child-care/Esse
 import CognitiveDevelopmentFromBirthToEarlyYearsArticle from "@pages/articles/child-care/CognitiveDevelopmentFromBirthToEarlyYearsArticle";
 import PlayTherapyAndChildBrainDevelopmentArticle from "@pages/articles/child-care/PlayTherapyAndChildBrainDevelopmentArticle";
 import HealthyIndependenceInChildrenArticle from "@pages/articles/child-care/HealthyIndependenceInChildrenArticle";
+import FactorsAffectingChildSenseOfSecurityArticle from "@pages/articles/child-care/FactorsAffectingChildSenseOfSecurityArticle";
+import HowToHandleChildCryingArticle from "@pages/articles/child-care/HowToHandleChildCryingArticle";
+import RoleOfRuleSettingInHealthyChildDevelopmentArticle from "@pages/articles/child-care/RoleOfRuleSettingInHealthyChildDevelopmentArticle";
+import BestGamesForBrainAndCreativityDevelopmentArticle from "@pages/articles/child-care/BestGamesForBrainAndCreativityDevelopmentArticle";
+import EyeContactAndEmotionalDevelopmentArticle from "@pages/articles/child-care/EyeContactAndEmotionalDevelopmentArticle";
+import SignsOfDevelopmentalDelayInChildrenArticle from "@pages/articles/child-care/SignsOfDevelopmentalDelayInChildrenArticle";
+import InfantReflexesAreTheyNormalArticle from "@pages/articles/child-care/InfantReflexesAreTheyNormalArticle";
+import EffectiveAndIneffectivePraiseInChildrenArticle from "@pages/articles/child-care/EffectiveAndIneffectivePraiseInChildrenArticle";
+
 
 
 
@@ -263,7 +272,14 @@ export default function App() {
         <Route path="/articles/child-care/cognitive-development-from-birth-to-early-years" element={<CognitiveDevelopmentFromBirthToEarlyYearsArticle />} />
         <Route path="/articles/child-care/play-therapy-and-child-brain-development" element={<PlayTherapyAndChildBrainDevelopmentArticle />} />
         <Route path="/articles/child-care/healthy-independence-in-children" element={<HealthyIndependenceInChildrenArticle />} />
-
+        <Route path="/articles/child-care/factors-affecting-child-sense-of-security" element={<FactorsAffectingChildSenseOfSecurityArticle />} />
+        <Route path="/articles/child-care/how-to-handle-child-crying" element={<HowToHandleChildCryingArticle />} />
+        <Route path="/articles/child-care/role-of-rule-setting-in-healthy-child-development" element={<RoleOfRuleSettingInHealthyChildDevelopmentArticle />} />
+        <Route path="/articles/child-care/best-games-for-brain-and-creativity-development" element={<BestGamesForBrainAndCreativityDevelopmentArticle />} />
+        <Route path="/articles/child-care/eye-contact-and-emotional-development" element={<EyeContactAndEmotionalDevelopmentArticle />} />
+        <Route path="/articles/child-care/signs-of-developmental-delay-in-children" element={<SignsOfDevelopmentalDelayInChildrenArticle />} />
+        <Route path="/articles/child-care/infant-reflexes-are-they-normal" element={<InfantReflexesAreTheyNormalArticle />} />
+        <Route path="/articles/child-care/effective-and-ineffective-praise-in-children" element={<EffectiveAndIneffectivePraiseInChildrenArticle />} />
 
 
       </Routes>
