@@ -65,6 +65,9 @@ export default function SignupUser() {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   // ✳️ تغییرات فرم + اعتبارسنجی لحظه‌ای
   function handleChange(e) {
@@ -91,20 +94,31 @@ export default function SignupUser() {
     const msg = validateField(name, formData[name], formData);
     setErrors((prev) => ({ ...prev, [name]: msg }));
   }
-function handleSubmit(e) {
+// ⭐ نسخه نهایی و کامل تابع handleSubmit
+async function handleSubmit(e) {
   e.preventDefault();
 
   const fields = [
-    "firstName", "lastName", "gender", "birthDate",
-    "province", "city", "phone", "email", "username",
-    "password", "confirmPassword", "terms"
+    "firstName",
+    "lastName",
+    "gender",
+    "birthDate",
+    "province",
+    "city",
+    "phone",
+    "email",
+    "username",
+    "password",
+    "confirmPassword",
+    "terms",
+    // اگر خواستی کدملی را اجباری کنی: "nationalCode"
   ];
 
   let newErrors = {};
   let touchedAll = {};
   let hasError = false;
 
-  // اجرای اعتبارسنجی تمام فیلدها
+  // ✅ اعتبارسنجی تمام فیلدها
   fields.forEach((f) => {
     const msg = validateField(f, formData[f], formData);
     newErrors[f] = msg;
@@ -112,104 +126,140 @@ function handleSubmit(e) {
     if (msg && msg.trim() !== "") hasError = true;
   });
 
-  // به‌روزرسانی State
   setErrors(newErrors);
   setTouched(touchedAll);
 
-  // توقف موقت برای اطمینان از نمایش پیام‌ها
-  setTimeout(() => {
+  // ❌ اگر خطا وجود داشته باشد → ادامه نده
   if (hasError) {
     setMessage("⚠️ لطفاً خطاهای مشخص‌شده را برطرف کنید.");
-  } else {
-    setMessage(`🎉 خوش آمدی ${formData.firstName} 🌿 ثبت‌نام شما با موفقیت انجام شد!`);
-    setShowTypeModal(true); // ✳️ نمایش پاپ‌آپ انتخاب نوع کاربر
+    return;
   }
-}, 50);
 
+  // ⏳ پیام در حال ارسال
+  setMessage("⏳ در حال ثبت‌نام...");
 
+  // حذف confirmPassword از ارسال
+  const submitData = { ...formData };
+  delete submitData.confirmPassword;
+
+  try {
+    const res = await fetch("http://localhost:4000/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(submitData),
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      setMessage(`❌ ${data.message}`);
+      return;
+    }
+
+    // 🎉 موفقیت
+    setMessage("🎉 ثبت‌نام با موفقیت انجام شد!");
+    setShowLifeStage(true);
+
+  } catch (error) {
+    console.error("Signup error:", error);
+    setMessage("❌ خطا در اتصال به سرور. لطفاً دوباره امتحان کنید.");
+  }
 }
+
 
   // ✅ تابع اعتبارسنجی فیلدها
   function validateField(name, value, data) {
-    const d = data || formData;
-const v = typeof value === "string" ? value.trim() : value;
+  const d = data || formData;
+  const v = typeof value === "string" ? value.trim() : value;
 
+  switch (name) {
+    case "firstName":
+      if (!v) return "نام الزامی است";
+      return "";
 
-    switch (name) {
-      case "firstName":
-        if (!v) return "نام الزامی است";
-        return "";
-      case "lastName":
-        if (!v) return "نام خانوادگی الزامی است";
-        return "";
-      case "gender":
-        if (!v) return "لطفاً جنسیت را انتخاب کنید";
-        return "";
-      case "birthDate":
-        if (!v) return "تاریخ تولد الزامی است";
-        return "";
-      case "province":
-        if (!v) return "استان محل سکونت را انتخاب کنید";
-        return "";
-      case "city":
-        if (!d.province) return "ابتدا استان را انتخاب کنید";
-        if (!v) return "شهر محل سکونت را انتخاب کنید";
-        return "";
-      case "phone":
-        if (!/^(09\d{9})$/.test(v)) return "شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد";
-        return "";
-      case "email":
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "فرمت ایمیل معتبر نیست";
-        return "";
-      case "username":
-        if (!/^[a-zA-Z0-9._-]{4,}$/.test(v)) return "نام کاربری حداقل ۴ کاراکتر باشد";
-        return "";
-      case "password":
-        if (v.length < 6) return "رمز عبور باید حداقل ۶ کاراکتر باشد";
-        return "";
-      case "confirmPassword":
-        if (v !== d.password) return "تکرار رمز باید با رمز یکسان باشد";
-        return "";
-      case "terms":
-        if (!d.terms) return "پذیرش قوانین برای ادامه الزامی است";
-        return "";
-      default:
-        return "";
-        case "nationalCode":
-  if (!v) return "کد ملی الزامی است";
-  if (!/^\d{10}$/.test(v)) return "کد ملی باید ۱۰ رقم باشد";
+    case "lastName":
+      if (!v) return "نام خانوادگی الزامی است";
+      return "";
 
-  // جلوگیری از کدهای اشتباه مثل 0000000000
-  if ([
-    "0000000000",
-    "1111111111",
-    "2222222222",
-    "3333333333",
-    "4444444444",
-    "5555555555",
-    "6666666666",
-    "7777777777",
-    "8888888888",
-    "9999999999",
-  ].includes(v)) {
-    return "کد ملی معتبر نیست";
+    case "gender":
+      if (!v) return "لطفاً جنسیت را انتخاب کنید";
+      return "";
+
+    case "birthDate":
+      if (!v) return "تاریخ تولد الزامی است";
+      return "";
+
+    case "province":
+      if (!v) return "استان محل سکونت را انتخاب کنید";
+      return "";
+
+    case "city":
+      if (!d.province) return "ابتدا استان را انتخاب کنید";
+      if (!v) return "شهر محل سکونت را انتخاب کنید";
+      return "";
+
+    case "phone":
+      if (!/^(09\d{9})$/.test(v)) return "شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد";
+      return "";
+
+    case "email":
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "فرمت ایمیل معتبر نیست";
+      return "";
+
+    case "username":
+      if (!/^[a-zA-Z0-9._-]{4,}$/.test(v)) return "نام کاربری حداقل ۴ کاراکتر باشد";
+      return "";
+
+    case "password":
+      if (v.length < 6) return "رمز عبور باید حداقل ۶ کاراکتر باشد";
+      return "";
+
+    case "confirmPassword":
+      if (v !== d.password) return "تکرار رمز باید با رمز یکسان باشد";
+      return "";
+
+    case "terms":
+      if (!d.terms) return "پذیرش قوانین برای ادامه الزامی است";
+      return "";
+
+    case "nationalCode":
+      if (!v) return "کد ملی الزامی است";
+      if (!/^\d{10}$/.test(v)) return "کد ملی باید ۱۰ رقم باشد";
+
+      if (
+        [
+          "0000000000",
+          "1111111111",
+          "2222222222",
+          "3333333333",
+          "4444444444",
+          "5555555555",
+          "6666666666",
+          "7777777777",
+          "8888888888",
+          "9999999999",
+        ].includes(v)
+      ) {
+        return "کد ملی معتبر نیست";
+      }
+
+      const check = parseInt(v[9]);
+      let sum = 0;
+      for (let i = 0; i < 9; i++) sum += parseInt(v[i]) * (10 - i);
+      const remainder = sum % 11;
+
+      if (!((remainder < 2 && check === remainder) || (remainder >= 2 && check === 11 - remainder)))
+        return "کد ملی معتبر نیست";
+
+      return "";
+
+    default:
+      return "";
   }
+}
 
-  // الگوریتم رسمی ثبت احوال
-  const check = parseInt(v[9]);
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    sum += parseInt(v[i]) * (10 - i);
-  }
-  const remainder = sum % 11;
-
-  if (!((remainder < 2 && check === remainder) || (remainder >= 2 && check === (11 - remainder)))) {
-    return "کد ملی معتبر نیست";
-  }
-
-  return "";
-    }
-  }
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f7f2eb] text-gray-800 px-4 py-8">
@@ -422,38 +472,50 @@ const v = typeof value === "string" ? value.trim() : value;
 
 
         {/* رمز عبور */}
-        <label className="block mt-4">
-          <span className="text-sm text-gray-600">رمز عبور</span>
-          {touched.password && errors.password && (
-            <p className="text-xs text-red-600 mt-1 mb-1">{errors.password}</p>
-          )}
-          <input
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="******"
-            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500"
-          />
-        </label>
+        <div className="relative">
+  <input
+    name="password"
+    type={showPassword ? "text" : "password"}
+    value={formData.password}
+    onChange={handleChange}
+    onBlur={handleBlur}
+    placeholder="******"
+    className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 pl-10"
+  />
+
+  {/* آیکون چشم سمت چپ */}
+  <span
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute left-3 top-3 cursor-pointer text-gray-500 text-xl"
+  >
+    {showPassword ? "●" : "○"}
+  </span>
+</div>
+
+
 
         {/* تکرار رمز عبور */}
-        <label className="block mt-4 mb-5">
-          <span className="text-sm text-gray-600">تکرار رمز عبور</span>
-          {touched.confirmPassword && errors.confirmPassword && (
-            <p className="text-xs text-red-600 mt-1 mb-1">{errors.confirmPassword}</p>
-          )}
-          <input
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="******"
-            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500"
-          />
-        </label>
+        <div className="relative">
+  <input
+    name="confirmPassword"
+    type={showConfirmPassword ? "text" : "password"}
+    value={formData.confirmPassword}
+    onChange={handleChange}
+    onBlur={handleBlur}
+    placeholder="******"
+    className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 pl-10"
+  />
+
+  {/* آیکون چشم سمت چپ */}
+  <span
+    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+    className="absolute left-3 top-3 cursor-pointer text-gray-500 text-xl"
+  >
+    {showConfirmPassword ? "●" : "○"}
+  </span>
+</div>
+
+
 
         {/* شرایط و قوانین */}
         <label className="flex items-center gap-2 mt-4 text-sm">
@@ -503,56 +565,6 @@ const v = typeof value === "string" ? value.trim() : value;
 )}
 
 
-{/* 🌿 پاپ‌آپ انتخاب نوع کاربر */}
-{showTypeModal && (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-    <div className="bg-gradient-to-b from-[#fffef9] to-[#f7f3eb] rounded-3xl shadow-2xl p-7 w-[90%] max-w-md text-center border border-yellow-100 animate-fadeIn">
-      <img
-        src={logo}
-        alt="Genino Logo"
-        className="w-16 h-16 mx-auto mb-4 drop-shadow-md"
-      />
-      <h2 className="text-2xl font-bold text-yellow-600 mb-2">
-        خوش اومدی به ژنینو 🌿
-      </h2>
-      <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-        حالا انتخاب کن که چطور می‌خوای مسیرت رو در ژنینو شروع کنی
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-        {/* کاربر عادی */}
-        <button
-          onClick={() => navigate("/dashboard-user")}
-          className="bg-white border-2 border-yellow-400 rounded-2xl py-4 hover:shadow-xl transition-all text-yellow-700 font-semibold hover:scale-105"
-        >
-          👤 کاربر عادی
-          <p className="text-xs text-gray-500 mt-1 font-normal">
-            فقط استفاده از محتوای عمومی
-          </p>
-        </button>
-
-        {/* کاربر ژنینویی */}
-        <button
-  onClick={() => {
-    setShowTypeModal(false);
-    setShowLifeStage(true);
-  }}
-  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-2.5 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all"
->
-  🌿 کاربر ژنینویی
-</button>
-      </div>
-
-      <button
-        onClick={() => setShowTypeModal(false)}
-        className="text-xs text-gray-400 hover:text-gray-500 transition"
-      >
-        بستن
-      </button>
-    </div>
-  </div>
-)}
-
 
 {/* 🌼 پاپ‌آپ انتخاب مرحله‌ی زندگی کاربر ژنینویی */}
 {/* 🌼 پاپ‌آپ انتخاب مرحله‌ی زندگی کاربر ژنینویی */}
@@ -565,11 +577,22 @@ const v = typeof value === "string" ? value.trim() : value;
         className="w-16 h-16 mx-auto mb-3 drop-shadow-md"
       />
       <h2 className="text-2xl font-bold text-yellow-600 mb-2">
-        مسیر ژنینویی تو از کجاست؟ 🌿
+        مسیر ژنینویی تو از کجاست؟ 
       </h2>
       <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-        لطفاً مرحله‌ی فعلی زندگی‌ت رو انتخاب کن تا محتوای ژنینو بر اساس اون تنظیم بشه 💛
+        لطفاً مرحله‌ی فعلی زندگی‌ت رو انتخاب کن تا محتوای ژنینو بر اساس اون تنظیم بشه
       </p>
+
+      {/* دکمه کاربر عادی */}
+<button
+  onClick={() => navigate("/dashboard-user")}
+  className="w-full bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 mb-4 hover:shadow-lg transition-all text-yellow-700 font-semibold hover:scale-105"
+>
+  👤 کاربر عادی
+  <p className="text-xs text-gray-500 mt-1 font-normal">
+    استفاده از امکانات عمومی ژنینو
+  </p>
+</button>
 
       <div
         dir="rtl"
