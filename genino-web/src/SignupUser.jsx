@@ -53,6 +53,7 @@ export default function SignupUser() {
     phone: "",
     email: "",
     username: "",
+    nationalCode: "", 
     password: "",
     confirmPassword: "",
     terms: false,
@@ -174,6 +175,39 @@ const v = typeof value === "string" ? value.trim() : value;
         return "";
       default:
         return "";
+        case "nationalCode":
+  if (!v) return "کد ملی الزامی است";
+  if (!/^\d{10}$/.test(v)) return "کد ملی باید ۱۰ رقم باشد";
+
+  // جلوگیری از کدهای اشتباه مثل 0000000000
+  if ([
+    "0000000000",
+    "1111111111",
+    "2222222222",
+    "3333333333",
+    "4444444444",
+    "5555555555",
+    "6666666666",
+    "7777777777",
+    "8888888888",
+    "9999999999",
+  ].includes(v)) {
+    return "کد ملی معتبر نیست";
+  }
+
+  // الگوریتم رسمی ثبت احوال
+  const check = parseInt(v[9]);
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(v[i]) * (10 - i);
+  }
+  const remainder = sum % 11;
+
+  if (!((remainder < 2 && check === remainder) || (remainder >= 2 && check === (11 - remainder)))) {
+    return "کد ملی معتبر نیست";
+  }
+
+  return "";
     }
   }
 
@@ -368,6 +402,25 @@ const v = typeof value === "string" ? value.trim() : value;
           />
         </label>
 
+        {/* کد ملی */}
+        <label className="block mt-4">
+          <span className="text-sm text-gray-600">کد ملی</span>
+          {touched.nationalCode && errors.nationalCode && (
+            <p className="text-xs text-red-600 mt-1 mb-1">{errors.nationalCode}</p>
+          )}
+          <input
+            name="nationalCode"
+            type="text"
+            value={formData.nationalCode}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            placeholder="مثلاً 1234567890"
+            maxLength={10}
+            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500"
+          />
+        </label>
+
+
         {/* رمز عبور */}
         <label className="block mt-4">
           <span className="text-sm text-gray-600">رمز عبور</span>
@@ -412,7 +465,17 @@ const v = typeof value === "string" ? value.trim() : value;
             onBlur={handleBlur}
             className="w-4 h-4 accent-yellow-500"
           />
-          <span className="text-gray-700">شرایط و قوانین ژنینو را می‌پذیرم</span>
+          <span className="text-gray-700">
+           شرایط و قوانین{" "}
+           <a
+           href="/terms"
+           target="_blank"
+           rel="noopener noreferrer"
+           className="text-yellow-600 underline hover:text-yellow-700">
+           ژنینو
+           </a>{" "}
+           را می‌پذیرم
+           </span>
         </label>
         {touched.terms && errors.terms && (
           <p className="text-xs text-red-600 mt-1 mb-1 text-right">{errors.terms}</p>

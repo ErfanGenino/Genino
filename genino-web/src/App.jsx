@@ -127,6 +127,8 @@ import EyeContactAndEmotionalDevelopmentArticle from "@pages/articles/child-care
 import SignsOfDevelopmentalDelayInChildrenArticle from "@pages/articles/child-care/SignsOfDevelopmentalDelayInChildrenArticle";
 import InfantReflexesAreTheyNormalArticle from "@pages/articles/child-care/InfantReflexesAreTheyNormalArticle";
 import EffectiveAndIneffectivePraiseInChildrenArticle from "@pages/articles/child-care/EffectiveAndIneffectivePraiseInChildrenArticle";
+import Terms from "./pages/Terms";
+
 
 
 
@@ -280,7 +282,7 @@ export default function App() {
         <Route path="/articles/child-care/signs-of-developmental-delay-in-children" element={<SignsOfDevelopmentalDelayInChildrenArticle />} />
         <Route path="/articles/child-care/infant-reflexes-are-they-normal" element={<InfantReflexesAreTheyNormalArticle />} />
         <Route path="/articles/child-care/effective-and-ineffective-praise-in-children" element={<EffectiveAndIneffectivePraiseInChildrenArticle />} />
-
+        <Route path="/terms" element={<Terms />} />
 
       </Routes>
     </>
