@@ -143,7 +143,7 @@ async function handleSubmit(e) {
   delete submitData.confirmPassword;
 
   try {
-    const res = await fetch("http://localhost:4000/api/auth/register", {
+    const res = await fetch("https://466d218372f8455faba5ee65f321376d.api.arvandbaas.ir/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
