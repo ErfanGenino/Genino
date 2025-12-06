@@ -124,7 +124,7 @@ export default function EssentialCareForChildren0To3Article() {
 
         <ul className="list-disc pr-6 space-y-3">
           <li>تماس بدنی زیاد (بغل کردن، نوازش، ماساژ)</li>
-          <li>گفت‌وگوی روزانه—even اگر کودک حرف نزند</li>
+          <li>گفت‌وگوی روزانه— حتی اگر کودک حرف نزند</li>
           <li>پاسخ دادن سریع به گریه و نیازها</li>
         </ul>
 

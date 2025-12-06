@@ -130,7 +130,7 @@ export default function WorldKnowledge() {
         transition={{ duration: 0.8 }}
         className="relative z-[10] text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-600 animate-gradient mb-8"
       >
-        🌍 دانستنی‌های روز دنیا
+       مجله ژنینو
       </motion.h1>
 
       <motion.p

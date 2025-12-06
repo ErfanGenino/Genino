@@ -295,56 +295,30 @@ const cardColors = {
         ))}
       </div>
 
-
-      {/* 🔸 اسلایدر اصلی صفحه ورود ژنینو */}
 <motion.div
-  className="relative w-full max-w-3xl aspect-[16/9] mb-2 rounded-3xl overflow-hidden z-20"
+  className="relative w-full max-w-4xl my-10 rounded-3xl overflow-hidden z-20"
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.8, ease: 'easeOut' }}
-  style={{
-    background: "transparent", // 🚫 هیچ رنگ زمینه‌ای
-    boxShadow: "none",         // 🚫 هیچ سایه‌ای
-    border: "none",            // 🚫 هیچ کادر یا لبه‌ای
-  }}
 >
   <PromoSlider
     variant="golden"
     interval={6}
+
+    /* 🌟 ارتفاع بزرگ‌تر */
+    height="h-80 sm:h-96 md:h-[30rem]"
+
+    className="rounded-3xl overflow-hidden shadow-[0_10px_25px_rgba(212,175,55,0.25)]"
     slides={[
-      {
-        id: 1,
-        text: "هر کودک، یک دنیا نوآوری",
-        sub: "ژنینو، همراه رشد و خلاقیت فرزندتان.",
-        image: "/images/slides/authstart/1.jpg",
-      },
-      {
-        id: 2,
-        text: "سلامت بانوان",
-        sub: "با تحلیل داده‌ها و پیشنهادهای تخصصی.",
-        image: "/images/slides/authstart/2.jpg",
-      },
-      {
-        id: 3,
-        text: "سلامت آقایان",
-        sub: "همراه شما برای ساخت آینده‌ای سالم.",
-        image: "/images/slides/authstart/3.jpg",
-      },
-      {
-        id: 4,
-        text: "پزشک من",
-        sub: "بایگانی پرونده‌های پزشکی شما در ژنینو.",
-        image: "/images/slides/authstart/4.jpg",
-      },
-      {
-        id: 5,
-        text: "فروشگاه تخصصی",
-        sub: "خرید آسان و تخصصی کالاها و خدمات مورد نیاز شما.",
-        image: "/images/slides/authstart/5.jpg",
-      },
+      { id: 1, text: "هر کودک، یک دنیا نوآوری", sub: "ژنینو، همراه رشد و خلاقیت فرزندتان.", image: "/images/slides/authstart/1.jpg" },
+      { id: 2, text: "سلامت بانوان", sub: "با تحلیل داده‌ها و پیشنهادهای تخصصی.", image: "/images/slides/authstart/2.jpg" },
+      { id: 3, text: "سلامت آقایان", sub: "همراه شما برای ساخت آینده‌ای سالم.", image: "/images/slides/authstart/3.jpg" },
+      { id: 4, text: "پزشک من", sub: "بایگانی پرونده‌های پزشکی شما در ژنینو.", image: "/images/slides/authstart/4.jpg" },
+      { id: 5, text: "فروشگاه تخصصی", sub: "خرید آسان و تخصصی کالاها و خدمات مورد نیاز شما.", image: "/images/slides/authstart/5.jpg" },
     ]}
   />
 </motion.div>
+
 
 {/* 🛍️ آخرین محصولات فروشگاه ژنینو */}
 <ScrollProduct
