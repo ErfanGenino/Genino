@@ -4,6 +4,8 @@ import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "./services/api";
+
 
 
 // 🌍 فهرست استان‌ها و شهرها
@@ -142,21 +144,16 @@ async function handleSubmit(e) {
   const submitData = { ...formData };
   delete submitData.confirmPassword;
 
+  console.log("SUBMIT DATA =>", submitData);
+
   try {
-    const res = await fetch("https://466d218372f8455faba5ee65f321376d.api.arvandbaas.ir/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(submitData),
-    });
+    const data = await registerUser(submitData);
 
-    const data = await res.json();
+if (!data.ok) {
+  setMessage(`❌ ${data.message}`);
+  return;
+}
 
-    if (!data.ok) {
-      setMessage(`❌ ${data.message}`);
-      return;
-    }
 
     // 🎉 موفقیت
     setMessage("🎉 ثبت‌نام با موفقیت انجام شد!");
@@ -471,49 +468,69 @@ async function handleSubmit(e) {
         </label>
 
 
-        {/* رمز عبور */}
-        <div className="relative">
-  <input
-    name="password"
-    type={showPassword ? "text" : "password"}
-    value={formData.password}
-    onChange={handleChange}
-    onBlur={handleBlur}
-    placeholder="******"
-    className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 pl-10"
-  />
+       {/* رمز عبور */}
+<label className="block mt-4 text-right">
+  <span className="text-sm text-gray-600">رمز عبور</span>
+  {touched.password && errors.password && (
+    <p className="text-xs text-red-600 mt-1 mb-1">{errors.password}</p>
+  )}
 
-  {/* آیکون چشم سمت چپ */}
-  <span
-    onClick={() => setShowPassword(!showPassword)}
-    className="absolute left-3 top-3 cursor-pointer text-gray-500 text-xl"
-  >
-    {showPassword ? "●" : "○"}
-  </span>
-</div>
+  <div className="relative">
+    <input
+      name="password"
+      type={showPassword ? "text" : "password"}
+      value={formData.password}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      placeholder="******"
+      className={`w-full border p-2 rounded-lg mt-1 text-right pl-10 ${
+        touched.password && errors.password
+          ? "border-red-400 focus:border-red-500"
+          : "border-gray-300 focus:border-yellow-500"
+      }`}
+    />
 
+    {/* آیکون چشم */}
+    <span
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute left-3 top-3 cursor-pointer text-gray-500 text-xl"
+    >
+      {showPassword ? "●" : "○"}
+    </span>
+  </div>
+</label>
 
+{/* تکرار رمز عبور */}
+<label className="block mt-4 text-right">
+  <span className="text-sm text-gray-600">تکرار رمز عبور</span>
+  {touched.confirmPassword && errors.confirmPassword && (
+    <p className="text-xs text-red-600 mt-1 mb-1">{errors.confirmPassword}</p>
+  )}
 
-        {/* تکرار رمز عبور */}
-        <div className="relative">
-  <input
-    name="confirmPassword"
-    type={showConfirmPassword ? "text" : "password"}
-    value={formData.confirmPassword}
-    onChange={handleChange}
-    onBlur={handleBlur}
-    placeholder="******"
-    className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 pl-10"
-  />
+  <div className="relative">
+    <input
+      name="confirmPassword"
+      type={showConfirmPassword ? "text" : "password"}
+      value={formData.confirmPassword}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      placeholder="******"
+      className={`w-full border p-2 rounded-lg mt-1 text-right pl-10 ${
+        touched.confirmPassword && errors.confirmPassword
+          ? "border-red-400 focus:border-red-500"
+          : "border-gray-300 focus:border-yellow-500"
+      }`}
+    />
 
-  {/* آیکون چشم سمت چپ */}
-  <span
-    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-    className="absolute left-3 top-3 cursor-pointer text-gray-500 text-xl"
-  >
-    {showConfirmPassword ? "●" : "○"}
-  </span>
-</div>
+    {/* آیکون چشم */}
+    <span
+      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+      className="absolute left-3 top-3 cursor-pointer text-gray-500 text-xl"
+    >
+      {showConfirmPassword ? "●" : "○"}
+    </span>
+  </div>
+</label>
 
 
 

@@ -1,6 +1,7 @@
 // src/App.jsx
 import { Routes, Route } from "react-router-dom";
 
+
 // اگر این فایل‌ها در ریشه‌ی src هستند (طبق اسکرین‌شات تو):
 import Navbar from "./Navbar.jsx";
 import AuthStart from "./AuthStart.jsx";
@@ -145,6 +146,8 @@ import ChildProfile from "./pages/ChildProfile";
 // import SidebarVendor from "./components/SidebarVendor.jsx";
 
 export default function App() {
+
+
   return (
     <>
       {/* نوار ناوبری بالای همه‌ی صفحات */}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo-genino.png";
+import { loginUser } from "./services/api"; // ⭐ اضافه شد
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -8,51 +9,67 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (email === "" || password === "") {
       setMessage("لطفاً همه فیلدها را پر کنید ❗");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setMessage("ایمیل خود را به درستی وارد کنید 📧");
-    } else if (email === "test@mail.com" && password === "1234") {
-      setMessage("ورود موفقیت‌آمیز بود 🌿 خوش آمدی!");
+      return;
+    }
 
-      // 🔹 تعیین مسیر بر اساس مرحله‌ی زندگی کاربر
-      const lifeStage = localStorage.getItem("lifeStage");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setMessage("ایمیل خود را به درستی وارد کنید 📧");
+      return;
+    }
+
+    try {
+      setMessage("⏳ در حال ورود...");
+
+      // ⭐ درخواست واقعی به بک‌اند
+      const data = await loginUser({ email, password });
+
+      if (!data.ok) {
+        setMessage(`❌ ${data.message}`);
+        return;
+      }
+
+      // ⭐ ذخیره توکن
+      localStorage.setItem("genino_token", data.token);
+
+      // ⭐ ذخیره اطلاعات کاربر
+      localStorage.setItem("genino_user", JSON.stringify(data.user));
+
+      setMessage("🌿 ورود موفقیت‌آمیز بود! خوش آمدی به ژنینو");
 
       setTimeout(() => {
+        const lifeStage = localStorage.getItem("lifeStage");
+
         if (lifeStage === "single") navigate("/dashboard-single");
         else if (lifeStage === "couple") navigate("/dashboard-couple");
         else if (lifeStage === "pregnancy") navigate("/dashboard-pregnancy");
         else if (lifeStage === "parent") navigate("/dashboard-parent");
-        else navigate("/signup-user"); // اگر هنوز مرحله‌ای انتخاب نکرده
-      }, 2000);
-    } else {
-      setMessage("ایمیل یا رمز عبور اشتباه است ❌");
+        else navigate("/signup-user");
+      }, 1200);
+
+    } catch (err) {
+      console.error("Login error:", err);
+      setMessage("❌ خطای سرور یا اینترنت. لطفاً دوباره تلاش کنید.");
     }
   }
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f7f2eb] text-gray-800 px-4">
-      {/* لوگو و عنوان */}
+      {/* لوگو */}
       <div className="flex flex-col items-center mb-8">
-        <img
-          src={logo}
-          alt="Genino Logo"
-          className="w-24 h-24 mb-4 drop-shadow-lg"
-        />
-        <h1 className="text-3xl font-bold text-yellow-600 tracking-tight">
-          ورود به ژنینو
-        </h1>
+        <img src={logo} alt="Genino Logo" className="w-24 h-24 mb-4 drop-shadow-lg" />
+        <h1 className="text-3xl font-bold text-yellow-600 tracking-tight">ورود به ژنینو</h1>
         <p className="text-gray-500 mt-2">دستیار هوشمند والدین 🌱</p>
       </div>
 
       {/* فرم ورود */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-2xl shadow-md w-full max-w-sm border border-yellow-100"
-      >
+      <form onSubmit={handleSubmit}
+            className="bg-white p-6 rounded-2xl shadow-md w-full max-w-sm border border-yellow-100">
+        
         <label className="block mb-4 text-right">
           <span className="text-sm text-gray-600">ایمیل</span>
           <input
@@ -60,7 +77,7 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="example@mail.com"
-            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:outline-none focus:border-yellow-500 text-right"
+            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 text-right"
           />
         </label>
 
@@ -71,7 +88,7 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="******"
-            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:outline-none focus:border-yellow-500 text-right"
+            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 text-right"
           />
         </label>
 
@@ -84,13 +101,12 @@ export default function Login() {
 
         <p className="text-center text-sm text-gray-500 mt-4">
           حساب کاربری ندارید؟{" "}
-          <Link to="/signup" className="text-yellow-600 hover:underline">
+          <Link to="/signup-user" className="text-yellow-600 hover:underline">
             ثبت‌نام کنید
           </Link>
         </p>
       </form>
 
-      {/* پیام وضعیت */}
       {message && (
         <p
           className={`mt-6 text-center text-sm font-medium ${
@@ -105,4 +121,3 @@ export default function Login() {
     </main>
   );
 }
-
