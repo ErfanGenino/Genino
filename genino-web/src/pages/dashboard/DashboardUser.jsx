@@ -2,91 +2,69 @@ import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
-  Baby,
-  Dumbbell,
-  Heart,
-  Car,
-  Wallet,
+  BookOpen,
   Brain,
-  Users,
-  Leaf,
+  Heart,
+  Stars,
   Sparkles,
-  Rocket,
-  Apple,
-  DollarSign,
+  Search,
+  Lightbulb,
+  User,
 } from "lucide-react";
 
+export default function DashboardUser() {
+  const user = JSON.parse(localStorage.getItem("genino_user") || "{}");
 
-export default function DashboardParent() {
-  const storedUser = localStorage.getItem("genino_user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const name = user.firstName ? `${user.firstName}` : "دوست ژنینویی";
 
-
-  // 🌿 کارت‌ها
   const cards = [
     {
-      title: "ورود به دنیای کودک من",
-      desc: "مشاهده و مدیریت رشد کودک",
-      icon: <Baby size={26} className="text-yellow-600" />,
-      link: "/mychild",
+      title: "دانشنامه ژنینو",
+      desc: "صدها مقاله علمی و ژنینویی برای رشد و آگاهی",
+      icon: <BookOpen size={26} className="text-yellow-600" />,
+      link: "/knowledge",
       highlight: true,
     },
     {
-      title: "پزشک من",
-      desc: "مدیریت پرونده‌ها، نسخه‌ها و آزمایش‌های پزشکی",
+      title: "خودآگاهی و رشد فردی",
+      desc: "تست‌ها، مهارت‌ها و شناخت بهتر خود",
+      icon: <Brain size={26} className="text-yellow-600" />,
+      link: "/awareness",
+    },
+    {
+      title: "روابط سالم",
+      desc: "بهبود ارتباط با شریک زندگی، خانواده و اطرافیان",
       icon: <Heart size={26} className="text-yellow-600" />,
-      link: "/my-doctor",
+      link: "/family-relations",
     },
     {
-      title: "آرامش ذهن و روان",
-      desc: "مدیتیشن و تمرین‌های ذهن‌آگاهی برای والد آرام‌تر",
-      icon: <Leaf size={26} className="text-yellow-600" />,
+      title: "هوش عاطفی",
+      desc: "مدیریت احساسات، آرامش و تصمیم‌گیری بهتر",
+      icon: <Lightbulb size={26} className="text-yellow-600" />,
+      link: "/emotional-intelligence",
     },
     {
-      title: "من ورزشکارم",
-      desc: "برنامه‌های ورزشی ساده برای خانه",
-      icon: <Dumbbell size={26} className="text-yellow-600" />,
-    },
-    ...(user.gender === "female"
-      ? [
-          {
-            title: "چرخه قاعدگی",
-            desc: "پیگیری و آگاهی از وضعیت جسمی ماهانه",
-            icon: <Heart size={26} className="text-yellow-600" />,
-          },
-        ]
-      : []),
-    {
-      title: "همسرم را بهتر بشناسم",
-      desc: "آموزش‌های ارتباط مؤثر و بهبود روابط زناشویی",
-      icon: <Users size={26} className="text-yellow-600" />,
+      title: "الهام روزانه",
+      desc: "جملات و تمرین‌های انرژی‌بخش",
+      icon: <Stars size={26} className="text-yellow-600" />,
+      link: "/inspiration",
     },
     {
-      title: "کالری‌شمار",
-      desc: "مدیریت تغذیه و وزن به روش ژنینو",
-      icon: <Apple size={26} className="text-yellow-600" />,
-      link: "/calorie-tracker",
+      title: "آگاهی‌های ژنینویی",
+      desc: "تست‌ها و چک‌لیست‌های کاربردی در زندگی",
+      icon: <Search size={26} className="text-yellow-600" />,
+      link: "/awareness-center",
     },
     {
-      title: "اقتصاد خانواده",
-      desc: "مدیریت مالی و بودجه خانواده",
-      icon: <DollarSign size={26} className="text-yellow-600" />,
-      link: "/family-finance",
-    },
-    {
-      title: "کارآفرینان موفق",
-      desc: "درس‌هایی از زندگی کارآفرینان الهام‌بخش",
-      icon: <Rocket size={26} className="text-yellow-600" />,
-    },
-    {
-      title: "دنیای خودروها",
-      desc: "اخبار و تکنولوژی‌های روز خودرو",
-      icon: <Car size={26} className="text-yellow-600" />,
+      title: "پروفایل من",
+      desc: "مدیریت اطلاعات و تنظیمات حساب کاربری",
+      icon: <User size={26} className="text-yellow-600" />,
+      link: "/profile",
     },
   ];
 
   return (
-    <DashboardLayout title="داشبورد: والد دارای فرزند 🌱">
+    <DashboardLayout title="داشبورد کاربر ژنینو 🌿">
       {/* 💛 خوش‌آمدگویی بالا */}
       <motion.div
         initial={{ opacity: 0, y: 25 }}
@@ -95,11 +73,10 @@ export default function DashboardParent() {
         className="text-center mb-10"
       >
         <h2 className="text-2xl font-bold text-yellow-700 mb-2">
-       خوش اومدی {user?.name || "کاربر عزیز"} 🌿
+          خوش اومدی {name} 🌿
         </h2>
-
         <p className="text-gray-600 text-sm">
-          اینجا مرکز رشد تو و فرزندته؛ هر روز یه قدم کوچک برای بزرگ‌ترین عشق زندگی‌ت 💛
+          اینجا مرکز رشد توست؛ جایی برای تبدیل شدن به نسخه‌ی بهترت 💛
         </p>
       </motion.div>
 
@@ -162,7 +139,7 @@ export default function DashboardParent() {
         transition={{ delay: 0.5 }}
         className="mt-12 text-center text-gray-500 text-sm italic"
       >
-        🌸 هر لبخند فرزندت بازتاب نوریه که از آرامش تو می‌تابه.
+        ✨ هر روزت فرصتی برای رشد و آگاهی بیشتره.
       </motion.div>
     </DashboardLayout>
   );

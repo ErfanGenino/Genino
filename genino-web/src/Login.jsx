@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo-genino.png";
-import { loginUser } from "./services/api"; // ⭐ اضافه شد
+import { loginUser, getUserProfile } from "./services/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,52 +10,64 @@ export default function Login() {
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (email === "" || password === "") {
-      setMessage("لطفاً همه فیلدها را پر کنید ❗");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setMessage("ایمیل خود را به درستی وارد کنید 📧");
-      return;
-    }
-
-    try {
-      setMessage("⏳ در حال ورود...");
-
-      // ⭐ درخواست واقعی به بک‌اند
-      const data = await loginUser({ email, password });
-
-      if (!data.ok) {
-        setMessage(`❌ ${data.message}`);
-        return;
-      }
-
-      // ⭐ ذخیره توکن
-      localStorage.setItem("genino_token", data.token);
-
-      // ⭐ ذخیره اطلاعات کاربر
-      localStorage.setItem("genino_user", JSON.stringify(data.user));
-
-      setMessage("🌿 ورود موفقیت‌آمیز بود! خوش آمدی به ژنینو");
-
-      setTimeout(() => {
-        const lifeStage = localStorage.getItem("lifeStage");
-
-        if (lifeStage === "single") navigate("/dashboard-single");
-        else if (lifeStage === "couple") navigate("/dashboard-couple");
-        else if (lifeStage === "pregnancy") navigate("/dashboard-pregnancy");
-        else if (lifeStage === "parent") navigate("/dashboard-parent");
-        else navigate("/signup-user");
-      }, 1200);
-
-    } catch (err) {
-      console.error("Login error:", err);
-      setMessage("❌ خطای سرور یا اینترنت. لطفاً دوباره تلاش کنید.");
-    }
+  if (email === "" || password === "") {
+    setMessage("لطفاً همه فیلدها را پر کنید ❗");
+    return;
   }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setMessage("ایمیل خود را به درستی وارد کنید 📧");
+    return;
+  }
+
+  try {
+    setMessage("⏳ در حال ورود...");
+
+    // مرحله ۱: ارسال اطلاعات ورود به بک‌اند
+    const data = await loginUser({ email, password });
+
+    if (!data.ok) {
+      setMessage(`❌ ${data.message}`);
+      return;
+    }
+
+    // مرحله ۲: ذخیره توکن
+    localStorage.setItem("genino_token", data.token);
+
+    // ⭐⭐⭐ مرحله ۳: دریافت پروفایل از بک‌اند — (این مهم بود!)
+    const profile = await getUserProfile();
+
+    if (profile.ok) {
+      localStorage.setItem("genino_user", JSON.stringify(profile.user));
+
+      const stage = profile.user.lifeStage || "parent";
+      localStorage.setItem("lifeStage", stage);
+    } else {
+      localStorage.setItem("lifeStage", "parent");
+    }
+
+    setMessage("🌿 ورود موفقیت‌آمیز بود! خوش آمدی به ژنینو");
+
+    // مرحله ۴: هدایت کاربر به داشبورد مناسب
+    setTimeout(() => {
+      const lifeStage = localStorage.getItem("lifeStage");
+
+      if (lifeStage === "single") navigate("/dashboard-single");
+      else if (lifeStage === "couple") navigate("/dashboard-couple");
+      else if (lifeStage === "pregnancy") navigate("/dashboard-pregnancy");
+      else if (lifeStage === "parent") navigate("/dashboard-parent");
+      else if (lifeStage === "user") navigate("/dashboard-user");
+      else navigate("/signup-user");
+    }, 1200);
+
+  } catch (err) {
+    console.error("Login error:", err);
+    setMessage("❌ خطای سرور یا اینترنت. لطفاً دوباره تلاش کنید.");
+  }
+}
+
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f7f2eb] text-gray-800 px-4">

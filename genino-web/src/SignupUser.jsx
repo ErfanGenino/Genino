@@ -602,7 +602,10 @@ if (!data.ok) {
 
       {/* دکمه کاربر عادی */}
 <button
-  onClick={() => navigate("/dashboard-user")}
+  onClick={() => {
+    localStorage.setItem("lifeStage", "user");
+    navigate("/dashboard-user");
+  }}
   className="w-full bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 mb-4 hover:shadow-lg transition-all text-yellow-700 font-semibold hover:scale-105"
 >
   👤 کاربر عادی

@@ -129,10 +129,8 @@ import SignsOfDevelopmentalDelayInChildrenArticle from "@pages/articles/child-ca
 import InfantReflexesAreTheyNormalArticle from "@pages/articles/child-care/InfantReflexesAreTheyNormalArticle";
 import EffectiveAndIneffectivePraiseInChildrenArticle from "@pages/articles/child-care/EffectiveAndIneffectivePraiseInChildrenArticle";
 import Terms from "./pages/Terms";
-
-
-
-
+import DashboardUser from "./pages/dashboard/DashboardUser";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
@@ -178,10 +176,10 @@ export default function App() {
         <Route path="/family-finance" element={<FamilyFinance />} />
         <Route path="/memory-album" element={<MemoryAlbum />} />
         <Route path="/events" element={<Events />} />
-        <Route path="/dashboard-single" element={<DashboardSingle />} />
-        <Route path="/dashboard-couple" element={<DashboardCouple />} />
-        <Route path="/dashboard-pregnancy" element={<DashboardPregnancy />} />
-        <Route path="/dashboard-parent" element={<DashboardParent />} />
+        <Route path="/dashboard-single" element={<ProtectedRoute> <DashboardSingle /> </ProtectedRoute>} />
+        <Route path="/dashboard-couple" element={<ProtectedRoute> <DashboardCouple /> </ProtectedRoute>} />
+        <Route path="/dashboard-pregnancy" element={<ProtectedRoute> <DashboardPregnancy /> </ProtectedRoute>} />
+        <Route path="/dashboard-parent" element={<ProtectedRoute> <DashboardParent /> </ProtectedRoute>} />
         <Route path="/my-doctor" element={<MyDoctor />} />
         <Route path="/single-world" element={<SingleWorld />} />
         <Route path="/my-cycle" element={<MyCycle />} />
@@ -286,6 +284,8 @@ export default function App() {
         <Route path="/articles/child-care/infant-reflexes-are-they-normal" element={<InfantReflexesAreTheyNormalArticle />} />
         <Route path="/articles/child-care/effective-and-ineffective-praise-in-children" element={<EffectiveAndIneffectivePraiseInChildrenArticle />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/dashboard-user" element={<ProtectedRoute> <DashboardUser /> </ProtectedRoute>} />
+
 
       </Routes>
     </>

@@ -1,37 +1,52 @@
 const BASE_URL = "https://genino-backend-app-409014d5ff-genino-registry.apps.ir-central1.arvancaas.ir/api";
 
-// --- ثبت نام کاربر ---
-export async function registerUser(formData) {
-  try {
-    const response = await fetch(`${BASE_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+// --- یک fetch اختصاصی که اتوماتیک Token اضافه می‌کند ---
+async function authFetch(url, options = {}) {
+  const token = localStorage.getItem("genino_token");
 
-    return await response.json();
-  } catch (error) {
-    console.error("REGISTER ERROR:", error);
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const config = {
+    ...options,
+    headers,
+  };
+
+  try {
+    const res = await fetch(url, config);
+    return await res.json();
+  } catch (err) {
+    console.error("AUTH FETCH ERROR:", err);
     return { ok: false, message: "خطا در اتصال به سرور." };
   }
 }
 
+// --- ثبت نام کاربر ---
+export async function registerUser(formData) {
+  return await authFetch(`${BASE_URL}/auth/register`, {
+    method: "POST",
+    body: JSON.stringify(formData),
+  });
+}
+
+
 // --- ورود کاربر ---
 export async function loginUser(credentials) {
-  try {
-    const response = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(credentials),
-    });
+  return await authFetch(`${BASE_URL}/auth/login`, {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+}
 
-    return await response.json();
-  } catch (error) {
-    console.error("LOGIN ERROR:", error);
-    return { ok: false, message: "خطا در اتصال به سرور." };
-  }
+// --- دریافت پروفایل کاربر ---
+export async function getUserProfile() {
+  return await authFetch(`${BASE_URL}/auth/profile`, {
+    method: "GET",
+  });
 }
