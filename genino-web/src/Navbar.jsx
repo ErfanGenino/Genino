@@ -8,13 +8,51 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [user, setUser] = useState(null);
+
   const navigate = useNavigate();
 
+  // 📌 مدیریت حالت اسکرول
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // ⭐ بارگذاری کاربر + واکنش به تغییرات localStorage
+  useEffect(() => {
+  const updateUser = () => {
+    const storedUser = localStorage.getItem("genino_user");
+    setUser(storedUser ? JSON.parse(storedUser) : null);
+  };
+
+  // بار اول
+  updateUser();
+
+  // وقتی localStorage از همین تب تغییر کند (مثلاً logout)
+  window.addEventListener("genino_user_changed", updateUser);
+
+  // وقتی localStorage از تب دیگر تغییر کند
+  window.addEventListener("storage", updateUser);
+
+  return () => {
+    window.removeEventListener("genino_user_changed", updateUser);
+    window.removeEventListener("storage", updateUser);
+  };
+}, []);
+
+
+  // ⭐ خروج کاربر
+  function handleLogoutConfirm() {
+    localStorage.removeItem("genino_user");
+    localStorage.removeItem("lifeStage");
+    localStorage.removeItem("userData");
+    sessionStorage.clear();
+
+    setUser(null);
+    setShowLogoutConfirm(false);
+    navigate("/login");
+  }
 
   const links = [
     { to: "/", label: "خانه" },
@@ -24,14 +62,6 @@ function Navbar() {
   ];
 
   const inDashboard = window.location.pathname.startsWith("/dashboard");
-
-  function handleLogoutConfirm() {
-    localStorage.removeItem("lifeStage");
-    localStorage.removeItem("userData");
-    sessionStorage.clear();
-    setShowLogoutConfirm(false);
-    navigate("/login");
-  }
 
   return (
     <>
@@ -47,34 +77,27 @@ function Navbar() {
           dir="rtl"
           className="w-full flex items-center justify-between px-8 py-3"
         >
-          {/* 🔸 لوگو راست */}
+          {/* 🔸 لوگو */}
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center gap-2">
               <div className="relative w-14 h-14 rounded-full flex items-center justify-center
                 bg-white border-2 border-yellow-400 shadow-sm
                 overflow-hidden hover:scale-110 transition-all duration-300">
-  
-  {/* حلقه درخشش سفارشی ژنینویی */}
-  <div className="relative w-14 h-14   rounded-full flex items-center justify-center
-                bg-white border-2 border-yellow-400 shadow-sm overflow-hidden"></div>
+                <img
+                  src={logo}
+                  alt="Genino Logo"
+                  className="relative z-10 w-20 h-20 object-contain bg-white"
+                />
+              </div>
 
-  {/* خود لوگو */}
-  <img
-    src={logo}
-    alt="Genino Logo"
-    className="relative z-10 w-20 h-20 object-contain bg-white"
-  />
-</div>
               <div className="flex flex-col items-center leading-tight mt-0.5">
-  <span className="text-[15px] font-semibold text-yellow-700">
-    ژنینو
-  </span>
-
-  <span className="text-[10.5px] text-gray-500 mt-0.5 tracking-tight">
-    دستیار هوشمند
-  </span>
-</div>
-
+                <span className="text-[15px] font-semibold text-yellow-700">
+                  ژنینو
+                </span>
+                <span className="text-[10.5px] text-gray-500 mt-0.5 tracking-tight">
+                  دستیار هوشمند
+                </span>
+              </div>
             </Link>
           </div>
 
@@ -100,38 +123,48 @@ function Navbar() {
 
           {/* 🔸 سمت چپ */}
           <div className="hidden md:flex items-center justify-end gap-3 flex-shrink-0">
-            {inDashboard ? (
-              <button
-                onClick={() => setShowLogoutConfirm(true)}
-                className="flex items-center gap-1.5 text-red-500 border border-red-300 px-3 py-1.5 rounded-xl text-sm font-medium hover:bg-red-50 hover:text-red-600 transition-all shadow-sm hover:shadow-md"
-              >
-                <LogOut size={17} className="opacity-80" />
-                <span>خروج</span>
-              </button>
+            {user ? (
+              <>
+                {/* نمایش نام کاربر */}
+                <Link
+                 to={`/dashboard-${user.lifeStage}`}
+                 className="text-gray-700 font-medium bg-yellow-100 border border-yellow-300 
+                 px-3 py-1.5 rounded-xl cursor-pointer hover:bg-yellow-200 transition">
+                 {user.fullName}
+                </Link>
+
+                {/* خروج */}
+                <button
+                  onClick={() => setShowLogoutConfirm(true)}
+                  className="flex items-center gap-1.5 text-red-500 border border-red-300 px-3 py-1.5 rounded-xl text-sm font-medium hover:bg-red-50 hover:text-red-600 transition-all shadow-sm hover:shadow-md"
+                >
+                  <LogOut size={17} className="opacity-80" />
+                  <span>خروج</span>
+                </button>
+              </>
             ) : (
               <>
                 <Link
-  to="/login"
-  className="flex items-center gap-1.5 
-             border border-yellow-300 text-yellow-700
-             px-3 py-1.5 rounded-xl text-sm font-medium
-             hover:bg-yellow-50 transition-all"
->
-  <LogIn size={17} className="opacity-80" />
-  <span>ورود</span>
-</Link>
+                  to="/login"
+                  className="flex items-center gap-1.5 
+                    border border-yellow-300 text-yellow-700
+                    px-3 py-1.5 rounded-xl text-sm font-medium
+                    hover:bg-yellow-50 transition-all"
+                >
+                  <LogIn size={17} className="opacity-80" />
+                  <span>ورود</span>
+                </Link>
 
                 <Link
-  to="/signup"
-  className="flex items-center gap-1.5 
-             bg-yellow-500 text-white
-             px-3.5 py-1.5 rounded-xl text-sm font-medium
-             hover:bg-yellow-600 transition-all shadow"
->
-  <UserPlus size={17} className="opacity-90" />
-  <span>ثبت‌نام</span>
-</Link>
-
+                  to="/signup"
+                  className="flex items-center gap-1.5 
+                    bg-yellow-500 text-white
+                    px-3.5 py-1.5 rounded-xl text-sm font-medium
+                    hover:bg-yellow-600 transition-all shadow"
+                >
+                  <UserPlus size={17} className="opacity-90" />
+                  <span>ثبت‌نام</span>
+                </Link>
               </>
             )}
           </div>
@@ -154,61 +187,77 @@ function Navbar() {
           <div className="md:hidden bg-white border-t border-gray-100 py-4 px-5 
                 flex flex-col gap-3 text-right">
 
-  {links.map((item) => (
-    <NavLink
-      key={item.to}
-      to={item.to}
-      onClick={() => setMenuOpen(false)}
-      className={({ isActive }) =>
-        [
-          "text-sm py-1 transition-all",
-          isActive
-            ? "text-yellow-600 font-semibold"
-            : "text-gray-700 hover:text-yellow-600",
-        ].join(" ")
-      }
-    >
-      {item.label}
-    </NavLink>
-  ))}
+            {links.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  [
+                    "text-sm py-1 transition-all",
+                    isActive
+                      ? "text-yellow-600 font-semibold"
+                      : "text-gray-700 hover:text-yellow-600",
+                  ].join(" ")
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
 
-  <hr className="my-2 border-gray-200" />
+            <hr className="my-2 border-gray-200" />
 
-  {!inDashboard && (
-    <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
+              {user ? (
+                <>
+                  <div className="bg-yellow-100 text-yellow-800 font-medium px-3 py-2 rounded-lg mb-2">
+                    {user.fullName}
+                  </div>
 
-      {/* ورود */}
-      <Link
-        to="/login"
-        onClick={() => setMenuOpen(false)}
-        className="flex items-center justify-between
-                   border border-yellow-300 text-yellow-700
-                   px-3 py-2 rounded-lg text-sm hover:bg-yellow-50"
-      >
-        <span>ورود</span>
-        <LogIn size={17} />
-      </Link>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setShowLogoutConfirm(true);
+                    }}
+                    className="flex items-center justify-between
+                      border border-red-300 text-red-500
+                      px-3 py-2 rounded-lg text-sm hover:bg-red-50"
+                  >
+                    <span>خروج</span>
+                    <LogOut size={17} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-between
+                      border border-yellow-300 text-yellow-700
+                      px-3 py-2 rounded-lg text-sm hover:bg-yellow-50"
+                  >
+                    <span>ورود</span>
+                    <LogIn size={17} />
+                  </Link>
 
-      {/* ثبت‌نام */}
-      <Link
-        to="/signup"
-        onClick={() => setMenuOpen(false)}
-        className="flex items-center justify-between
-                   bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm
-                   hover:bg-yellow-600 shadow"
-      >
-        <span>ثبت‌نام</span>
-        <UserPlus size={17} />
-      </Link>
-
-    </div>
-  )}
-</div>
-
+                  <Link
+                    to="/signup"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-between
+                      bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm
+                      hover:bg-yellow-600 shadow"
+                  >
+                    <span>ثبت‌نام</span>
+                    <UserPlus size={17} />
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
         )}
       </header>
 
-      {/* 🌟 پاپ‌آپ خروج در کل صفحه */}
+      {/* 🌟 پاپ‌آپ خروج */}
       <AnimatePresence>
         {showLogoutConfirm && (
           <motion.div
@@ -219,18 +268,17 @@ function Navbar() {
           >
             <motion.div
               className="relative bg-gradient-to-br from-yellow-50 to-white rounded-3xl shadow-[0_0_40px_rgba(212,175,55,0.6)]
-                         p-7 w-[90%] max-w-sm text-center border border-yellow-200 overflow-hidden"
+                p-7 w-[90%] max-w-sm text-center border border-yellow-200 overflow-hidden"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+              transition={{ type: "spring", stiffness: 200, damping: 18 }}
             >
-              {/* ✨ افکت درخشش طلایی */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                animate={{ x: ['-150%', '150%'] }}
-                transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-                style={{ transform: 'rotate(25deg)' }}
+                animate={{ x: ["-150%", "150%"] }}
+                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                style={{ transform: "rotate(25deg)" }}
               />
 
               <div className="relative z-10">
@@ -245,12 +293,12 @@ function Navbar() {
                   <motion.button
                     whileHover={{
                       scale: 1.05,
-                      boxShadow: '0 0 25px rgba(212,175,55,0.8)',
+                      boxShadow: "0 0 25px rgba(212,175,55,0.8)",
                     }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleLogoutConfirm}
                     className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-5 py-2 rounded-xl 
-                               font-semibold shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all"
+                      font-semibold shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all"
                   >
                     بله، خروج
                   </motion.button>
@@ -274,4 +322,3 @@ function Navbar() {
 }
 
 export default Navbar;
-

@@ -1,4 +1,4 @@
-const BASE_URL = "https://genino-backend-app-409014d5ff-genino-registry.apps.ir-central1.arvancaas.ir/api";
+const BASE_URL = "http://185.220.227.31/api";
 
 // --- یک fetch اختصاصی که اتوماتیک Token اضافه می‌کند ---
 async function authFetch(url, options = {}) {
@@ -35,8 +35,7 @@ export async function registerUser(formData) {
   });
 }
 
-
-// --- ورود کاربر ---
+// --- ورود ---
 export async function loginUser(credentials) {
   return await authFetch(`${BASE_URL}/auth/login`, {
     method: "POST",
@@ -44,9 +43,19 @@ export async function loginUser(credentials) {
   });
 }
 
-// --- دریافت پروفایل کاربر ---
+// --- دریافت پروفایل ---
 export async function getUserProfile() {
   return await authFetch(`${BASE_URL}/auth/profile`, {
     method: "GET",
   });
 }
+
+// --- آپدیت مرحله زندگی ---
+export async function updateLifeStage(stage) {
+  return await authFetch(`${BASE_URL}/auth/update-life-stage`, {
+    method: "PUT",
+    body: JSON.stringify({ lifeStage: stage }),   // ← درست شد
+  });
+}
+
+console.log("BASE_URL =>", BASE_URL);

@@ -5,6 +5,7 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "./services/api";
+import { updateLifeStage } from "./services/api";
 
 
 
@@ -154,10 +155,22 @@ if (!data.ok) {
   return;
 }
 
+// ⭐ ذخیره توکن و یوزر در localStorage
+if (data.token) {
+  localStorage.setItem("genino_token", data.token);
+}
+if (data.user) {
+  localStorage.setItem("genino_user", JSON.stringify(data.user));
 
-    // 🎉 موفقیت
-    setMessage("🎉 ثبت‌نام با موفقیت انجام شد!");
-    setShowLifeStage(true);
+  const stage = data.user.lifeStage || "user";
+  localStorage.setItem("lifeStage", stage);
+  window.dispatchEvent(new Event("genino_user_changed"));
+}
+
+// 🎉 موفقیت
+setMessage("🎉 ثبت‌نام با موفقیت انجام شد!");
+setShowLifeStage(true);
+
 
   } catch (error) {
     console.error("Signup error:", error);
@@ -600,68 +613,139 @@ if (!data.ok) {
         لطفاً مرحله‌ی فعلی زندگی‌ت رو انتخاب کن تا محتوای ژنینو بر اساس اون تنظیم بشه
       </p>
 
-      {/* دکمه کاربر عادی */}
+      {/* 🌼 دکمه کاربر عادی */}
 <button
-  onClick={() => {
-    localStorage.setItem("lifeStage", "user");
-    navigate("/dashboard-user");
+  onClick={async () => {
+    const res = await updateLifeStage("user");
+    if (res.ok) {
+
+      localStorage.setItem("lifeStage", "user");
+
+      let userData = JSON.parse(localStorage.getItem("genino_user"));
+      userData.lifeStage = "user";
+      localStorage.setItem("genino_user", JSON.stringify(userData));
+
+      window.dispatchEvent(new Event("genino_user_changed"));
+      navigate("/dashboard-user");
+
+    } else alert("خطا در ذخیره مرحله زندگی");
   }}
   className="w-full bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 mb-4 hover:shadow-lg transition-all text-yellow-700 font-semibold hover:scale-105"
 >
   👤 کاربر عادی
-  <p className="text-xs text-gray-500 mt-1 font-normal">
-    استفاده از امکانات عمومی ژنینو
-  </p>
+  <p className="text-xs text-gray-500 mt-1 font-normal">استفاده از امکانات عمومی ژنینو</p>
 </button>
 
-      <div
-        dir="rtl"
-        className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-right"
-      >
-        {/* مجرد */}
-        <button
-          onClick={() => navigate("/dashboard-single")}
-          className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
-        >
-          💍 <span className="font-semibold">مجردم و قصد ازدواج دارم</span>
-          <p className="text-xs text-gray-500 mt-1 font-normal">
-            آمادگی برای زندگی مشترک
-          </p>
-        </button>
+<div dir="rtl" className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-right">
 
-        {/* متأهل بدون فرزند */}
-        <button
-          onClick={() => navigate("/dashboard-couple")}
-          className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
-        >
-          💑 <span className="font-semibold">متأهلم و فرزند ندارم</span>
-          <p className="text-xs text-gray-500 mt-1 font-normal">
-            تحکیم رابطه و آمادگی فرزندآوری
-          </p>
-        </button>
+  {/* مجرد */}
+  <button
+  onClick={async () => {
+    const res = await updateLifeStage("single");
+    if (res.ok) {
 
-        {/* در آستانه فرزند */}
-        <button
-          onClick={() => navigate("/dashboard-pregnancy")}
-          className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
-        >
-          👶 <span className="font-semibold">در آستانه فرزندآوری</span>
-          <p className="text-xs text-gray-500 mt-1 font-normal">
-            مراقبت بارداری و آماده‌سازی والدگری
-          </p>
-        </button>
+      localStorage.setItem("lifeStage", "single");
 
-        {/* والد دارای فرزند */}
-        <button
-          onClick={() => navigate("/dashboard-parent")}
-          className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-2xl py-4 px-3 hover:shadow-xl transition-all font-semibold hover:scale-105"
-        >
-          🧒 <span>فرزند دارم</span>
-          <p className="text-xs mt-1 font-normal opacity-80">
-            ساخت پروفایل کودک و مسیر رشد
-          </p>
-        </button>
-      </div>
+      let userData = JSON.parse(localStorage.getItem("genino_user"));
+      userData.lifeStage = "single";
+      localStorage.setItem("genino_user", JSON.stringify(userData));
+
+      window.dispatchEvent(new Event("genino_user_changed"));
+      navigate("/dashboard-single");
+
+    } else alert("خطا در ذخیره مرحله زندگی");
+  }}
+  className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
+>
+  💍 <span className="font-semibold">مجردم و قصد ازدواج دارم</span>
+  <p className="text-xs text-gray-500 mt-1 font-normal">آمادگی برای زندگی مشترک</p>
+</button>
+
+
+  {/* متأهل بدون فرزند */}
+  <button
+  onClick={async () => {
+    const res = await updateLifeStage("couple");
+    if (res.ok) {
+
+      localStorage.setItem("lifeStage", "couple");
+
+      let userData = JSON.parse(localStorage.getItem("genino_user"));
+      userData.lifeStage = "couple";
+      localStorage.setItem("genino_user", JSON.stringify(userData));
+
+      window.dispatchEvent(new Event("genino_user_changed"));
+      navigate("/dashboard-couple");
+
+    } else alert("خطا در ذخیره مرحله زندگی");
+  }}
+  className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
+>
+  💑 <span className="font-semibold">متأهلم و فرزند ندارم</span>
+  <p className="text-xs text-gray-500 mt-1 font-normal">تحکیم رابطه و آمادگی فرزندآوری</p>
+</button>
+
+
+  {/* در آستانه فرزند */}
+  <button
+  onClick={async () => {
+    const res = await updateLifeStage("pregnancy");
+    if (res.ok) {
+
+      localStorage.setItem("lifeStage", "pregnancy");
+
+      let userData = JSON.parse(localStorage.getItem("genino_user"));
+      userData.lifeStage = "pregnancy";
+      localStorage.setItem("genino_user", JSON.stringify(userData));
+
+      window.dispatchEvent(new Event("genino_user_changed"));
+      navigate("/dashboard-pregnancy");
+
+    } else alert("خطا در ذخیره مرحله زندگی");
+  }}
+  className="bg-white border-2 border-yellow-400 rounded-2xl py-4 px-3 hover:shadow-lg transition-all text-yellow-700 hover:scale-105"
+>
+  👶 <span className="font-semibold">در آستانه فرزندآوری</span>
+  <p className="text-xs text-gray-500 mt-1 font-normal">مراقبت بارداری و آماده‌سازی والدگری</p>
+</button>
+
+
+  {/* والد دارای فرزند */}
+  <button
+ onClick={async () => {
+  const res = await updateLifeStage("parent");
+
+  if (res.ok) {
+    // 1. lifeStage جداگانه (این از قبل بود)
+    localStorage.setItem("lifeStage", "parent");
+
+    // 2. genino_user را بخوان
+    let userData = JSON.parse(localStorage.getItem("genino_user"));
+
+    // 3. مقدار جدید را داخل userData بگذار
+    userData.lifeStage = "parent";
+
+    // 4. در genino_user ذخیره کن
+    localStorage.setItem("genino_user", JSON.stringify(userData));
+
+    // 5. به Navbar خبر بده
+    window.dispatchEvent(new Event("genino_user_changed"));
+
+    // 6. هدایت
+    navigate("/dashboard-parent");
+  } else {
+    alert("خطا در ذخیره مرحله زندگی");
+  }
+}}
+  className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-2xl py-4 px-3 hover:shadow-xl transition-all font-semibold hover:scale-105"
+>
+  🧒 <span>فرزند دارم</span>
+  <p className="text-xs mt-1 font-normal opacity-80">ساخت پروفایل کودک و مسیر رشد</p>
+</button>
+
+
+</div>
+
 
       <button
         onClick={() => setShowLifeStage(false)}

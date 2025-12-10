@@ -41,6 +41,7 @@ export default function Login() {
 
     if (profile.ok) {
       localStorage.setItem("genino_user", JSON.stringify(profile.user));
+      window.dispatchEvent(new Event("genino_user_changed"));
 
       const stage = profile.user.lifeStage || "parent";
       localStorage.setItem("lifeStage", stage);
