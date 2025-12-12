@@ -60,6 +60,7 @@ export default function DashboardParent() {
       title: "همسرم را بهتر بشناسم",
       desc: "آموزش‌های ارتباط مؤثر و بهبود روابط زناشویی",
       icon: <Users size={26} className="text-yellow-600" />,
+      link: "/knowledge/family-relations",
     },
     {
       title: "کالری‌شمار",
@@ -86,7 +87,7 @@ export default function DashboardParent() {
   ];
 
   return (
-    <DashboardLayout title="داشبورد: والد دارای فرزند 🌱">
+    <DashboardLayout title="پنل کاربری والدین">
       {/* 💛 خوش‌آمدگویی بالا */}
       <motion.div
         initial={{ opacity: 0, y: 25 }}
@@ -95,11 +96,14 @@ export default function DashboardParent() {
         className="text-center mb-10"
       >
         <h2 className="text-2xl font-bold text-yellow-700 mb-2">
-       خوش اومدی {user?.name || "کاربر عزیز"} 🌿
+        خوش آمدی{" "}
+{user?.fullName || user?.firstName || user?.name
+  ? `${user?.fullName || user?.firstName || user?.name} عزیز`
+  : "کاربر عزیز"} 
         </h2>
 
         <p className="text-gray-600 text-sm">
-          اینجا مرکز رشد تو و فرزندته؛ هر روز یه قدم کوچک برای بزرگ‌ترین عشق زندگی‌ت 💛
+         ژنینو همراه شما در مسیر رشد فردی، تحکیم خانواده و پرورش آگاهانه فرزندتان است؛ هر روز گامی سنجیده برای ساخت آینده‌ای سالم‌تر و پایدارتر.
         </p>
       </motion.div>
 

@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 
 export default function DashboardPregnancy() {
-  const user = { name: "فرناز" }; // فعلاً فرضی
+   const storedUser = localStorage.getItem("genino_user");
+   const user = storedUser ? JSON.parse(storedUser) : null;
 
   const cards = [
     {
@@ -70,7 +71,7 @@ export default function DashboardPregnancy() {
   ];
 
   return (
-    <DashboardLayout title="داشبورد: در انتظار فرزند 🌼">
+    <DashboardLayout title="پنل کاربری دوران بارداری">
       {/* 💛 خوش‌آمدگویی بالا */}
       <motion.div
         initial={{ opacity: 0, y: 25 }}
@@ -79,10 +80,13 @@ export default function DashboardPregnancy() {
         className="text-center mb-10"
       >
         <h2 className="text-2xl font-bold text-yellow-700 mb-2">
-          خوش اومدی {user.name} 🌿
+          خوش آمدی{" "}
+{user?.fullName || user?.firstName || user?.name
+  ? `${user?.fullName || user?.firstName || user?.name} عزیز`
+  : "کاربر عزیز"} 
         </h2>
         <p className="text-gray-600 text-sm">
-          دوران بارداری سفریه از عشق و انتظار؛ هر روزش هدیه‌ای برای خلق زندگیه 💛
+         دوران بارداری، سفری آکنده از عشق و انتظار است؛ هر روز آن هدیه‌ای ارزشمند در مسیر آفرینش زندگی.
         </p>
       </motion.div>
 

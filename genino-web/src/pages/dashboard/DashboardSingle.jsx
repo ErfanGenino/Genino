@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 
 export default function DashboardSingle() {
-  const user = { name: "عرفان" }; // فعلاً فرضی
+    const storedUser = localStorage.getItem("genino_user");
+   const user = storedUser ? JSON.parse(storedUser) : null;
 
   const cards = [
     {
@@ -82,7 +83,7 @@ export default function DashboardSingle() {
   ];
 
   return (
-    <DashboardLayout title="داشبورد: دنیای مجردها 🌊">
+    <DashboardLayout title="پنل کاربری مجردها ">
       {/* 💙 خوش‌آمدگویی بالا */}
       <motion.div
         initial={{ opacity: 0, y: 25 }}
@@ -91,10 +92,13 @@ export default function DashboardSingle() {
         className="text-center mb-10"
       >
         <h2 className="text-2xl font-bold text-sky-700 mb-2">
-          خوش اومدی {user.name} 💫
+          خوش آمدی{" "}
+{user?.fullName || user?.firstName || user?.name
+  ? `${user?.fullName || user?.firstName || user?.name} عزیز`
+  : "کاربر عزیز"} 
         </h2>
         <p className="text-gray-600 text-sm">
-          اینجا دنیای رشد، آرامش و شادیه؛ هر روزت فرصتیه برای ساختن نسخه‌ی بهتر از خودت 🌿
+         ژنینو فضایی برای رشد، آرامش و شادی است؛ هر روز فرصتی برای ارتقای آگاهانه‌ی توانمندی‌های فردی.
         </p>
       </motion.div>
 

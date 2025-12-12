@@ -13,9 +13,8 @@ import {
 } from "lucide-react";
 
 export default function DashboardUser() {
-  const user = JSON.parse(localStorage.getItem("genino_user") || "{}");
-
-  const name = user.firstName ? `${user.firstName}` : "دوست ژنینویی";
+  const storedUser = localStorage.getItem("genino_user");
+   const user = storedUser ? JSON.parse(storedUser) : null;
 
   const cards = [
     {
@@ -64,7 +63,7 @@ export default function DashboardUser() {
   ];
 
   return (
-    <DashboardLayout title="داشبورد کاربر ژنینو 🌿">
+    <DashboardLayout title="پنل کاربران ژنینو">
       {/* 💛 خوش‌آمدگویی بالا */}
       <motion.div
         initial={{ opacity: 0, y: 25 }}
@@ -73,10 +72,13 @@ export default function DashboardUser() {
         className="text-center mb-10"
       >
         <h2 className="text-2xl font-bold text-yellow-700 mb-2">
-          خوش اومدی {name} 🌿
+              خوش آمدی{" "}
+{user?.fullName || user?.firstName || user?.name
+  ? `${user?.fullName || user?.firstName || user?.name} عزیز`
+  : "کاربر عزیز"}   
         </h2>
         <p className="text-gray-600 text-sm">
-          اینجا مرکز رشد توست؛ جایی برای تبدیل شدن به نسخه‌ی بهترت 💛
+         ژنینو مرکز رشد شماست؛ فضایی برای حرکت آگاهانه به‌سوی نسخه‌ای بهتر از خود.
         </p>
       </motion.div>
 

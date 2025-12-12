@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 
 export default function DashboardCouple() {
-  const user = { name: "عرفان" }; // فعلاً فرضی
+  const storedUser = localStorage.getItem("genino_user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   const cards = [
     {
@@ -69,7 +70,7 @@ export default function DashboardCouple() {
   ];
 
   return (
-    <DashboardLayout title="داشبورد: زوج‌ها 💞">
+    <DashboardLayout title="پنل کاربری زوج ها">
       {/* 💕 خوش‌آمدگویی بالا */}
       <motion.div
         initial={{ opacity: 0, y: 25 }}
@@ -78,10 +79,13 @@ export default function DashboardCouple() {
         className="text-center mb-10"
       >
         <h2 className="text-2xl font-bold text-pink-600 mb-2">
-          خوش اومدی {user.name} 💞
+          خوش آمدی{" "}
+{user?.fullName || user?.firstName || user?.name
+  ? `${user?.fullName || user?.firstName || user?.name} عزیز`
+  : "کاربر عزیز"} 
         </h2>
         <p className="text-gray-600 text-sm">
-          عشق یعنی رشد دو نفره؛ اینجا جاییه برای رشد رابطه، آرامش و لبخندهای دونفره 🌸
+         عشق، در رشد متقابل معنا می‌یابد؛ ژنینو فضایی برای تقویت رابطه، آرامش پایدار و لبخندهای مشترک است.
         </p>
       </motion.div>
 
