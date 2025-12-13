@@ -41,11 +41,13 @@ export default function DashboardParent() {
       title: "آرامش ذهن و روان",
       desc: "مدیتیشن و تمرین‌های ذهن‌آگاهی برای والد آرام‌تر",
       icon: <Leaf size={26} className="text-yellow-600" />,
+      link: "/knowledge/mind-calm",
     },
     {
       title: "من ورزشکارم",
       desc: "برنامه‌های ورزشی ساده برای خانه",
       icon: <Dumbbell size={26} className="text-yellow-600" />,
+      link: "/knowledge/home-workout",
     },
     ...(user.gender === "female"
       ? [
@@ -78,6 +80,7 @@ export default function DashboardParent() {
       title: "کارآفرینان موفق",
       desc: "درس‌هایی از زندگی کارآفرینان الهام‌بخش",
       icon: <Rocket size={26} className="text-yellow-600" />,
+      link: "/knowledge/successful-entrepreneurs",
     },
     {
       title: "دنیای خودروها",

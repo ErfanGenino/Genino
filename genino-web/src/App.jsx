@@ -146,9 +146,12 @@ import MentalCalmInCrisisArticle from "./pages/articles/mind-calm/MentalCalmInCr
 import MeditationImpactOnFocusAndDecisionMakingArticle from "./pages/articles/mind-calm/MeditationImpactOnFocusAndDecisionMakingArticle";
 import ManagingNegativeThoughtsWithMentalTrainingArticle from "./pages/articles/mind-calm/ManagingNegativeThoughtsWithMentalTrainingArticle";
 import FiveSimpleExercisesForInstantCalmArticle from "./pages/articles/mind-calm/FiveSimpleExercisesForInstantCalmArticle";
-
-
-
+import HomeWorkoutWithoutEquipmentArticle from "./pages/articles/home-workout/HomeWorkoutWithoutEquipmentArticle";
+import DailySimpleWorkoutsForBusyParentsArticle from "./pages/articles/home-workout/DailySimpleWorkoutsForBusyParentsArticle";
+import WorkoutsForRestartingArticle from "./pages/articles/home-workout/WorkoutsForRestartingArticle";
+import ExercisesForLowerBackPainArticle from "./pages/articles/home-workout/ExercisesForLowerBackPainArticle";
+import StretchingExercisesForMusclePainReliefArticle from "./pages/articles/home-workout/StretchingExercisesForMusclePainReliefArticle";
+import FatBurningHomeWorkoutArticle from "./pages/articles/home-workout/FatBurningHomeWorkoutArticle";
 
 
 
@@ -321,8 +324,12 @@ export default function App() {
         <Route path="/articles/mind-calm/meditation-focus-decision" element={<MeditationImpactOnFocusAndDecisionMakingArticle />} />
         <Route path="/articles/mind-calm/managing-negative-thoughts" element={<ManagingNegativeThoughtsWithMentalTrainingArticle />} />
         <Route path="/articles/mind-calm/instant-calm-exercises" element={<FiveSimpleExercisesForInstantCalmArticle />} />
-
-
+        <Route path="/articles/home-workout/no-equipment" element={<HomeWorkoutWithoutEquipmentArticle />} />
+        <Route path="/articles/home-workout/daily-workouts-for-busy-parents" element={<DailySimpleWorkoutsForBusyParentsArticle />} />
+        <Route path="/articles/home-workout/restarting" element={<WorkoutsForRestartingArticle />} />
+        <Route path="/articles/home-workout/back-pain" element={<ExercisesForLowerBackPainArticle />} />
+        <Route path="/articles/home-workout/stretching-for-muscle-pain" element={<StretchingExercisesForMusclePainReliefArticle />} />
+        <Route path="/articles/home-workout/fat-burning" element={<FatBurningHomeWorkoutArticle />} />
 
 
       </Routes>
