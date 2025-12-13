@@ -134,6 +134,24 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import MindCalmKnowledge from "./pages/knowledge/MindCalmKnowledge";
 import HomeWorkoutKnowledge from "./pages/knowledge/HomeWorkoutKnowledge";
 import SuccessfulEntrepreneursKnowledge from "./pages/knowledge/SuccessfulEntrepreneursKnowledge";
+import WhatIsMeditationArticle from "./pages/articles/mind-calm/WhatIsMeditationArticle";
+import BreathingExercisesForDailyStressArticle from "./pages/articles/mind-calm/BreathingExercisesForDailyStressArticle";
+import MeditationForBusyParentsArticle from "./pages/articles/mind-calm/MeditationForBusyParentsArticle";
+import CalmingMindBeforeSleepArticle from "./pages/articles/mind-calm/CalmingMindBeforeSleepArticle";
+import ParentalMentalCalmImpactOnChildGrowthArticle from "./pages/articles/mind-calm/ParentalMentalCalmImpactOnChildGrowthArticle";
+import FiveMinuteHomeMeditationArticle from "./pages/articles/mind-calm/FiveMinuteHomeMeditationArticle";
+import MindfulnessInDailyLifeArticle from "./pages/articles/mind-calm/MindfulnessInDailyLifeArticle";
+import ReducingAnxietyWithSimpleMentalExercisesArticle from "./pages/articles/mind-calm/ReducingAnxietyWithSimpleMentalExercisesArticle";
+import MentalCalmInCrisisArticle from "./pages/articles/mind-calm/MentalCalmInCrisisArticle";
+import MeditationImpactOnFocusAndDecisionMakingArticle from "./pages/articles/mind-calm/MeditationImpactOnFocusAndDecisionMakingArticle";
+import ManagingNegativeThoughtsWithMentalTrainingArticle from "./pages/articles/mind-calm/ManagingNegativeThoughtsWithMentalTrainingArticle";
+import FiveSimpleExercisesForInstantCalmArticle from "./pages/articles/mind-calm/FiveSimpleExercisesForInstantCalmArticle";
+
+
+
+
+
+
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
@@ -291,6 +309,20 @@ export default function App() {
         <Route path="/knowledge/mind-calm" element={<MindCalmKnowledge />} />
         <Route path="/knowledge/home-workout" element={<HomeWorkoutKnowledge />} />
         <Route path="/knowledge/successful-entrepreneurs" element={<SuccessfulEntrepreneursKnowledge />} />
+        <Route path="/articles/mind-calm/what-is-meditation" element={<WhatIsMeditationArticle />} />
+        <Route path="/articles/mind-calm/breathing-exercises" element={<BreathingExercisesForDailyStressArticle />} />
+        <Route path="/articles/mind-calm/meditation-for-busy-parents" element={<MeditationForBusyParentsArticle />} />
+        <Route path="/articles/mind-calm/calming-before-sleep" element={<CalmingMindBeforeSleepArticle />} />
+        <Route path="/articles/mind-calm/parental-calm-child-growth" element={<ParentalMentalCalmImpactOnChildGrowthArticle />} />
+        <Route path="/articles/mind-calm/5-minute-meditation" element={<FiveMinuteHomeMeditationArticle />} />
+        <Route path="/articles/mind-calm/mindfulness-daily-life" element={<MindfulnessInDailyLifeArticle />} />
+        <Route path="/articles/mind-calm/reducing-anxiety" element={<ReducingAnxietyWithSimpleMentalExercisesArticle />} />
+        <Route path="/articles/mind-calm/mental-calm-in-crisis" element={<MentalCalmInCrisisArticle />} />
+        <Route path="/articles/mind-calm/meditation-focus-decision" element={<MeditationImpactOnFocusAndDecisionMakingArticle />} />
+        <Route path="/articles/mind-calm/managing-negative-thoughts" element={<ManagingNegativeThoughtsWithMentalTrainingArticle />} />
+        <Route path="/articles/mind-calm/instant-calm-exercises" element={<FiveSimpleExercisesForInstantCalmArticle />} />
+
+
 
 
       </Routes>
