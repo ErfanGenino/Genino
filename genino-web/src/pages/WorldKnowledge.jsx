@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Heart, Users, Sparkles, Smile, Utensils, Dna } from "lucide-react";
+import { Heart, Users, Sparkles, Smile, Utensils, Dna, Activity, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function WorldKnowledge() {
@@ -41,6 +41,24 @@ export default function WorldKnowledge() {
       desc: "احترام، همدلی و درک متقابل، زیربنای رشد سالم فرزندان.",
       link: "/knowledge/family-relations",
     },
+    {
+      icon: <Heart className="w-10 h-10 text-yellow-500 mb-3" />,
+  title: "آرامش ذهن و روان (مدیتیشن)",
+  desc: "مدیریت استرس، آرام‌سازی ذهن و تقویت سلامت روان برای والدین و خانواده‌ها.",
+  link: "/knowledge/mind-calm",
+},
+{
+  icon: <Activity className="w-10 h-10 text-yellow-500 mb-3" />,
+  title: "ورزش در خانه",
+  desc: "تمرین‌های ساده و کاربردی برای حفظ سلامت بدن بدون نیاز به باشگاه.",
+  link: "/knowledge/home-workout",
+},
+{
+  icon: <Briefcase className="w-10 h-10 text-yellow-500 mb-3" />,
+  title: "کارآفرینان موفق",
+  desc: "داستان‌ها، مسیرها و ذهنیت کارآفرینانی که از صفر به موفقیت رسیدند.",
+  link: "/knowledge/successful-entrepreneurs",
+},
   ];
 
   const cardColors = [

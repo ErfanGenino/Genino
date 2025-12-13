@@ -131,6 +131,9 @@ import EffectiveAndIneffectivePraiseInChildrenArticle from "@pages/articles/chil
 import Terms from "./pages/Terms";
 import DashboardUser from "./pages/dashboard/DashboardUser";
 import ProtectedRoute from "./components/ProtectedRoute";
+import MindCalmKnowledge from "./pages/knowledge/MindCalmKnowledge";
+import HomeWorkoutKnowledge from "./pages/knowledge/HomeWorkoutKnowledge";
+import SuccessfulEntrepreneursKnowledge from "./pages/knowledge/SuccessfulEntrepreneursKnowledge";
 
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
@@ -285,6 +288,9 @@ export default function App() {
         <Route path="/articles/child-care/effective-and-ineffective-praise-in-children" element={<EffectiveAndIneffectivePraiseInChildrenArticle />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/dashboard-user" element={<ProtectedRoute> <DashboardUser /> </ProtectedRoute>} />
+        <Route path="/knowledge/mind-calm" element={<MindCalmKnowledge />} />
+        <Route path="/knowledge/home-workout" element={<HomeWorkoutKnowledge />} />
+        <Route path="/knowledge/successful-entrepreneurs" element={<SuccessfulEntrepreneursKnowledge />} />
 
 
       </Routes>
