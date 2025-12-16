@@ -153,6 +153,8 @@ import ExercisesForLowerBackPainArticle from "./pages/articles/home-workout/Exer
 import StretchingExercisesForMusclePainReliefArticle from "./pages/articles/home-workout/StretchingExercisesForMusclePainReliefArticle";
 import FatBurningHomeWorkoutArticle from "./pages/articles/home-workout/FatBurningHomeWorkoutArticle";
 import EmotionRegulationTest from "./pages/child-mental-health/EmotionRegulationTest";
+import AttentionFocusTest from "./pages/child-mental-health/AttentionFocusTest";
+import SocialInteractionTest from "./pages/child-mental-health/SocialInteractionTest";
 
 
 
@@ -333,6 +335,8 @@ export default function App() {
         <Route path="/articles/home-workout/stretching-for-muscle-pain" element={<StretchingExercisesForMusclePainReliefArticle />} />
         <Route path="/articles/home-workout/fat-burning" element={<FatBurningHomeWorkoutArticle />} />
         <Route path="/child-mental-health/emotion-regulation" element={<EmotionRegulationTest />} />
+        <Route path="/child-mental-health/attention-focus" element={<AttentionFocusTest />} />
+        <Route path="/child-mental-health/social-interaction" element={<SocialInteractionTest />} />
 
 
 
