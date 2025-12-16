@@ -3,7 +3,7 @@ import { useState } from "react";
 import GeninoDNABackground from "@components/Core/GeninoDNABackground";
 import GoldenModal from "@components/Core/GoldenModal";
 import { Link } from "react-router-dom";
-import { HeartPulse, Brain, Activity, Eye, Ear, Smile, Utensils, Move } from "lucide-react";
+import { HeartPulse, Brain, Activity, Eye, Ear, Smile, Utensils, Move, AlertTriangle, Moon } from "lucide-react";
 import GeninoReportButton from "@components/Core/GeninoReportButton";
 import { useNavigate } from "react-router-dom";
 
@@ -22,10 +22,37 @@ export default function ChildHealthCheck() {
   ];
 
   const mentalChecks = [
-    { title: "پایش خلق‌وخو و احساسات", icon: <HeartPulse className="w-10 h-10" />, link: "/child-health-check/emotions" },
-    { title: "تمرکز و آرامش ذهن", icon: <Brain className="w-10 h-10" />, link: "/child-health-check/focus" },
-    { title: "ارتباط اجتماعی کودک", icon: <Activity className="w-10 h-10" />, link: "/child-health-check/social" },
-  ];
+  {
+    title: "تنظیم هیجان کودک",
+    icon: <HeartPulse className="w-10 h-10" />,
+    link: "/child-mental-health/emotion-regulation",
+  },
+  {
+    title: "تمرکز و توجه",
+    icon: <Brain className="w-10 h-10" />,
+    link: "/child-mental-health/attention-focus",
+  },
+  {
+    title: "تعامل اجتماعی کودک",
+    icon: <Activity className="w-10 h-10" />,
+    link: "/child-mental-health/social-interaction",
+  },
+  {
+    title: "اضطراب و ترس‌های کودک",
+    icon: <AlertTriangle className="w-10 h-10" />,
+    link: "/child-mental-health/anxiety-fear",
+  },
+  {
+    title: "عزت‌نفس کودک",
+    icon: <Smile className="w-10 h-10" />,
+    link: "/child-mental-health/self-confidence",
+  },
+  {
+    title: "خواب و آرامش",
+    icon: <Moon className="w-10 h-10" />,
+    link: "/child-mental-health/sleep-calm",
+  },
+];
 
   return (
     <GeninoDNABackground strands={10} opacity={0.25} duration={90}>
