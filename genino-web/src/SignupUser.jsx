@@ -223,8 +223,16 @@ setShowLifeStage(true);
       return "";
 
     case "password":
-      if (v.length < 6) return "رمز عبور باید حداقل ۶ کاراکتر باشد";
-      return "";
+  if (v.length < 8)
+    return "رمز عبور باید حداقل ۸ کاراکتر باشد (شامل اعداد و حروف)";
+
+  if (!/[A-Za-z]/.test(v))
+    return "رمز عبور باید حداقل یک حرف داشته باشد";
+
+  if (!/\d/.test(v))
+    return "رمز عبور باید حداقل یک عدد داشته باشد";
+
+  return "";
 
     case "confirmPassword":
       if (v !== d.password) return "تکرار رمز باید با رمز یکسان باشد";
