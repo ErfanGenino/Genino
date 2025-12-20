@@ -87,6 +87,12 @@ try {
       icon: <Globe size={26} className="text-sky-600" />,
       link: "/world-knowledge",
     },
+    {
+  title: "علایق من",
+  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+  icon: <Heart size={26} className="text-yellow-600" />,
+  link: "/favorites",
+},
   ];
 
   return (

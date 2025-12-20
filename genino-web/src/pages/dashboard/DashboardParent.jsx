@@ -90,9 +90,10 @@ try {
       link: "/knowledge/successful-entrepreneurs",
     },
     {
-      title: "دنیای خودروها",
-      desc: "اخبار و تکنولوژی‌های روز خودرو",
-      icon: <Car size={26} className="text-yellow-600" />,
+      title: "علایق من",
+      desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+      icon: <Heart size={26} className="text-yellow-600" />,
+      link: "/favorites",
     },
   ];
 

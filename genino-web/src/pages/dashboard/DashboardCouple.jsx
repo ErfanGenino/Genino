@@ -65,14 +65,15 @@ try {
       icon: <CalendarHeart size={26} className="text-pink-500" />,
     },
     {
-      title: "مهربانی در رابطه",
-      desc: "درس‌هایی از همدلی و درک متقابل برای روابط پایدار",
-      icon: <HandHeart size={26} className="text-pink-500" />,
-    },
-    {
       title: "موسیقی و حس خوب",
       desc: "پلی‌لیست‌های مخصوص زوج‌ها برای لحظه‌های دونفره",
       icon: <Music size={26} className="text-pink-500" />,
+    },
+    {
+      title: "علایق من",
+      desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+      icon: <Heart size={26} className="text-yellow-600" />,
+      link: "/favorites",
     },
   ];
 

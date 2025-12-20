@@ -71,10 +71,11 @@ try {
       icon: <HandHeart size={26} className="text-yellow-600" />,
     },
     {
-      title: "الهام مادرانه",
-      desc: "نقل‌قول‌ها و داستان‌های الهام‌بخش از مادران دیگر",
-      icon: <Sparkles size={26} className="text-yellow-600" />,
-    },
+  title: "علایق من",
+  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+  icon: <Heart size={26} className="text-yellow-600" />,
+  link: "/favorites",
+},
   ];
 
   return (

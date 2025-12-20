@@ -67,6 +67,12 @@ try {
       icon: <User size={26} className="text-yellow-600" />,
       link: "/profile",
     },
+    {
+  title: "علایق من",
+  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+  icon: <Heart size={26} className="text-yellow-600" />,
+  link: "/favorites",
+},
   ];
 
   return (
