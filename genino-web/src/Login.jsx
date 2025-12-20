@@ -4,29 +4,27 @@ import logo from "./assets/logo-genino.png";
 import { loginUser, getUserProfile } from "./services/api";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+
   async function handleSubmit(e) {
   e.preventDefault();
 
-  if (email === "" || password === "") {
-    setMessage("لطفاً همه فیلدها را پر کنید ❗");
-    return;
-  }
+  if (identifier.trim() === "" || password === "") {
+  setMessage("لطفاً همه فیلدها را پر کنید ❗");
+  return;
+}
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    setMessage("ایمیل خود را به درستی وارد کنید 📧");
-    return;
-  }
+
 
   try {
     setMessage("⏳ در حال ورود...");
 
     // مرحله ۱: ارسال اطلاعات ورود به بک‌اند
-    const data = await loginUser({ email, password });
+    const data = await loginUser({ identifier, password });
 
     if (!data.ok) {
       setMessage(`❌ ${data.message}`);
@@ -84,14 +82,16 @@ export default function Login() {
             className="bg-white p-6 rounded-2xl shadow-md w-full max-w-sm border border-yellow-100">
         
         <label className="block mb-4 text-right">
-          <span className="text-sm text-gray-600">ایمیل</span>
+          <span className="text-sm text-gray-600">
+  ایمیل، شماره موبایل یا نام کاربری
+</span>
           <input
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="example@mail.com"
-            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 text-right"
-          />
+  type="text"
+  value={identifier}
+  onChange={(e) => setIdentifier(e.target.value)}
+  placeholder="ایمیل، موبایل یا نام کاربری"
+  className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 text-right"
+/>
         </label>
 
         <label className="block mb-5 text-right">
