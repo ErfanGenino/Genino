@@ -1,4 +1,5 @@
-const BASE_URL = "http://185.220.227.31/api";
+const BASE_URL =
+  "https://genino-backend-app-409014d5ff-genino-registry.apps.ir-central1.arvancaas.ir/api";
 
 // --- یک fetch اختصاصی که اتوماتیک Token اضافه می‌کند ---
 async function authFetch(url, options = {}) {

@@ -169,6 +169,24 @@ function Navbar() {
             )}
           </div>
 
+          {/* 🔸 دکمه داشبورد در موبایل */}
+{user && (
+  <button
+    onClick={() => {
+      setMenuOpen(false); // 👈 این خط
+      navigate(`/dashboard-${user.lifeStage}`);
+    }}
+    className="md:hidden 
+      flex items-center gap-2 
+      bg-yellow-100 border border-yellow-300 
+      px-3 py-1.5 rounded-xl 
+      text-sm font-medium text-yellow-800
+      hover:bg-yellow-200 transition"
+  >
+    {user.fullName}
+  </button>
+)}
+
           {/* 🔸 منوی موبایل */}
           <button
             className="md:hidden p-2 rounded-lg hover:bg-yellow-50 transition"
@@ -210,9 +228,7 @@ function Navbar() {
             <div className="flex flex-col gap-2">
               {user ? (
                 <>
-                  <div className="bg-yellow-100 text-yellow-800 font-medium px-3 py-2 rounded-lg mb-2">
-                    {user.fullName}
-                  </div>
+                
 
                   <button
                     onClick={() => {
