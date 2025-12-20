@@ -18,8 +18,15 @@ import {
 
 
 export default function DashboardParent() {
+let user = null;
+
+try {
   const storedUser = localStorage.getItem("genino_user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  user = storedUser ? JSON.parse(storedUser) : null;
+} catch (error) {
+  user = null;
+}
+
 
 
   // 🌿 کارت‌ها
@@ -49,7 +56,7 @@ export default function DashboardParent() {
       icon: <Dumbbell size={26} className="text-yellow-600" />,
       link: "/knowledge/home-workout",
     },
-    ...(user.gender === "female"
+    ...(user?.gender === "female"
       ? [
           {
             title: "چرخه قاعدگی",

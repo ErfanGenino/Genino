@@ -16,8 +16,15 @@ import {
 } from "lucide-react";
 
 export default function DashboardSingle() {
-    const storedUser = localStorage.getItem("genino_user");
-   const user = storedUser ? JSON.parse(storedUser) : null;
+    let user = null;
+
+try {
+  const storedUser = localStorage.getItem("genino_user");
+  user = storedUser ? JSON.parse(storedUser) : null;
+} catch (error) {
+  user = null;
+}
+
 
   const cards = [
     {
