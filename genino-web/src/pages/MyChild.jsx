@@ -348,12 +348,16 @@ const [selectedChildForTree, setSelectedChildForTree] = useState(null);
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.6 }}
 >
-  <Link to="/child-health-check" className="block">
-    <GeninoHealthButton
-      title="پایش سلامت کودک"
-      icon={HeartPulse}
-    />
-  </Link>
+  <Link
+  to={`/child-health-check?childId=${activeChild?.id}`}
+  className={`block ${!activeChild ? "pointer-events-none opacity-50" : ""}`}
+>
+  <GeninoHealthButton
+    title="پایش سلامت کودک"
+    icon={HeartPulse}
+  />
+</Link>
+
 </motion.div>
 
 

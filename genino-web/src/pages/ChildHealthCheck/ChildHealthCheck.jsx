@@ -6,53 +6,67 @@ import { Link } from "react-router-dom";
 import { HeartPulse, Brain, Activity, Eye, Ear, Smile, Utensils, Move, AlertTriangle, Moon } from "lucide-react";
 import GeninoReportButton from "@components/Core/GeninoReportButton";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export default function ChildHealthCheck() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const navigate = useNavigate(); // 👈 این خط ضروریه
+  const [searchParams] = useSearchParams();
+  const childId = searchParams.get("childId");
+
 
   // 🌕 داده‌های سکه‌ها
-  const physicalChecks = [
-    { title: "پایش بینایی", icon: <Eye className="w-10 h-10" />, link: "/child-health-check/vision" },
-    { title: "پایش شنوایی", icon: <Ear className="w-10 h-10" />, link: "/child-health-check/hearing" },
-    { title: "سلامت دهان و دندان", icon: <Smile className="w-10 h-10" />, link: "/child-health-check/dental" },
-    { title: "سلامت گوارش و بلع", icon: <Utensils className="w-10 h-10" />, link: "/child-health-check/digestion" },
-    { title: "رشد حرکتی و تعادل", icon: <Move className="w-10 h-10" />, link: "/child-health-check/movement" },
-    { title: "قد، وزن و BMI", icon: <Activity className="w-10 h-10" />, link: "/child-health-check/bodymetrics" },
-  ];
+  const physicalChecks = childId
+  ? [
+    { title: "پایش بینایی", icon: <Eye className="w-10 h-10" />, link: `/child-health-check/vision?childId=${childId}` },
+    { title: "پایش شنوایی", icon: <Ear className="w-10 h-10" />, link: `/child-health-check/hearing?childId=${childId}` },
+    { title: "سلامت دهان و دندان", icon: <Smile className="w-10 h-10" />, link: `/child-health-check/dental?childId=${childId}` },
+    { title: "سلامت گوارش و بلع", icon: <Utensils className="w-10 h-10" />, link: `/child-health-check/digestion?childId=${childId}` },
+    { title: "رشد حرکتی و تعادل", icon: <Move className="w-10 h-10" />, link: `/child-health-check/movement?childId=${childId}` },
+    { title: "قد، وزن و BMI", icon: <Activity className="w-10 h-10" />, link: `/child-health-check/bodymetrics?childId=${childId}` },
+  ]
+  : [];
 
   const mentalChecks = [
   {
     title: "تنظیم هیجان کودک",
     icon: <HeartPulse className="w-10 h-10" />,
-    link: "/child-mental-health/emotion-regulation",
+    link: `/child-mental-health/emotion-regulation?childId=${childId}`,
   },
   {
     title: "تمرکز و توجه",
     icon: <Brain className="w-10 h-10" />,
-    link: "/child-mental-health/attention-focus",
+    link: `/child-mental-health/attention-focus?childId=${childId}`,
   },
   {
     title: "تعامل اجتماعی کودک",
     icon: <Activity className="w-10 h-10" />,
-    link: "/child-mental-health/social-interaction",
+    link: `/child-mental-health/social-interaction?childId=${childId}`,
   },
   {
     title: "اضطراب و ترس‌های کودک",
     icon: <AlertTriangle className="w-10 h-10" />,
-    link: "/child-mental-health/anxiety-fear",
+    link: `/child-mental-health/anxiety-fear?childId=${childId}`,
   },
   {
     title: "عزت‌نفس کودک",
     icon: <Smile className="w-10 h-10" />,
-    link: "/child-mental-health/self-confidence",
+    link: `/child-mental-health/self-confidence?childId=${childId}`,
   },
   {
     title: "خواب و آرامش",
     icon: <Moon className="w-10 h-10" />,
-    link: "/child-mental-health/sleep-calm",
+    link: `/child-mental-health/sleep-calm?childId=${childId}`,
   },
 ];
+
+if (!childId) {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-gray-600">
+      کودک مشخص نشده است
+    </div>
+  );
+}
 
   return (
     <GeninoDNABackground strands={10} opacity={0.25} duration={90}>
