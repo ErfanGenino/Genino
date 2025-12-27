@@ -31,16 +31,23 @@ export default function ChildProfile() {
   }, [birthDate]);
 
   // 💾 ذخیره در localStorage و بازگشت
-  const handleSave = () => {
-    localStorage.setItem("childName", childName);
-    localStorage.setItem("birthDate", birthDate);
-    localStorage.setItem("gender", gender);
-    localStorage.setItem("childPhoto", childPhoto);
+const handleSave = () => {
+  const stored = localStorage.getItem("children");
+  const children = stored ? JSON.parse(stored) : [];
 
-    setTimeout(() => {
-      navigate("/mychild");
-    }, 500);
+  const newChild = {
+    id: Date.now(),
+    name: childName,
+    birthDate,
+    gender,
+    photo: childPhoto,
   };
+
+  localStorage.setItem("children", JSON.stringify([...children, newChild]));
+
+  navigate("/mychild", { replace: true });
+};
+  
 
   return (
     <main

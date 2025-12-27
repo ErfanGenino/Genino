@@ -8,13 +8,15 @@ import TodayCalendarBox from "@components/Dashboard/TodayCalendarBox";
 import GeninoAwarenessBox from "@components/Awareness/GeninoAwarenessBox";
 import GeninoHealthButton from "@components/Assessments/GeninoHealthButton";
 import { useState } from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 
 
 export default function MyChild() {
 
-
+const navigate = useNavigate();
 
   // 🌳 استیت‌های درختواره
   const [showFamilyTree, setShowFamilyTree] = useState(false);
@@ -27,25 +29,43 @@ export default function MyChild() {
   const [others, setOthers] = useState([]);
 
   // 👶 اطلاعات کودک از localStorage
-  const [childPhoto, setChildPhoto] = useState(localStorage.getItem("childPhoto") || null);
-  const [childName, setChildName] = useState(localStorage.getItem("childName") || "حنا");
-  const [birthDate, setBirthDate] = useState(localStorage.getItem("birthDate") || "2021-03-12");
-  const [gender, setGender] = useState(localStorage.getItem("gender") || "girl");
+const loadChildren = () => {
+  const stored = localStorage.getItem("children");
+  return stored ? JSON.parse(stored) : [];
+};
 
+const [childrenList, setChildrenList] = useState(loadChildren);
+useEffect(() => {
+  const stored = localStorage.getItem("children");
+  const parsed = stored ? JSON.parse(stored) : [];
 
-// 👶 لیست فرزندان (فعلاً موقت – فرانت)
-const [childrenList, setChildrenList] = useState([
-  {
-    id: 1,
-    name: childName,
-    photo: childPhoto,
-    birthDate,
-    gender,
-  },
-]);
+  if (parsed.length === 0) {
+    navigate("/child-profile?mode=createFirst", { replace: true });
+  }
+}, []);
 
-// ⭐ کودک فعال
-const [activeChildId, setActiveChildId] = useState(1);
+const [activeChildId, setActiveChildId] = useState(
+  childrenList[0]?.id || null
+); 
+
+useEffect(() => {
+  const sync = () => {
+    const stored = localStorage.getItem("children");
+    const parsed = stored ? JSON.parse(stored) : [];
+    setChildrenList(parsed);
+
+    // اگر activeChildId خالی بود و حداقل یک کودک داریم
+    if (!activeChildId && parsed.length > 0) {
+      setActiveChildId(parsed[0].id);
+    }
+  };
+
+  sync();
+
+  // وقتی در تب دیگری هم تغییر کرد
+  window.addEventListener("storage", sync);
+  return () => window.removeEventListener("storage", sync);
+}, [activeChildId]);
 
 
 
@@ -54,8 +74,11 @@ const activeChild = childrenList.find(
   (child) => child.id === activeChildId
 );
 
+if (!activeChild) return null;
+
+
   // 📆 محاسبه دقیق سن و روز مانده تا تولد
-const birth = new Date(activeChild?.birthDate || birthDate);
+const birth = new Date(activeChild.birthDate);
 const today = new Date();
 
 // محاسبه دقیق روزهای مانده تا تولد بعدی
@@ -79,6 +102,29 @@ if (ageMonths < 0) {
 const ageText = `${ageYears} سال و ${ageMonths} ماه`;
 
 const [selectedChildForTree, setSelectedChildForTree] = useState(null);
+
+
+// امکان حذف کودک از نوار کودک من
+const handleDeleteChild = (childId) => {
+  const stored = localStorage.getItem("children");
+  const children = stored ? JSON.parse(stored) : [];
+
+  const updatedChildren = children.filter(
+    (child) => child.id !== childId
+  );
+
+  localStorage.setItem("children", JSON.stringify(updatedChildren));
+
+  if (updatedChildren.length === 0) {
+    navigate("/child-profile?mode=createFirst", { replace: true });
+  } else {
+    setChildrenList(updatedChildren);
+    setActiveChildId(updatedChildren[0].id);
+  }
+};
+
+const [confirmDelete, setConfirmDelete] = useState(false);
+
 
 
 
@@ -246,16 +292,48 @@ const [selectedChildForTree, setSelectedChildForTree] = useState(null);
       </div>
     </div>
 
-    {/* ✏️ ویرایش اطلاعات */}
-    <Link
-      to="/child-profile"
-      className="inline-flex items-center justify-center gap-2 
-                 bg-gradient-to-r from-yellow-500 to-yellow-400 
-                 text-white px-6 py-2 rounded-xl font-semibold shadow-md 
-                 hover:from-yellow-600 hover:to-yellow-500 transition"
+    <div className="mt-4 flex gap-3">
+
+  {/* ✏️ ویرایش */}
+  <Link
+    to="/child-profile"
+    className="flex-1 inline-flex items-center justify-center gap-2
+               bg-gradient-to-r from-yellow-500 to-yellow-400
+               text-white py-2 rounded-xl font-semibold shadow-md
+               hover:from-yellow-600 hover:to-yellow-500 transition"
+  >
+    ✏️ ویرایش
+  </Link>
+
+  {/* 🗑️ حذف */}
+  {!confirmDelete ? (
+    <button
+      onClick={() => setConfirmDelete(true)}
+      className="flex-1 inline-flex items-center justify-center gap-2
+                 bg-white border border-gray-300 text-gray-600
+                 py-2 rounded-xl font-semibold
+                 hover:border-red-300 hover:text-red-600
+                 hover:bg-red-50 transition"
     >
-      ✏️ ویرایش اطلاعات کودک
-    </Link>
+      🗑️ حذف
+    </button>
+  ) : (
+    <button
+      onClick={() => {
+        setConfirmDelete(false);
+        handleDeleteChild(activeChild.id);
+      }}
+      className="flex-1 inline-flex items-center justify-center gap-2
+                 bg-red-600 text-white py-2 rounded-xl font-semibold
+                 hover:bg-red-700 transition"
+    >
+      حذف قطعی
+    </button>
+  )}
+</div>
+
+
+
   </div>
 </motion.div>
 
