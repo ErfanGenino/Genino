@@ -35,18 +35,54 @@ const loadChildren = () => {
 };
 
 const [childrenList, setChildrenList] = useState(loadChildren);
-useEffect(() => {
-  const stored = localStorage.getItem("children");
-  const parsed = stored ? JSON.parse(stored) : [];
-
-  if (parsed.length === 0) {
-    navigate("/child-profile?mode=createFirst", { replace: true });
-  }
-}, []);
-
 const [activeChildId, setActiveChildId] = useState(
   childrenList[0]?.id || null
 ); 
+
+useEffect(() => {
+  async function loadChildrenFromApi() {
+    try {
+      const token = localStorage.getItem("token"); // همون JWT که بعد از لاگین ذخیره کردی
+      if (!token) throw new Error("no token");
+
+      const res = await fetch("http://localhost:80/api/children", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("api error");
+
+      const data = await res.json();
+
+      // اگر از بک‌اند داده داریم
+      if (Array.isArray(data) && data.length > 0) {
+        setChildrenList(data);
+        setActiveChildId(data[0].id);
+        localStorage.setItem("children", JSON.stringify(data));
+        return;
+      }
+    } catch (e) {
+      // fallback
+    }
+
+    // fallback به localStorage
+    const stored = localStorage.getItem("children");
+const parsed = stored ? JSON.parse(stored) : [];
+
+if (parsed.length === 0) {
+  navigate("/child-profile?mode=createFirst", { replace: true });
+  return;
+}
+
+setChildrenList(parsed);
+setActiveChildId(parsed[0].id);
+
+  }
+
+  loadChildrenFromApi();  
+}, []);
+
 
 useEffect(() => {
   const sync = () => {
