@@ -141,23 +141,48 @@ const [selectedChildForTree, setSelectedChildForTree] = useState(null);
 
 
 // امکان حذف کودک از نوار کودک من
-const handleDeleteChild = (childId) => {
-  const stored = localStorage.getItem("children");
-  const children = stored ? JSON.parse(stored) : [];
+const handleDeleteChild = async (childId) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("لطفاً دوباره وارد شوید");
+      return;
+    }
 
-  const updatedChildren = children.filter(
-    (child) => child.id !== childId
-  );
+    const res = await fetch(`http://localhost:80/api/children/${childId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  localStorage.setItem("children", JSON.stringify(updatedChildren));
+    if (!res.ok) {
+      throw new Error("delete failed");
+    }
 
-  if (updatedChildren.length === 0) {
-    navigate("/child-profile?mode=createFirst", { replace: true });
-  } else {
-    setChildrenList(updatedChildren);
-    setActiveChildId(updatedChildren[0].id);
+    // 🔄 بعد از حذف، دوباره از بک‌اند بخون
+    const refresh = await fetch("http://localhost:80/api/children", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const updatedChildren = await refresh.json();
+
+    localStorage.setItem("children", JSON.stringify(updatedChildren));
+
+    if (updatedChildren.length === 0) {
+      navigate("/child-profile?mode=createFirst", { replace: true });
+    } else {
+      setChildrenList(updatedChildren);
+      setActiveChildId(updatedChildren[0].id);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("حذف کودک انجام نشد");
   }
 };
+
 
 const [confirmDelete, setConfirmDelete] = useState(false);
 

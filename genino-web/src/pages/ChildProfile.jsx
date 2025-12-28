@@ -21,6 +21,8 @@ export default function ChildProfile() {
   const isEdit = mode === "edit";
 
 
+
+
   // 📆 محاسبه سن به سال و ماه
   useEffect(() => {
     if (birthDate) {
@@ -57,41 +59,49 @@ export default function ChildProfile() {
 
 
   // 💾 ذخیره در localStorage و بازگشت
-const handleSave = () => {
-  const stored = localStorage.getItem("children");
-  const children = stored ? JSON.parse(stored) : [];
+const handleSave = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("لطفاً دوباره وارد شوید");
+      return;
+    }
 
-  if (mode === "edit" && editId) {
-    const updatedChildren = children.map((child) =>
-      String(child.id) === String(editId)
-        ? {
-            ...child,
-            name: childName,
-            birthDate,
-            gender,
-            photo: childPhoto,
-          }
-        : child
-    );
-
-    localStorage.setItem("children", JSON.stringify(updatedChildren));
-  } else {
-    const newChild = {
-      id: Date.now(),
-      name: childName,
-      birthDate,
+    const payload = {
+      fullName: childName,
       gender,
-      photo: childPhoto,
+      birthDate,
     };
 
-    localStorage.setItem(
-      "children",
-      JSON.stringify([...children, newChild])
-    );
-  }
+    const isEditMode = mode === "edit" && editId;
 
-  navigate("/mychild", { replace: true });
+    const url = isEditMode
+      ? `http://localhost:80/api/children/${editId}`
+      : "http://localhost:80/api/children";
+
+    const method = isEditMode ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      throw new Error("خطا در ذخیره کودک");
+    }
+
+    navigate("/mychild", { replace: true });
+
+  } catch (err) {
+    console.error(err);
+    alert("ذخیره کودک انجام نشد");
+  }
 };
+
   
 
   return (
