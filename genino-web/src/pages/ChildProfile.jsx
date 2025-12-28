@@ -5,15 +5,21 @@ import { Link, useNavigate } from "react-router-dom";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
+import { useSearchParams } from "react-router-dom";
+
 
 export default function ChildProfile() {
   const navigate = useNavigate();
-
-  const [childName, setChildName] = useState(localStorage.getItem("childName") || "");
-  const [birthDate, setBirthDate] = useState(localStorage.getItem("birthDate") || "");
-  const [gender, setGender] = useState(localStorage.getItem("gender") || "girl");
-  const [childPhoto, setChildPhoto] = useState(localStorage.getItem("childPhoto") || "");
   const [ageText, setAgeText] = useState("");
+  const [childName, setChildName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [gender, setGender] = useState("girl");
+  const [childPhoto, setChildPhoto] = useState("");
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get("mode"); // edit | null
+  const editId = searchParams.get("id");
+  const isEdit = mode === "edit";
+
 
   // 📆 محاسبه سن به سال و ماه
   useEffect(() => {
@@ -30,20 +36,59 @@ export default function ChildProfile() {
     }
   }, [birthDate]);
 
+// برای کارکردن دکمه ویرایش کودک
+  useEffect(() => {
+  if (mode === "edit" && editId) {
+    const stored = localStorage.getItem("children");
+    const children = stored ? JSON.parse(stored) : [];
+
+    const child = children.find(
+      (c) => String(c.id) === String(editId)
+    );
+
+    if (child) {
+      setChildName(child.name);
+      setBirthDate(child.birthDate);
+      setGender(child.gender);
+      setChildPhoto(child.photo || "");
+    }
+  }
+}, [mode, editId]);
+
+
   // 💾 ذخیره در localStorage و بازگشت
 const handleSave = () => {
   const stored = localStorage.getItem("children");
   const children = stored ? JSON.parse(stored) : [];
 
-  const newChild = {
-    id: Date.now(),
-    name: childName,
-    birthDate,
-    gender,
-    photo: childPhoto,
-  };
+  if (mode === "edit" && editId) {
+    const updatedChildren = children.map((child) =>
+      String(child.id) === String(editId)
+        ? {
+            ...child,
+            name: childName,
+            birthDate,
+            gender,
+            photo: childPhoto,
+          }
+        : child
+    );
 
-  localStorage.setItem("children", JSON.stringify([...children, newChild]));
+    localStorage.setItem("children", JSON.stringify(updatedChildren));
+  } else {
+    const newChild = {
+      id: Date.now(),
+      name: childName,
+      birthDate,
+      gender,
+      photo: childPhoto,
+    };
+
+    localStorage.setItem(
+      "children",
+      JSON.stringify([...children, newChild])
+    );
+  }
 
   navigate("/mychild", { replace: true });
 };
@@ -60,9 +105,16 @@ const handleSave = () => {
         transition={{ duration: 0.6 }}
         className="bg-white/80 backdrop-blur-md border border-yellow-300 rounded-3xl shadow-xl p-8 w-full max-w-md"
       >
-        <h2 className="text-2xl font-bold text-yellow-800 mb-6 text-center">
-          پروفایل کودک
+        <h2 className="text-2xl font-bold text-yellow-800 mb-1 text-center">
+        {isEdit ? "ویرایش اطلاعات کودک" : "افزودن کودک"}
         </h2>
+
+        {isEdit && (
+        <p className="text-xs text-gray-600 mb-6 text-center">
+         در حال ویرایش اطلاعات این کودک هستید
+        </p>
+        )}
+
 
         {/* تصویر کودک */}
         <div className="flex justify-center mb-6">
@@ -157,7 +209,7 @@ const handleSave = () => {
           onClick={handleSave}
           className="mt-6 w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-2 rounded-lg font-semibold shadow-md hover:from-yellow-600 hover:to-yellow-500 transition"
         >
-          💾 ذخیره تغییرات
+          💾 {isEdit ? "ذخیره تغییرات" : "ذخیره کودک"}
         </button>
 
         {/* بازگشت دستی */}

@@ -296,7 +296,7 @@ const [confirmDelete, setConfirmDelete] = useState(false);
 
   {/* ✏️ ویرایش */}
   <Link
-    to="/child-profile"
+    to={`/child-profile?mode=edit&id=${activeChild.id}`}
     className="flex-1 inline-flex items-center justify-center gap-2
                bg-gradient-to-r from-yellow-500 to-yellow-400
                text-white py-2 rounded-xl font-semibold shadow-md
