@@ -19,8 +19,8 @@ export default function ChildProfile() {
   const mode = searchParams.get("mode"); // edit | null
   const editId = searchParams.get("id");
   const isEdit = mode === "edit";
-
-
+  const BASE_URL =
+  "https://genino-backend-app-409014d5ff-genino-registry.apps.ir-central1.arvancaas.ir/api";
 
 
   // 📆 محاسبه سن به سال و ماه
@@ -61,7 +61,7 @@ export default function ChildProfile() {
   // 💾 ذخیره در localStorage و بازگشت
 const handleSave = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("genino_token");
     if (!token) {
       alert("لطفاً دوباره وارد شوید");
       return;
@@ -76,8 +76,8 @@ const handleSave = async () => {
     const isEditMode = mode === "edit" && editId;
 
     const url = isEditMode
-      ? `http://localhost:80/api/children/${editId}`
-      : "http://localhost:80/api/children";
+  ? `${BASE_URL}/children/${editId}`
+  : `${BASE_URL}/children`;
 
     const method = isEditMode ? "PUT" : "POST";
 
