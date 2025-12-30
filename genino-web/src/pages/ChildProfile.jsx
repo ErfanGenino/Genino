@@ -62,6 +62,7 @@ export default function ChildProfile() {
 const handleSave = async () => {
   try {
     const token = localStorage.getItem("genino_token");
+    console.log("🟢 JWT from localStorage:", token);
     if (!token) {
       alert("لطفاً دوباره وارد شوید");
       return;

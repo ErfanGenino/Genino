@@ -16,6 +16,9 @@ import { useNavigate } from "react-router-dom";
 
 export default function MyChild() {
 
+  const BASE_URL =
+  "https://genino-backend-app-409014d5ff-genino-registry.apps.ir-central1.arvancaas.ir/api";
+
 const navigate = useNavigate();
 
   // 🌳 استیت‌های درختواره
@@ -42,10 +45,10 @@ const [activeChildId, setActiveChildId] = useState(
 useEffect(() => {
   async function loadChildrenFromApi() {
     try {
-      const token = localStorage.getItem("token"); // همون JWT که بعد از لاگین ذخیره کردی
+      const token = localStorage.getItem("genino_token"); // همون JWT که بعد از لاگین ذخیره کردی
       if (!token) throw new Error("no token");
 
-      const res = await fetch("http://localhost:80/api/children", {
+      const res = await fetch(`${BASE_URL}/children`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -143,13 +146,13 @@ const [selectedChildForTree, setSelectedChildForTree] = useState(null);
 // امکان حذف کودک از نوار کودک من
 const handleDeleteChild = async (childId) => {
   try {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("genino_token");
     if (!token) {
       alert("لطفاً دوباره وارد شوید");
       return;
     }
 
-    const res = await fetch(`http://localhost:80/api/children/${childId}`, {
+    const res = await fetch(`${BASE_URL}/children/${childId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -161,7 +164,7 @@ const handleDeleteChild = async (childId) => {
     }
 
     // 🔄 بعد از حذف، دوباره از بک‌اند بخون
-    const refresh = await fetch("http://localhost:80/api/children", {
+    const refresh = await fetch(`${BASE_URL}/children`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
