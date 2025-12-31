@@ -44,15 +44,18 @@ function Navbar() {
 
   // ⭐ خروج کاربر
   function handleLogoutConfirm() {
-    localStorage.removeItem("genino_user");
-    localStorage.removeItem("lifeStage");
-    localStorage.removeItem("userData");
-    sessionStorage.clear();
+  localStorage.removeItem("genino_user");
+  localStorage.removeItem("genino_token"); // ✅ مهم
+  localStorage.removeItem("children");     // ✅ مهم
+  localStorage.removeItem("lifeStage");
+  localStorage.removeItem("userData");
+  sessionStorage.clear();
 
-    setUser(null);
-    setShowLogoutConfirm(false);
-    navigate("/login");
-  }
+  setUser(null);
+  setShowLogoutConfirm(false);
+  navigate("/login", { replace: true });
+}
+
 
   const links = [
     { to: "/", label: "خانه" },

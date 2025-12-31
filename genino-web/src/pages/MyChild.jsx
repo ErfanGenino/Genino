@@ -17,9 +17,9 @@ import { authFetch } from "../services/api";
 
 export default function MyChild() {
 
-
-
 const navigate = useNavigate();
+
+
 const [isLoading, setIsLoading] = useState(true);
 const [confirmDelete, setConfirmDelete] = useState(false);
 const [selectedChildForTree, setSelectedChildForTree] = useState(null);

@@ -195,7 +195,7 @@ export default function App() {
         <Route path="/calorie-tracker" element={<CalorieTracker />} />
         <Route path="/world-knowledge" element={<WorldKnowledge />} />
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
-        <Route path="/mychild" element={<MyChild />} />
+        <Route path="/mychild" element={<ProtectedRoute> <MyChild /> </ProtectedRoute>} />
         <Route path="/social" element={<Feed />} />
         <Route path="/social/profile" element={<Profile />} />
         <Route path="/social/create" element={<CreatePost />} />
