@@ -6,6 +6,7 @@ import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useSearchParams } from "react-router-dom";
+import { authFetch } from "../services/api";
 
 
 export default function ChildProfile() {
@@ -19,8 +20,7 @@ export default function ChildProfile() {
   const mode = searchParams.get("mode"); // edit | null
   const editId = searchParams.get("id");
   const isEdit = mode === "edit";
-  const BASE_URL =
-  "https://genino-backend-app-409014d5ff-genino-registry.apps.ir-central1.arvancaas.ir/api";
+
 
 
   // 📆 محاسبه سن به سال و ماه
@@ -49,7 +49,7 @@ export default function ChildProfile() {
     );
 
     if (child) {
-      setChildName(child.name);
+      setChildName(child.fullName);
       setBirthDate(child.birthDate);
       setGender(child.gender);
       setChildPhoto(child.photo || "");
@@ -62,46 +62,42 @@ export default function ChildProfile() {
 const handleSave = async () => {
   try {
     const token = localStorage.getItem("genino_token");
-    console.log("🟢 JWT from localStorage:", token);
     if (!token) {
       alert("لطفاً دوباره وارد شوید");
       return;
     }
 
     const payload = {
-      fullName: childName,
-      gender,
-      birthDate,
-    };
+  fullName: childName,
+  gender,
+  birthDate,
+};
 
     const isEditMode = mode === "edit" && editId;
-
-    const url = isEditMode
-  ? `${BASE_URL}/children/${editId}`
-  : `${BASE_URL}/children`;
-
     const method = isEditMode ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    await authFetch(
+      isEditMode ? `/children/${editId}` : "/children",
+      {
+        method,
+        body: JSON.stringify(payload),
+      }
+    );
 
-    if (!res.ok) {
-      throw new Error("خطا در ذخیره کودک");
-    }
+    // 🔄 دریافت لیست جدید کودکان
+const updatedChildren = await authFetch("/children");
+
+// ذخیره در localStorage
+localStorage.setItem("children", JSON.stringify(updatedChildren));
+
 
     navigate("/mychild", { replace: true });
-
   } catch (err) {
     console.error(err);
     alert("ذخیره کودک انجام نشد");
   }
 };
+
 
   
 

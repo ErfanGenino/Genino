@@ -10,16 +10,19 @@ import GeninoHealthButton from "@components/Assessments/GeninoHealthButton";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/api";
 
 
 
 
 export default function MyChild() {
 
-  const BASE_URL =
-  "https://genino-backend-app-409014d5ff-genino-registry.apps.ir-central1.arvancaas.ir/api";
+
 
 const navigate = useNavigate();
+const [isLoading, setIsLoading] = useState(true);
+const [confirmDelete, setConfirmDelete] = useState(false);
+const [selectedChildForTree, setSelectedChildForTree] = useState(null);
 
   // 🌳 استیت‌های درختواره
   const [showFamilyTree, setShowFamilyTree] = useState(false);
@@ -37,7 +40,7 @@ const loadChildren = () => {
   return stored ? JSON.parse(stored) : [];
 };
 
-const [childrenList, setChildrenList] = useState(loadChildren);
+const [childrenList, setChildrenList] = useState([]);
 const [activeChildId, setActiveChildId] = useState(
   childrenList[0]?.id || null
 ); 
@@ -48,21 +51,17 @@ useEffect(() => {
       const token = localStorage.getItem("genino_token"); // همون JWT که بعد از لاگین ذخیره کردی
       if (!token) throw new Error("no token");
 
-      const res = await fetch(`${BASE_URL}/children`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const data = await authFetch("/children");
+      setIsLoading(false);
 
-      if (!res.ok) throw new Error("api error");
 
-      const data = await res.json();
 
       // اگر از بک‌اند داده داریم
       if (Array.isArray(data) && data.length > 0) {
         setChildrenList(data);
         setActiveChildId(data[0].id);
         localStorage.setItem("children", JSON.stringify(data));
+        setIsLoading(false);
         return;
       }
     } catch (e) {
@@ -75,13 +74,13 @@ const parsed = stored ? JSON.parse(stored) : [];
 
 if (parsed.length === 0) {
   navigate("/child-profile?mode=createFirst", { replace: true });
-  return;
+} else {
+  setChildrenList(parsed);
+  setActiveChildId(parsed[0].id);
+  setIsLoading(false);
 }
 
-setChildrenList(parsed);
-setActiveChildId(parsed[0].id);
-
-  }
+}
 
   loadChildrenFromApi();  
 }, []);
@@ -113,7 +112,21 @@ const activeChild = childrenList.find(
   (child) => child.id === activeChildId
 );
 
-if (!activeChild) return null;
+if (isLoading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      در حال آماده‌سازی صفحه کودک...
+    </div>
+  );
+}
+
+if (!activeChild) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      هیچ کودکی ثبت نشده است
+    </div>
+  );
+}
 
 
   // 📆 محاسبه دقیق سن و روز مانده تا تولد
@@ -140,7 +153,6 @@ if (ageMonths < 0) {
 }
 const ageText = `${ageYears} سال و ${ageMonths} ماه`;
 
-const [selectedChildForTree, setSelectedChildForTree] = useState(null);
 
 
 // امکان حذف کودک از نوار کودک من
@@ -152,25 +164,11 @@ const handleDeleteChild = async (childId) => {
       return;
     }
 
-    const res = await fetch(`${BASE_URL}/children/${childId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await authFetch(`/children/${childId}`, { method: "DELETE" });
 
-    if (!res.ok) {
-      throw new Error("delete failed");
-    }
+    // 🔄 بعد از حذف، لیست جدید کودکان
+    const updatedChildren = await authFetch("/children");
 
-    // 🔄 بعد از حذف، دوباره از بک‌اند بخون
-    const refresh = await fetch(`${BASE_URL}/children`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const updatedChildren = await refresh.json();
 
     localStorage.setItem("children", JSON.stringify(updatedChildren));
 
@@ -186,8 +184,6 @@ const handleDeleteChild = async (childId) => {
   }
 };
 
-
-const [confirmDelete, setConfirmDelete] = useState(false);
 
 
 
@@ -279,7 +275,7 @@ const [confirmDelete, setConfirmDelete] = useState(false);
           )}
         </div>
 
-        <span className="text-sm font-medium">{child.name}</span>
+        <span className="text-sm font-medium">{child.fullName}</span>
       </button>
     ))}
     {/* ➕ افزودن فرزند */}
@@ -336,7 +332,7 @@ const [confirmDelete, setConfirmDelete] = useState(false);
 
     {/* 📝 نام کودک */}
     <h2 className="text-2xl font-extrabold text-yellow-800 mb-1">
-      {activeChild?.name || "نام کودک"}
+      {activeChild?.fullName || "نام کودک"}
     </h2>
 
     {/* 🎂 سن و جنسیت */}

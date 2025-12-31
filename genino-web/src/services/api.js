@@ -1,5 +1,4 @@
-const BASE_URL =
-  "https://genino-backend-app-409014d5ff-genino-registry.apps.ir-central1.arvancaas.ir/api";
+const BASE_URL = "https://api.genino.ir/api";
 
 // ✅ فقط localStorage
 function getAuthToken() {
@@ -7,7 +6,7 @@ function getAuthToken() {
 }
 
 // --- fetch اختصاصی با توکن ---
-async function authFetch(url, options = {}) {
+export async function authFetch(url, options = {}) {
   const token = getAuthToken();
 
   const headers = {
@@ -20,10 +19,11 @@ async function authFetch(url, options = {}) {
   }
 
   try {
-    const res = await fetch(url, {
-      ...options,
-      headers,
-    });
+    const res = await fetch(`${BASE_URL}${url}`, {
+  ...options,
+  headers,
+});
+
     return await res.json();
   } catch (err) {
     console.error("AUTH FETCH ERROR:", err);
@@ -33,7 +33,7 @@ async function authFetch(url, options = {}) {
 
 // --- ثبت نام ---
 export async function registerUser(formData) {
-  return await authFetch(`${BASE_URL}/auth/register`, {
+  return await authFetch("/auth/register", {
     method: "POST",
     body: JSON.stringify(formData),
   });
@@ -41,7 +41,7 @@ export async function registerUser(formData) {
 
 // --- ورود ---
 export async function loginUser(credentials) {
-  return await authFetch(`${BASE_URL}/auth/login`, {
+  return await authFetch("/auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),
   });
@@ -49,14 +49,14 @@ export async function loginUser(credentials) {
 
 // --- پروفایل ---
 export async function getUserProfile() {
-  return await authFetch(`${BASE_URL}/auth/profile`, {
+  return await authFetch("/auth/profile", {
     method: "GET",
   });
 }
 
 // --- آپدیت مرحله زندگی ---
 export async function updateLifeStage(stage) {
-  return await authFetch(`${BASE_URL}/auth/update-life-stage`, {
+  return await authFetch("/auth/update-life-stage", {
     method: "PUT",
     body: JSON.stringify({ lifeStage: stage }),
   });
