@@ -22,7 +22,14 @@ const navigate = useNavigate();
 
 const [isLoading, setIsLoading] = useState(true);
 const [confirmDelete, setConfirmDelete] = useState(false);
+const [showInviteModal, setShowInviteModal] = useState(false);
+const [inviteEmail, setInviteEmail] = useState("");
+const [invitePhone, setInvitePhone] = useState("");
 const [selectedChildForTree, setSelectedChildForTree] = useState(null);
+const [isInviting, setIsInviting] = useState(false);
+const [childAdmins, setChildAdmins] = useState([]);
+
+
 
   // 🌳 استیت‌های درختواره
   const [showFamilyTree, setShowFamilyTree] = useState(false);
@@ -107,10 +114,31 @@ useEffect(() => {
 
 
 
+useEffect(() => {
+  if (!activeChildId) return;
+
+  async function loadChildAdmins() {
+    try {
+      const res = await authFetch(`/children/${activeChildId}/admins`);
+      if (res?.ok) {
+        setChildAdmins(res.admins || []);
+      }
+    } catch (err) {
+      console.error("خطا در دریافت والدین کودک:", err);
+    }
+  }
+
+  loadChildAdmins();
+}, [activeChildId]);
+
+
 
 const activeChild = childrenList.find(
   (child) => child.id === activeChildId
 );
+const father = childAdmins.find((a) => a.role === "father");
+const mother = childAdmins.find((a) => a.role === "mother");
+
 
 if (isLoading) {
   return (
@@ -184,8 +212,40 @@ const handleDeleteChild = async (childId) => {
   }
 };
 
+const handleSendInvitation = async () => {
+  if (!inviteEmail && !invitePhone) {
+    alert("ایمیل یا شماره موبایل را وارد کنید");
+    return;
+  }
 
+  try {
+    setIsInviting(true);
 
+    await authFetch("/invitations", {
+      method: "POST",
+      body: JSON.stringify({
+        childId: activeChild.id,
+        email: inviteEmail || undefined,
+        phone: invitePhone || undefined,
+      }),
+    });
+
+    alert("دعوت با موفقیت ارسال شد");
+
+    setShowInviteModal(false);
+    setInviteEmail("");
+    setInvitePhone("");
+  } catch (err) {
+    console.error(err);
+    alert("ارسال دعوت انجام نشد");
+  } finally {
+    setIsInviting(false);
+  }
+};
+
+console.log("CHILD ADMINS:", childAdmins);
+console.log("FATHER:", father);
+console.log("MOTHER:", mother);
 
 
   return (
@@ -341,6 +401,41 @@ const handleDeleteChild = async (childId) => {
       {activeChild?.gender === "girl" ? "دختر" : "پسر"}
       )
     </p>
+    
+    {/* 👨‍👩‍👧 والدین کودک */}
+<div className="mt-4 mb-4 space-y-2 text-sm text-gray-700">
+
+  {/* 👨 پدر */}
+<div className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2">
+  <span>👨 پدر</span>
+  <span className="font-semibold">
+    {father ? father.fullName : "ثبت نشده"}
+  </span>
+</div>
+
+{/* 👩 مادر */}
+<div className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2">
+  <span>👩 مادر</span>
+
+  <div className="flex items-center gap-2">
+    <span className="font-semibold">
+      {mother ? mother.fullName : "ثبت نشده"}
+    </span>
+
+    {!mother && (
+      <button
+        onClick={() => setShowInviteModal(true)}
+        className="text-xs px-2 py-1 rounded-lg border border-yellow-400 text-yellow-700 hover:bg-yellow-100 transition"
+      >
+        ➕ دعوت
+      </button>
+    )}
+  </div>
+</div>
+
+
+</div>
+
 
     {/* 📊 اطلاعات خلاصه */}
     <div className="grid grid-cols-2 gap-4 text-sm text-gray-700 mb-5">
@@ -391,7 +486,6 @@ const handleDeleteChild = async (childId) => {
     </button>
   )}
 </div>
-
 
 
   </div>
@@ -498,7 +592,60 @@ const handleDeleteChild = async (childId) => {
 
 </motion.div>
 
+{showInviteModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+      <h2 className="text-lg font-extrabold text-gray-800 mb-4">
+        دعوت والد دوم برای {activeChild?.fullName}
+      </h2>
 
+      <label className="text-sm text-gray-600">ایمیل والد</label>
+      <input
+        value={inviteEmail}
+        onChange={(e) => setInviteEmail(e.target.value)}
+        type="email"
+        placeholder="مثلاً farnaz@gmail.com"
+        className="w-full border rounded-xl px-3 py-2 mt-1 mb-4"
+      />
+
+      <label className="text-sm text-gray-600">یا شماره موبایل</label>
+      <input
+        value={invitePhone}
+        onChange={(e) => setInvitePhone(e.target.value)}
+        type="text"
+        placeholder="مثلاً 0912..."
+        className="w-full border rounded-xl px-3 py-2 mt-1 mb-5"
+      />
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => {
+            setShowInviteModal(false);
+            setInviteEmail("");
+            setInvitePhone("");
+          }}
+          className="px-4 py-2 rounded-xl border"
+        >
+          بستن
+        </button>
+
+        <button
+  onClick={handleSendInvitation}
+  disabled={isInviting}
+  className={`px-4 py-2 rounded-xl font-semibold transition
+    ${
+      isInviting
+        ? "bg-gray-300 text-gray-600"
+        : "bg-yellow-500 text-white hover:bg-yellow-600"
+    }
+  `}
+>
+  {isInviting ? "در حال ارسال..." : "ارسال دعوت"}
+</button>
+      </div>
+    </div>
+  </div>
+)}
 
 
 </main>
