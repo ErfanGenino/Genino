@@ -1,16 +1,30 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export default function FamilyTree({ show, onClose }) {
-  const [sisters, setSisters] = useState([]);
-  const [brothers, setBrothers] = useState([]);
-  const [aunts, setAunts] = useState([]);
-  const [uncles, setUncles] = useState([]);
-  const [khaleha, setKhaleha] = useState([]);
-  const [dayiha, setDayiha] = useState([]);
-  const [others, setOthers] = useState([]);
+export default function FamilyTree({ show, onClose, child, father, mother }) {
+
+  const [nodes, setNodes] = useState([
+    { id: null, label: "پدر", relationType: "father", nodeStatus: "CONNECTED" },
+    { id: null, label: "مادر", relationType: "mother", nodeStatus: "CONNECTED" },
+
+    { id: null, label: "پدربزرگ پدری", relationType: "grandfather_paternal", nodeStatus: "EMPTY" },
+    { id: null, label: "مادربزرگ پدری", relationType: "grandmother_paternal", nodeStatus: "EMPTY" },
+
+    { id: null, label: "خاله", relationType: "aunt", nodeStatus: "EMPTY" },
+  ]);
+
+  const [showInviteModal, setShowInviteModal] = useState(false);
+const [selectedNode, setSelectedNode] = useState(null);
+const [fatherOverridePhoto, setFatherOverridePhoto] = useState(null);
+const [motherOverridePhoto, setMotherOverridePhoto] = useState(null);
+
+
 
   if (!show) return null;
+  console.log("TREE CHILD:", child);
+console.log("TREE FATHER:", father);
+console.log("TREE MOTHER:", mother);
+
 
   return (
     <motion.div
@@ -34,25 +48,126 @@ export default function FamilyTree({ show, onClose }) {
 
       {/* 🧬 کل محتوا */}
       <div className="flex flex-col items-center py-10 px-6 space-y-10">
+
         {/* 👶 کودک */}
-        <div className="flex flex-col items-center">
-          <div className="w-28 h-28 rounded-full bg-white/80 border border-yellow-400 shadow-md flex items-center justify-center text-3xl font-bold text-yellow-700">
-            H
-          </div>
-          <p className="mt-2 text-sm text-gray-700 font-medium">کودک</p>
-        </div>
+        {/* 👶 هدر کودک (داینامیک از MyChild) */}
+<div className="flex flex-col items-center text-center">
+  <div className="w-28 h-28 rounded-full bg-white/90 border border-yellow-400 shadow-md flex items-center justify-center overflow-hidden">
+    {child?.photo ? (
+      <img src={child.photo} alt={child.fullName} className="w-full h-full object-cover" />
+    ) : (
+      <span className="text-3xl font-bold text-yellow-700">
+        {child?.fullName?.[0] || "👶"}
+      </span>
+    )}
+  </div>
+
+  <p className="mt-3 text-lg font-extrabold text-yellow-900">
+    {child?.fullName || "نام کودک"}
+  </p>
+
+  <p className="mt-1 text-xs text-gray-600">
+    درختواره خانوادگی
+  </p>
+</div>
+
 
         {/* 👨‍👩 والدین */}
-        <div className="flex justify-center gap-20 items-center">
-          {["پدر", "مادر"].map((role, i) => (
-            <div key={i} className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-full bg-white/80 border border-yellow-300 shadow-sm flex items-center justify-center text-xl text-gray-700 font-medium">
-                {role === "پدر" ? "F" : "M"}
-              </div>
-              <p className="mt-1 text-sm text-gray-600">{role}</p>
-            </div>
-          ))}
-        </div>
+{/* 👨‍👩 والدین (داینامیک از MyChild) */}
+<div className="flex justify-center gap-10 sm:gap-16 items-start">
+  {/* 👨 پدر */}
+  <div className="flex flex-col items-center">
+    <div
+      onClick={() => document.getElementById("father-override-photo")?.click()}
+      className="w-20 h-20 rounded-full bg-white/90 border border-yellow-300 shadow-sm
+                 flex items-center justify-center overflow-hidden cursor-pointer
+                 hover:scale-105 transition"
+      title="انتخاب عکس پدر"
+    >
+      {fatherOverridePhoto ? (
+        <img
+          src={fatherOverridePhoto}
+          alt="father override"
+          className="w-full h-full object-cover"
+        />
+      ) : father?.photo ? (
+        <img
+          src={father.photo}
+          alt={father.fullName}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <span className="text-xl text-gray-700 font-bold">👨</span>
+      )}
+    </div>
+
+    <p className="mt-2 text-sm font-semibold text-gray-800">
+      {father?.fullName || "پدر"}
+    </p>
+    <p className="text-xs text-gray-500">پدر</p>
+  </div>
+
+  {/* 👩 مادر */}
+  <div className="flex flex-col items-center">
+    <div
+      onClick={() => document.getElementById("mother-override-photo")?.click()}
+      className="w-20 h-20 rounded-full bg-white/90 border border-yellow-300 shadow-sm
+                 flex items-center justify-center overflow-hidden cursor-pointer
+                 hover:scale-105 transition"
+      title="انتخاب عکس مادر"
+    >
+      {motherOverridePhoto ? (
+        <img
+          src={motherOverridePhoto}
+          alt="mother override"
+          className="w-full h-full object-cover"
+        />
+      ) : mother?.photo ? (
+        <img
+          src={mother.photo}
+          alt={mother.fullName}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <span className="text-xl text-gray-700 font-bold">👩</span>
+      )}
+    </div>
+
+    <p className="mt-2 text-sm font-semibold text-gray-800">
+      {mother?.fullName || "ثبت نشده"}
+    </p>
+    <p className="text-xs text-gray-500">مادر</p>
+  </div>
+</div>
+
+
+<input
+  id="father-override-photo"
+  type="file"
+  accept="image/*"
+  className="hidden"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setFatherOverridePhoto(url);
+  }}
+/>
+
+<input
+  id="mother-override-photo"
+  type="file"
+  accept="image/*"
+  className="hidden"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setMotherOverridePhoto(url);
+  }}
+/>
+
+
 
         {/* 👴 پدربزرگ‌ها و مادربزرگ‌ها */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mt-8">
@@ -72,7 +187,23 @@ export default function FamilyTree({ show, onClose }) {
           ))}
         </div>
 
+        <div className="flex flex-wrap gap-4 justify-center mt-10">
+  {nodes.map((node, index) => (
+    <FamilyNode
+      key={index}
+      node={node}
+      onClick={(clickedNode) => {
+        setSelectedNode(clickedNode);
+        setShowInviteModal(true);
+      }}
+    />
+  ))}
+</div>
+
+
+
         {/* 👧👦 خواهرها و برادرها (بدون تیتر بالایی) */}
+        {/* 
         <FamilyRow
           title="خواهرها و برادرها"
           leftItems={sisters}
@@ -83,8 +214,10 @@ export default function FamilyTree({ show, onClose }) {
           rightPrefix="B"
           showTopTitle={false}
         />
+        */}
 
         {/* 👩‍👩‍👦 عمه‌ها، عموها، خاله‌ها و دایی‌ها (بدون تیتر بالایی) */}
+        {/* 
         <FamilyRow
           title="عمه‌ها، عموها، خاله‌ها و دایی‌ها"
           leftItems={aunts}
@@ -100,8 +233,10 @@ export default function FamilyTree({ show, onClose }) {
           doubleRow
           showTopTitle={false}
         />
+        */}
 
         {/* 👭 سایر اقوام و دوستان */}
+        {/*
         <div className="mt-12 w-full flex flex-col items-center">
           <h3 className="text-yellow-800 font-semibold text-base sm:text-lg mb-4">
             سایر اقوام و دوستان
@@ -123,7 +258,56 @@ export default function FamilyTree({ show, onClose }) {
 
           <AddButton onClick={() => setOthers([...others, {}])} />
         </div>
+*/}
+
       </div>
+
+      {/* ⬇️⬇️⬇️ مودال Invite دقیقاً اینجا ⬇️⬇️⬇️ */}
+      {showInviteModal && selectedNode && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[200]">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <h2 className="text-lg font-extrabold text-gray-800 mb-4">
+              دعوت {selectedNode.label}
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-6">
+              می‌خواهید {selectedNode.label} را به درختواره کودک اضافه کنید؟
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowInviteModal(false);
+                  setSelectedNode(null);
+                }}
+                className="px-4 py-2 rounded-xl border"
+              >
+                بستن
+              </button>
+
+              <button
+  onClick={() => {
+    setNodes((prevNodes) =>
+      prevNodes.map((n) =>
+        n.relationType === selectedNode.relationType
+          ? { ...n, nodeStatus: "PENDING" }
+          : n
+      )
+    );
+
+    setShowInviteModal(false);
+    setSelectedNode(null);
+  }}
+  className="px-4 py-2 rounded-xl bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition"
+>
+  ارسال دعوت
+</button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </motion.div>
   );
 }
@@ -269,4 +453,49 @@ function FamilyRow({
     </div>
   );
 }
+
+function FamilyNode({ node, onClick }) {
+  const isClickable = node.nodeStatus === "EMPTY";
+  const isPending = node.nodeStatus === "PENDING";
+
+  return (
+    <div className="relative group">
+      <div
+        onClick={() => {
+          if (isClickable && onClick) {
+            onClick(node);
+          }
+        }}
+        className={`w-20 h-20 rounded-full flex items-center justify-center
+          text-sm font-semibold transition
+          ${
+            node.nodeStatus === "CONNECTED"
+              ? "bg-green-100 border border-green-400 text-green-800 cursor-default"
+              : node.nodeStatus === "PENDING"
+              ? "bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-not-allowed opacity-80"
+              : "bg-white border border-gray-300 text-gray-700 cursor-pointer hover:scale-105 hover:shadow-md"
+          }
+        `}
+      >
+        {node.label}
+      </div>
+
+      {/* 🟡 Tooltip فقط برای PENDING */}
+      {isPending && (
+        <div
+          className="absolute -top-9 left-1/2 -translate-x-1/2
+                     bg-gray-800 text-white text-xs rounded-md px-2 py-1
+                     opacity-0 group-hover:opacity-100 transition
+                     pointer-events-none whitespace-nowrap"
+        >
+          دعوت ارسال شده – در انتظار پذیرش
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+
 

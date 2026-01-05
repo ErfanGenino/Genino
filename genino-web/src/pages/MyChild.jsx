@@ -541,11 +541,13 @@ console.log("MOTHER:", mother);
 {/* 🌳 مودال درختواره کودک */}
 <FamilyTree
   show={showFamilyTree}
-  child={selectedChildForTree}
   onClose={() => {
     setShowFamilyTree(false);
     setSelectedChildForTree(null);
   }}
+  child={selectedChildForTree}   // یا activeChild (فعلاً همین که داری خوبه)
+  father={father}
+  mother={mother}
 />
 
 
@@ -604,7 +606,7 @@ console.log("MOTHER:", mother);
         value={inviteEmail}
         onChange={(e) => setInviteEmail(e.target.value)}
         type="email"
-        placeholder="مثلاً farnaz@gmail.com"
+        placeholder="مثلاً test@gmail.com"
         className="w-full border rounded-xl px-3 py-2 mt-1 mb-4"
       />
 
