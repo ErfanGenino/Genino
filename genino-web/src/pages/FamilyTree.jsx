@@ -1,29 +1,74 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import InviteModal from "../components/FamilyTree/InviteModal";
+
+
 
 export default function FamilyTree({ show, onClose, child, father, mother }) {
 
   const [nodes, setNodes] = useState([
-    { id: null, label: "پدر", relationType: "father", nodeStatus: "CONNECTED" },
-    { id: null, label: "مادر", relationType: "mother", nodeStatus: "CONNECTED" },
+  // 👨‍👩 والدین
+  { id: null, label: "پدر", relationType: "father", nodeStatus: "CONNECTED" },
+  { id: null, label: "مادر", relationType: "mother", nodeStatus: "CONNECTED" },
 
-    { id: null, label: "پدربزرگ پدری", relationType: "grandfather_paternal", nodeStatus: "EMPTY" },
-    { id: null, label: "مادربزرگ پدری", relationType: "grandmother_paternal", nodeStatus: "EMPTY" },
+  // 👴👵 پدربزرگ‌ها و مادربزرگ‌ها (پدری)
+  {
+    id: null,
+    label: "پدربزرگ پدری",
+    relationType: "grandfather_paternal",
+    nodeStatus: "EMPTY",
+  },
+  {
+    id: null,
+    label: "مادربزرگ پدری",
+    relationType: "grandmother_paternal",
+    nodeStatus: "EMPTY",
+  },
 
-    { id: null, label: "خاله", relationType: "aunt", nodeStatus: "EMPTY" },
-  ]);
+  // 👴👵 پدربزرگ‌ها و مادربزرگ‌ها (مادری)
+  {
+    id: null,
+    label: "پدربزرگ مادری",
+    relationType: "grandfather_maternal",
+    nodeStatus: "EMPTY",
+  },
+  {
+    id: null,
+    label: "مادربزرگ مادری",
+    relationType: "grandmother_maternal",
+    nodeStatus: "EMPTY",
+  },
+]);
 
-  const [showInviteModal, setShowInviteModal] = useState(false);
-const [selectedNode, setSelectedNode] = useState(null);
+
 const [fatherOverridePhoto, setFatherOverridePhoto] = useState(null);
 const [motherOverridePhoto, setMotherOverridePhoto] = useState(null);
+  // ✅ بخش‌های قابل افزایش با دکمه +
+  const [sisters, setSisters] = useState([]);
+  const [brothers, setBrothers] = useState([]);
+
+  const [aunts, setAunts] = useState([]);     // عمه‌ها
+  const [uncles, setUncles] = useState([]);   // عموها
+
+  const [khaleha, setKhaleha] = useState([]); // خاله‌ها
+  const [dayiha, setDayiha] = useState([]);   // دایی‌ها
+
+  const [others, setOthers] = useState([]);   // سایر اقوام و دوستان
+  const [inviteTarget, setInviteTarget] = useState(null);
+
+
+
+useEffect(() => {
+  return () => {
+    if (fatherOverridePhoto) URL.revokeObjectURL(fatherOverridePhoto);
+    if (motherOverridePhoto) URL.revokeObjectURL(motherOverridePhoto);
+  };
+}, [fatherOverridePhoto, motherOverridePhoto]);
+
 
 
 
   if (!show) return null;
-  console.log("TREE CHILD:", child);
-console.log("TREE FATHER:", father);
-console.log("TREE MOTHER:", mother);
 
 
   return (
@@ -47,7 +92,7 @@ console.log("TREE MOTHER:", mother);
       </div>
 
       {/* 🧬 کل محتوا */}
-      <div className="flex flex-col items-center py-10 px-6 space-y-10">
+      <div className="flex flex-col items-center py-10 px-6 space-y-10 w-full max-w-4xl mx-auto">
 
         {/* 👶 کودک */}
         {/* 👶 هدر کودک (داینامیک از MyChild) */}
@@ -78,11 +123,15 @@ console.log("TREE MOTHER:", mother);
   {/* 👨 پدر */}
   <div className="flex flex-col items-center">
     <div
-      onClick={() => document.getElementById("father-override-photo")?.click()}
-      className="w-20 h-20 rounded-full bg-white/90 border border-yellow-300 shadow-sm
-                 flex items-center justify-center overflow-hidden cursor-pointer
-                 hover:scale-105 transition"
-      title="انتخاب عکس پدر"
+      onClick={() => {
+       if (!father) return;
+       document.getElementById("father-override-photo")?.click();
+        }}
+      className={`w-20 h-20 rounded-full bg-white/90 border border-yellow-300 shadow-sm
+       flex items-center justify-center overflow-hidden
+       ${father ? "cursor-pointer hover:scale-105" : "opacity-60 cursor-not-allowed"}
+       transition`}
+      title={father ? "انتخاب عکس پدر" : "پدر ثبت نشده"}
     >
       {fatherOverridePhoto ? (
         <img
@@ -110,11 +159,15 @@ console.log("TREE MOTHER:", mother);
   {/* 👩 مادر */}
   <div className="flex flex-col items-center">
     <div
-      onClick={() => document.getElementById("mother-override-photo")?.click()}
-      className="w-20 h-20 rounded-full bg-white/90 border border-yellow-300 shadow-sm
-                 flex items-center justify-center overflow-hidden cursor-pointer
-                 hover:scale-105 transition"
-      title="انتخاب عکس مادر"
+      onClick={() => {
+       if (!mother) return; 
+       document.getElementById("mother-override-photo")?.click();
+      }}
+      className={`w-20 h-20 rounded-full bg-white/90 border border-yellow-300 shadow-sm
+       flex items-center justify-center overflow-hidden
+       ${mother ? "cursor-pointer hover:scale-105" : "opacity-60 cursor-not-allowed"}
+       transition`}
+      title={mother ? "انتخاب عکس مادر" : "مادر ثبت نشده"}
     >
       {motherOverridePhoto ? (
         <img
@@ -170,157 +223,182 @@ console.log("TREE MOTHER:", mother);
 
 
         {/* 👴 پدربزرگ‌ها و مادربزرگ‌ها */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mt-8">
-          {["پدربزرگ پدری", "مادربزرگ پدری", "پدربزرگ مادری", "مادربزرگ مادری"].map((title, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="flex flex-col items-center"
-            >
-              <div className="w-20 h-20 rounded-full bg-white/70 border border-yellow-200 shadow-sm flex items-center justify-center text-lg text-gray-700 font-semibold">
-                {i % 2 === 0 ? "PG" : "GM"}
-              </div>
-              <p className="text-xs mt-2 text-yellow-800">{title}</p>
-            </motion.div>
-          ))}
-        </div>
+        {/* 👴👵 پدربزرگ‌ها و مادربزرگ‌ها (داینامیک از nodes) */}
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mt-8">
+  {nodes
+    .filter((n) =>
+      [
+        "grandfather_paternal",
+        "grandmother_paternal",
+        "grandfather_maternal",
+        "grandmother_maternal",
+      ].includes(n.relationType)
+    )
+    .map((node) => (
+      <div key={node.relationType} className="flex flex-col items-center">
+        <div className="relative group">
+  <div
+    onClick={() => {
+      if (node.nodeStatus !== "EMPTY") return;
+      setInviteTarget({
+        label: node.label,
+        relationType: node.relationType,
+      });
+    }}
+    className={`w-20 h-20 rounded-full flex items-center justify-center
+      text-sm font-semibold transition
+      ${
+        node.nodeStatus === "CONNECTED"
+          ? "bg-green-100 border border-green-400 text-green-800 cursor-default"
+          : node.nodeStatus === "PENDING"
+          ? "bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-not-allowed opacity-80"
+          : "bg-white border border-gray-300 text-gray-700 cursor-pointer hover:scale-105 hover:shadow-md"
+      }
+    `}
+  >
+    {node.relationType.includes("grandfather") ? "👴" : "👵"}
+  </div>
 
-        <div className="flex flex-wrap gap-4 justify-center mt-10">
-  {nodes.map((node, index) => (
-    <FamilyNode
-      key={index}
-      node={node}
-      onClick={(clickedNode) => {
-        setSelectedNode(clickedNode);
-        setShowInviteModal(true);
-      }}
-    />
-  ))}
+  {/* 🟡 Tooltip فقط برای حالت PENDING */}
+  {node.nodeStatus === "PENDING" && (
+    <div
+      className="absolute -top-9 left-1/2 -translate-x-1/2
+                 bg-gray-800 text-white text-xs rounded-md px-2 py-1
+                 opacity-0 group-hover:opacity-100 transition
+                 pointer-events-none whitespace-nowrap"
+    >
+      دعوت ارسال شده – در انتظار پذیرش
+    </div>
+  )}
+</div>
+
+        <p className="text-xs mt-2 text-yellow-800 text-center">
+          {node.label}
+        </p>
+      </div>
+    ))}
 </div>
 
 
-
-        {/* 👧👦 خواهرها و برادرها (بدون تیتر بالایی) */}
-        {/* 
         <FamilyRow
-          title="خواهرها و برادرها"
-          leftItems={sisters}
-          setLeftItems={setSisters}
-          rightItems={brothers}
-          setRightItems={setBrothers}
-          leftPrefix="S"
-          rightPrefix="B"
-          showTopTitle={false}
+  title="خواهرها و برادرها"
+  leftItems={sisters}
+  setLeftItems={setSisters}
+  rightItems={brothers}
+  setRightItems={setBrothers}
+  leftPrefix="S"
+  rightPrefix="B"
+  showTopTitle={false}
+/>
+<FamilyRow
+  title="عمه‌ها و عموها"
+  leftItems={aunts}
+  setLeftItems={setAunts}
+  rightItems={uncles}
+  setRightItems={setUncles}
+  leftPrefix="AM"
+  rightPrefix="AO"
+  showTopTitle={false}
+/>
+<FamilyRow
+  title="خاله‌ها و دایی‌ها"
+  leftItems={khaleha}
+  setLeftItems={setKhaleha}
+  rightItems={dayiha}
+  setRightItems={setDayiha}
+  leftPrefix="KH"
+  rightPrefix="DY"
+  showTopTitle={false}
+/>
+
+{/* 👭 سایر اقوام و دوستان */}
+<div className="mt-6 w-full flex flex-col items-center">
+  <h3 className="text-yellow-800 font-semibold text-base sm:text-lg mb-3">
+    سایر اقوام و دوستان
+  </h3>
+
+  <div className="w-full overflow-x-auto px-4">
+    <div className="flex items-center gap-4 pb-4">
+      {others.map((_, i) => (
+        <DeletableCircle
+          key={`other-${i}`}
+          label={`O${i + 1}`}
+          onDelete={() => setOthers(others.filter((_, index) => index !== i))}
         />
-        */}
+      ))}
+    </div>
+  </div>
 
-        {/* 👩‍👩‍👦 عمه‌ها، عموها، خاله‌ها و دایی‌ها (بدون تیتر بالایی) */}
-        {/* 
-        <FamilyRow
-          title="عمه‌ها، عموها، خاله‌ها و دایی‌ها"
-          leftItems={aunts}
-          setLeftItems={setAunts}
-          rightItems={uncles}
-          setRightItems={setUncles}
-          leftPrefix="A"
-          rightPrefix="U"
-          extraLeft={khaleha}
-          setExtraLeft={setKhaleha}
-          extraRight={dayiha}
-          setExtraRight={setDayiha}
-          doubleRow
-          showTopTitle={false}
-        />
-        */}
-
-        {/* 👭 سایر اقوام و دوستان */}
-        {/*
-        <div className="mt-12 w-full flex flex-col items-center">
-          <h3 className="text-yellow-800 font-semibold text-base sm:text-lg mb-4">
-            سایر اقوام و دوستان
-          </h3>
-
-          <div className="w-full overflow-x-auto px-4">
-            <div className="flex items-center gap-4 pb-4">
-              {others.map((_, i) => (
-                <DeletableCircle
-                  key={`other-${i}`}
-                  label={`O${i + 1}`}
-                  onDelete={() =>
-                    setOthers(others.filter((_, index) => index !== i))
-                  }
-                />
-              ))}
-            </div>
-          </div>
-
-          <AddButton onClick={() => setOthers([...others, {}])} />
-        </div>
-*/}
-
+  <AddButton onClick={() => setOthers([...others, {}])} />
+</div>
       </div>
 
       {/* ⬇️⬇️⬇️ مودال Invite دقیقاً اینجا ⬇️⬇️⬇️ */}
-      {showInviteModal && selectedNode && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[200]">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-            <h2 className="text-lg font-extrabold text-gray-800 mb-4">
-              دعوت {selectedNode.label}
-            </h2>
-
-            <p className="text-sm text-gray-600 mb-6">
-              می‌خواهید {selectedNode.label} را به درختواره کودک اضافه کنید؟
-            </p>
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  setShowInviteModal(false);
-                  setSelectedNode(null);
-                }}
-                className="px-4 py-2 rounded-xl border"
-              >
-                بستن
-              </button>
-
-              <button
-  onClick={() => {
-    setNodes((prevNodes) =>
-      prevNodes.map((n) =>
-        n.relationType === selectedNode.relationType
-          ? { ...n, nodeStatus: "PENDING" }
-          : n
+      <InviteModal
+  open={!!inviteTarget}
+  title={`دعوت ${inviteTarget?.label || ""}`}
+  description={`می‌خواهید ${inviteTarget?.label} را به درختواره کودک اضافه کنید؟`}
+  onClose={() => setInviteTarget(null)}
+  onConfirm={() => {
+  if (inviteTarget?.side === "left") {
+    setLeftItems((prev) =>
+      prev.map((item, i) =>
+        i === inviteTarget.index
+          ? { ...item, nodeStatus: "PENDING" }
+          : item
       )
     );
+  }
 
-    setShowInviteModal(false);
-    setSelectedNode(null);
-  }}
-  className="px-4 py-2 rounded-xl bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition"
->
-  ارسال دعوت
-</button>
+  if (inviteTarget?.side === "right") {
+    setRightItems((prev) =>
+      prev.map((item, i) =>
+        i === inviteTarget.index
+          ? { ...item, nodeStatus: "PENDING" }
+          : item
+      )
+    );
+  }
 
-            </div>
-          </div>
-        </div>
-      )}
+  setInviteTarget(null);
+}}
+
+/>
 
     </motion.div>
   );
 }
 
 /* 🔸 جزء قابل حذف (دایره با سطل) */
-function DeletableCircle({ label, onDelete }) {
+function DeletableCircle({ label, onDelete, nodeStatus, onClick }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="relative group w-20 h-20 rounded-full bg-white/80 border border-yellow-300 flex items-center justify-center text-gray-700 shadow-sm"
+      className={`relative group w-20 h-20 rounded-full flex items-center justify-center
+  text-sm font-semibold shadow-sm transition
+  ${
+    nodeStatus === "DRAFT"
+      ? "bg-blue-50 border border-blue-400 text-blue-700 cursor-pointer"
+      : nodeStatus === "PENDING"
+      ? "bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-not-allowed"
+      : "bg-white/80 border border-yellow-300 text-gray-700"
+  }
+`}
+onClick={onClick}
     >
+      {nodeStatus === "DRAFT" && (
+  <div
+    className="absolute -top-9 left-1/2 -translate-x-1/2
+               bg-blue-700 text-white text-xs rounded-md px-2 py-1
+               opacity-0 group-hover:opacity-100 transition
+               pointer-events-none whitespace-nowrap"
+  >
+    برای ارسال دعوت کلیک کنید
+  </div>
+)}
+
       <span className="text-sm font-semibold">{label}</span>
       <button
         onClick={onDelete}
@@ -384,16 +462,39 @@ function FamilyRow({
         {/* 🔸 سمت چپ */}
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-3">
-            {leftItems.map((_, i) => (
-              <DeletableCircle
-                key={`${leftPrefix}-${i}`}
-                label={`${leftPrefix}${i + 1}`}
-                onDelete={() =>
-                  setLeftItems(leftItems.filter((_, idx) => idx !== i))
-                }
-              />
-            ))}
-            <AddButton onClick={() => setLeftItems([...leftItems, {}])} />
+            {leftItems.map((item, i) => (
+  <DeletableCircle
+    key={`${leftPrefix}-${i}`}
+    label={`${leftPrefix}${i + 1}`}
+    nodeStatus={item.nodeStatus}
+    onClick={() => {
+      if (item.nodeStatus === "DRAFT") {
+        setInviteTarget({
+          label: title,
+          relationType: leftPrefix,
+          index: i,
+          side: "left",
+        });
+      }
+    }}
+    onDelete={() =>
+      setLeftItems(leftItems.filter((_, idx) => idx !== i))
+    }
+  />
+))}
+            <AddButton
+  onClick={() =>
+    setLeftItems([
+      ...leftItems,
+      {
+        id: null,
+        label: "در انتظار دعوت",
+        relationType: leftPrefix,
+        nodeStatus: "DRAFT",
+      },
+    ])
+  }
+/>
           </div>
 
           {extraLeft && (
@@ -422,16 +523,40 @@ function FamilyRow({
         {/* 🔸 سمت راست */}
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-3">
-            {rightItems.map((_, i) => (
-              <DeletableCircle
-                key={`${rightPrefix}-${i}`}
-                label={`${rightPrefix}${i + 1}`}
-                onDelete={() =>
-                  setRightItems(rightItems.filter((_, idx) => idx !== i))
-                }
-              />
-            ))}
-            <AddButton onClick={() => setRightItems([...rightItems, {}])} />
+            {rightItems.map((item, i) => (
+  <DeletableCircle
+    key={`${rightPrefix}-${i}`}
+    label={`${rightPrefix}${i + 1}`}
+    nodeStatus={item.nodeStatus}
+    onClick={() => {
+      if (item.nodeStatus === "DRAFT") {
+        setInviteTarget({
+          label: title,
+          relationType: rightPrefix,
+          index: i,
+          side: "right",
+        });
+      }
+    }}
+    onDelete={() =>
+      setRightItems(rightItems.filter((_, idx) => idx !== i))
+    }
+  />
+))}
+            <AddButton
+  onClick={() =>
+    setRightItems([
+      ...rightItems,
+      {
+        id: null,
+        label: "در انتظار دعوت",
+        relationType: rightPrefix,
+        nodeStatus: "DRAFT",
+      },
+    ])
+  }
+/>
+
           </div>
 
           {extraRight && (
