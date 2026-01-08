@@ -1,3 +1,5 @@
+// src/pages/FamilyTree.jsx
+
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import InviteModal from "../components/FamilyTree/InviteModal";
@@ -53,9 +55,11 @@ const [motherOverridePhoto, setMotherOverridePhoto] = useState(null);
   const [khaleha, setKhaleha] = useState([]); // خاله‌ها
   const [dayiha, setDayiha] = useState([]);   // دایی‌ها
 
-  const [others, setOthers] = useState([]);   // سایر اقوام و دوستان
+  const [friends, setFriends] = useState([]);   // 👥 دوستان (سمت چپ)
+  const [relatives, setRelatives] = useState([]); // 🧬 سایر اقوام (سمت راست)
+  
   const [inviteTarget, setInviteTarget] = useState(null);
-
+  
 
 
 useEffect(() => {
@@ -66,9 +70,9 @@ useEffect(() => {
 }, [fatherOverridePhoto, motherOverridePhoto]);
 
 
-
-
   if (!show) return null;
+
+ 
 
 
   return (
@@ -236,45 +240,18 @@ useEffect(() => {
     )
     .map((node) => (
       <div key={node.relationType} className="flex flex-col items-center">
-        <div className="relative group">
-  <div
-    onClick={() => {
-      if (node.nodeStatus !== "EMPTY") return;
-      setInviteTarget({
-        label: node.label,
-        relationType: node.relationType,
-      });
-    }}
-    className={`w-20 h-20 rounded-full flex items-center justify-center
-      text-sm font-semibold transition
-      ${
-        node.nodeStatus === "CONNECTED"
-          ? "bg-green-100 border border-green-400 text-green-800 cursor-default"
-          : node.nodeStatus === "PENDING"
-          ? "bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-not-allowed opacity-80"
-          : "bg-white border border-gray-300 text-gray-700 cursor-pointer hover:scale-105 hover:shadow-md"
-      }
-    `}
-  >
-    {node.relationType.includes("grandfather") ? "👴" : "👵"}
-  </div>
-
-  {/* 🟡 Tooltip فقط برای حالت PENDING */}
-  {node.nodeStatus === "PENDING" && (
-    <div
-      className="absolute -top-9 left-1/2 -translate-x-1/2
-                 bg-gray-800 text-white text-xs rounded-md px-2 py-1
-                 opacity-0 group-hover:opacity-100 transition
-                 pointer-events-none whitespace-nowrap"
-    >
-      دعوت ارسال شده – در انتظار پذیرش
-    </div>
-  )}
-</div>
-
-        <p className="text-xs mt-2 text-yellow-800 text-center">
-          {node.label}
-        </p>
+       <FamilyCircle
+  nodeStatus={node.nodeStatus}
+  emoji={node.relationType.includes("grandfather") ? "👴" : "👵"}
+  relationLabel={node.label}
+  onClick={() => {
+    if (node.nodeStatus !== "EMPTY") return;
+    setInviteTarget({
+      label: node.label,
+      relationType: node.relationType,
+    });
+  }}
+/>
       </div>
     ))}
 </div>
@@ -312,25 +289,18 @@ useEffect(() => {
 />
 
 {/* 👭 سایر اقوام و دوستان */}
-<div className="mt-6 w-full flex flex-col items-center">
-  <h3 className="text-yellow-800 font-semibold text-base sm:text-lg mb-3">
-    سایر اقوام و دوستان
-  </h3>
+<FamilyRow
+  title="سایر اقوام و دوستان"
+  leftItems={friends}
+  setLeftItems={setFriends}
+  rightItems={relatives}
+  setRightItems={setRelatives}
+  leftPrefix="FR"     // Friends
+  rightPrefix="RL"    // Relatives
+  showTopTitle={false}
+/>
 
-  <div className="w-full overflow-x-auto px-4">
-    <div className="flex items-center gap-4 pb-4">
-      {others.map((_, i) => (
-        <DeletableCircle
-          key={`other-${i}`}
-          label={`O${i + 1}`}
-          onDelete={() => setOthers(others.filter((_, index) => index !== i))}
-        />
-      ))}
-    </div>
-  </div>
 
-  <AddButton onClick={() => setOthers([...others, {}])} />
-</div>
       </div>
 
       {/* ⬇️⬇️⬇️ مودال Invite دقیقاً اینجا ⬇️⬇️⬇️ */}
@@ -338,10 +308,21 @@ useEffect(() => {
   open={!!inviteTarget}
   title={`دعوت ${inviteTarget?.label || ""}`}
   description={`می‌خواهید ${inviteTarget?.label} را به درختواره کودک اضافه کنید؟`}
-  onClose={() => setInviteTarget(null)}
-  onConfirm={() => {
-  if (inviteTarget?.side === "left") {
-    setLeftItems((prev) =>
+ onClose={() => setInviteTarget(null)}
+
+onConfirm={() => {
+  if (!inviteTarget) return;
+
+  // 👈 سمت چپ
+  if (inviteTarget.side === "left") {
+    const map = {
+      S: setSisters,
+      AM: setAunts,
+      KH: setKhaleha,
+      FR: setFriends,
+    };
+
+    map[inviteTarget.relationType]?.((prev) =>
       prev.map((item, i) =>
         i === inviteTarget.index
           ? { ...item, nodeStatus: "PENDING" }
@@ -350,8 +331,16 @@ useEffect(() => {
     );
   }
 
-  if (inviteTarget?.side === "right") {
-    setRightItems((prev) =>
+  // 👉 سمت راست
+  if (inviteTarget.side === "right") {
+    const map = {
+      B: setBrothers,
+      AO: setUncles,
+      DY: setDayiha,
+      RL: setRelatives,
+    };
+
+    map[inviteTarget.relationType]?.((prev) =>
       prev.map((item, i) =>
         i === inviteTarget.index
           ? { ...item, nodeStatus: "PENDING" }
@@ -362,10 +351,115 @@ useEffect(() => {
 
   setInviteTarget(null);
 }}
-
 />
 
+
     </motion.div>
+  );
+}
+
+function FamilyCircle({
+  nodeStatus = "EMPTY",      // EMPTY | PENDING | CONNECTED
+  emoji = "👤",
+  photo = null,
+  fullName = null,
+  relationLabel = "",
+  onClick,
+  onDelete,
+}) {
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative group">
+        <div
+          onClick={() => {
+            if (nodeStatus === "EMPTY" && onClick) onClick();
+          }}
+          className={`w-20 h-20 rounded-full flex items-center justify-center
+            transition shadow-sm
+            ${
+              nodeStatus === "CONNECTED"
+                ? "bg-green-100 border border-green-400 cursor-default"
+                : nodeStatus === "PENDING"
+                ? "bg-yellow-100 border border-yellow-400 cursor-not-allowed opacity-80"
+                : "bg-white border border-gray-300 cursor-pointer hover:scale-105 hover:shadow-md"
+            }
+          `}
+        >
+          {onDelete && nodeStatus !== "CONNECTED" && (
+  <button
+    onClick={(e) => {
+      e.stopPropagation(); // 👈 کلیک دایره فعال نشه
+      onDelete();
+    }}
+    className="absolute bottom-1 right-1 bg-white/90 border border-gray-300
+               rounded-full p-[3px] opacity-0 group-hover:opacity-100 transition"
+    title="حذف"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="w-3.5 h-3.5 text-red-500"
+    >
+      <path
+        fillRule="evenodd"
+        d="M6 8a1 1 0 011-1h6a1 1 0 011 1v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8zm3-5a1 1 0 00-1 1v1H4.5a.5.5 0 000 1h11a.5.5 0 000-1H12V4a1 1 0 00-1-1H9z"
+        clipRule="evenodd"
+      />
+    </svg>
+  </button>
+)}
+
+          {photo ? (
+            <img
+              src={photo}
+              alt={fullName || relationLabel}
+              className="w-full h-full object-cover rounded-full"
+            />
+          ) : (
+            <span className="text-2xl">{emoji}</span>
+          )}
+        </div>
+
+        {/* Tooltip برای EMPTY */}
+        {nodeStatus === "EMPTY" && (
+          <div
+            className="absolute -top-9 left-1/2 -translate-x-1/2
+                       bg-gray-800 text-white text-xs rounded-md px-2 py-1
+                       opacity-0 group-hover:opacity-100 transition
+                       pointer-events-none whitespace-nowrap"
+          >
+            برای ارسال دعوت کلیک کنید
+          </div>
+        )}
+
+        {/* Tooltip برای PENDING */}
+        {nodeStatus === "PENDING" && (
+          <div
+            className="absolute -top-9 left-1/2 -translate-x-1/2
+                       bg-gray-800 text-white text-xs rounded-md px-2 py-1
+                       opacity-0 group-hover:opacity-100 transition
+                       pointer-events-none whitespace-nowrap"
+          >
+            دعوت ارسال شده – در انتظار پذیرش
+          </div>
+        )}
+      </div>
+
+      {/* نام شخص (اگر وصل شده) */}
+      {fullName && (
+        <p className="mt-2 text-sm font-semibold text-gray-800 text-center">
+          {fullName}
+        </p>
+      )}
+
+      {/* نسبت فامیلی */}
+      {relationLabel && (
+        <p className="text-xs text-gray-500 text-center">
+          {relationLabel}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -388,10 +482,10 @@ function DeletableCircle({ label, onDelete, nodeStatus, onClick }) {
 `}
 onClick={onClick}
     >
-      {nodeStatus === "DRAFT" && (
+     {nodeStatus === "EMPTY" && (
   <div
     className="absolute -top-9 left-1/2 -translate-x-1/2
-               bg-blue-700 text-white text-xs rounded-md px-2 py-1
+               bg-gray-800 text-white text-xs rounded-md px-2 py-1
                opacity-0 group-hover:opacity-100 transition
                pointer-events-none whitespace-nowrap"
   >
@@ -399,7 +493,11 @@ onClick={onClick}
   </div>
 )}
 
-      <span className="text-sm font-semibold">{label}</span>
+      {nodeStatus === "EMPTY" ? (
+  <span className="text-2xl">{label}</span>
+) : (
+  <span className="text-sm font-semibold">{label}</span>
+)}
       <button
         onClick={onDelete}
         className="absolute bottom-1 right-1 bg-white/90 border border-gray-300 rounded-full p-[3px] opacity-0 group-hover:opacity-100 transition"
@@ -445,10 +543,6 @@ function FamilyRow({
   setRightItems,
   leftPrefix,
   rightPrefix,
-  extraLeft,
-  setExtraLeft,
-  extraRight,
-  setExtraRight,
   doubleRow = false,
   showTopTitle = true,
 }) {
@@ -463,54 +557,61 @@ function FamilyRow({
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-3">
             {leftItems.map((item, i) => (
-  <DeletableCircle
+  <FamilyCircle
     key={`${leftPrefix}-${i}`}
-    label={`${leftPrefix}${i + 1}`}
     nodeStatus={item.nodeStatus}
+    emoji={item.emoji}
+    fullName={item.fullName}
+    relationLabel={item.relationLabel}
     onClick={() => {
-      if (item.nodeStatus === "DRAFT") {
-        setInviteTarget({
-          label: title,
-          relationType: leftPrefix,
-          index: i,
-          side: "left",
-        });
-      }
+      if (item.nodeStatus !== "EMPTY") return;
+      setInviteTarget({
+        label: item.relationLabel,
+        index: i,
+        side: "left",
+        listType: "left",
+      });
     }}
     onDelete={() =>
       setLeftItems(leftItems.filter((_, idx) => idx !== i))
     }
   />
 ))}
+
             <AddButton
   onClick={() =>
     setLeftItems([
-      ...leftItems,
-      {
-        id: null,
-        label: "در انتظار دعوت",
-        relationType: leftPrefix,
-        nodeStatus: "DRAFT",
-      },
-    ])
+  ...leftItems,
+  {
+    id: null,
+    fullName: null,
+    relationType: leftPrefix,
+    relationLabel:
+  leftPrefix === "S" ? "خواهر" :
+  leftPrefix === "B" ? "برادر" :
+  leftPrefix === "AM" ? "عمه" :
+  leftPrefix === "AO" ? "عمو" :
+  leftPrefix === "KH" ? "خاله" :
+  leftPrefix === "DY" ? "دایی" :
+  "",   // مثلاً «خواهرها و برادرها»
+    emoji:
+      leftPrefix === "S" ? "👧" :
+      leftPrefix === "B" ? "👦" :
+      leftPrefix === "AM" ? "👩" :
+      leftPrefix === "AO" ? "👨" :
+      leftPrefix === "KH" ? "👩" :
+      leftPrefix === "DY" ? "👨" :
+      "👤",
+    nodeStatus: "EMPTY",
+    userId: null,
+    overridePhoto: null,
+  },
+])
   }
 />
           </div>
 
-          {extraLeft && (
-            <div className="flex items-center gap-3">
-              {extraLeft.map((_, i) => (
-                <DeletableCircle
-                  key={`exLeft-${i}`}
-                  label={`KH${i + 1}`}
-                  onDelete={() =>
-                    setExtraLeft(extraLeft.filter((_, idx) => idx !== i))
-                  }
-                />
-              ))}
-              <AddButton onClick={() => setExtraLeft([...extraLeft, {}])} />
-            </div>
-          )}
+          
         </div>
 
         {/* 🔸 تیتر وسط */}
@@ -524,19 +625,20 @@ function FamilyRow({
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-3">
             {rightItems.map((item, i) => (
-  <DeletableCircle
+  <FamilyCircle
     key={`${rightPrefix}-${i}`}
-    label={`${rightPrefix}${i + 1}`}
     nodeStatus={item.nodeStatus}
+    emoji={item.emoji}
+    fullName={item.fullName}
+    relationLabel={item.relationLabel}
     onClick={() => {
-      if (item.nodeStatus === "DRAFT") {
-        setInviteTarget({
-          label: title,
-          relationType: rightPrefix,
-          index: i,
-          side: "right",
-        });
-      }
+      if (item.nodeStatus !== "EMPTY") return;
+      setInviteTarget({
+        label: item.relationLabel,
+        index: i,
+        side: "right",
+        listType: "right",
+      });
     }}
     onDelete={() =>
       setRightItems(rightItems.filter((_, idx) => idx !== i))
@@ -549,76 +651,42 @@ function FamilyRow({
       ...rightItems,
       {
         id: null,
-        label: "در انتظار دعوت",
+        fullName: null,
         relationType: rightPrefix,
-        nodeStatus: "DRAFT",
+        relationLabel:
+          rightPrefix === "S" ? "خواهر" :
+          rightPrefix === "B" ? "برادر" :
+          rightPrefix === "AM" ? "عمه" :
+          rightPrefix === "AO" ? "عمو" :
+          rightPrefix === "KH" ? "خاله" :
+          rightPrefix === "DY" ? "دایی" :
+          "",
+        emoji:
+          rightPrefix === "S" ? "👧" :
+          rightPrefix === "B" ? "👦" :
+          rightPrefix === "AM" ? "👩" :
+          rightPrefix === "AO" ? "👨" :
+          rightPrefix === "KH" ? "👩" :
+          rightPrefix === "DY" ? "👨" :
+          "👤",
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
       },
     ])
   }
 />
 
+
           </div>
 
-          {extraRight && (
-            <div className="flex items-center gap-3">
-              {extraRight.map((_, i) => (
-                <DeletableCircle
-                  key={`exRight-${i}`}
-                  label={`D${i + 1}`}
-                  onDelete={() =>
-                    setExtraRight(extraRight.filter((_, idx) => idx !== i))
-                  }
-                />
-              ))}
-              <AddButton onClick={() => setExtraRight([...extraRight, {}])} />
-            </div>
-          )}
+        
         </div>
       </div>
     </div>
   );
 }
 
-function FamilyNode({ node, onClick }) {
-  const isClickable = node.nodeStatus === "EMPTY";
-  const isPending = node.nodeStatus === "PENDING";
-
-  return (
-    <div className="relative group">
-      <div
-        onClick={() => {
-          if (isClickable && onClick) {
-            onClick(node);
-          }
-        }}
-        className={`w-20 h-20 rounded-full flex items-center justify-center
-          text-sm font-semibold transition
-          ${
-            node.nodeStatus === "CONNECTED"
-              ? "bg-green-100 border border-green-400 text-green-800 cursor-default"
-              : node.nodeStatus === "PENDING"
-              ? "bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-not-allowed opacity-80"
-              : "bg-white border border-gray-300 text-gray-700 cursor-pointer hover:scale-105 hover:shadow-md"
-          }
-        `}
-      >
-        {node.label}
-      </div>
-
-      {/* 🟡 Tooltip فقط برای PENDING */}
-      {isPending && (
-        <div
-          className="absolute -top-9 left-1/2 -translate-x-1/2
-                     bg-gray-800 text-white text-xs rounded-md px-2 py-1
-                     opacity-0 group-hover:opacity-100 transition
-                     pointer-events-none whitespace-nowrap"
-        >
-          دعوت ارسال شده – در انتظار پذیرش
-        </div>
-      )}
-    </div>
-  );
-}
 
 
 
