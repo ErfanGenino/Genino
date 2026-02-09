@@ -11,7 +11,6 @@ import ScrollProduct from "./components/Core/ScrollProduct";
 
 
 
-    
 
 export default function AuthStart() {
   const [open, setOpen] = useState(false);
@@ -109,6 +108,36 @@ export default function AuthStart() {
 { icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
   
 ];
+
+// ✅ تقسیم کارت‌ها به دسته‌های ۴تایی
+const chunk = (arr, size) => {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+
+const featuresChunks = chunk(features, 4);
+
+// 🛍️ اسلایدر ۱: سیسمونی تخصصی ژنینو
+const babyStarterProducts = Array.from({ length: 20 }).map((_, i) => ({
+  id: `baby-${i + 1}`,
+  name: `سیسمونی تخصصی ${i + 1}`,
+  price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
+  image: logo,
+  category: ["کالسکه", "لباس نوزاد", "بهداشت کودک", "اتاق کودک"][i % 4],
+}));
+
+// 🧩 اسلایدر ۲: خدمات برگزیده ژنینو (ارائه‌دهنده خدمات)
+const featuredServices = Array.from({ length: 20 }).map((_, i) => ({
+  id: `svc-${i + 1}`,
+  name:
+    ["کلاس موسیقی کودک", "کلاس ورزشی کودک", "مهد کودک", "مدرسه"][i % 4] +
+    ` ${i + 1}`,
+  price: ["رزرو آنلاین", "مشاهده جزئیات", "شروع از ۱٫۲ میلیون", "ثبت‌نام/استعلام"][i % 4],
+  image: logo,
+  category: ["آموزشی", "ورزشی", "مراقبتی", "مدرسه"][i % 4],
+}));
+
 
   const [highlight, setHighlight] = useState(false);
 
@@ -334,139 +363,160 @@ const cardColors = {
 />
 
 
+{/* ✅ کارت‌ها ۴تایی + اسلایدر زیر هر ۴ کارت */}
+{/* 1) کارت‌ها داخل max-w */}
+<div className="w-full mt-4 z-20">
 
-      {/* 🔸 کارت‌های ویژگی (افکت برای کارتهای ویژگی) */}
-{/* 🔸 کارت‌های ویژگی (container) */}
-<motion.section
-  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full mt-4 z-20"
-  initial="hidden"
-  whileInView="visible"
-  viewport={{ once: true }}
-  variants={{
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.08, duration: 0.35 } },
-  }}
->
-  {features.map((item, i) => (
-    <Link key={i} to={item.link || "#"} className="group">
-  <motion.div
-    whileHover={{
-      scale: 1.05,
-      y: -4,
-      boxShadow: "0 0 20px rgba(212,175,55,0.32)"
-    }}
-    animate={
-      item.title === "فروشگاه تخصصی" && highlight
-        ? { scale: [1, 1.08, 1], rotate: [0, -3, 0] }
-        : item.title === "کودک من" && pulse
-        ? { scale: [1, 1.03, 1] }
-        : {}
-    }
-    transition={{ duration: 0.35, ease: "easeOut" }}
-    className={`
-  relative p-4 rounded-2xl border 
-  h-full min-h-[170px] lg:min-h-[190px]
-  flex flex-col justify-between cursor-pointer
-  transition-all duration-300
-
-  ${item.specialMagazineCard ? `
-    bg-gradient-to-br from-[#fffbe8] via-[#fff7d1] to-white
-    border-yellow-300 shadow-[0_0_22px_rgba(212,175,55,0.25)]
-    overflow-hidden
-  ` : ""}
-  ${item.specialMagazineCard ? "bg-[#fff9d9] border-yellow-300 shadow-lg" : ""}
-
-  ${
-    item.title === "کودک من"
-      ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
-      : item.title === "فروشگاه تخصصی"
-      ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md"
-      : item.title === "اقتصاد و حسابداری خانواده"
-      ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_12px_rgba(212,175,55,0.15)]"
-      : cardColors[item.color] || cardColors.default
-  }
-`}
-  >
-    
-    
-
-      {/* 🌟 ستاره‌های طلایی مخصوص دانستنی‌های روز دنیا */}
-      {item.title === "دانستنی‌های روز دنیا" && (
-        <>
-          {Array.from({ length: 10 }).map((_, idx) => (
-            <motion.div
-              key={idx}
-              className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full shadow-[0_0_8px_rgba(255,215,0,0.8)]"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                opacity: 0.8,
-              }}
-              animate={{
-                opacity: [0.2, 1, 0.2],
-                scale: [0.9, 1.4, 0.9],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 2 + Math.random() * 2,
-                delay: Math.random() * 2,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </>
-      )}
-      {item.title === "اقتصاد و حسابداری خانواده" && (
-  <motion.div
-    className="absolute top-0 left-0 w-full h-full rounded-2xl overflow-hidden z-0"
-  >
-    <motion.div
-      className="absolute top-0 left-0 w-full h-full rounded-2xl bg-gradient-to-r from-transparent via-yellow-300/25 to-transparent"
-      animate={{ x: ["-120%", "120%"] }}
-      transition={{
-        duration: 2.8,
-        repeat: Infinity,
-        repeatDelay: 8,
-        ease: "easeInOut",
+  {/* 🔸 بلاک اول: ۴ کارت اول */}
+  <div className="w-full max-w-6xl mx-auto">
+    <motion.section
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={{
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.08, duration: 0.35 } },
       }}
-      style={{
-        backgroundSize: "200% 100%",
-        maskImage:
-          "linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)",
-        WebkitMaskImage:
-          "linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)",
-      }}
-    />
-  </motion.div>
-)}
+    >
+      {featuresChunks?.[0]?.map((item, i) => (
+        <Link key={`f0-${i}`} to={item.link || "#"} className="group">
+          {/* کارت خودت (بدون تغییر) */}
+          <motion.div
+            whileHover={{ scale: 1.05, y: -4, boxShadow: "0 0 20px rgba(212,175,55,0.32)" }}
+            animate={
+              item.title === "فروشگاه تخصصی" && highlight
+                ? { scale: [1, 1.08, 1], rotate: [0, -3, 0] }
+                : item.title === "کودک من" && pulse
+                ? { scale: [1, 1.03, 1] }
+                : {}
+            }
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className={`
+              relative p-4 rounded-2xl border 
+              h-full min-h-[170px] lg:min-h-[190px]
+              flex flex-col justify-between cursor-pointer
+              transition-all duration-300
 
-      <div className="flex flex-col items-center relative z-10">
-        {item.title === "کودک من" ? (
-          <Baby className="w-10 h-10 text-yellow-700 mb-3 drop-shadow-md" />
-        ) : (
-          item.icon
-        )}
-        <h3
-          className={`${
-            item.title === "کودک من"
-              ? "text-lg font-extrabold text-yellow-800"
-              : "text-base font-semibold text-gray-700"
-          } mb-1`}
-        >
-          {item.title}
-        </h3>
-        <p
-          className={`${
-            item.title === "کودک من" ? "text-gray-700" : "text-gray-500"
-          } text-sm leading-relaxed`}
-        >
-          {item.desc}
-        </p>
-      </div>
-    </motion.div>
-  </Link>
-))}
-      </motion.section>
+              ${item.specialMagazineCard ? "bg-[#fff9d9] border-yellow-300 shadow-lg" : ""}
+
+              ${
+                item.title === "کودک من"
+                  ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
+                  : item.title === "فروشگاه تخصصی"
+                  ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md"
+                  : item.title === "اقتصاد و حسابداری خانواده"
+                  ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+                  : cardColors[item.color] || cardColors.default
+              }
+            `}
+          >
+            <div className="flex flex-col items-center relative z-10">
+              {item.title === "کودک من" ? (
+                <Baby className="w-10 h-10 text-yellow-700 mb-3 drop-shadow-md" />
+              ) : (
+                item.icon
+              )}
+
+              <h3
+                className={`${
+                  item.title === "کودک من"
+                    ? "text-lg font-extrabold text-yellow-800"
+                    : "text-base font-semibold text-gray-700"
+                } mb-1`}
+              >
+                {item.title}
+              </h3>
+
+              <p
+                className={`${
+                  item.title === "کودک من" ? "text-gray-700" : "text-gray-500"
+                } text-sm leading-relaxed`}
+              >
+                {item.desc}
+              </p>
+            </div>
+          </motion.div>
+        </Link>
+      ))}
+    </motion.section>
+  </div>
+
+  {/* ✅ اسلایدر ۱: مثل اسکرول اول/آخر (مستقیم زیر main) */}
+  <ScrollProduct title="سیسمونی تخصصی ژنینو" color="yellow" items={babyStarterProducts} />
+
+  {/* 🔸 بلاک دوم: ۴ کارت دوم */}
+  <div className="w-full max-w-6xl mx-auto">
+    <motion.section
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full mt-6"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={{
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.08, duration: 0.35 } },
+      }}
+    >
+      {featuresChunks?.[1]?.map((item, i) => (
+        <Link key={`f1-${i}`} to={item.link || "#"} className="group">
+          {/* کارت خودت (همون قبلی) */}
+          <motion.div
+            whileHover={{ scale: 1.05, y: -4, boxShadow: "0 0 20px rgba(212,175,55,0.32)" }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className={`
+              relative p-4 rounded-2xl border 
+              h-full min-h-[170px] lg:min-h-[190px]
+              flex flex-col justify-between cursor-pointer
+              transition-all duration-300
+              ${cardColors[item.color] || cardColors.default}
+            `}
+          >
+            <div className="flex flex-col items-center relative z-10">
+              {item.icon}
+              <h3 className="text-base font-semibold text-gray-700 mb-1">{item.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+            </div>
+          </motion.div>
+        </Link>
+      ))}
+    </motion.section>
+  </div>
+
+  {/* ✅ اسلایدر ۲: مثل اسکرول اول/آخر */}
+  <ScrollProduct title="خدمات برگزیده ژنینو" color="blue" items={featuredServices} />
+
+  {/* 🔸 باقی کارت‌ها */}
+  <div className="w-full max-w-6xl mx-auto">
+    <motion.section
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full mt-6"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={{
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.08, duration: 0.35 } },
+      }}
+    >
+      {featuresChunks?.slice(2).flat().map((item, i) => (
+        <Link key={`rest-${i}`} to={item.link || "#"} className="group">
+          <motion.div
+            whileHover={{ scale: 1.05, y: -4, boxShadow: "0 0 20px rgba(212,175,55,0.32)" }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className={`${cardColors[item.color] || cardColors.default} relative p-4 rounded-2xl border h-full min-h-[170px] lg:min-h-[190px] flex flex-col justify-between`}
+          >
+            <div className="flex flex-col items-center relative z-10">
+              {item.icon}
+              <h3 className="text-base font-semibold text-gray-700 mb-1">{item.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+            </div>
+          </motion.div>
+        </Link>
+      ))}
+    </motion.section>
+  </div>
+
+</div>
+
 
 
       {/* 🔥 محصولات تخفیف‌خورده */}
@@ -489,4 +539,3 @@ const cardColors = {
     </main>
   );
 }
-

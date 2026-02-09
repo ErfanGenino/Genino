@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import InviteModal from "../components/FamilyTree/InviteModal";
+import { authFetch } from "../services/api";
 
 
 
@@ -70,10 +71,146 @@ useEffect(() => {
 }, [fatherOverridePhoto, motherOverridePhoto]);
 
 
-  if (!show) return null;
+function metaByPrefix(prefix) {
+  return {
+    relationType: prefix,
+    relationLabel:
+      prefix === "S" ? "خواهر" :
+      prefix === "B" ? "برادر" :
+      prefix === "AM" ? "عمه" :
+      prefix === "AO" ? "عمو" :
+      prefix === "KH" ? "خاله" :
+      prefix === "DY" ? "دایی" :
+      prefix === "FR" ? "دوست" :
+      prefix === "RL" ? "قوم" :
+      "عضو",
+    emoji:
+      prefix === "S" ? "👧" :
+      prefix === "B" ? "👦" :
+      prefix === "AM" ? "👩" :
+      prefix === "AO" ? "👨" :
+      prefix === "KH" ? "👩" :
+      prefix === "DY" ? "👨" :
+      prefix === "FR" ? "👥" :
+      prefix === "RL" ? "🧬" :
+      "👤",
+  };
+}
 
- 
+function ensureSlotAndSetPending(setter, prefix, slot) {
+  const meta = metaByPrefix(prefix);
 
+  setter((prev) => {
+    const arr = [...prev];
+
+    // اگر آرایه کوتاه بود، تا slot پرش کن
+    while (arr.length <= slot) {
+      arr.push({
+        id: null,
+        fullName: null,
+        relationType: meta.relationType,
+        relationLabel: meta.relationLabel,
+        emoji: meta.emoji,
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+        slot: arr.length, // ✅ خیلی مهم
+      });
+    }
+
+    // حالا دقیقاً همون slot رو pending کن
+    arr[slot] = { ...arr[slot], nodeStatus: "PENDING" };
+
+    return arr;
+  });
+}
+
+function backendRTtoPrefix(rt) {
+  const map = {
+    sister: "S",
+    brother: "B",
+    amme: "AM",
+    ammo: "AO",
+    khale: "KH",
+    dayi: "DY",
+    friend: "FR",
+    relative: "RL",
+
+    // این‌ها همونطور بمونن
+    grandfather_paternal: "grandfather_paternal",
+    grandmother_paternal: "grandmother_paternal",
+    grandfather_maternal: "grandfather_maternal",
+    grandmother_maternal: "grandmother_maternal",
+  };
+
+  return map[rt] || rt;
+}
+
+
+
+  async function loadPendingInvites() {
+  if (!show || !child?.id) return;
+
+  try {
+    const res = await authFetch(`/family-tree/${child.id}/pending-invitations`);
+    if (!res?.ok) return;
+
+    const invites = res.pendingInvitations || [];
+
+// 1) پدربزرگ/مادربزرگ‌ها (nodes ثابت هستند)
+setNodes((prev) =>
+  prev.map((n) => {
+    const found = invites.find(
+      (inv) => inv.relationType === n.relationType
+    );
+    if (found) return { ...n, nodeStatus: "PENDING" };
+    return n;
+  })
+);
+
+// 🔄 ریست آرایه‌های داینامیک قبل از اعمال pending
+setSisters([]);
+setBrothers([]);
+setAunts([]);
+setUncles([]);
+setKhaleha([]);
+setDayiha([]);
+setFriends([]);
+setRelatives([]);
+
+// 2) بخش‌های دینامیک (باید slot بسازیم اگر نبود)
+invites.forEach((inv) => {
+  // اگر بک‌اند برای این‌ها "KH/AO/..." می‌فرسته:
+  const rt = backendRTtoPrefix(inv.relationType);
+  const slot = inv.slot;
+
+  if (rt === "S") ensureSlotAndSetPending(setSisters, "S", slot);
+  if (rt === "B") ensureSlotAndSetPending(setBrothers, "B", slot);
+
+  if (rt === "AM") ensureSlotAndSetPending(setAunts, "AM", slot);
+  if (rt === "AO") ensureSlotAndSetPending(setUncles, "AO", slot);
+
+  if (rt === "KH") ensureSlotAndSetPending(setKhaleha, "KH", slot);
+  if (rt === "DY") ensureSlotAndSetPending(setDayiha, "DY", slot);
+
+  if (rt === "FR") ensureSlotAndSetPending(setFriends, "FR", slot);
+  if (rt === "RL") ensureSlotAndSetPending(setRelatives, "RL", slot);
+});
+
+      // فعلاً فقط لاگ بگیر تا مطمئن بشیم میاد
+      console.log("PENDING INVITES:", res.pendingInvitations);
+    } catch (e) {
+    console.log("loadPendingInvites error:", e);
+  }
+}
+
+useEffect(() => {
+  loadPendingInvites();
+}, [show, child?.id]);
+
+
+  
+if (!show) return null;
 
   return (
     <motion.div
@@ -266,6 +403,8 @@ useEffect(() => {
   leftPrefix="S"
   rightPrefix="B"
   showTopTitle={false}
+  setInviteTarget={setInviteTarget}   // ✅ اضافه شد
+  child={child}                       // ✅ اضافه شد
 />
 <FamilyRow
   title="عمه‌ها و عموها"
@@ -276,6 +415,8 @@ useEffect(() => {
   leftPrefix="AM"
   rightPrefix="AO"
   showTopTitle={false}
+  setInviteTarget={setInviteTarget}   // ✅ اضافه شد
+  child={child}                       // ✅ اضافه شد
 />
 <FamilyRow
   title="خاله‌ها و دایی‌ها"
@@ -286,6 +427,8 @@ useEffect(() => {
   leftPrefix="KH"
   rightPrefix="DY"
   showTopTitle={false}
+  setInviteTarget={setInviteTarget}   // ✅ اضافه شد
+  child={child}                       // ✅ اضافه شد
 />
 
 {/* 👭 سایر اقوام و دوستان */}
@@ -298,6 +441,8 @@ useEffect(() => {
   leftPrefix="FR"     // Friends
   rightPrefix="RL"    // Relatives
   showTopTitle={false}
+  setInviteTarget={setInviteTarget}   // ✅ اضافه شد
+  child={child}                       // ✅ اضافه شد
 />
 
 
@@ -306,52 +451,32 @@ useEffect(() => {
       {/* ⬇️⬇️⬇️ مودال Invite دقیقاً اینجا ⬇️⬇️⬇️ */}
       <InviteModal
   open={!!inviteTarget}
+  target={inviteTarget}   // ✅ جدید
   title={`دعوت ${inviteTarget?.label || ""}`}
   description={`می‌خواهید ${inviteTarget?.label} را به درختواره کودک اضافه کنید؟`}
- onClose={() => setInviteTarget(null)}
-
-onConfirm={() => {
+  onClose={() => setInviteTarget(null)}
+  onConfirm={(res) => {
   if (!inviteTarget) return;
 
-  // 👈 سمت چپ
+  // فقط UI رو PENDING کن
   if (inviteTarget.side === "left") {
-    const map = {
-      S: setSisters,
-      AM: setAunts,
-      KH: setKhaleha,
-      FR: setFriends,
-    };
-
+    const map = { S: setSisters, AM: setAunts, KH: setKhaleha, FR: setFriends };
     map[inviteTarget.relationType]?.((prev) =>
-      prev.map((item, i) =>
-        i === inviteTarget.index
-          ? { ...item, nodeStatus: "PENDING" }
-          : item
-      )
+      prev.map((item, i) => (i === inviteTarget.index ? { ...item, nodeStatus: "PENDING" } : item))
     );
   }
 
-  // 👉 سمت راست
   if (inviteTarget.side === "right") {
-    const map = {
-      B: setBrothers,
-      AO: setUncles,
-      DY: setDayiha,
-      RL: setRelatives,
-    };
-
+    const map = { B: setBrothers, AO: setUncles, DY: setDayiha, RL: setRelatives };
     map[inviteTarget.relationType]?.((prev) =>
-      prev.map((item, i) =>
-        i === inviteTarget.index
-          ? { ...item, nodeStatus: "PENDING" }
-          : item
-      )
+      prev.map((item, i) => (i === inviteTarget.index ? { ...item, nodeStatus: "PENDING" } : item))
     );
   }
 
-  setInviteTarget(null);
+  setInviteTarget(null); // مودال بسته بشه
+  loadPendingInvites();
 }}
-/>
+  />
 
 
     </motion.div>
@@ -545,6 +670,8 @@ function FamilyRow({
   rightPrefix,
   doubleRow = false,
   showTopTitle = true,
+  setInviteTarget,    // ✅ اضافه شد
+  child,              // ✅ اضافه شد
 }) {
   return (
     <div className="mt-8 flex flex-col items-center w-full gap-6">
@@ -566,15 +693,22 @@ function FamilyRow({
     onClick={() => {
       if (item.nodeStatus !== "EMPTY") return;
       setInviteTarget({
-        label: item.relationLabel,
-        index: i,
-        side: "left",
-        listType: "left",
-      });
+      childId: child?.id,              // ✅
+      label: item.relationLabel,       // برای متن مودال
+      relationType: item.relationType, // ✅ (مثلاً "KH" یا "FR")
+      slot: item.slot,                         // ✅ شماره جایگاه
+      roleLabel: item.relationLabel,   // ✅ فارسیِ نقش
+      index: i,
+      side: "left",
+    });
     }}
     onDelete={() =>
-      setLeftItems(leftItems.filter((_, idx) => idx !== i))
-    }
+  setLeftItems((prev) =>
+    prev
+      .filter((_, idx) => idx !== i)
+      .map((it, idx) => ({ ...it, slot: idx }))
+  )
+}
   />
 ))}
 
@@ -586,6 +720,7 @@ function FamilyRow({
     id: null,
     fullName: null,
     relationType: leftPrefix,
+    slot: leftItems.length,
     relationLabel:
   leftPrefix === "S" ? "خواهر" :
   leftPrefix === "B" ? "برادر" :
@@ -634,15 +769,22 @@ function FamilyRow({
     onClick={() => {
       if (item.nodeStatus !== "EMPTY") return;
       setInviteTarget({
-        label: item.relationLabel,
-        index: i,
-        side: "right",
-        listType: "right",
+       childId: child?.id,
+       label: item.relationLabel,
+       relationType: item.relationType,
+       slot: item.slot,
+       roleLabel: item.relationLabel,
+       index: i,
+       side: "right",
       });
     }}
     onDelete={() =>
-      setRightItems(rightItems.filter((_, idx) => idx !== i))
-    }
+  setRightItems((prev) =>
+    prev
+      .filter((_, idx) => idx !== i)
+      .map((it, idx) => ({ ...it, slot: idx }))
+  )
+}
   />
 ))}
             <AddButton
@@ -653,6 +795,7 @@ function FamilyRow({
         id: null,
         fullName: null,
         relationType: rightPrefix,
+        slot: rightItems.length,
         relationLabel:
           rightPrefix === "S" ? "خواهر" :
           rightPrefix === "B" ? "برادر" :
@@ -686,9 +829,4 @@ function FamilyRow({
     </div>
   );
 }
-
-
-
-
-
 

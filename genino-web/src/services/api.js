@@ -1,39 +1,90 @@
 const BASE_URL = "https://api.genino.ir/api";
 
-// ✅ فقط localStorage
 function getAuthToken() {
   return localStorage.getItem("genino_token");
 }
 
-// --- fetch اختصاصی با توکن ---
 export async function authFetch(url, options = {}) {
   const token = getAuthToken();
 
   const headers = {
-    "Content-Type": "application/json",
     ...(options.headers || {}),
   };
+
+  // فقط وقتی body داریم Content-Type بذار (برای GET بهتره نذاری)
+  const hasBody = options.body !== undefined && options.body !== null;
+  if (hasBody && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  let res;
   try {
-    const res = await fetch(`${BASE_URL}${url}`, {
-  ...options,
-  headers,
-});
-
-    return await res.json();
+    res = await fetch(`${BASE_URL}${url}`, {
+      ...options,
+      headers,
+    });
   } catch (err) {
-    console.error("AUTH FETCH ERROR:", err);
-    return { ok: false, message: "خطا در اتصال به سرور." };
+    console.error("AUTH FETCH NETWORK ERROR:", err);
+    return { ok: false, message: "خطا در اتصال به سرور.", status: 0 };
   }
+
+  // تلاش برای parse پاسخ (JSON یا text)
+  const contentType = res.headers.get("content-type") || "";
+  let data = null;
+
+  try {
+    if (contentType.includes("application/json")) {
+      data = await res.json();
+    } else {
+      const text = await res.text();
+      data = text ? { message: text } : null;
+    }
+  } catch (err) {
+    // اگر body خراب بود
+    data = null;
+  }
+
+  // اگر بک‌اند خودش ok می‌دهد، همان را نگه می‌داریم؛
+  // ولی اگر نداد، از status می‌سازیم
+  if (data && typeof data === "object" && "ok" in data) {
+    return { ...data, status: res.status };
+  }
+
+  // هندل استاندارد
+    // اگر خطا بود
+  if (!res.ok) {
+    return {
+      ok: false,
+      status: res.status,
+      message: (data && data.message) || `خطای سرور (${res.status})`,
+      data,
+    };
+  }
+
+  // ✅ نکته مهم: اگر خروجی آرایه بود، آرایه را دستکاری نکن
+  if (Array.isArray(data)) {
+    // فقط ok/status را به عنوان property روی آرایه می‌گذاریم (آرایه می‌ماند آرایه)
+    data.ok = true;
+    data.status = res.status;
+    return data;
+  }
+
+  // اگر آبجکت بود، مثل قبل ok/status اضافه کن
+  return {
+    ok: true,
+    status: res.status,
+    ...(data && typeof data === "object" ? data : {}),
+  };
+
 }
 
 // --- ثبت نام ---
 export async function registerUser(formData) {
-  return await authFetch("/auth/register", {
+  return authFetch("/auth/register", {
     method: "POST",
     body: JSON.stringify(formData),
   });
@@ -41,7 +92,7 @@ export async function registerUser(formData) {
 
 // --- ورود ---
 export async function loginUser(credentials) {
-  return await authFetch("/auth/login", {
+  return authFetch("/auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),
   });
@@ -49,14 +100,14 @@ export async function loginUser(credentials) {
 
 // --- پروفایل ---
 export async function getUserProfile() {
-  return await authFetch("/auth/profile", {
+  return authFetch("/auth/profile", {
     method: "GET",
   });
 }
 
 // --- آپدیت مرحله زندگی ---
 export async function updateLifeStage(stage) {
-  return await authFetch("/auth/update-life-stage", {
+  return authFetch("/auth/update-life-stage", {
     method: "PUT",
     body: JSON.stringify({ lifeStage: stage }),
   });

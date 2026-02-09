@@ -58,33 +58,56 @@ useEffect(() => {
       const token = localStorage.getItem("genino_token"); // همون JWT که بعد از لاگین ذخیره کردی
       if (!token) throw new Error("no token");
 
-      const data = await authFetch("/children");
-      setIsLoading(false);
+      const res = await authFetch("/children");
 
+      // ✅ اگر بک‌اند آرایه داد یا آبجکت {children: []}
+      const data = Array.isArray(res) ? res : (res?.children || []);
 
-
-      // اگر از بک‌اند داده داریم
-      if (Array.isArray(data) && data.length > 0) {
-        setChildrenList(data);
-        setActiveChildId(data[0].id);
-        localStorage.setItem("children", JSON.stringify(data));
-        setIsLoading(false);
-        return;
+      // اگر باز هم آرایه نبود، برو fallback
+      if (!Array.isArray(data)) {
+      throw new Error(res?.message || "children invalid");
       }
+
+
+// اگر از بک‌اند داده داریم
+if (data.length > 0) {
+  setChildrenList(data);
+  localStorage.setItem("children", JSON.stringify(data));
+
+  const savedActiveChildId = localStorage.getItem("activeChildId");
+  const exists = data.find(c => String(c.id) === String(savedActiveChildId));
+  setActiveChildId(exists ? exists.id : data[0].id);
+
+  setIsLoading(false);
+  return;
+}
+
     } catch (e) {
       // fallback
     }
 
     // fallback به localStorage
     const stored = localStorage.getItem("children");
-const parsed = stored ? JSON.parse(stored) : [];
+let parsed = [];
+try {
+  parsed = stored ? JSON.parse(stored) : [];
+} catch (e) {
+  console.error("children in localStorage is invalid JSON", e);
+  localStorage.removeItem("children");
+  localStorage.removeItem("activeChildId");
+  parsed = [];
+}
+if (!Array.isArray(parsed)) parsed = [];
 
 if (parsed.length === 0) {
   navigate("/child-profile?mode=createFirst", { replace: true });
 } else {
   setChildrenList(parsed);
-  setActiveChildId(parsed[0].id);
+  const savedActiveChildId = localStorage.getItem("activeChildId");
+  const exists = parsed.find(c => String(c.id) === String(savedActiveChildId));
+  setActiveChildId(exists ? exists.id : parsed[0].id);
   setIsLoading(false);
+
 }
 
 }
@@ -96,7 +119,16 @@ if (parsed.length === 0) {
 useEffect(() => {
   const sync = () => {
     const stored = localStorage.getItem("children");
-    const parsed = stored ? JSON.parse(stored) : [];
+    let parsed = [];
+try {
+  parsed = stored ? JSON.parse(stored) : [];
+} catch (e) {
+  console.error("children in localStorage is invalid JSON", e);
+  localStorage.removeItem("children");
+  localStorage.removeItem("activeChildId");
+  parsed = [];
+}
+if (!Array.isArray(parsed)) parsed = [];
     setChildrenList(parsed);
 
     // اگر activeChildId خالی بود و حداقل یک کودک داریم
@@ -127,14 +159,20 @@ useEffect(() => {
       console.error("خطا در دریافت والدین کودک:", err);
     }
   }
-
   loadChildAdmins();
+}, [activeChildId]);
+
+
+useEffect(() => {
+  if (activeChildId) {
+    localStorage.setItem("activeChildId", activeChildId);
+  }
 }, [activeChildId]);
 
 
 
 const activeChild = childrenList.find(
-  (child) => child.id === activeChildId
+  (child) => String(child.id) === String(activeChildId)
 );
 const father = childAdmins.find((a) => a.role === "father");
 const mother = childAdmins.find((a) => a.role === "mother");
@@ -152,6 +190,14 @@ if (!activeChild) {
   return (
     <div className="min-h-screen flex items-center justify-center">
       هیچ کودکی ثبت نشده است
+    </div>
+  );
+}
+
+if (!activeChild?.birthDate) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      تاریخ تولد کودک ثبت نشده یا نامعتبر است
     </div>
   );
 }
@@ -243,6 +289,7 @@ const handleSendInvitation = async () => {
   }
 };
 
+
 console.log("CHILD ADMINS:", childAdmins);
 console.log("FATHER:", father);
 console.log("MOTHER:", mother);
@@ -302,55 +349,111 @@ console.log("MOTHER:", mother);
       </div>
 
       {/* 👨‍👩‍👧 نوار تب‌های فرزندان من */}
-<motion.div
-  className="relative z-[6] mt-6 mb-6 w-full max-w-4xl px-4"
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5 }}
+{/* 🪙 نوار فرزندان (دقیقاً شبیه AchievementsBar) */}
+<div
+  className="relative z-[10] w-full overflow-x-auto overflow-y-hidden whitespace-nowrap py-5 px-6 mb-6
+             bg-gradient-to-r from-[#fff7cf] via-[#ffef99] to-[#ffe66e] backdrop-blur-sm shadow-inner border-b border-yellow-300
+             scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-yellow-100"
 >
-  <div className="flex gap-3 overflow-x-auto pb-2">
-
+  <div className="flex space-x-5 rtl:space-x-reverse">
     {childrenList.map((child) => (
-      <button
+      <motion.div
         key={child.id}
+        whileHover={{
+          rotateY: 15,
+          scale: 1.12,
+          boxShadow: "0 0 40px rgba(255, 215, 0, 0.9)",
+        }}
+        transition={{ type: "spring", stiffness: 200, damping: 12 }}
         onClick={() => setActiveChildId(child.id)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-full border
-          whitespace-nowrap transition
-          ${
-            activeChildId === child.id
-              ? "bg-yellow-400 text-white border-yellow-400 shadow-md"
-              : "bg-white/80 text-gray-700 border-yellow-200 hover:bg-yellow-50"
-          }`}
+        className="flex flex-col items-center justify-center text-center cursor-pointer"
       >
-        {/* آواتار کوچک */}
-        <div className="w-8 h-8 rounded-full bg-yellow-200 overflow-hidden flex items-center justify-center">
-          {child.photo ? (
-            <img
-              src={child.photo}
-              alt={child.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-xs">👶</span>
-          )}
+        {/* 🪙 سکه طلایی */}
+        <div
+          className={`relative w-20 h-20 rounded-full bg-gradient-to-br from-[#fff8c7] via-[#ffd84d] to-[#d6a700]
+                      shadow-[0_0_35px_rgba(212,175,55,0.6)] border-[3px] border-[#f8e47a]
+                      flex items-center justify-center overflow-hidden
+                      ${activeChildId === child.id
+                      ? "ring-4 ring-yellow-400 shadow-[0_0_45px_rgba(255,215,0,0.9)]"
+                      : "opacity-80"}
+                      `}
+        >
+          {/* ✨ درخشش دائمی طلایی */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
+            animate={{ x: ["-150%", "150%"] }}
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            style={{ transform: "rotate(20deg)" }}
+          />
+
+          {/* 🌕 نور متحرک درخشان */}
+          <motion.div
+            className="absolute inset-0 rounded-full bg-gradient-to-br from-transparent via-yellow-200/40 to-transparent blur-[10px]"
+            animate={{ rotate: [0, 360] }}
+            transition={{ repeat: Infinity, duration: 7, ease: "linear" }}
+          />
+
+          {/* 👶 عکس کودک یا آیکن */}
+          <div className="relative z-[2] w-full h-full flex items-center justify-center">
+            {child.photo ? (
+              <img
+                src={child.photo}
+                alt={child.fullName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl">👶</span>
+            )}
+          </div>
         </div>
 
-        <span className="text-sm font-medium">{child.fullName}</span>
-      </button>
+        {/* 📝 اسم کودک */}
+        <p className="text-xs mt-3 font-semibold text-yellow-800 drop-shadow-[0_0_6px_rgba(255,255,180,0.7)]">
+          {child.fullName}
+        </p>
+      </motion.div>
     ))}
-    {/* ➕ افزودن فرزند */}
-<Link
-  to="/child-profile"
-  className="flex items-center gap-2 px-4 py-2 rounded-full border
-             bg-white/80 text-yellow-700 border-yellow-300
-             hover:bg-yellow-50 transition
-             whitespace-nowrap"
->
-  <span className="text-lg">➕</span>
-  <span className="text-sm font-medium">افزودن فرزند</span>
-</Link>
+
+    {/* ➕ افزودن فرزند (همان استایل سکه) */}
+    <Link to="/child-profile" className="flex flex-col items-center justify-center text-center cursor-pointer">
+      <motion.div
+        whileHover={{
+          rotateY: 15,
+          scale: 1.12,
+          boxShadow: "0 0 40px rgba(255, 215, 0, 0.9)",
+        }}
+        transition={{ type: "spring", stiffness: 200, damping: 12 }}
+        className="flex flex-col items-center justify-center"
+      >
+        <div
+          className="relative w-20 h-20 rounded-full bg-gradient-to-br from-[#fff8c7] via-[#ffd84d] to-[#d6a700]
+                     shadow-[0_0_35px_rgba(212,175,55,0.6)] border-[3px] border-[#f8e47a]
+                     flex items-center justify-center overflow-hidden"
+        >
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
+            animate={{ x: ["-150%", "150%"] }}
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            style={{ transform: "rotate(20deg)" }}
+          />
+          <motion.div
+            className="absolute inset-0 rounded-full bg-gradient-to-br from-transparent via-yellow-200/40 to-transparent blur-[10px]"
+            animate={{ rotate: [0, 360] }}
+            transition={{ repeat: Infinity, duration: 7, ease: "linear" }}
+          />
+
+          <div className="relative z-[2] text-3xl text-[#cfa500] drop-shadow-[0_0_8px_rgba(255,220,120,0.9)]">
+            ➕
+          </div>
+        </div>
+
+        <p className="text-xs mt-3 font-semibold text-yellow-800 drop-shadow-[0_0_6px_rgba(255,255,180,0.7)]">
+          افزودن فرزند
+        </p>
+      </motion.div>
+    </Link>
   </div>
-</motion.div>
+</div>
 
 
       {/* 🏅 نوار دستاوردهای کودک */}

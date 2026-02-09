@@ -155,9 +155,7 @@ import FatBurningHomeWorkoutArticle from "./pages/articles/home-workout/FatBurni
 import EmotionRegulationTest from "./pages/child-mental-health/EmotionRegulationTest";
 import AttentionFocusTest from "./pages/child-mental-health/AttentionFocusTest";
 import SocialInteractionTest from "./pages/child-mental-health/SocialInteractionTest";
-
-
-
+import Notifications from "./pages/Notifications";
 
 
 
@@ -173,7 +171,7 @@ import ChildProfile from "./pages/ChildProfile";
 
 export default function App() {
 
-
+console.log("APP ROUTES LOADED");
   return (
     <>
       {/* نوار ناوبری بالای همه‌ی صفحات */}
@@ -337,7 +335,7 @@ export default function App() {
         <Route path="/child-mental-health/emotion-regulation" element={<EmotionRegulationTest />} />
         <Route path="/child-mental-health/attention-focus" element={<AttentionFocusTest />} />
         <Route path="/child-mental-health/social-interaction" element={<SocialInteractionTest />} />
-
+        <Route path="/notifications" element={ <ProtectedRoute>  <Notifications /> </ProtectedRoute>} />
 
 
       </Routes>

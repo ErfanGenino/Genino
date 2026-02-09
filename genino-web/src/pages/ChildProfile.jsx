@@ -62,41 +62,69 @@ export default function ChildProfile() {
 const handleSave = async () => {
   try {
     const token = localStorage.getItem("genino_token");
+    console.log("TOKEN EXISTS?", !!token);
+
     if (!token) {
       alert("لطفاً دوباره وارد شوید");
       return;
     }
 
-    const payload = {
-  fullName: childName,
-  gender,
-  birthDate,
-};
-
+    const payload = { fullName: childName, gender, birthDate };
     const isEditMode = mode === "edit" && editId;
     const method = isEditMode ? "PUT" : "POST";
 
-    await authFetch(
-      isEditMode ? `/children/${editId}` : "/children",
-      {
-        method,
-        body: JSON.stringify(payload),
-      }
-    );
+    console.log("PAYLOAD:", payload);
+    console.log("SAVE URL:", isEditMode ? `/children/${editId}` : "/children");
 
-    // 🔄 دریافت لیست جدید کودکان
-const updatedChildren = await authFetch("/children");
+    // 1) ساخت/ویرایش کودک
+    const saveRes = await authFetch(isEditMode ? `/children/${editId}` : "/children", {
+      method,
+      body: JSON.stringify(payload),
+    });
+
+    console.log("SAVE RES:", saveRes);
+
+    // اگر سرور خطا برگرداند
+    if (saveRes?.ok === false) {
+      alert(saveRes?.message || "ذخیره کودک انجام نشد");
+      return;
+    }
+
+   // 2) دریافت لیست جدید کودکان
+const listRes = await authFetch("/children");
+console.log("LIST RES:", listRes);
+
+// ✅ نرمالایز: بک‌اند ممکنه [] یا {children: []} بده
+const childrenArr = Array.isArray(listRes)
+  ? listRes
+  : Array.isArray(listRes?.children)
+  ? listRes.children
+  : [];
+
+console.log("UPDATED CHILDREN:", childrenArr);
+
+if (childrenArr.length === 0) {
+  alert(listRes?.message || "لیست کودکان خالی برگشت (مشکل پاسخ /children)");
+  return;
+}
 
 // ذخیره در localStorage
-localStorage.setItem("children", JSON.stringify(updatedChildren));
+localStorage.setItem("children", JSON.stringify(childrenArr));
+localStorage.setItem("activeChildId", String(childrenArr[0].id));
+
+// تریگر برای MyChild که از localStorage دوباره بخونه
+window.dispatchEvent(new Event("storage"));
+
+
 
 
     navigate("/mychild", { replace: true });
   } catch (err) {
-    console.error(err);
+    console.error("HANDLE SAVE ERROR:", err);
     alert("ذخیره کودک انجام نشد");
   }
 };
+
 
 
   

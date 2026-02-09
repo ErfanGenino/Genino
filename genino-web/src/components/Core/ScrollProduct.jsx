@@ -45,7 +45,7 @@ export default function ScrollProduct({
       : "text-yellow-600 border-yellow-100";
 
   return (
-    <section className="relative z-10 w-full max-w-5xl text-center mt-10 mb-14">
+    <section className="relative z-10 w-full max-w-5xl mx-auto text-center mt-10 mb-14">
       {/* 🏷️ تیتر و فلش‌ها */}
       <div className="relative flex items-center justify-center mb-6">
         <button

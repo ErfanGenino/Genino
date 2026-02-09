@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Palette, Dumbbell, Brain } from "lucide-react";
+import { Palette, Dumbbell, Brain, Book, Flower } from "lucide-react";
 
 export default function AchievementsBar() {
   const [selectedBadge, setSelectedBadge] = useState(null);
@@ -32,6 +32,24 @@ export default function AchievementsBar() {
       id: 3,
       title: "دستاورد پرورشی",
       icon: <Brain className="w-8 h-8 text-[#cfa500] drop-shadow-[0_0_8px_rgba(255,220,120,0.9)]" />,
+      date: "25 شهریور 1404",
+      coach: "کلاس‌های خلاقیت کودک پاستیلا",
+      score: "۱۰۰ از ۱۰۰",
+      desc: "حل مسئله‌ی پیچیده با روش ابتکاری در کلاس هوش و تمرکز.",
+    },
+    {
+      id: 4,
+      title: "دستاورد علمی",
+      icon: <Book className="w-8 h-8 text-[#cfa500] drop-shadow-[0_0_8px_rgba(255,220,120,0.9)]" />,
+      date: "25 شهریور 1404",
+      coach: "کلاس‌های خلاقیت کودک پاستیلا",
+      score: "۱۰۰ از ۱۰۰",
+      desc: "حل مسئله‌ی پیچیده با روش ابتکاری در کلاس هوش و تمرکز.",
+    },
+    {
+      id: 5,
+      title: "دستاورد معنوی",
+      icon: <Flower className="w-8 h-8 text-[#cfa500] drop-shadow-[0_0_8px_rgba(255,220,120,0.9)]" />,
       date: "25 شهریور 1404",
       coach: "کلاس‌های خلاقیت کودک پاستیلا",
       score: "۱۰۰ از ۱۰۰",

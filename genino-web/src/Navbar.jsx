@@ -3,6 +3,7 @@ import { LogIn, UserPlus, Menu, X, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import logo from "./assets/logo-genino.png";
 import { motion, AnimatePresence } from "framer-motion";
+import { Bell } from "lucide-react";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -49,6 +50,8 @@ function Navbar() {
   localStorage.removeItem("children");     // ✅ مهم
   localStorage.removeItem("lifeStage");
   localStorage.removeItem("userData");
+  localStorage.removeItem("genino_notifications");
+  window.dispatchEvent(new Event("genino_notifications_changed"));
   sessionStorage.clear();
 
   setUser(null);
@@ -65,6 +68,32 @@ function Navbar() {
   ];
 
   const inDashboard = window.location.pathname.startsWith("/dashboard");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+useEffect(() => {
+  const loadUnread = () => {
+    try {
+      const raw = localStorage.getItem("genino_notifications");
+      const list = raw ? JSON.parse(raw) : [];
+      const unread = Array.isArray(list) ? list.filter((n) => !n.read).length : 0;
+      setUnreadCount(unread);
+    } catch {
+      setUnreadCount(0);
+    }
+  };
+
+  loadUnread();
+
+  // وقتی اعلان‌ها یا کاربر تغییر کرد
+  window.addEventListener("genino_notifications_changed", loadUnread);
+  window.addEventListener("storage", loadUnread);
+
+  return () => {
+    window.removeEventListener("genino_notifications_changed", loadUnread);
+    window.removeEventListener("storage", loadUnread);
+  };
+}, []);
+
 
   return (
     <>
@@ -135,6 +164,27 @@ function Navbar() {
                  px-3 py-1.5 rounded-xl cursor-pointer hover:bg-yellow-200 transition">
                  {user.fullName}
                 </Link>
+
+                {/* 🔔 اعلان‌ها */}
+                <button
+                  onClick={() => navigate("/notifications")}
+                  className="relative flex items-center justify-center w-10 h-10 rounded-xl
+                             bg-white border border-yellow-300 text-yellow-700
+                             hover:bg-yellow-50 transition shadow-sm"
+                  aria-label="اعلان‌ها"
+                >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                <span
+                className="absolute -top-2 -left-2 min-w-[20px] h-5 px-1
+                           rounded-full bg-red-500 text-white text-[11px]
+                           flex items-center justify-center font-bold shadow"
+                >
+                {unreadCount > 99 ? "99+" : unreadCount}
+                 </span>
+                 )}
+                </button>
+
 
                 {/* خروج */}
                 <button
@@ -231,6 +281,29 @@ function Navbar() {
             <div className="flex flex-col gap-2">
               {user ? (
                 <>
+
+                <button
+                  onClick={() => {
+                   setMenuOpen(false);
+                   navigate("/notifications");
+                  }}
+                className="flex items-center justify-between
+                           border border-yellow-300 text-yellow-700
+                           px-3 py-2 rounded-lg text-sm hover:bg-yellow-50"
+                >
+               <span className="flex items-center gap-2">
+                     <Bell size={18} />
+                     اعلان‌ها
+               </span>
+
+             {unreadCount > 0 && (
+                <span className="min-w-[22px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px]
+                                 flex items-center justify-center font-bold">
+             {unreadCount > 99 ? "99+" : unreadCount}
+                 </span>
+                   )}
+                </button>
+
                 
 
                   <button
