@@ -49,17 +49,16 @@ const [motherOverridePhoto, setMotherOverridePhoto] = useState(null);
   // ✅ بخش‌های قابل افزایش با دکمه +
   const [sisters, setSisters] = useState([]);
   const [brothers, setBrothers] = useState([]);
-
   const [aunts, setAunts] = useState([]);     // عمه‌ها
   const [uncles, setUncles] = useState([]);   // عموها
-
   const [khaleha, setKhaleha] = useState([]); // خاله‌ها
   const [dayiha, setDayiha] = useState([]);   // دایی‌ها
-
   const [friends, setFriends] = useState([]);   // 👥 دوستان (سمت چپ)
   const [relatives, setRelatives] = useState([]); // 🧬 سایر اقوام (سمت راست)
-  
   const [inviteTarget, setInviteTarget] = useState(null);
+  const [pendingInvites, setPendingInvites] = useState([]);
+  const [members, setMembers] = useState([]);
+
   
 
 
@@ -125,6 +124,41 @@ function ensureSlotAndSetPending(setter, prefix, slot) {
   });
 }
 
+function ensureSlotAndSetConnected(setter, prefix, slot, member) {
+  const meta = metaByPrefix(prefix);
+
+  setter((prev) => {
+    const arr = [...prev];
+
+    // تا slot بساز
+    while (arr.length <= slot) {
+      arr.push({
+        id: null,
+        fullName: null,
+        relationType: meta.relationType,
+        relationLabel: meta.relationLabel,
+        emoji: meta.emoji,
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+        slot: arr.length,
+      });
+    }
+
+    // ✅ همون slot رو CONNECTED کن + نام
+    arr[slot] = {
+      ...arr[slot],
+      nodeStatus: "CONNECTED",
+      fullName: member?.user?.fullName || arr[slot].fullName,
+      userId: member?.userId || arr[slot].userId,
+      id: member?.id || arr[slot].id,
+    };
+
+    return arr;
+  });
+}
+
+
 function backendRTtoPrefix(rt) {
   const map = {
     sister: "S",
@@ -155,58 +189,90 @@ function backendRTtoPrefix(rt) {
     const res = await authFetch(`/family-tree/${child.id}/pending-invitations`);
     if (!res?.ok) return;
 
-    const invites = res.pendingInvitations || [];
-
-// 1) پدربزرگ/مادربزرگ‌ها (nodes ثابت هستند)
-setNodes((prev) =>
-  prev.map((n) => {
-    const found = invites.find(
-      (inv) => inv.relationType === n.relationType
-    );
-    if (found) return { ...n, nodeStatus: "PENDING" };
-    return n;
-  })
-);
-
-// 🔄 ریست آرایه‌های داینامیک قبل از اعمال pending
-setSisters([]);
-setBrothers([]);
-setAunts([]);
-setUncles([]);
-setKhaleha([]);
-setDayiha([]);
-setFriends([]);
-setRelatives([]);
-
-// 2) بخش‌های دینامیک (باید slot بسازیم اگر نبود)
-invites.forEach((inv) => {
-  // اگر بک‌اند برای این‌ها "KH/AO/..." می‌فرسته:
-  const rt = backendRTtoPrefix(inv.relationType);
-  const slot = inv.slot;
-
-  if (rt === "S") ensureSlotAndSetPending(setSisters, "S", slot);
-  if (rt === "B") ensureSlotAndSetPending(setBrothers, "B", slot);
-
-  if (rt === "AM") ensureSlotAndSetPending(setAunts, "AM", slot);
-  if (rt === "AO") ensureSlotAndSetPending(setUncles, "AO", slot);
-
-  if (rt === "KH") ensureSlotAndSetPending(setKhaleha, "KH", slot);
-  if (rt === "DY") ensureSlotAndSetPending(setDayiha, "DY", slot);
-
-  if (rt === "FR") ensureSlotAndSetPending(setFriends, "FR", slot);
-  if (rt === "RL") ensureSlotAndSetPending(setRelatives, "RL", slot);
-});
-
-      // فعلاً فقط لاگ بگیر تا مطمئن بشیم میاد
-      console.log("PENDING INVITES:", res.pendingInvitations);
-    } catch (e) {
+    setPendingInvites(res.pendingInvitations || []);
+    console.log("PENDING INVITES:", res.pendingInvitations);
+  } catch (e) {
     console.log("loadPendingInvites error:", e);
   }
 }
 
+
+async function loadMembers() {
+  if (!show || !child?.id) return;
+
+  try {
+    const res = await authFetch(`/family-tree/${child.id}/members`);
+    if (!res?.ok) return;
+
+    setMembers(res.members || []);
+    console.log("MEMBERS:", res.members);
+  } catch (e) {
+    console.log("loadMembers error:", e);
+  }
+}
+
+
+
 useEffect(() => {
   loadPendingInvites();
+  loadMembers();
 }, [show, child?.id]);
+
+useEffect(() => {
+  if (!show || !child?.id) return;
+
+  // ✅ اول همه‌چی ریست
+  setSisters([]);
+  setBrothers([]);
+  setAunts([]);
+  setUncles([]);
+  setKhaleha([]);
+  setDayiha([]);
+  setFriends([]);
+  setRelatives([]);
+
+  // ✅ اول members رو CONNECTED کن (سبز)
+  members.forEach((m) => {
+    const role = m.role;
+    const slot = Number.isFinite(m.slot) ? m.slot : 0;
+
+    if (role === "sister") ensureSlotAndSetConnected(setSisters, "S", slot, m);
+    if (role === "brother") ensureSlotAndSetConnected(setBrothers, "B", slot, m);
+
+    if (role === "amme") ensureSlotAndSetConnected(setAunts, "AM", slot, m);
+    if (role === "ammo") ensureSlotAndSetConnected(setUncles, "AO", slot, m);
+
+    if (role === "khale") ensureSlotAndSetConnected(setKhaleha, "KH", slot, m);
+    if (role === "dayi") ensureSlotAndSetConnected(setDayiha, "DY", slot, m);
+
+    if (role === "friend") ensureSlotAndSetConnected(setFriends, "FR", slot, m);
+    if (role === "relative") ensureSlotAndSetConnected(setRelatives, "RL", slot, m);
+  });
+
+  // ✅ بعد pending ها رو فقط اگر اون slot هنوز CONNECTED نیست PENDING کن (زرد)
+  pendingInvites.forEach((inv) => {
+    const rt = backendRTtoPrefix(inv.relationType);
+    const slot = inv.slot;
+
+    // اگر اون عضو قبلاً CONNECTED شده، دیگه زردش نکن
+    const isAlreadyConnected = members.some(
+      (m) => backendRTtoPrefix(m.role) === rt && m.slot === slot
+    );
+    if (isAlreadyConnected) return;
+
+    if (rt === "S") ensureSlotAndSetPending(setSisters, "S", slot);
+    if (rt === "B") ensureSlotAndSetPending(setBrothers, "B", slot);
+
+    if (rt === "AM") ensureSlotAndSetPending(setAunts, "AM", slot);
+    if (rt === "AO") ensureSlotAndSetPending(setUncles, "AO", slot);
+
+    if (rt === "KH") ensureSlotAndSetPending(setKhaleha, "KH", slot);
+    if (rt === "DY") ensureSlotAndSetPending(setDayiha, "DY", slot);
+
+    if (rt === "FR") ensureSlotAndSetPending(setFriends, "FR", slot);
+    if (rt === "RL") ensureSlotAndSetPending(setRelatives, "RL", slot);
+  });
+}, [show, child?.id, members, pendingInvites]);
 
 
   
@@ -544,6 +610,21 @@ function FamilyCircle({
           ) : (
             <span className="text-2xl">{emoji}</span>
           )}
+
+          {/* ✅ Badge برای CONNECTED */}
+{nodeStatus === "CONNECTED" && (
+  <div
+    className="absolute -bottom-1 -right-1
+               w-6 h-6 rounded-full
+               bg-green-500 text-white
+               flex items-center justify-center
+               text-xs font-bold
+               border-2 border-white shadow-md"
+  >
+    ✓
+  </div>
+)}
+
         </div>
 
         {/* Tooltip برای EMPTY */}
@@ -569,10 +650,23 @@ function FamilyCircle({
             دعوت ارسال شده – در انتظار پذیرش
           </div>
         )}
+
+        {/* Tooltip برای CONNECTED */}
+        {nodeStatus === "CONNECTED" && (
+          <div
+            className="absolute -top-9 left-1/2 -translate-x-1/2
+                       bg-gray-800 text-white text-xs rounded-md px-2 py-1
+                       opacity-0 group-hover:opacity-100 transition
+                       pointer-events-none whitespace-nowrap"
+          >
+            ✅ متصل شده
+          </div>
+        )}
+
       </div>
 
       {/* نام شخص (اگر وصل شده) */}
-      {fullName && (
+      {nodeStatus === "CONNECTED" && fullName && (
         <p className="mt-2 text-sm font-semibold text-gray-800 text-center">
           {fullName}
         </p>

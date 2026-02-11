@@ -1,4 +1,4 @@
-const BASE_URL = "https://api.genino.ir/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function getAuthToken() {
   return localStorage.getItem("genino_token");
