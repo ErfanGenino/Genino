@@ -274,6 +274,87 @@ useEffect(() => {
   });
 }, [show, child?.id, members, pendingInvites]);
 
+function normalizedRT(rt) {
+  // rt ممکنه 'KH' یا 'khale' یا ... باشه
+  const map = {
+    KH: "khale",
+    DY: "dayi",
+    AM: "amme",
+    AO: "ammo",
+    FR: "friend",
+    RL: "relative",
+    S: "sister",
+    B: "brother",
+  };
+  return map[rt] || rt;
+}
+
+function findPendingInvitationId(relationType, slot) {
+  const rt = normalizedRT(relationType);
+  const inv = pendingInvites.find(
+    (x) => normalizedRT(x.relationType) === rt && Number(x.slot) === Number(slot)
+  );
+  return inv?.id || null;
+}
+
+function findMemberId(role, slot) {
+  const rt = normalizedRT(role);
+  const m = members.find(
+    (x) => normalizedRT(x.role) === rt && Number(x.slot) === Number(slot)
+  );
+  return m?.id || null;
+}
+
+async function handleCancelInvite(relationType, slot) {
+  const invitationId = findPendingInvitationId(relationType, slot);
+  if (!invitationId) return;
+
+  const ok = window.confirm("دعوت لغو شود؟");
+  if (!ok) return;
+
+  try {
+    const res = await authFetch(`/invitations/${invitationId}`, {
+      method: "DELETE",
+    });
+
+    if (!res?.ok) {
+      alert(res?.message || "لغو دعوت ناموفق بود.");
+      return;
+    }
+
+    await loadPendingInvites();
+    await loadMembers();
+  } catch (e) {
+    alert("خطا در اتصال به سرور.");
+  }
+}
+
+async function handleRemoveMember(role, slot) {
+  if (!child?.id) return;
+
+  const memberId = findMemberId(role, slot);
+  if (!memberId) return;
+
+  const ok = window.confirm("اتصال این عضو لغو شود؟");
+  if (!ok) return;
+
+  try {
+    const res = await authFetch(`/family-tree/${child.id}/members/${memberId}`, {
+      method: "DELETE",
+    });
+
+    if (!res?.ok) {
+      alert(res?.message || "لغو اتصال ناموفق بود.");
+      return;
+    }
+
+    await loadPendingInvites();
+    await loadMembers();
+  } catch (e) {
+    alert("خطا در اتصال به سرور.");
+  }
+}
+
 
   
 if (!show) return null;
@@ -471,6 +552,8 @@ if (!show) return null;
   showTopTitle={false}
   setInviteTarget={setInviteTarget}   // ✅ اضافه شد
   child={child}                       // ✅ اضافه شد
+  onCancelInvite={handleCancelInvite}
+  onRemoveMember={handleRemoveMember}
 />
 <FamilyRow
   title="عمه‌ها و عموها"
@@ -483,6 +566,8 @@ if (!show) return null;
   showTopTitle={false}
   setInviteTarget={setInviteTarget}   // ✅ اضافه شد
   child={child}                       // ✅ اضافه شد
+  onCancelInvite={handleCancelInvite}
+  onRemoveMember={handleRemoveMember}
 />
 <FamilyRow
   title="خاله‌ها و دایی‌ها"
@@ -495,6 +580,8 @@ if (!show) return null;
   showTopTitle={false}
   setInviteTarget={setInviteTarget}   // ✅ اضافه شد
   child={child}                       // ✅ اضافه شد
+  onCancelInvite={handleCancelInvite}
+  onRemoveMember={handleRemoveMember}
 />
 
 {/* 👭 سایر اقوام و دوستان */}
@@ -509,6 +596,8 @@ if (!show) return null;
   showTopTitle={false}
   setInviteTarget={setInviteTarget}   // ✅ اضافه شد
   child={child}                       // ✅ اضافه شد
+  onCancelInvite={handleCancelInvite}
+  onRemoveMember={handleRemoveMember}
 />
 
 
@@ -576,7 +665,7 @@ function FamilyCircle({
             }
           `}
         >
-          {onDelete && nodeStatus !== "CONNECTED" && (
+          {onDelete && nodeStatus !== "EMPTY" && (
   <button
     onClick={(e) => {
       e.stopPropagation(); // 👈 کلیک دایره فعال نشه
@@ -766,6 +855,8 @@ function FamilyRow({
   showTopTitle = true,
   setInviteTarget,    // ✅ اضافه شد
   child,              // ✅ اضافه شد
+  onCancelInvite,
+  onRemoveMember,
 }) {
   return (
     <div className="mt-8 flex flex-col items-center w-full gap-6">
@@ -796,13 +887,16 @@ function FamilyRow({
       side: "left",
     });
     }}
-    onDelete={() =>
-  setLeftItems((prev) =>
-    prev
-      .filter((_, idx) => idx !== i)
-      .map((it, idx) => ({ ...it, slot: idx }))
-  )
-}
+    onDelete={() => {
+  if (item.nodeStatus === "PENDING") {
+    onCancelInvite?.(item.relationType, item.slot);
+    return;
+  }
+  if (item.nodeStatus === "CONNECTED") {
+    onRemoveMember?.(item.relationType, item.slot);
+    return;
+  }
+}}
   />
 ))}
 
@@ -872,13 +966,17 @@ function FamilyRow({
        side: "right",
       });
     }}
-    onDelete={() =>
-  setRightItems((prev) =>
-    prev
-      .filter((_, idx) => idx !== i)
-      .map((it, idx) => ({ ...it, slot: idx }))
-  )
-}
+    onDelete={() => {
+  if (item.nodeStatus === "PENDING") {
+    onCancelInvite?.(item.relationType, item.slot);
+    return;
+  }
+  if (item.nodeStatus === "CONNECTED") {
+    onRemoveMember?.(item.relationType, item.slot);
+    return;
+  }
+}}
+
   />
 ))}
             <AddButton
