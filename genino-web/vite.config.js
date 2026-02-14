@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 import path from "path"; // 👈 برای تعریف مسیرها
 
 export default defineConfig({
-  base: "./",
+  base: "/",
   plugins: [react()],
   resolve: {
     alias: {

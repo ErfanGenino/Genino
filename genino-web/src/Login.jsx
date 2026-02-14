@@ -1,14 +1,15 @@
 // D:\projects\Genino\genino-web\src\login.jsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import logo from "./assets/logo-genino.png";
 import { loginUser, getUserProfile } from "./services/api";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export default function Login() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e) {
@@ -50,7 +51,17 @@ export default function Login() {
 
       // مرحله ۴: هدایت به داشبورد
       setTimeout(() => {
-        const lifeStage = localStorage.getItem("lifeStage");
+      // ✅ اگر از لینک دعوت آمده، اولویت با next است
+        const params = new URLSearchParams(location.search);
+        const next = params.get("next");
+
+        if (next) {
+        navigate(next, { replace: true });
+        return;
+      }
+
+      // ✅ در غیر اینصورت مثل قبل برو داشبورد
+      const lifeStage = localStorage.getItem("lifeStage");
 
         if (lifeStage === "single") navigate("/dashboard-single");
         else if (lifeStage === "couple") navigate("/dashboard-couple");
@@ -59,6 +70,7 @@ export default function Login() {
         else if (lifeStage === "user") navigate("/dashboard-user");
         else navigate("/signup-user");
       }, 1200);
+
     } catch (err) {
       console.error("Login error:", err);
       setMessage("❌ خطای سرور یا اینترنت. لطفاً دوباره تلاش کنید.");

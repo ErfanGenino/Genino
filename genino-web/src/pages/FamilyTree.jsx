@@ -58,6 +58,8 @@ const [motherOverridePhoto, setMotherOverridePhoto] = useState(null);
   const [inviteTarget, setInviteTarget] = useState(null);
   const [pendingInvites, setPendingInvites] = useState([]);
   const [members, setMembers] = useState([]);
+  const [shareInvite, setShareInvite] = useState(null);
+// شکل داده: { link, message, roleLabel, childName }
 
   
 
@@ -189,8 +191,34 @@ function backendRTtoPrefix(rt) {
     const res = await authFetch(`/family-tree/${child.id}/pending-invitations`);
     if (!res?.ok) return;
 
-    setPendingInvites(res.pendingInvitations || []);
-    console.log("PENDING INVITES:", res.pendingInvitations);
+    const base =
+      window.location.origin.includes("localhost")
+        ? "http://localhost:5173"
+        : "https://genino.ir";
+
+    // ✅ Dedup: برای هر (relationType, slot) فقط جدیدترین pending نگه داشته می‌شود
+    const map = new Map();
+    for (const inv of res.pendingInvitations || []) {
+      const key = `${inv.relationType}:${inv.slot}`;
+      const prev = map.get(key);
+
+      if (!prev) {
+        map.set(key, inv);
+        continue;
+      }
+
+      // جدیدترین createdAt رو نگه داریم
+      const prevT = new Date(prev.createdAt).getTime();
+      const curT = new Date(inv.createdAt).getTime();
+      if (curT > prevT) map.set(key, inv);
+    }
+
+    const pendingUnique = Array.from(map.values()).map((x) => ({
+      ...x,
+      inviteLink: x.token ? `${base}/invite/${x.token}` : null,
+    }));
+
+    setPendingInvites(pendingUnique);
   } catch (e) {
     console.log("loadPendingInvites error:", e);
   }
@@ -607,29 +635,59 @@ if (!show) return null;
       <InviteModal
   open={!!inviteTarget}
   target={inviteTarget}   // ✅ جدید
+  child={child}
   title={`دعوت ${inviteTarget?.label || ""}`}
   description={`می‌خواهید ${inviteTarget?.label} را به درختواره کودک اضافه کنید؟`}
   onClose={() => setInviteTarget(null)}
   onConfirm={(res) => {
   if (!inviteTarget) return;
 
-  // فقط UI رو PENDING کن
+  // ✅ 1) فقط UI رو PENDING کن
   if (inviteTarget.side === "left") {
     const map = { S: setSisters, AM: setAunts, KH: setKhaleha, FR: setFriends };
     map[inviteTarget.relationType]?.((prev) =>
-      prev.map((item, i) => (i === inviteTarget.index ? { ...item, nodeStatus: "PENDING" } : item))
+      prev.map((item, i) =>
+        i === inviteTarget.index ? { ...item, nodeStatus: "PENDING" } : item
+      )
     );
   }
 
   if (inviteTarget.side === "right") {
     const map = { B: setBrothers, AO: setUncles, DY: setDayiha, RL: setRelatives };
     map[inviteTarget.relationType]?.((prev) =>
-      prev.map((item, i) => (i === inviteTarget.index ? { ...item, nodeStatus: "PENDING" } : item))
+      prev.map((item, i) =>
+        i === inviteTarget.index ? { ...item, nodeStatus: "PENDING" } : item
+      )
     );
   }
 
-  setInviteTarget(null); // مودال بسته بشه
+  // ✅ 2) InviteModal بسته شود
+  setInviteTarget(null);
+
+  // ✅ 3) shareInvite پر شود (برای مودال بعدی)
+  const link = res?.token
+    ? `https://genino.ir/invite/${encodeURIComponent(res.token)}`
+    : "";
+
+  const childName = child?.fullName || "";
+  const roleLabel = inviteTarget?.roleLabel || inviteTarget?.label || "";
+
+  const message = `🌿 دعوت به ژنینو
+
+شما به عنوان ${roleLabel}${childName ? `ِ ${childName}` : ""}
+به ژنینو و صفحه ${childName} دعوت شده‌اید.
+
+با پذیرش این دعوت می‌توانید همراه ${childName} باشید.
+
+لینک پذیرش دعوت:
+${link}
+`;
+
+  setShareInvite({ link, message, roleLabel, childName });
+
+  // ✅ 4) sync با بک‌اند
   loadPendingInvites();
+  loadMembers();
 }}
   />
 
@@ -665,7 +723,8 @@ function FamilyCircle({
             }
           `}
         >
-          {onDelete && nodeStatus !== "EMPTY" && (
+          {onDelete && (
+
   <button
     onClick={(e) => {
       e.stopPropagation(); // 👈 کلیک دایره فعال نشه
@@ -703,7 +762,7 @@ function FamilyCircle({
           {/* ✅ Badge برای CONNECTED */}
 {nodeStatus === "CONNECTED" && (
   <div
-    className="absolute -bottom-1 -right-1
+    className="absolute -top-1 -left-1 z-10
                w-6 h-6 rounded-full
                bg-green-500 text-white
                flex items-center justify-center
@@ -888,15 +947,19 @@ function FamilyRow({
     });
     }}
     onDelete={() => {
-  if (item.nodeStatus === "PENDING") {
-    onCancelInvite?.(item.relationType, item.slot);
-    return;
-  }
-  if (item.nodeStatus === "CONNECTED") {
-    onRemoveMember?.(item.relationType, item.slot);
-    return;
+  if (item.nodeStatus === "PENDING") return onCancelInvite?.(item.relationType, item.slot);
+  if (item.nodeStatus === "CONNECTED") return onRemoveMember?.(item.relationType, item.slot);
+
+  if (item.nodeStatus === "EMPTY") {
+    setLeftItems((prev) =>
+      prev
+        .filter((_, idx) => idx !== i)
+        .map((x, idx) => ({ ...x, slot: idx }))
+    );
   }
 }}
+
+
   />
 ))}
 
@@ -967,13 +1030,15 @@ function FamilyRow({
       });
     }}
     onDelete={() => {
-  if (item.nodeStatus === "PENDING") {
-    onCancelInvite?.(item.relationType, item.slot);
-    return;
-  }
-  if (item.nodeStatus === "CONNECTED") {
-    onRemoveMember?.(item.relationType, item.slot);
-    return;
+  if (item.nodeStatus === "PENDING") return onCancelInvite?.(item.relationType, item.slot);
+  if (item.nodeStatus === "CONNECTED") return onRemoveMember?.(item.relationType, item.slot);
+
+  if (item.nodeStatus === "EMPTY") {
+    setRightItems((prev) =>
+      prev
+        .filter((_, idx) => idx !== i)
+        .map((x, idx) => ({ ...x, slot: idx }))
+    );
   }
 }}
 
