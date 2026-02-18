@@ -4,6 +4,10 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import InviteModal from "../components/FamilyTree/InviteModal";
 import { authFetch } from "../services/api";
+import ShareInviteModal from "../components/FamilyTree/ShareInviteModal";
+import FamilyCircle from "../components/FamilyTree/FamilyCircle";
+import FamilyLayerRow from "../components/FamilyTree/FamilyLayerRow";
+import { buildInviteLink, buildInviteMessage } from "../utils/inviteShare";
 
 
 
@@ -54,7 +58,6 @@ const [motherOverridePhoto, setMotherOverridePhoto] = useState(null);
   const [khaleha, setKhaleha] = useState([]); // خاله‌ها
   const [dayiha, setDayiha] = useState([]);   // دایی‌ها
   const [friends, setFriends] = useState([]);   // 👥 دوستان (سمت چپ)
-  const [relatives, setRelatives] = useState([]); // 🧬 سایر اقوام (سمت راست)
   const [inviteTarget, setInviteTarget] = useState(null);
   const [pendingInvites, setPendingInvites] = useState([]);
   const [members, setMembers] = useState([]);
@@ -82,7 +85,7 @@ function metaByPrefix(prefix) {
       prefix === "AO" ? "عمو" :
       prefix === "KH" ? "خاله" :
       prefix === "DY" ? "دایی" :
-      prefix === "FR" ? "دوست" :
+      prefix === "FR" ? "سایر" :
       prefix === "RL" ? "قوم" :
       "عضو",
     emoji:
@@ -170,7 +173,7 @@ function backendRTtoPrefix(rt) {
     khale: "KH",
     dayi: "DY",
     friend: "FR",
-    relative: "RL",
+    relative: "FR",
 
     // این‌ها همونطور بمونن
     grandfather_paternal: "grandfather_paternal",
@@ -257,7 +260,7 @@ useEffect(() => {
   setKhaleha([]);
   setDayiha([]);
   setFriends([]);
-  setRelatives([]);
+
 
   // ✅ اول members رو CONNECTED کن (سبز)
   members.forEach((m) => {
@@ -273,8 +276,8 @@ useEffect(() => {
     if (role === "khale") ensureSlotAndSetConnected(setKhaleha, "KH", slot, m);
     if (role === "dayi") ensureSlotAndSetConnected(setDayiha, "DY", slot, m);
 
-    if (role === "friend") ensureSlotAndSetConnected(setFriends, "FR", slot, m);
-    if (role === "relative") ensureSlotAndSetConnected(setRelatives, "RL", slot, m);
+    if (role === "friend" || role === "relative")
+  ensureSlotAndSetConnected(setFriends, "FR", slot, m);
   });
 
   // ✅ بعد pending ها رو فقط اگر اون slot هنوز CONNECTED نیست PENDING کن (زرد)
@@ -298,7 +301,6 @@ useEffect(() => {
     if (rt === "DY") ensureSlotAndSetPending(setDayiha, "DY", slot);
 
     if (rt === "FR") ensureSlotAndSetPending(setFriends, "FR", slot);
-    if (rt === "RL") ensureSlotAndSetPending(setRelatives, "RL", slot);
   });
 }, [show, child?.id, members, pendingInvites]);
 
@@ -309,8 +311,7 @@ function normalizedRT(rt) {
     DY: "dayi",
     AM: "amme",
     AO: "ammo",
-    FR: "friend",
-    RL: "relative",
+    FR: "friend", // هر چیزی که تو UI "سایر" هست، در بک‌اند دوست/relative میاد، پس نرمالش = friend
     S: "sister",
     B: "brother",
   };
@@ -331,6 +332,26 @@ function findMemberId(role, slot) {
     (x) => normalizedRT(x.role) === rt && Number(x.slot) === Number(slot)
   );
   return m?.id || null;
+}
+
+function openShareForPending(relationType, slot, roleLabelFallback) {
+  const rt = normalizedRT(relationType);
+
+  const inv = pendingInvites.find(
+    (x) => normalizedRT(x.relationType) === rt && Number(x.slot) === Number(slot)
+  );
+
+  if (!inv?.token) {
+    alert("برای این دعوت، لینک دستی پیدا نشد.");
+    return;
+  }
+
+  const link = buildInviteLink(inv.token);
+  const childName = child?.fullName || "";
+  const roleLabel = roleLabelFallback || inv.roleLabel || "عضو خانواده";
+  const message = buildInviteMessage({ roleLabel, childName, link });
+
+  setShareInvite({ link, message, roleLabel, childName });
 }
 
 async function handleCancelInvite(relationType, slot) {
@@ -383,6 +404,83 @@ async function handleRemoveMember(role, slot) {
   }
 }
 
+function renderCircle(item, i) {
+  return (
+    <FamilyCircle
+      nodeStatus={item.nodeStatus}
+      emoji={item.emoji}
+      fullName={item.fullName}
+      relationLabel={item.relationLabel}
+      onClick={() => {
+        if (item.nodeStatus === "EMPTY") {
+          setInviteTarget({
+            childId: child?.id,
+            label: item.relationLabel,
+            relationType: item.relationType,
+            slot: item.slot,
+            roleLabel: item.relationLabel,
+            index: i,
+            side: "single", // تو لایه جدید دیگه چپ/راست نداریم
+          });
+          return;
+        }
+
+        if (item.nodeStatus === "PENDING") {
+          openShareForPending(item.relationType, item.slot, item.relationLabel);
+        }
+      }}
+      onDelete={() => {
+        if (item.nodeStatus === "PENDING") return handleCancelInvite(item.relationType, item.slot);
+        if (item.nodeStatus === "CONNECTED") return handleRemoveMember(item.relationType, item.slot);
+
+        if (item.nodeStatus === "EMPTY") {
+          // حذف اسلات
+          const setter =
+            item.relationType === "S" ? setSisters :
+            item.relationType === "B" ? setBrothers :
+            item.relationType === "KH" ? setKhaleha :
+            item.relationType === "AM" ? setAunts :
+            item.relationType === "DY" ? setDayiha :
+            item.relationType === "AO" ? setUncles :
+            // سایر: FR و RL با هم می‌شن "سایر" ولی فعلا اینجا جدا مدیریت می‌کنیم
+            item.relationType === "FR" ? setFriends :
+            null;
+
+          if (!setter) return;
+
+          setter((prev) =>
+            prev
+              .filter((_, idx) => idx !== i)
+              .map((x, idx) => ({ ...x, slot: idx }))
+          );
+        }
+      }}
+    />
+  );
+}
+
+function setPendingByTarget(t) {
+  const map = {
+    S: setSisters,
+    B: setBrothers,
+    KH: setKhaleha,
+    AM: setAunts,
+    DY: setDayiha,
+    AO: setUncles,
+    FR: setFriends,
+  };
+
+  const setter = map[t?.relationType];
+  if (!setter) return;
+
+  setter((prev) =>
+  prev.map((item, idx) =>
+    (Number.isFinite(t.index) ? idx === t.index : Number(item.slot) === Number(t.slot))
+      ? { ...item, nodeStatus: "PENDING" }
+      : item
+  )
+);
+}
 
   
 if (!show) return null;
@@ -569,64 +667,161 @@ if (!show) return null;
 </div>
 
 
-        <FamilyRow
-  title="خواهرها و برادرها"
-  leftItems={sisters}
-  setLeftItems={setSisters}
-  rightItems={brothers}
-  setRightItems={setBrothers}
-  leftPrefix="S"
-  rightPrefix="B"
-  showTopTitle={false}
-  setInviteTarget={setInviteTarget}   // ✅ اضافه شد
-  child={child}                       // ✅ اضافه شد
-  onCancelInvite={handleCancelInvite}
-  onRemoveMember={handleRemoveMember}
-/>
-<FamilyRow
-  title="عمه‌ها و عموها"
-  leftItems={aunts}
-  setLeftItems={setAunts}
-  rightItems={uncles}
-  setRightItems={setUncles}
-  leftPrefix="AM"
-  rightPrefix="AO"
-  showTopTitle={false}
-  setInviteTarget={setInviteTarget}   // ✅ اضافه شد
-  child={child}                       // ✅ اضافه شد
-  onCancelInvite={handleCancelInvite}
-  onRemoveMember={handleRemoveMember}
-/>
-<FamilyRow
-  title="خاله‌ها و دایی‌ها"
-  leftItems={khaleha}
-  setLeftItems={setKhaleha}
-  rightItems={dayiha}
-  setRightItems={setDayiha}
-  leftPrefix="KH"
-  rightPrefix="DY"
-  showTopTitle={false}
-  setInviteTarget={setInviteTarget}   // ✅ اضافه شد
-  child={child}                       // ✅ اضافه شد
-  onCancelInvite={handleCancelInvite}
-  onRemoveMember={handleRemoveMember}
+
+<FamilyLayerRow
+  title="خواهرها"
+  items={sisters}
+  onAdd={() =>
+    setSisters((prev) => [
+      ...prev,
+      {
+        id: null,
+        fullName: null,
+        relationType: "S",
+        slot: prev.length,
+        relationLabel: "خواهر",
+        emoji: "👧",
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+      },
+    ])
+  }
+  renderItem={renderCircle}
 />
 
-{/* 👭 سایر اقوام و دوستان */}
-<FamilyRow
-  title="سایر اقوام و دوستان"
-  leftItems={friends}
-  setLeftItems={setFriends}
-  rightItems={relatives}
-  setRightItems={setRelatives}
-  leftPrefix="FR"     // Friends
-  rightPrefix="RL"    // Relatives
-  showTopTitle={false}
-  setInviteTarget={setInviteTarget}   // ✅ اضافه شد
-  child={child}                       // ✅ اضافه شد
-  onCancelInvite={handleCancelInvite}
-  onRemoveMember={handleRemoveMember}
+<FamilyLayerRow
+  title="برادرها"
+  items={brothers}
+  onAdd={() =>
+    setBrothers((prev) => [
+      ...prev,
+      {
+        id: null,
+        fullName: null,
+        relationType: "B",
+        slot: prev.length,
+        relationLabel: "برادر",
+        emoji: "👦",
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+      },
+    ])
+  }
+  renderItem={renderCircle}
 />
+
+<FamilyLayerRow
+  title="خاله‌ها"
+  items={khaleha}
+  onAdd={() =>
+    setKhaleha((prev) => [
+      ...prev,
+      {
+        id: null,
+        fullName: null,
+        relationType: "KH",
+        slot: prev.length,
+        relationLabel: "خاله",
+        emoji: "👩",
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+      },
+    ])
+  }
+  renderItem={renderCircle}
+/>
+
+<FamilyLayerRow
+  title="عمه‌ها"
+  items={aunts}
+  onAdd={() =>
+    setAunts((prev) => [
+      ...prev,
+      {
+        id: null,
+        fullName: null,
+        relationType: "AM",
+        slot: prev.length,
+        relationLabel: "عمه",
+        emoji: "👩",
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+      },
+    ])
+  }
+  renderItem={renderCircle}
+/>
+
+<FamilyLayerRow
+  title="دایی‌ها"
+  items={dayiha}
+  onAdd={() =>
+    setDayiha((prev) => [
+      ...prev,
+      {
+        id: null,
+        fullName: null,
+        relationType: "DY",
+        slot: prev.length,
+        relationLabel: "دایی",
+        emoji: "👨",
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+      },
+    ])
+  }
+  renderItem={renderCircle}
+/>
+
+<FamilyLayerRow
+  title="عموها"
+  items={uncles}
+  onAdd={() =>
+    setUncles((prev) => [
+      ...prev,
+      {
+        id: null,
+        fullName: null,
+        relationType: "AO",
+        slot: prev.length,
+        relationLabel: "عمو",
+        emoji: "👨",
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+      },
+    ])
+  }
+  renderItem={renderCircle}
+/>
+
+<FamilyLayerRow
+  title="سایر"
+  items={friends}
+  onAdd={() =>
+    setFriends((prev) => [
+      ...prev,
+      {
+        id: null,
+        fullName: null,
+        relationType: "FR",
+        slot: prev.length,
+        relationLabel: "سایر",
+        emoji: "👥",
+        nodeStatus: "EMPTY",
+        userId: null,
+        overridePhoto: null,
+      },
+    ])
+  }
+  renderItem={renderCircle}
+/>
+
 
 
       </div>
@@ -642,35 +837,23 @@ if (!show) return null;
   onConfirm={(res) => {
   if (!inviteTarget) return;
 
-  // ✅ 1) فقط UI رو PENDING کن
-  if (inviteTarget.side === "left") {
-    const map = { S: setSisters, AM: setAunts, KH: setKhaleha, FR: setFriends };
-    map[inviteTarget.relationType]?.((prev) =>
-      prev.map((item, i) =>
-        i === inviteTarget.index ? { ...item, nodeStatus: "PENDING" } : item
-      )
-    );
-  }
+  const t = inviteTarget; // ✅ کپی محلی
 
-  if (inviteTarget.side === "right") {
-    const map = { B: setBrothers, AO: setUncles, DY: setDayiha, RL: setRelatives };
-    map[inviteTarget.relationType]?.((prev) =>
-      prev.map((item, i) =>
-        i === inviteTarget.index ? { ...item, nodeStatus: "PENDING" } : item
-      )
-    );
-  }
+  // ✅ 1) UI همون slot رو PENDING کن
+  if (t?.slot !== undefined && t?.slot !== null) {
+    setPendingByTarget(t);
+    }
 
   // ✅ 2) InviteModal بسته شود
   setInviteTarget(null);
 
-  // ✅ 3) shareInvite پر شود (برای مودال بعدی)
+  // ✅ 3) shareInvite پر شود
   const link = res?.token
     ? `https://genino.ir/invite/${encodeURIComponent(res.token)}`
     : "";
 
   const childName = child?.fullName || "";
-  const roleLabel = inviteTarget?.roleLabel || inviteTarget?.label || "";
+  const roleLabel = t?.roleLabel || t?.label || "";
 
   const message = `🌿 دعوت به ژنینو
 
@@ -689,401 +872,16 @@ ${link}
   loadPendingInvites();
   loadMembers();
 }}
+
   />
+
+  <ShareInviteModal
+  open={!!shareInvite}
+  data={shareInvite}
+  onClose={() => setShareInvite(null)}
+/>
 
 
     </motion.div>
   );
 }
-
-function FamilyCircle({
-  nodeStatus = "EMPTY",      // EMPTY | PENDING | CONNECTED
-  emoji = "👤",
-  photo = null,
-  fullName = null,
-  relationLabel = "",
-  onClick,
-  onDelete,
-}) {
-  return (
-    <div className="flex flex-col items-center">
-      <div className="relative group">
-        <div
-          onClick={() => {
-            if (nodeStatus === "EMPTY" && onClick) onClick();
-          }}
-          className={`w-20 h-20 rounded-full flex items-center justify-center
-            transition shadow-sm
-            ${
-              nodeStatus === "CONNECTED"
-                ? "bg-green-100 border border-green-400 cursor-default"
-                : nodeStatus === "PENDING"
-                ? "bg-yellow-100 border border-yellow-400 cursor-not-allowed opacity-80"
-                : "bg-white border border-gray-300 cursor-pointer hover:scale-105 hover:shadow-md"
-            }
-          `}
-        >
-          {onDelete && (
-
-  <button
-    onClick={(e) => {
-      e.stopPropagation(); // 👈 کلیک دایره فعال نشه
-      onDelete();
-    }}
-    className="absolute bottom-1 right-1 bg-white/90 border border-gray-300
-               rounded-full p-[3px] opacity-0 group-hover:opacity-100 transition"
-    title="حذف"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      className="w-3.5 h-3.5 text-red-500"
-    >
-      <path
-        fillRule="evenodd"
-        d="M6 8a1 1 0 011-1h6a1 1 0 011 1v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8zm3-5a1 1 0 00-1 1v1H4.5a.5.5 0 000 1h11a.5.5 0 000-1H12V4a1 1 0 00-1-1H9z"
-        clipRule="evenodd"
-      />
-    </svg>
-  </button>
-)}
-
-          {photo ? (
-            <img
-              src={photo}
-              alt={fullName || relationLabel}
-              className="w-full h-full object-cover rounded-full"
-            />
-          ) : (
-            <span className="text-2xl">{emoji}</span>
-          )}
-
-          {/* ✅ Badge برای CONNECTED */}
-{nodeStatus === "CONNECTED" && (
-  <div
-    className="absolute -top-1 -left-1 z-10
-               w-6 h-6 rounded-full
-               bg-green-500 text-white
-               flex items-center justify-center
-               text-xs font-bold
-               border-2 border-white shadow-md"
-  >
-    ✓
-  </div>
-)}
-
-        </div>
-
-        {/* Tooltip برای EMPTY */}
-        {nodeStatus === "EMPTY" && (
-          <div
-            className="absolute -top-9 left-1/2 -translate-x-1/2
-                       bg-gray-800 text-white text-xs rounded-md px-2 py-1
-                       opacity-0 group-hover:opacity-100 transition
-                       pointer-events-none whitespace-nowrap"
-          >
-            برای ارسال دعوت کلیک کنید
-          </div>
-        )}
-
-        {/* Tooltip برای PENDING */}
-        {nodeStatus === "PENDING" && (
-          <div
-            className="absolute -top-9 left-1/2 -translate-x-1/2
-                       bg-gray-800 text-white text-xs rounded-md px-2 py-1
-                       opacity-0 group-hover:opacity-100 transition
-                       pointer-events-none whitespace-nowrap"
-          >
-            دعوت ارسال شده – در انتظار پذیرش
-          </div>
-        )}
-
-        {/* Tooltip برای CONNECTED */}
-        {nodeStatus === "CONNECTED" && (
-          <div
-            className="absolute -top-9 left-1/2 -translate-x-1/2
-                       bg-gray-800 text-white text-xs rounded-md px-2 py-1
-                       opacity-0 group-hover:opacity-100 transition
-                       pointer-events-none whitespace-nowrap"
-          >
-            ✅ متصل شده
-          </div>
-        )}
-
-      </div>
-
-      {/* نام شخص (اگر وصل شده) */}
-      {nodeStatus === "CONNECTED" && fullName && (
-        <p className="mt-2 text-sm font-semibold text-gray-800 text-center">
-          {fullName}
-        </p>
-      )}
-
-      {/* نسبت فامیلی */}
-      {relationLabel && (
-        <p className="text-xs text-gray-500 text-center">
-          {relationLabel}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* 🔸 جزء قابل حذف (دایره با سطل) */
-function DeletableCircle({ label, onDelete, nodeStatus, onClick }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-      className={`relative group w-20 h-20 rounded-full flex items-center justify-center
-  text-sm font-semibold shadow-sm transition
-  ${
-    nodeStatus === "DRAFT"
-      ? "bg-blue-50 border border-blue-400 text-blue-700 cursor-pointer"
-      : nodeStatus === "PENDING"
-      ? "bg-yellow-100 border border-yellow-400 text-yellow-800 cursor-not-allowed"
-      : "bg-white/80 border border-yellow-300 text-gray-700"
-  }
-`}
-onClick={onClick}
-    >
-     {nodeStatus === "EMPTY" && (
-  <div
-    className="absolute -top-9 left-1/2 -translate-x-1/2
-               bg-gray-800 text-white text-xs rounded-md px-2 py-1
-               opacity-0 group-hover:opacity-100 transition
-               pointer-events-none whitespace-nowrap"
-  >
-    برای ارسال دعوت کلیک کنید
-  </div>
-)}
-
-      {nodeStatus === "EMPTY" ? (
-  <span className="text-2xl">{label}</span>
-) : (
-  <span className="text-sm font-semibold">{label}</span>
-)}
-      <button
-        onClick={onDelete}
-        className="absolute bottom-1 right-1 bg-white/90 border border-gray-300 rounded-full p-[3px] opacity-0 group-hover:opacity-100 transition"
-        title="حذف"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="w-3.5 h-3.5 text-red-500"
-        >
-          <path
-            fillRule="evenodd"
-            d="M6 8a1 1 0 011-1h6a1 1 0 011 1v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8zm3-5a1 1 0 00-1 1v1H4.5a.5.5 0 000 1h11a.5.5 0 000-1H12V4a1 1 0 00-1-1H9z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-    </motion.div>
-  );
-}
-
-/* 🔹 دکمه افزودن */
-function AddButton({ onClick }) {
-  return (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={onClick}
-      className="mt-3 w-8 h-8 rounded-full border-2 border-dashed border-yellow-500 text-yellow-600 text-lg font-bold flex items-center justify-center bg-white hover:bg-yellow-50 transition"
-    >
-      +
-    </motion.button>
-  );
-}
-
-/* 🔸 ردیف خانواده (عمومی برای دو طرف) */
-function FamilyRow({
-  title,
-  leftItems,
-  setLeftItems,
-  rightItems,
-  setRightItems,
-  leftPrefix,
-  rightPrefix,
-  doubleRow = false,
-  showTopTitle = true,
-  setInviteTarget,    // ✅ اضافه شد
-  child,              // ✅ اضافه شد
-  onCancelInvite,
-  onRemoveMember,
-}) {
-  return (
-    <div className="mt-8 flex flex-col items-center w-full gap-6">
-      {showTopTitle && (
-        <h3 className="text-yellow-800 font-semibold text-base sm:text-lg mb-4">{title}</h3>
-      )}
-
-      <div className={`flex ${doubleRow ? "flex-col sm:flex-row" : "flex-row"} items-center justify-center gap-8`}>
-        {/* 🔸 سمت چپ */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex items-center gap-3">
-            {leftItems.map((item, i) => (
-  <FamilyCircle
-    key={`${leftPrefix}-${i}`}
-    nodeStatus={item.nodeStatus}
-    emoji={item.emoji}
-    fullName={item.fullName}
-    relationLabel={item.relationLabel}
-    onClick={() => {
-      if (item.nodeStatus !== "EMPTY") return;
-      setInviteTarget({
-      childId: child?.id,              // ✅
-      label: item.relationLabel,       // برای متن مودال
-      relationType: item.relationType, // ✅ (مثلاً "KH" یا "FR")
-      slot: item.slot,                         // ✅ شماره جایگاه
-      roleLabel: item.relationLabel,   // ✅ فارسیِ نقش
-      index: i,
-      side: "left",
-    });
-    }}
-    onDelete={() => {
-  if (item.nodeStatus === "PENDING") return onCancelInvite?.(item.relationType, item.slot);
-  if (item.nodeStatus === "CONNECTED") return onRemoveMember?.(item.relationType, item.slot);
-
-  if (item.nodeStatus === "EMPTY") {
-    setLeftItems((prev) =>
-      prev
-        .filter((_, idx) => idx !== i)
-        .map((x, idx) => ({ ...x, slot: idx }))
-    );
-  }
-}}
-
-
-  />
-))}
-
-            <AddButton
-  onClick={() =>
-    setLeftItems([
-  ...leftItems,
-  {
-    id: null,
-    fullName: null,
-    relationType: leftPrefix,
-    slot: leftItems.length,
-    relationLabel:
-  leftPrefix === "S" ? "خواهر" :
-  leftPrefix === "B" ? "برادر" :
-  leftPrefix === "AM" ? "عمه" :
-  leftPrefix === "AO" ? "عمو" :
-  leftPrefix === "KH" ? "خاله" :
-  leftPrefix === "DY" ? "دایی" :
-  "",   // مثلاً «خواهرها و برادرها»
-    emoji:
-      leftPrefix === "S" ? "👧" :
-      leftPrefix === "B" ? "👦" :
-      leftPrefix === "AM" ? "👩" :
-      leftPrefix === "AO" ? "👨" :
-      leftPrefix === "KH" ? "👩" :
-      leftPrefix === "DY" ? "👨" :
-      "👤",
-    nodeStatus: "EMPTY",
-    userId: null,
-    overridePhoto: null,
-  },
-])
-  }
-/>
-          </div>
-
-          
-        </div>
-
-        {/* 🔸 تیتر وسط */}
-        <div className="flex flex-col items-center justify-center">
-          <span className="text-yellow-700 font-semibold text-sm sm:text-base text-center">
-            {title}
-          </span>
-        </div>
-
-        {/* 🔸 سمت راست */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex items-center gap-3">
-            {rightItems.map((item, i) => (
-  <FamilyCircle
-    key={`${rightPrefix}-${i}`}
-    nodeStatus={item.nodeStatus}
-    emoji={item.emoji}
-    fullName={item.fullName}
-    relationLabel={item.relationLabel}
-    onClick={() => {
-      if (item.nodeStatus !== "EMPTY") return;
-      setInviteTarget({
-       childId: child?.id,
-       label: item.relationLabel,
-       relationType: item.relationType,
-       slot: item.slot,
-       roleLabel: item.relationLabel,
-       index: i,
-       side: "right",
-      });
-    }}
-    onDelete={() => {
-  if (item.nodeStatus === "PENDING") return onCancelInvite?.(item.relationType, item.slot);
-  if (item.nodeStatus === "CONNECTED") return onRemoveMember?.(item.relationType, item.slot);
-
-  if (item.nodeStatus === "EMPTY") {
-    setRightItems((prev) =>
-      prev
-        .filter((_, idx) => idx !== i)
-        .map((x, idx) => ({ ...x, slot: idx }))
-    );
-  }
-}}
-
-  />
-))}
-            <AddButton
-  onClick={() =>
-    setRightItems([
-      ...rightItems,
-      {
-        id: null,
-        fullName: null,
-        relationType: rightPrefix,
-        slot: rightItems.length,
-        relationLabel:
-          rightPrefix === "S" ? "خواهر" :
-          rightPrefix === "B" ? "برادر" :
-          rightPrefix === "AM" ? "عمه" :
-          rightPrefix === "AO" ? "عمو" :
-          rightPrefix === "KH" ? "خاله" :
-          rightPrefix === "DY" ? "دایی" :
-          "",
-        emoji:
-          rightPrefix === "S" ? "👧" :
-          rightPrefix === "B" ? "👦" :
-          rightPrefix === "AM" ? "👩" :
-          rightPrefix === "AO" ? "👨" :
-          rightPrefix === "KH" ? "👩" :
-          rightPrefix === "DY" ? "👨" :
-          "👤",
-        nodeStatus: "EMPTY",
-        userId: null,
-        overridePhoto: null,
-      },
-    ])
-  }
-/>
-
-
-          </div>
-
-        
-        </div>
-      </div>
-    </div>
-  );
-}
-

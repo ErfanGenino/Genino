@@ -1,16 +1,265 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, MapPin, Calendar, Edit, LogOut } from "lucide-react";
+import { User, Mail, MapPin, Calendar, Edit, LogOut, Save, Camera } from "lucide-react";
+import { getUserProfile, updateUserProfile, authFetch } from "../../services/api";
+
+
+
+// نگاشت مرحله زندگی برای UI
+const LIFE_STAGE_OPTIONS = [
+  { value: "user", label: "کاربر عادی" },
+  { value: "single", label: "مجرد" },
+  { value: "couple", label: "زوج" },
+  { value: "pregnancy", label: "در آستانه فرزندآوری" },
+  { value: "parent", label: "والدین" },
+];
+
+const DEFAULT_AVATARS = {
+  male: [
+    "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140061.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140037.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140057.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140075.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140044.png",
+
+    // ✅ چندتای اضافه (مردانه)
+    "https://cdn-icons-png.flaticon.com/512/4140/4140054.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140060.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140033.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140073.png",
+  ],
+  female: [
+    // ✅ چندتای زنانه
+    "https://cdn-icons-png.flaticon.com/512/4140/4140041.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140042.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140043.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140045.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140046.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140047.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140050.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140051.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140052.png",
+    "https://cdn-icons-png.flaticon.com/512/4140/4140053.png",
+  ],
+};
+
+
+function toPersianDate(dateValue) {
+  if (!dateValue) return "—";
+  try {
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return "—";
+    return new Intl.DateTimeFormat("fa-IR").format(d);
+  } catch {
+    return "—";
+  }
+}
+
+async function uploadAvatarToArvan(file) {
+  // 1) گرفتن presign از بک‌اند
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  const contentType = file.type || "image/png";
+
+  const presign = await authFetch("/uploads/presign/avatar", {
+    method: "POST",
+    body: JSON.stringify({ ext, contentType }),
+  });
+
+  if (!presign?.ok) {
+    return { ok: false, message: presign?.message || "خطا در گرفتن لینک آپلود." };
+  }
+
+  // 2) آپلود مستقیم به Arvan (PUT)
+  const putRes = await fetch(presign.uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": contentType,
+    },
+    body: file,
+  });
+
+  if (!putRes.ok) {
+    return { ok: false, message: `آپلود عکس ناموفق بود (${putRes.status})` };
+  }
+
+  // 3) لینک عمومی
+  return { ok: true, publicUrl: presign.publicUrl, key: presign.key };
+}
 
 export default function Profile() {
-  const user = {
-    name: "کاربر ژنینو",
-    email: "user@genino.com",
-    age: 32,
-    city: "تهران",
-    joinDate: "۱۴۰۳/۰۲/۱۵",
-    avatar: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png", // آواتار ساده طلایی
-  };
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showAvatars, setShowAvatars] = useState(false);
+  const [serverUser, setServerUser] = useState(null);
+
+  // فرم قابل ویرایش
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    phone: "",
+    gender: "",
+    birthDate: "", 
+    province: "",
+    city: "",
+    lifeStage: "user",
+    avatarUrl: "",
+  });
+
+  const fullName = useMemo(() => {
+    const a = (form.firstName || "").trim();
+    const b = (form.lastName || "").trim();
+    const combined = `${a} ${b}`.trim();
+    return combined || serverUser?.fullName || "کاربر ژنینو";
+  }, [form.firstName, form.lastName, serverUser?.fullName]);
+
+  const joinDate = useMemo(() => toPersianDate(serverUser?.createdAt), [serverUser?.createdAt]);
+
+  const avatarToShow = useMemo(() => {
+    return (
+      form.avatarUrl ||
+      serverUser?.avatarUrl ||
+      "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
+    );
+  }, [form.avatarUrl, serverUser?.avatarUrl]);
+
+  // بارگذاری پروفایل
+  useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      setLoading(true);
+      const res = await getUserProfile();
+
+      if (!alive) return;
+
+      if (!res?.ok) {
+        setLoading(false);
+        alert(res?.message || "خطا در دریافت پروفایل");
+        return;
+      }
+
+      const u = res.user;
+      setServerUser(u);
+
+      setForm({
+        firstName: u.firstName || "",
+        lastName: u.lastName || "",
+        username: u.username || "",
+        phone: u.phone || "",
+        gender: u.gender || "",
+        birthDate: u.birthDate ? new Date(u.birthDate).toISOString().slice(0, 10) : "",
+        province: u.province || "",
+        city: u.city || "",
+        lifeStage: u.lifeStage || "user",
+        avatarUrl: u.avatarUrl || "",
+      });
+
+      setLoading(false);
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  function setField(name, value) {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function onPickAvatar(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // محدودیت ساده و امن
+    if (!file.type.startsWith("image/")) {
+      alert("فقط فایل تصویر قابل قبول است.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("حجم عکس باید کمتر از 5 مگابایت باشد.");
+      return;
+    }
+
+    setUploading(true);
+
+    const up = await uploadAvatarToArvan(file);
+    setUploading(false);
+
+    if (!up.ok) {
+      alert(up.message || "آپلود ناموفق بود.");
+      return;
+    }
+
+    // فقط لینک را در فرم می‌گذاریم؛ ذخیره نهایی با دکمه ذخیره
+    setField("avatarUrl", up.publicUrl);
+  }
+
+  async function onSave() {
+    setSaving(true);
+
+    // payload مینیمال و تمیز
+    const payload = {
+      firstName: form.firstName?.trim() || null,
+      lastName: form.lastName?.trim() || null,
+      username: form.username?.trim() || null,
+      phone: form.phone?.trim() || null,
+      gender: form.gender || null,
+      birthDate: form.birthDate ? form.birthDate : null,
+      province: form.province?.trim() || null,
+      city: form.city?.trim() || null,
+      lifeStage: form.lifeStage || "user",
+      avatarUrl: form.avatarUrl || null,
+    };
+
+    const res = await updateUserProfile(payload);
+    setSaving(false);
+
+    if (!res?.ok) {
+      alert(res?.message || "ذخیره پروفایل ناموفق بود.");
+      return;
+    }
+
+    // بعد از ذخیره، دوباره پروفایل را از سرور بگیر تا همیشه sync باشیم
+    const fresh = await getUserProfile();
+    if (fresh?.ok) {
+      setServerUser(fresh.user);
+      setForm((prev) => ({
+        ...prev,
+        avatarUrl: fresh.user.avatarUrl || prev.avatarUrl,
+        lifeStage: fresh.user.lifeStage || prev.lifeStage,
+      }));
+    }
+
+    alert("✅ پروفایل با موفقیت ذخیره شد.");
+  }
+
+  function onLogout() {
+    // ساده و مستقیم
+    localStorage.removeItem("genino_token");
+    window.location.href = "/login";
+  }
+
+  const avatarList = useMemo(() => {
+  if (form.gender === "male") return DEFAULT_AVATARS.male;
+  if (form.gender === "female") return DEFAULT_AVATARS.female;
+  return [...DEFAULT_AVATARS.male, ...DEFAULT_AVATARS.female];
+}, [form.gender]);
+
+if (loading) {
+  return (
+    <main dir="rtl" className="min-h-screen flex items-center justify-center">
+      <p className="text-gray-600">در حال دریافت پروفایل...</p>
+    </main>
+  );
+}
+
+
+
+
+
 
   return (
     <main
@@ -36,59 +285,141 @@ export default function Profile() {
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
         >
-          <img
-            src={user.avatar}
-            alt="avatar"
-            className="w-full h-full object-cover"
-          />
+          <img src={avatarToShow} alt="avatar" className="w-full h-full object-cover" />
+          <button
+            type="button"
+            onClick={() => setShowAvatars((s) => !s)}
+            className="absolute bottom-2 right-2 inline-flex items-center gap-1 text-xs bg-white/90 text-yellow-700 px-2 py-1 rounded-lg shadow"
+          >
+          <User className="w-4 h-4" />
+             آواتار
+          </button>
+          <label className="absolute bottom-2 left-2 cursor-pointer">
+            <input type="file" accept="image/*" className="hidden" onChange={onPickAvatar} />
+            <span className="inline-flex items-center gap-1 text-xs bg-white/90 text-yellow-700 px-2 py-1 rounded-lg shadow">
+              <Camera className="w-4 h-4" />
+              {uploading ? "آپلود..." : "عکس"}
+            </span>
+          </label>
         </motion.div>
+        {showAvatars && (
+  <div className="mt-4 w-full max-w-xl bg-white/80 backdrop-blur rounded-2xl border border-yellow-200 p-4 z-10">
+    <p className="text-sm text-gray-700 mb-3">یک آواتار آماده انتخاب کن:</p>
+
+    <div className="grid grid-cols-6 gap-3">
+      {avatarList.map((url) => (
+        <button
+          key={url}
+          type="button"
+          onClick={() => {
+            setField("avatarUrl", url);
+            setShowAvatars(false);
+          }}
+          className="rounded-full overflow-hidden border border-yellow-200 hover:border-yellow-400 transition"
+          title="انتخاب آواتار"
+        >
+          <img src={url} alt="avatar" className="w-full h-full object-cover" />
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
+
         <h1 className="mt-5 text-3xl font-extrabold text-yellow-700 drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]">
-          {user.name}
+          {fullName}
         </h1>
         <p className="text-sm text-gray-500 mt-1">عضو خانواده ژنینو 💛</p>
       </motion.div>
 
-      {/* 🧾 کارت اطلاعات */}
+      {/* 🧾 کارت اطلاعات + فرم */}
       <motion.div
-        className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-[0_0_25px_rgba(212,175,55,0.1)] border border-yellow-200 w-full max-w-lg p-8 text-right space-y-4 z-10"
+        className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-[0_0_25px_rgba(212,175,55,0.1)] border border-yellow-200 w-full max-w-xl p-6 sm:p-8 text-right space-y-6 z-10"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
       >
-        <InfoRow icon={<Mail />} label="ایمیل" value={user.email} />
-        <InfoRow icon={<Calendar />} label="سن" value={`${user.age} سال`} />
-        <InfoRow icon={<MapPin />} label="شهر" value={user.city} />
-        <InfoRow icon={<User />} label="تاریخ عضویت" value={user.joinDate} />
-      </motion.div>
+        {/* نمایش اطلاعات ثابت */}
+        <div className="space-y-3">
+          <InfoRow icon={<Mail />} label="ایمیل" value={serverUser?.email || "—"} />
+          <InfoRow icon={<User />} label="نام کاربری" value={serverUser?.username || "—"} />
+          <InfoRow icon={<Calendar />} label="تاریخ عضویت" value={joinDate} />
+        </div>
 
-      {/* 🔘 دکمه‌ها */}
-      <motion.div
-        className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 z-10"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md hover:from-yellow-600 hover:to-yellow-500 transition"
-        >
-          <Edit className="w-4 h-4" />
-          ویرایش پروفایل
-        </motion.button>
+        <div className="h-px bg-yellow-100" />
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 bg-white text-yellow-600 border border-yellow-300 font-semibold px-6 py-2.5 rounded-xl shadow-sm hover:bg-yellow-50 transition"
-        >
-          <LogOut className="w-4 h-4" />
-          خروج از حساب
-        </motion.button>
+        {/* فرم ویرایش */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="نام" value={form.firstName} onChange={(v) => setField("firstName", v)} />
+          <Field label="نام خانوادگی" value={form.lastName} onChange={(v) => setField("lastName", v)} />
+
+          <Field label="نام کاربری" value={form.username} onChange={(v) => setField("username", v)} />
+          <Field label="موبایل" value={form.phone} onChange={(v) => setField("phone", v)} />
+
+          <Field label="استان" value={form.province} onChange={(v) => setField("province", v)} />
+          <Field label="شهر" value={form.city} onChange={(v) => setField("city", v)} />
+
+          <Select
+            label="جنسیت"
+            value={form.gender}
+            onChange={(v) => setField("gender", v)}
+            options={[
+              { value: "", label: "—" },
+              { value: "male", label: "مرد" },
+              { value: "female", label: "زن" },
+            ]}
+          />
+
+          {/* تاریخ تولد */}
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-gray-600">تاریخ تولد</span>
+          <input
+          type="date"
+          value={form.birthDate}
+          onChange={(e) => setField("birthDate", e.target.value)}
+          className="w-full rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm outline-none focus:border-yellow-400"
+         />
+        </label>
+
+          <Select
+            label="مرحله زندگی"
+            value={form.lifeStage}
+            onChange={(v) => setField("lifeStage", v)}
+            options={LIFE_STAGE_OPTIONS}
+          />
+        </div>
+
+        {/* 🔘 دکمه‌ها */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={saving || uploading}
+            onClick={onSave}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md hover:from-yellow-600 hover:to-yellow-500 transition disabled:opacity-60"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? "در حال ذخیره..." : "ذخیره تغییرات"}
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onLogout}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-yellow-700 border border-yellow-300 font-semibold px-6 py-2.5 rounded-xl shadow-sm hover:bg-yellow-50 transition"
+          >
+            <LogOut className="w-4 h-4" />
+            خروج از حساب
+          </motion.button>
+        </div>
+
+        <p className="text-xs text-gray-500 leading-6">
+          نکته: با تغییر «مرحله زندگی»، دسترسی به داشبوردهای مختلف هم تغییر می‌کند.
+        </p>
       </motion.div>
 
       {/* ✨ ذرات طلایی */}
-      {Array.from({ length: 15 }).map((_, i) => (
+      {Array.from({ length: 12 }).map((_, i) => (
         <motion.div
           key={i}
           className="absolute w-2 h-2 bg-yellow-400 rounded-full shadow-[0_0_10px_rgba(255,215,0,0.6)]"
@@ -112,15 +443,49 @@ export default function Profile() {
   );
 }
 
-/* 💎 کامپوننت اطلاعات */
+/* 💎 نمایش اطلاعات */
 function InfoRow({ icon, label, value }) {
   return (
     <div className="flex items-center justify-between border-b border-yellow-100 pb-2">
-      <div className="flex items-center gap-2 text-yellow-600">
+      <div className="flex items-center gap-2 text-yellow-700">
         <span className="p-1 bg-yellow-100 rounded-lg">{icon}</span>
         <span className="text-sm font-medium">{label}</span>
       </div>
       <p className="text-gray-700 text-sm">{value}</p>
     </div>
+  );
+}
+
+/* 🧾 فیلد */
+function Field({ label, value, onChange }) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs text-gray-600">{label}</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm outline-none focus:border-yellow-400"
+      />
+    </label>
+  );
+}
+
+/* 🔽 سلکت */
+function Select({ label, value, onChange, options }) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs text-gray-600">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm outline-none focus:border-yellow-400"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

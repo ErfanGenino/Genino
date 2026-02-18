@@ -112,3 +112,12 @@ export async function updateLifeStage(stage) {
     body: JSON.stringify({ lifeStage: stage }),
   });
 }
+
+// --- آپدیت پروفایل (me) ---
+export async function updateUserProfile(payload) {
+  return authFetch("/auth/profile", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
