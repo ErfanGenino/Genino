@@ -64,7 +64,7 @@ function Navbar() {
     { to: "/", label: "خانه" },
     { to: "/shop", label: "فروشگاه" },
     { to: "/social", label: "شبکه اجتماعی ژنینو" },
-    { to: "/settings", label: "تنظیمات" },
+    { to: "/social/profile", label: "پروفایل" },
   ];
 
   const inDashboard = window.location.pathname.startsWith("/dashboard");
@@ -159,11 +159,23 @@ useEffect(() => {
               <>
                 {/* نمایش نام کاربر */}
                 <Link
-                 to={`/dashboard-${user.lifeStage}`}
-                 className="text-gray-700 font-medium bg-yellow-100 border border-yellow-300 
-                 px-3 py-1.5 rounded-xl cursor-pointer hover:bg-yellow-200 transition">
-                 {user.fullName}
-                </Link>
+                  to={`/dashboard-${user.lifeStage}`}
+                  className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 
+                             px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-yellow-200 transition"
+                >
+                {/* آواتار کوچک */}
+                <img
+                   src={user?.avatarUrl || "/avatars/101.png"}
+                   alt="avatar"
+                   className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
+                />
+
+            {/* نام کاربر (کمی کوچیکتر) */}
+            <span className="text-[13px] text-gray-700 font-medium leading-none">
+               {user.fullName}
+               </span>
+            </Link>
+
 
                 {/* 🔔 اعلان‌ها */}
                 <button
@@ -223,22 +235,36 @@ useEffect(() => {
           </div>
 
           {/* 🔸 دکمه داشبورد در موبایل */}
+{/* 🔸 دکمه داشبورد در موبایل */}
 {user && (
   <button
     onClick={() => {
-      setMenuOpen(false); // 👈 این خط
+      setMenuOpen(false);
       navigate(`/dashboard-${user.lifeStage}`);
     }}
     className="md:hidden 
       flex items-center gap-2 
       bg-yellow-100 border border-yellow-300 
       px-3 py-1.5 rounded-xl 
-      text-sm font-medium text-yellow-800
       hover:bg-yellow-200 transition"
   >
-    {user.fullName}
+    {/* آواتار کوچک */}
+    <img
+      src={user?.avatarUrl || "/avatars/101.png"}
+      alt="avatar"
+      className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
+      onError={(e) => {
+        e.currentTarget.src = "/avatars/101.png";
+      }}
+    />
+
+    {/* نام کاربر (کوچیکتر) */}
+    <span className="text-[13px] font-medium text-yellow-800 leading-none">
+      {user.fullName}
+    </span>
   </button>
 )}
+
 
           {/* 🔸 منوی موبایل */}
           <button

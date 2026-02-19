@@ -2,6 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, MapPin, Calendar, Edit, LogOut, Save, Camera } from "lucide-react";
 import { getUserProfile, updateUserProfile, authFetch } from "../../services/api";
+import DatePicker from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import DateObject from "react-date-object";
+import gregorian from "react-date-object/calendars/gregorian";
+import { useRef } from "react";
 
 
 
@@ -15,34 +21,18 @@ const LIFE_STAGE_OPTIONS = [
 ];
 
 const DEFAULT_AVATARS = {
-  male: [
-    "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140061.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140037.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140057.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140075.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140044.png",
-
-    // ✅ چندتای اضافه (مردانه)
-    "https://cdn-icons-png.flaticon.com/512/4140/4140054.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140060.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140033.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140073.png",
-  ],
-  female: [
-    // ✅ چندتای زنانه
-    "https://cdn-icons-png.flaticon.com/512/4140/4140041.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140042.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140043.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140045.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140046.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140047.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140050.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140051.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140052.png",
-    "https://cdn-icons-png.flaticon.com/512/4140/4140053.png",
-  ],
+  male: Array.from({ length: 19 }, (_, i) => `/avatars/${101 + i}.png`),
+  female: Array.from({ length: 20 }, (_, i) => `/avatars/${201 + i}.png`),
 };
+
+
+function toLatinDigits(input) {
+  if (!input) return input;
+  return String(input)
+    .replace(/[۰-۹]/g, (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)])
+    .replace(/[٠-٩]/g, (d) => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)]);
+}
+
 
 
 function toPersianDate(dateValue) {
@@ -92,7 +82,11 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showAvatars, setShowAvatars] = useState(false);
+  const [localPreview, setLocalPreview] = useState("");
   const [serverUser, setServerUser] = useState(null);
+  const birthRef = useRef(null);
+
+  
 
   // فرم قابل ویرایش
   const [form, setForm] = useState({
@@ -118,12 +112,14 @@ export default function Profile() {
   const joinDate = useMemo(() => toPersianDate(serverUser?.createdAt), [serverUser?.createdAt]);
 
   const avatarToShow = useMemo(() => {
-    return (
-      form.avatarUrl ||
-      serverUser?.avatarUrl ||
-      "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
-    );
-  }, [form.avatarUrl, serverUser?.avatarUrl]);
+  return (
+    localPreview ||
+    form.avatarUrl ||
+    serverUser?.avatarUrl ||
+    "/avatars/101.png"
+  );
+}, [localPreview, form.avatarUrl, serverUser?.avatarUrl]);
+
 
   // بارگذاری پروفایل
   useEffect(() => {
@@ -170,32 +166,40 @@ export default function Profile() {
   }
 
   async function onPickAvatar(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    // محدودیت ساده و امن
-    if (!file.type.startsWith("image/")) {
-      alert("فقط فایل تصویر قابل قبول است.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("حجم عکس باید کمتر از 5 مگابایت باشد.");
-      return;
-    }
+  console.log("picked file:", file?.name, file?.type, file?.size);
 
-    setUploading(true);
-
-    const up = await uploadAvatarToArvan(file);
-    setUploading(false);
-
-    if (!up.ok) {
-      alert(up.message || "آپلود ناموفق بود.");
-      return;
-    }
-
-    // فقط لینک را در فرم می‌گذاریم؛ ذخیره نهایی با دکمه ذخیره
-    setField("avatarUrl", up.publicUrl);
+  // ✅ اول چک‌ها
+  if (!file.type.startsWith("image/")) {
+    alert("فقط فایل تصویر قابل قبول است.");
+    return;
   }
+  if (file.size > 5 * 1024 * 1024) {
+    alert("حجم عکس باید کمتر از 5 مگابایت باشد.");
+    return;
+  }
+
+  // ✅ بعدش preview
+  const previewUrl = URL.createObjectURL(file);
+  console.log("previewUrl:", previewUrl);
+  setLocalPreview(previewUrl);
+
+  setUploading(true);
+  const up = await uploadAvatarToArvan(file);
+  setUploading(false);
+
+  if (!up.ok) {
+    alert(up.message || "آپلود ناموفق بود.");
+    return;
+  }
+
+  setField("avatarUrl", up.publicUrl);
+  setShowAvatars(false);
+ // setLocalPreview(""); // (فعلاً اینو نگه دار)
+}
+
 
   async function onSave() {
     setSaving(true);
@@ -207,7 +211,7 @@ export default function Profile() {
       username: form.username?.trim() || null,
       phone: form.phone?.trim() || null,
       gender: form.gender || null,
-      birthDate: form.birthDate ? form.birthDate : null,
+      birthDate: form.birthDate ? toLatinDigits(form.birthDate) : null,
       province: form.province?.trim() || null,
       city: form.city?.trim() || null,
       lifeStage: form.lifeStage || "user",
@@ -224,14 +228,26 @@ export default function Profile() {
 
     // بعد از ذخیره، دوباره پروفایل را از سرور بگیر تا همیشه sync باشیم
     const fresh = await getUserProfile();
-    if (fresh?.ok) {
-      setServerUser(fresh.user);
-      setForm((prev) => ({
-        ...prev,
-        avatarUrl: fresh.user.avatarUrl || prev.avatarUrl,
-        lifeStage: fresh.user.lifeStage || prev.lifeStage,
-      }));
-    }
+if (fresh?.ok) {
+  setServerUser(fresh.user);
+
+  setForm((prev) => ({
+    ...prev,
+    avatarUrl: fresh.user.avatarUrl || prev.avatarUrl,
+    lifeStage: fresh.user.lifeStage || prev.lifeStage,
+  }));
+
+  // ✅ Navbar را هم بلافاصله Sync کن
+  try {
+    localStorage.setItem("genino_user", JSON.stringify(fresh.user));
+    window.dispatchEvent(new Event("genino_user_changed"));
+    // 🔄 اگر مرحله زندگی تغییر کرده، به داشبورد جدید برو
+if (fresh.user.lifeStage) {
+  window.location.href = `/dashboard-${fresh.user.lifeStage}`;
+}
+  } catch {}
+}
+
 
     alert("✅ پروفایل با موفقیت ذخیره شد.");
   }
@@ -285,42 +301,77 @@ if (loading) {
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
         >
-          <img src={avatarToShow} alt="avatar" className="w-full h-full object-cover" />
-          <button
-            type="button"
-            onClick={() => setShowAvatars((s) => !s)}
-            className="absolute bottom-2 right-2 inline-flex items-center gap-1 text-xs bg-white/90 text-yellow-700 px-2 py-1 rounded-lg shadow"
-          >
-          <User className="w-4 h-4" />
-             آواتار
-          </button>
-          <label className="absolute bottom-2 left-2 cursor-pointer">
-            <input type="file" accept="image/*" className="hidden" onChange={onPickAvatar} />
-            <span className="inline-flex items-center gap-1 text-xs bg-white/90 text-yellow-700 px-2 py-1 rounded-lg shadow">
-              <Camera className="w-4 h-4" />
-              {uploading ? "آپلود..." : "عکس"}
-            </span>
-          </label>
-        </motion.div>
-        {showAvatars && (
-  <div className="mt-4 w-full max-w-xl bg-white/80 backdrop-blur rounded-2xl border border-yellow-200 p-4 z-10">
-    <p className="text-sm text-gray-700 mb-3">یک آواتار آماده انتخاب کن:</p>
-
-    <div className="grid grid-cols-6 gap-3">
-      {avatarList.map((url) => (
-        <button
-          key={url}
-          type="button"
-          onClick={() => {
-            setField("avatarUrl", url);
-            setShowAvatars(false);
+          <img src={avatarToShow} alt="avatar" className="w-full h-full object-cover" onError={(e) => {console.log("❌ avatar img error:", avatarToShow); 
+          e.currentTarget.src = "/avatars/101.png"; // fallback
           }}
-          className="rounded-full overflow-hidden border border-yellow-200 hover:border-yellow-400 transition"
-          title="انتخاب آواتار"
-        >
-          <img src={url} alt="avatar" className="w-full h-full object-cover" />
-        </button>
-      ))}
+          />
+        </motion.div>
+
+  {/* دکمه انتخب عکس پروفایل */}      
+<motion.button
+  type="button"
+  whileHover={{ scale: 1.03 }}
+  whileTap={{ scale: 0.98 }}
+  onClick={() => setShowAvatars(true)}
+  className="mt-3 inline-flex items-center justify-center text-[11px] px-2 py-1 rounded-lg bg-white/90 text-yellow-700 border border-yellow-200 shadow-sm hover:bg-yellow-50"
+>
+  انتخاب عکس
+</motion.button>
+
+
+        {showAvatars && (
+  <div className="mt-4 w-full max-w-xl bg-white/80 backdrop-blur rounded-2xl border border-yellow-200 p-4 z-10 space-y-4">
+    {/* بخش بالا: آواتار آماده */}
+    <div>
+      <p className="text-sm text-gray-700 mb-3">یک آواتار آماده انتخاب کن:</p>
+
+      <div className="grid grid-cols-6 gap-3">
+        {avatarList.map((url) => (
+          <button
+            key={url}
+            type="button"
+            onClick={() => {
+              setField("avatarUrl", url);
+              setShowAvatars(false);
+            }}
+            className="rounded-full overflow-hidden border border-yellow-200 hover:border-yellow-400 transition"
+            title="انتخاب آواتار"
+          >
+            <img src={url} alt="avatar" className="w-full h-full object-cover" />
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div className="h-px bg-yellow-100" />
+
+    {/* بخش پایین: انتخاب از گالری */}
+    <div>
+      <p className="text-sm text-gray-700 mb-2">یا عکس دلخواهت را از دستگاه انتخاب کن:</p>
+
+      <label
+  className={`inline-flex items-center gap-2 text-xs border border-yellow-200 px-3 py-2 rounded-xl shadow-sm transition
+    ${uploading ? "opacity-60 cursor-not-allowed bg-gray-50 text-gray-500" : "cursor-pointer bg-white text-yellow-700 hover:bg-yellow-50"}
+  `}
+>
+  <Camera className="w-4 h-4" />
+  {uploading ? "در حال آپلود..." : "انتخاب عکس از گالری"}
+  <input
+    type="file"
+    accept="image/*"
+    className="hidden"
+    onChange={onPickAvatar}
+    disabled={uploading}
+  />
+</label>
+{uploading && (
+  <p className="mt-2 text-[11px] text-gray-600">
+    لطفاً چند لحظه صبر کن… تصویر در حال آپلود است.
+  </p>
+)}
+    <p className="mt-2 text-[11px] text-gray-500">
+        (فرمت تصویر و حجم کمتر از ۵ مگابایت)
+      </p>
     </div>
   </div>
 )}
@@ -373,12 +424,30 @@ if (loading) {
           {/* تاریخ تولد */}
         <label className="flex flex-col gap-1">
           <span className="text-xs text-gray-600">تاریخ تولد</span>
-          <input
-          type="date"
-          value={form.birthDate}
-          onChange={(e) => setField("birthDate", e.target.value)}
-          className="w-full rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm outline-none focus:border-yellow-400"
-         />
+          <DatePicker
+  ref={birthRef}
+  calendar={persian}
+  locale={persian_fa}
+  format="YYYY/MM/DD"
+  editable={false}
+  value={
+    form.birthDate
+      ? new DateObject({
+          date: form.birthDate,
+          format: "YYYY-MM-DD",
+          calendar: gregorian,
+          locale: persian_fa,
+        }).convert(persian)
+      : null
+  }
+  onChange={(date) => {
+    const iso = date ? date.convert(gregorian).format("YYYY-MM-DD", "en") : "";
+    setField("birthDate", toLatinDigits(iso));
+    setTimeout(() => birthRef.current?.closeCalendar(), 0);
+  }}
+  inputClass="w-full rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm outline-none focus:border-yellow-400"
+  placeholder="انتخاب تاریخ"
+/>
         </label>
 
           <Select
