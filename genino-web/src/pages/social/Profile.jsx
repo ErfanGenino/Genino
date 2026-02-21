@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, MapPin, Calendar, Edit, LogOut, Save, Camera } from "lucide-react";
+import { User, Mail, Calendar, LogOut, Save, Camera } from "lucide-react";
 import { getUserProfile, updateUserProfile, authFetch } from "../../services/api";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
@@ -86,6 +86,15 @@ export default function Profile() {
   const [serverUser, setServerUser] = useState(null);
   const birthRef = useRef(null);
 
+
+
+    // ✅ جلوگیری از Memory Leak برای preview
+  useEffect(() => {
+    return () => {
+      if (localPreview) URL.revokeObjectURL(localPreview);
+    };
+  }, [localPreview]);
+
   
 
   // فرم قابل ویرایش
@@ -100,6 +109,8 @@ export default function Profile() {
     city: "",
     lifeStage: "user",
     avatarUrl: "",
+    nationalCode: "",
+    addresses: [],
   });
 
   const fullName = useMemo(() => {
@@ -151,6 +162,15 @@ export default function Profile() {
         city: u.city || "",
         lifeStage: u.lifeStage || "user",
         avatarUrl: u.avatarUrl || "",
+        nationalCode: u.nationalCode || "",
+        addresses: (() => {
+        const list = Array.isArray(u.addresses) ? u.addresses : [];
+        if (list.length === 0) return [];
+        const hasDefault = list.some((x) => !!x.isDefault);
+        if (hasDefault) return list;
+        // اگر هیچ پیش‌فرضی نبود، اولی را پیش‌فرض کن
+        return list.map((x, i) => ({ ...x, isDefault: i === 0 }));
+        })(),
       });
 
       setLoading(false);
@@ -164,6 +184,71 @@ export default function Profile() {
   function setField(name, value) {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
+
+  // ====================
+// مدیریت آدرس‌ها
+// ====================
+
+function addAddress() {
+  setForm((prev) => {
+    const list = Array.isArray(prev.addresses) ? prev.addresses : [];
+    if (list.length >= 5) {
+      alert("حداکثر ۵ آدرس می‌تونی ثبت کنی.");
+      return prev;
+    }
+
+    const next = [
+      ...list,
+      {
+        id: null,
+        label: "",
+        address: "",
+        postalCode: "",
+        isDefault: list.length === 0,
+      },
+    ];
+
+    return { ...prev, addresses: next };
+  });
+}
+
+function updateAddress(index, field, value) {
+  setForm((prev) => {
+    const list = Array.isArray(prev.addresses) ? [...prev.addresses] : [];
+    if (!list[index]) return prev;
+
+    list[index] = {
+      ...list[index],
+      [field]: field === "postalCode" ? toLatinDigits(value) : value,
+    };
+
+    return { ...prev, addresses: list };
+  });
+}
+
+function removeAddress(index) {
+  setForm((prev) => {
+    let list = Array.isArray(prev.addresses) ? [...prev.addresses] : [];
+    if (!list[index]) return prev;
+
+    const wasDefault = !!list[index].isDefault;
+    list.splice(index, 1);
+
+    if (wasDefault && list.length > 0) {
+      list = list.map((a, i) => ({ ...a, isDefault: i === 0 }));
+    }
+
+    return { ...prev, addresses: list };
+  });
+}
+
+function setDefaultAddress(index) {
+  setForm((prev) => {
+    const list = Array.isArray(prev.addresses) ? prev.addresses : [];
+    const next = list.map((a, i) => ({ ...a, isDefault: i === index }));
+    return { ...prev, addresses: next };
+  });
+}
 
   async function onPickAvatar(e) {
   const file = e.target.files?.[0];
@@ -204,19 +289,87 @@ export default function Profile() {
   async function onSave() {
     setSaving(true);
 
+    // ====================
+// Validation (قبل از ارسال به سرور)
+// ====================
+
+// 1) کد ملی: اگر وارد شده باید 10 رقم باشد
+const nc = toLatinDigits(String(form.nationalCode || "").trim());
+if (nc && !/^\d{10}$/.test(nc)) {
+  alert("کد ملی باید دقیقاً ۱۰ رقم باشد.");
+  setSaving(false);
+  return;
+}
+
+// 2) آدرس‌ها: اگر وجود دارند، باید معتبر باشند
+const list = Array.isArray(form.addresses) ? form.addresses : [];
+if (list.length > 0) {
+  // اگر هیچ پیش‌فرضی نبود، اولی را پیش‌فرض کن
+  const hasDefault = list.some((x) => !!x.isDefault);
+  if (!hasDefault) {
+  // سبک‌تر: بدون setForm و بدون نیاز به ذخیره دوباره
+  alert("هیچ آدرس پیش‌فرضی انتخاب نشده بود؛ آدرس اول به عنوان پیش‌فرض ارسال می‌شود.");
+}
+
+  // چک خالی نبودن عنوان و متن آدرس
+  for (let i = 0; i < list.length; i++) {
+    const a = list[i] || {};
+    const label = String(a.label || "").trim();
+    const address = String(a.address || "").trim();
+
+    if (!label) {
+      alert(`عنوان آدرس ${i + 1} را وارد کن (مثلاً خانه).`);
+      setSaving(false);
+      return;
+    }
+    if (!address) {
+      alert(`متن آدرس ${i + 1} را وارد کن.`);
+      setSaving(false);
+      return;
+    }
+    // ✅ کد پستی (اگر وارد شده باشد باید ۱۰ رقم باشد)
+const pc = toLatinDigits(String(a.postalCode || "").trim());
+if (pc && !/^\d{10}$/.test(pc)) {
+  alert(`کد پستی آدرس ${i + 1} باید دقیقاً ۱۰ رقم باشد.`);
+  setSaving(false);
+  return;
+}
+  }
+}
+
+
     // payload مینیمال و تمیز
     const payload = {
-      firstName: form.firstName?.trim() || null,
-      lastName: form.lastName?.trim() || null,
-      username: form.username?.trim() || null,
-      phone: form.phone?.trim() || null,
-      gender: form.gender || null,
-      birthDate: form.birthDate ? toLatinDigits(form.birthDate) : null,
-      province: form.province?.trim() || null,
-      city: form.city?.trim() || null,
-      lifeStage: form.lifeStage || "user",
-      avatarUrl: form.avatarUrl || null,
-    };
+  firstName: form.firstName?.trim() || null,
+  lastName: form.lastName?.trim() || null,
+  username: form.username?.trim() || null,
+  phone: form.phone?.trim() || null,
+  gender: form.gender || null,
+  birthDate: form.birthDate ? toLatinDigits(form.birthDate) : null,
+  province: form.province?.trim() || null,
+  city: form.city?.trim() || null,
+  lifeStage: form.lifeStage || "user",
+  avatarUrl: form.avatarUrl || null,
+
+  nationalCode: form.nationalCode ? toLatinDigits(form.nationalCode.trim()) : null,
+  addresses: Array.isArray(form.addresses)
+  ? (() => {
+      const list = form.addresses;
+      const hasDefault = list.some((x) => !!x.isDefault);
+      const normalized = hasDefault
+        ? list
+        : list.map((x, i) => ({ ...x, isDefault: i === 0 }));
+
+      return normalized.map((a) => ({
+        id: a?.id ?? null,
+        label: (a?.label || "").trim(),
+        address: (a?.address || "").trim(),
+        postalCode: a?.postalCode ? toLatinDigits(String(a.postalCode).trim()) : null,
+        isDefault: !!a?.isDefault,
+      }));
+    })()
+  : [],
+};
 
     const res = await updateUserProfile(payload);
     setSaving(false);
@@ -232,10 +385,22 @@ if (fresh?.ok) {
   setServerUser(fresh.user);
 
   setForm((prev) => ({
-    ...prev,
-    avatarUrl: fresh.user.avatarUrl || prev.avatarUrl,
-    lifeStage: fresh.user.lifeStage || prev.lifeStage,
-  }));
+  ...prev,
+
+  // ✅ فیلدهایی که از سرور “حقیقت نهایی” هستند
+  avatarUrl: fresh.user.avatarUrl || "",
+  lifeStage: fresh.user.lifeStage || "user",
+  nationalCode: fresh.user.nationalCode || "",
+  addresses: (() => {
+  const list = Array.isArray(fresh.user.addresses) ? fresh.user.addresses : [];
+  if (list.length === 0) return [];
+  const hasDefault = list.some((x) => !!x.isDefault);
+  if (hasDefault) return list;
+  return list.map((x, i) => ({ ...x, isDefault: i === 0 }));
+})(),
+
+  // ✅ بقیه را دست نمی‌زنیم تا اگر کاربر هنوز در حال تایپ بود، بهم نریزد
+}));
 
   // ✅ Navbar را هم بلافاصله Sync کن
   try {
@@ -409,6 +574,7 @@ if (loading) {
 
           <Field label="استان" value={form.province} onChange={(v) => setField("province", v)} />
           <Field label="شهر" value={form.city} onChange={(v) => setField("city", v)} />
+          <Field label="کد ملی" value={form.nationalCode} onChange={(v) => setField("nationalCode", toLatinDigits(v))} />
 
           <Select
             label="جنسیت"
@@ -457,6 +623,95 @@ if (loading) {
             options={LIFE_STAGE_OPTIONS}
           />
         </div>
+
+        {/* 📍 آدرس‌ها */}
+<div className="mt-6 space-y-3">
+  <div className="flex items-center justify-between">
+    <p className="text-sm font-semibold text-gray-700">آدرس‌ها</p>
+
+    <button
+  type="button"
+  onClick={addAddress}
+  disabled={(form.addresses?.length || 0) >= 5}
+  className="text-xs px-3 py-2 rounded-xl border border-yellow-200 bg-white text-yellow-700 hover:bg-yellow-50 disabled:opacity-60"
+>
+  + افزودن آدرس
+</button>
+  </div>
+
+  <p className="text-[11px] text-gray-500">
+    حداکثر ۵ آدرس. یکی از آدرس‌ها باید «پیش‌فرض» باشد.
+  </p>
+
+  {(!form.addresses || form.addresses.length === 0) ? (
+    <div className="rounded-2xl border border-yellow-100 bg-yellow-50/40 p-4 text-sm text-gray-600">
+      هنوز آدرسی ثبت نکرده‌ای.
+    </div>
+  ) : (
+    <div className="space-y-3">
+      {form.addresses.map((a, idx) => (
+        <div
+          key={a?.id ?? `new-${idx}`}
+          className="rounded-2xl border border-yellow-200 bg-white p-4 space-y-3"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-gray-500">آدرس {idx + 1}</p>
+
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-gray-600 flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="defaultAddress"
+                  checked={!!a.isDefault}
+                  onChange={() => setDefaultAddress(idx)}
+                />
+                پیش‌فرض
+              </label>
+
+              <button
+                type="button"
+                onClick={() => removeAddress(idx)}
+                className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+              >
+                حذف
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-gray-600">عنوان (مثلاً خانه)</span>
+              <input
+                value={a.label || ""}
+                onChange={(e) => updateAddress(idx, "label", e.target.value)}
+                className="w-full rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm outline-none focus:border-yellow-400"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-gray-600">کد پستی</span>
+              <input
+                value={a.postalCode || ""}
+                onChange={(e) => updateAddress(idx, "postalCode", e.target.value)}
+                className="w-full rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm outline-none focus:border-yellow-400"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-xs text-gray-600">متن آدرس</span>
+              <textarea
+                rows={2}
+                value={a.address || ""}
+                onChange={(e) => updateAddress(idx, "address", e.target.value)}
+                className="w-full rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm outline-none focus:border-yellow-400"
+              />
+            </label>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
         {/* 🔘 دکمه‌ها */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">

@@ -8,6 +8,7 @@ import { TbXboxY } from "react-icons/tb";
 import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
 import PromoSlider from "@components/Social/PromoSlider";
 import ScrollProduct from "./components/Core/ScrollProduct";
+import TodayCalendarBox from "./components/Dashboard/TodayCalendarBox";
 
 
 
@@ -168,7 +169,7 @@ const cardColors = {
 
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-20 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
+    <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-6 sm:pt-10 lg:pt-12 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
 
       
   {/* 🔹 دکمه دریافت اپ - نسخه نهایی با انیمیشن باز و بسته طبیعی */}
@@ -323,6 +324,8 @@ const cardColors = {
           </motion.svg>
         ))}
       </div>
+
+<TodayCalendarBox className="mt-2 sm:mt-3 lg:mt-4" />
 
 <motion.div
   className="relative w-full max-w-4xl my-10 rounded-3xl overflow-hidden z-20"

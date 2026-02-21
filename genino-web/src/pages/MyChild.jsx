@@ -299,7 +299,7 @@ console.log("MOTHER:", mother);
     <main
       dir="rtl"
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden 
-             bg-gradient-to-b from-[#fff5cc] via-[#ffe88a] to-[#ffd95c] text-gray-800 pt-28 sm:pt-10 pb-24"
+           bg-gradient-to-b from-[#fff5cc] via-[#ffe88a] to-[#ffd95c] text-gray-800 pt-12 sm:pt-10 pb-24"
     >
       {/* ☀️ نور طلایی بالا */}
       <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-[#fff8dc]/90 to-transparent z-[2] blur-2xl pointer-events-none" />
