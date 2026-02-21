@@ -26,6 +26,7 @@ try {
 }
 
 
+
   const cards = [
     {
       title: "رشد شخصی من",
@@ -35,9 +36,9 @@ try {
     },
     {
       title: "سلامت و تناسب اندام",
-      desc: "برنامه‌ی ورزشی و تغذیه مناسب برای انرژی روزانه",
+      desc: "برنامه‌ی ورزشی برای انرژی روزانه",
       icon: <Dumbbell size={26} className="text-sky-600" />,
-      link: "/calorie-tracker",
+      link: "/knowledge/home-workout",
     },
     {
       title: "پزشک من",
@@ -49,6 +50,7 @@ try {
       title: "روان آرام",
       desc: "مدیتیشن، آگاهی و کنترل استرس روزمره",
       icon: <Heart size={26} className="text-sky-600" />,
+      link: "/knowledge/mind-calm",
     },
     {
       title: "الهام روزانه",

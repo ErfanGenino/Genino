@@ -96,6 +96,7 @@ try {
       link: "/favorites",
     },
   ];
+  
 
   return (
     <DashboardLayout title="پنل کاربری والدین">

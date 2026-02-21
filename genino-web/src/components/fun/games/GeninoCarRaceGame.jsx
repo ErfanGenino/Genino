@@ -42,7 +42,7 @@ export default function CarRace3LaneGame({
   // وضعیت بازی
   const [stage, setStage] = useState(1);
   const [timeLeft, setTimeLeft] = useState(stageSeconds);
-  const [status, setStatus] = useState("ready"); // ready | playing | stage | lose | win
+  const [status, setStatus] = useState("ready"); // ready | playing | paused | stage | lose | win
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(() => loadBest());
 
@@ -69,6 +69,43 @@ export default function CarRace3LaneGame({
   // کنترل
   const swipeStart = useRef(null);
 
+  // Tap (برای حرکت با ضربه روی نیمه چپ/راست)
+const tapStartRef = useRef(null);
+
+const onPointerDownRoad = (e) => {
+  if (status !== "playing") return;
+  // اگر روی دکمه‌ها زد، Tap حساب نکن
+  if (e.target?.closest?.("button")) return;
+  tapStartRef.current = { x: e.clientX, y: e.clientY };
+};
+
+const onPointerUpRoad = (e) => {
+  if (status !== "playing") return;
+
+  const st = tapStartRef.current;
+  tapStartRef.current = null;
+  if (!st) return;
+
+  // اگر روی دکمه‌ها زد، Tap حساب نکن
+  if (e.target?.closest?.("button")) return;
+
+  const dx = Math.abs(e.clientX - st.x);
+  const dy = Math.abs(e.clientY - st.y);
+
+  // اگر حرکت زیاد بود یعنی Swipe بوده
+  const TH = 14;
+  if (dx > TH || dy > TH) return;
+
+  // تشخیص نیمه چپ/راست صفحه بازی
+  const rect = stageRef.current?.getBoundingClientRect();
+  if (!rect) return;
+
+  const mid = rect.left + rect.width / 2;
+
+  if (e.clientX < mid) setLane((ln) => clamp(ln - 1, 0, 2));
+  else setLane((ln) => clamp(ln + 1, 0, 2));
+};
+
   // RAF
   const rafRef = useRef(null);
   const lastT = useRef(performance.now());
@@ -77,6 +114,7 @@ export default function CarRace3LaneGame({
 
   // تایمر مرحله (با timestamp برای دقت و بدون drift)
   const endAtRef = useRef(null);
+  const pausedLeftMsRef = useRef(null); // زمان باقی‌مانده هنگام پاز
 
   // سختی مرحله
   const stageCfg = useMemo(() => {
@@ -123,6 +161,7 @@ export default function CarRace3LaneGame({
     setStatus("ready");
     swipeStart.current = null;
     endAtRef.current = null;
+    pausedLeftMsRef.current = null;
   };
 
   const start = () => {
@@ -158,6 +197,36 @@ export default function CarRace3LaneGame({
     endAtRef.current = Date.now() + stageSeconds * 1000;
     setTimeLeft(stageSeconds);
   };
+
+  const pauseGame = () => {
+  if (status !== "playing") return;
+
+  const endAt = endAtRef.current;
+  if (!endAt) return;
+
+  // زمان باقی‌مانده رو ذخیره کن
+  pausedLeftMsRef.current = Math.max(0, endAt - Date.now());
+
+  setStatus("paused");
+  setToast("⏸ بازی متوقف شد");
+  setTimeout(() => setToast(null), 700);
+};
+
+const resumeGame = () => {
+  if (status !== "paused") return;
+
+  const left = pausedLeftMsRef.current ?? timeLeft * 1000;
+
+  // ادامه تایمر از همان جا
+  endAtRef.current = Date.now() + left;
+
+  // جلوگیری از جهش dt در RAF
+  lastT.current = performance.now();
+
+  setStatus("playing");
+  setToast("▶ ادامه بده!");
+  setTimeout(() => setToast(null), 700);
+};
 
   const showStageBanner = (txt) => {
     setStageBanner(txt);
@@ -540,6 +609,14 @@ export default function CarRace3LaneGame({
               </span>
             ))}
             {shield && <span className="text-yellow-200 font-bold">Shield</span>}
+            <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => (status === "playing" ? pauseGame() : status === "paused" ? resumeGame() : null)}
+            className="ml-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 hover:bg-white/15 transition"
+            aria-label={status === "paused" ? "ادامه" : "پاز"}
+            >
+            {status === "paused" ? "▶ ادامه" : "⏸ پاز"}
+            </button>
           </div>
         </div>
 
@@ -560,7 +637,13 @@ export default function CarRace3LaneGame({
         </AnimatePresence>
 
         {/* Road */}
-        <div className="relative w-full" style={{ height: H, maxWidth: W, margin: "0 auto" }}>
+          <div
+          className="relative w-full"
+          style={{ height: H, maxWidth: W, margin: "0 auto" }}
+          onPointerDown={onPointerDownRoad}
+          onPointerUp={onPointerUpRoad}
+          >
+          
           {/* Background glow */}
           <div className="absolute inset-0 pointer-events-none">
             <div
@@ -657,28 +740,35 @@ export default function CarRace3LaneGame({
           </motion.div>
 
           {/* Mobile Controls */}
-          <div className="absolute bottom-3 left-0 right-0 z-30 flex justify-between px-3">
-            <div className="text-[11px] text-white/60 flex items-end">
-              کنترل: ← → / A D / سوایپ
-            </div>
+<div className="absolute bottom-3 left-0 right-0 z-30 flex items-end justify-between px-3">
+  {/* راهنما */}
+  <div className="text-[11px] text-white/60">
+    کنترل: ← → / A D / سوایپ
+  </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => status === "playing" && setLane((ln) => clamp(ln - 1, 0, 2))}
-                className="w-12 h-12 rounded-2xl border border-white/15 bg-white/5 text-white font-extrabold active:bg-white/10"
-                aria-label="چپ"
-              >
-                ◀
-              </button>
-              <button
-                onClick={() => status === "playing" && setLane((ln) => clamp(ln + 1, 0, 2))}
-                className="w-12 h-12 rounded-2xl border border-white/15 bg-white/5 text-white font-extrabold active:bg-white/10"
-                aria-label="راست"
-              >
-                ▶
-              </button>
-            </div>
-          </div>
+  {/* دکمه‌ها: یکی چپ، یکی راست */}
+  <div className="flex w-full items-center justify-between">
+    
+
+    <button
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={() => status === "playing" && setLane((ln) => clamp(ln + 1, 0, 2))}
+      className="w-14 h-14 rounded-2xl border border-white/15 bg-white/5 text-white font-extrabold active:bg-white/10"
+      aria-label="راست"
+    >
+      ▶
+    </button>
+
+    <button
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={() => status === "playing" && setLane((ln) => clamp(ln - 1, 0, 2))}
+      className="w-14 h-14 rounded-2xl border border-white/15 bg-white/5 text-white font-extrabold active:bg-white/10"
+      aria-label="چپ"
+    >
+      ◀
+    </button>
+  </div>
+</div>
         </div>
 
         {/* Ready */}

@@ -10,6 +10,7 @@ import {
   Search,
   Lightbulb,
   User,
+  Apple,
 } from "lucide-react";
 
 export default function DashboardUser() {
@@ -23,25 +24,26 @@ try {
 }
 
 
+
   const cards = [
     {
       title: "دانشنامه ژنینو",
       desc: "صدها مقاله علمی و ژنینویی برای رشد و آگاهی",
       icon: <BookOpen size={26} className="text-yellow-600" />,
-      link: "/knowledge",
+      link: "/world-knowledge",
       highlight: true,
     },
     {
-      title: "خودآگاهی و رشد فردی",
-      desc: "تست‌ها، مهارت‌ها و شناخت بهتر خود",
-      icon: <Brain size={26} className="text-yellow-600" />,
-      link: "/awareness",
+      title: "کالری‌شمار",
+      desc: "مدیریت تغذیه و وزن به روش ژنینو",
+      icon: <Apple size={26} className="text-yellow-600" />,
+      link: "/calorie-tracker",
     },
     {
-      title: "روابط سالم",
-      desc: "بهبود ارتباط با شریک زندگی، خانواده و اطرافیان",
+      title: "پزشک من",
+      desc: "مدیریت پرونده‌ها، نسخه‌ها و آزمایش‌های پزشکی",
       icon: <Heart size={26} className="text-yellow-600" />,
-      link: "/family-relations",
+      link: "/my-doctor",
     },
     {
       title: "هوش عاطفی",
