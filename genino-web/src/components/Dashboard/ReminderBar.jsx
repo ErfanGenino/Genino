@@ -1,9 +1,14 @@
+//src/components/Dashboard/ReminderBar.jsx
+
 import { useState, useEffect, useRef } from "react";
 import { Bell, Plus, Trash2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
+import { getReminders, createReminder, deleteReminder as apiDeleteReminder } from "../../services/api";
+import DateObject from "react-date-object";
+import gregorian from "react-date-object/calendars/gregorian";
 
 export default function ReminderBar() {
   const [reminders, setReminders] = useState([]);
@@ -45,30 +50,44 @@ export default function ReminderBar() {
     },
   ];
 
-  // 📦 Load from localStorage
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("reminders")) || [];
-    setReminders(saved);
-  }, []);
+  // 📦 Load reminders from server
+useEffect(() => {
+  let mounted = true;
 
-  // 💾 Save reminders
-  useEffect(() => {
-    localStorage.setItem("reminders", JSON.stringify(reminders));
-  }, [reminders]);
+  (async () => {
+    const res = await getReminders();
+    if (!mounted) return;
 
-  // 🕒 Auto-remove expired one-time reminders
-  useEffect(() => {
-    const today = new Date();
-    const filtered = reminders.filter((r) => {
-      if (r.repeat === "once") {
-        const dateParts = r.date.split("/");
-        const reminderDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-        return reminderDate >= today;
-      }
-      return true;
-    });
-    if (filtered.length !== reminders.length) setReminders(filtered);
-  }, []);
+    if (res?.ok) {
+      // reminders از سرور می‌آید
+      const list = (res.reminders || []).map((r) => {
+  // تبدیل remindAt (میلادی) به تاریخ شمسی برای نمایش
+  const dateFa = r.remindAt
+    ? new DateObject({
+        date: new Date(r.remindAt),
+        calendar: gregorian,
+      })
+        .convert(persian)
+        .format("YYYY/MM/DD")
+    : "";
+
+  return {
+    ...r,
+    date: dateFa,          // برای UI
+    desc: r.description || "", // برای UI (هم‌نام با کد فعلی)
+  };
+});
+
+setReminders(list);
+    } else {
+      console.error("❌ getReminders failed:", res);
+    }
+  })();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
 
   // 🔒 Close modal when clicking outside
   useEffect(() => {
@@ -92,18 +111,67 @@ export default function ReminderBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [activeIndex]);
 
-  const addReminder = () => {
-    if (!newReminder.title || !newReminder.date) return;
-    const updated = [...reminders, newReminder];
-    setReminders(updated);
-    setNewReminder({ title: "", date: "", desc: "", type: "", repeat: "" });
-    setShowModal(false);
+  const addReminder = async () => {
+  if (!newReminder.title || !newReminder.date) return;
+
+  // تبدیل YYYY/MM/DD به تاریخ استاندارد برای سرور
+  const remindAt = new DateObject({
+  date: newReminder.date,
+  format: "YYYY/MM/DD",
+  calendar: persian,
+  locale: persian_fa,
+})
+  .convert(gregorian)
+  .toDate()
+  .toISOString();
+
+  const payload = {
+    title: newReminder.title,
+    description: newReminder.desc || null,
+    type: newReminder.type,
+    repeat: newReminder.repeat,
+    remindAt,
   };
 
-  const deleteReminder = (index) => {
-    setReminders(reminders.filter((_, i) => i !== index));
-    setActiveIndex(null);
+  const res = await createReminder(payload);
+
+  if (!res?.ok) {
+    console.error("❌ createReminder failed:", res);
+    return;
+  }
+
+  // سرور reminder با id برمی‌گرداند
+  const saved = res.reminder;
+
+  // برای UI همان تاریخ شمسی انتخاب‌شده را نگه می‌داریم
+  const uiItem = {
+    ...saved,
+    date: newReminder.date,
+    desc: newReminder.desc || "",
   };
+
+  setReminders((prev) => [...prev, uiItem]);
+  setNewReminder({ title: "", date: "", desc: "", type: "", repeat: "" });
+  setShowModal(false);
+};
+
+  const deleteReminder = async (index) => {
+  const target = reminders[index];
+  if (!target?.id) {
+    console.error("❌ reminder id not found for delete:", target);
+    return;
+  }
+
+  const res = await apiDeleteReminder(target.id);
+
+  if (!res?.ok) {
+    console.error("❌ deleteReminder failed:", res);
+    return;
+  }
+
+  setReminders((prev) => prev.filter((_, i) => i !== index));
+  setActiveIndex(null);
+};
 
   const openModal = (type, repeat) => {
     setNewReminder({ title: "", date: "", desc: "", type, repeat });

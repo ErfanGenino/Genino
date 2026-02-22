@@ -168,3 +168,21 @@ export async function getInspirationSaved(mode = "calm", take = 50) {
     { method: "GET" }
   );
 }
+
+// --- Reminders ---
+export async function getReminders() {
+  return authFetch("/reminders", { method: "GET" });
+}
+
+export async function createReminder(payload) {
+  return authFetch("/reminders", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteReminder(id) {
+  return authFetch(`/reminders/${id}`, {
+    method: "DELETE",
+  });
+}
