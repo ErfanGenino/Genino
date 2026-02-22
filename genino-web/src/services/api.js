@@ -121,3 +121,50 @@ export async function updateUserProfile(payload) {
   });
 }
 
+// --- Inspiration (الهام روزانه) ---
+export async function getInspirationToday(mode = "calm") {
+  return authFetch(`/inspiration/today?mode=${encodeURIComponent(mode)}`, {
+    method: "GET",
+  });
+}
+
+export async function getInspirationWeek(mode = "calm") {
+  return authFetch(`/inspiration/week?mode=${encodeURIComponent(mode)}`, {
+    method: "GET",
+  });
+}
+
+export async function setInspirationComplete({ mode = "calm", dateKey, completed = true }) {
+  return authFetch("/inspiration/complete", {
+    method: "POST",
+    body: JSON.stringify({ mode, dateKey, completed }),
+  });
+}
+
+export async function setInspirationSave({ mode = "calm", dateKey, saved = true }) {
+  return authFetch("/inspiration/save", {
+    method: "POST",
+    body: JSON.stringify({ mode, dateKey, saved }),
+  });
+}
+
+export async function setInspirationNote({ mode = "calm", dateKey, note = "" }) {
+  return authFetch("/inspiration/note", {
+    method: "POST",
+    body: JSON.stringify({ mode, dateKey, note }),
+  });
+}
+
+export async function getInspirationHistory(mode = "calm", take = 30) {
+  return authFetch(
+    `/inspiration/history?mode=${encodeURIComponent(mode)}&take=${encodeURIComponent(take)}`,
+    { method: "GET" }
+  );
+}
+
+export async function getInspirationSaved(mode = "calm", take = 50) {
+  return authFetch(
+    `/inspiration/saved?mode=${encodeURIComponent(mode)}&take=${encodeURIComponent(take)}`,
+    { method: "GET" }
+  );
+}

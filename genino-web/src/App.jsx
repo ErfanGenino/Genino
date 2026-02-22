@@ -157,6 +157,7 @@ import AttentionFocusTest from "./pages/child-mental-health/AttentionFocusTest";
 import SocialInteractionTest from "./pages/child-mental-health/SocialInteractionTest";
 import Notifications from "./pages/Notifications";
 import AcceptInvite from "./pages/AcceptInvite";
+import Inspiration from "./pages/Inspiration.jsx";
 
 // 🧭 دو گزینه برای داشبوردها: اگر فایل‌های داشبورد آماده‌اند از این‌ها استفاده کن:
 import Shop from "./pages/Shop.jsx";
@@ -336,6 +337,7 @@ console.log("APP ROUTES LOADED");
         <Route path="/child-mental-health/social-interaction" element={<SocialInteractionTest />} />
         <Route path="/notifications" element={ <ProtectedRoute>  <Notifications /> </ProtectedRoute>} />
         <Route path="/invite/:token" element={<AcceptInvite />} />
+        <Route path="/inspiration" element={<ProtectedRoute><Inspiration /></ProtectedRoute>} />
 
 
       </Routes>
