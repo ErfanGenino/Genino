@@ -1,3 +1,4 @@
+//src/services/api.js
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function getAuthToken() {
@@ -184,5 +185,17 @@ export async function createReminder(payload) {
 export async function deleteReminder(id) {
   return authFetch(`/reminders/${id}`, {
     method: "DELETE",
+  });
+}
+
+// --- MyCycle (چرخه بانوان) ---
+export async function getMyCycle() {
+  return authFetch("/my-cycle", { method: "GET" });
+}
+
+export async function updateMyCycle(payload) {
+  return authFetch("/my-cycle", {
+    method: "PUT",
+    body: JSON.stringify(payload),
   });
 }

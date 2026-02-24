@@ -9,8 +9,26 @@ import gregorian from "react-date-object/calendars/gregorian";
 import { Heart, Flower2, Sun, Moon, Droplet, CalendarDays } from "lucide-react";
 import GoldenModal from "@components/Core/GoldenModal";
 import { Link } from "react-router-dom";
+import { getMyCycle, updateMyCycle } from "../services/api";
 
 const LS_KEY = "myCycle:v1";
+
+// ✅ تبدیل تاریخ شمسی ذخیره‌شده در فرم → ISO میلادی برای ارسال به سرور
+function persianStrToGregorianISO(persianStr) {
+  const persianDate = new DateObject({
+    date: persianStr,
+    calendar: persian,
+    locale: persian_fa,
+  });
+  return persianDate.convert(gregorian).toDate().toISOString();
+}
+
+// ✅ تبدیل ISO میلادی برگشتی از سرور → شمسی برای DatePicker
+function gregorianISOToPersianStr(iso) {
+  const d = new Date(iso);
+  const p = new DateObject({ date: d, calendar: gregorian }).convert(persian);
+  return p.format("YYYY-MM-DD");
+}
 
 // 🧠 تعیین فاز بر اساس روز چرخه
 function getPhaseForDay(day, cycleLength, periodLength) {
@@ -196,8 +214,50 @@ export default function MyCycle() {
     setTodayGregorian(nowGregorian.format("dddd, MMMM D, YYYY"));
   }, []);
 
+  // ✅ خواندن چرخه از سرور (Protected)
+useEffect(() => {
+  let mounted = true;
+
+  (async () => {
+    const res = await getMyCycle();
+    if (!mounted) return;
+
+    if (res?.ok && res.cycle) {
+      const { lastPeriodAt, cycleLength, periodLength, updatedAt } = res.cycle;
+
+      setForm({
+        lastPeriod: gregorianISOToPersianStr(lastPeriodAt),
+        cycleLength: cycleLength ?? 28,
+        periodLength: periodLength ?? 5,
+      });
+
+      if (updatedAt) setLastUpdate(updatedAt);
+
+      // محاسبه وضعیت فعلی بعد از لود
+      const today = new Date();
+      today.setHours(12, 0, 0, 0);
+
+      const start = new Date(lastPeriodAt);
+      start.setHours(12, 0, 0, 0);
+
+      let diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+      if (diffDays < 0) diffDays = 0;
+
+      const dayInCycle = (diffDays % (cycleLength ?? 28)) + 1;
+      setCurrentDay(dayInCycle);
+
+      const p = getPhaseForDay(dayInCycle, cycleLength ?? 28, periodLength ?? 5);
+      setPhase(p);
+    }
+  })();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
+
   // 🩷 خواندن از localStorage
-  useEffect(() => {
+ /* useEffect(() => {
     const saved = localStorage.getItem(LS_KEY);
     if (saved) {
       try {
@@ -211,15 +271,15 @@ export default function MyCycle() {
     }
     const savedUpdate = localStorage.getItem("myCycleLastUpdate");
     if (savedUpdate) setLastUpdate(savedUpdate);
-  }, []);
+  }, []);*/
 
   // 💾 ذخیره در localStorage
-  useEffect(() => {
+ /* useEffect(() => {
     localStorage.setItem(LS_KEY, JSON.stringify({ form, phase, currentDay }));
-  }, [form, phase, currentDay]);
+  }, [form, phase, currentDay]);*/
 
   // 📅 محاسبه فاز فعلی
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
     if (!form.lastPeriod) {
       setShowErrorModal(true);
       return;
@@ -244,10 +304,19 @@ export default function MyCycle() {
 
     const p = getPhaseForDay(dayInCycle, form.cycleLength, form.periodLength);
     setPhase(p);
+    // ✅ ذخیره روی سرور
+const res = await updateMyCycle({
+  lastPeriodAt: persianStrToGregorianISO(form.lastPeriod),
+  cycleLength: form.cycleLength,
+  periodLength: form.periodLength,
+});
 
-    const nowISO = new Date().toISOString();
-    localStorage.setItem("myCycleLastUpdate", nowISO);
-    setLastUpdate(nowISO);
+// ✅ lastUpdate از سرور
+if (res?.ok && res.cycle?.updatedAt) {
+  setLastUpdate(res.cycle.updatedAt);
+} else {
+  setLastUpdate(new Date().toISOString());
+}
   };
 
   // 🔄 بازنشانی داده‌ها
@@ -255,7 +324,6 @@ export default function MyCycle() {
     setPhase(null);
     setCurrentDay(0);
     setForm({ lastPeriod: "", cycleLength: 28, periodLength: 5 });
-    localStorage.removeItem(LS_KEY);
   };
 
   // 🧮 ساخت تقویم

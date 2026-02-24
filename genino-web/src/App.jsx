@@ -208,7 +208,7 @@ console.log("APP ROUTES LOADED");
         <Route path="/dashboard-parent" element={<ProtectedRoute> <DashboardParent /> </ProtectedRoute>} />
         <Route path="/my-doctor" element={<MyDoctor />} />
         <Route path="/single-world" element={<SingleWorld />} />
-        <Route path="/my-cycle" element={<MyCycle />} />
+        <Route path="/my-cycle" element={<ProtectedRoute><MyCycle /></ProtectedRoute>} />
         <Route path="/my-men-health" element={<MyMenHealth />} />
         <Route path="/my-women-health-test" element={<MyWomenHealthTest />} />
         <Route path="/social/room/:id" element={<ChatRoom />} />
