@@ -62,6 +62,7 @@ try {
             title: "چرخه قاعدگی",
             desc: "پیگیری و آگاهی از وضعیت جسمی ماهانه",
             icon: <Heart size={26} className="text-yellow-600" />,
+            link: "/my-cycle",
           },
         ]
       : []),

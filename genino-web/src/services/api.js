@@ -199,3 +199,23 @@ export async function updateMyCycle(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+// --- Women Health Reports (تست سلامت بانوان) ---
+export async function createWomenHealthReport(payload) {
+  return authFetch("/women-health/reports", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getWomenHealthReports(take = 20) {
+  return authFetch(`/women-health/reports?take=${encodeURIComponent(take)}`, {
+    method: "GET",
+  });
+}
+
+export async function deleteWomenHealthReport(id) {
+  return authFetch(`/women-health/reports/${id}`, {
+    method: "DELETE",
+  });
+}

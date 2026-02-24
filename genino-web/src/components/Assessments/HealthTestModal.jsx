@@ -1,4 +1,4 @@
-// 📄 src/components/HealthTestModal.jsx
+// 📄 src/components/Assessments/HealthTestModal.jsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import GoldenModal from "@components/Core/GoldenModal";
@@ -14,6 +14,7 @@ export default function HealthTestModal({
 }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [error, setError] = useState("");
 
   // 🎯 ثبت پاسخ هر سؤال
   const handleAnswer = (sectionId, questionIndex, value) => {
@@ -24,16 +25,37 @@ export default function HealthTestModal({
         [sectionId]: { ...section, [questionIndex]: value },
       };
     });
+    setError("");
   };
+
+  const isCurrentSectionComplete = () => {
+  const sec = sections[step];
+  const secAns = answers?.[sec?.id] || {};
+  return sec?.questions?.every((_, i) => !!secAns[i]);
+};
+
+const resetTest = () => {
+  setStep(0);
+  setAnswers({});
+  setError("");
+};
+
+const handleClose = () => {
+  resetTest();
+  onClose();
+};
 
   // 💾 پایان تست و ارسال نتیجه
   const handleFinish = () => {
-    const result = { date: new Date().toISOString(), answers };
-    onSubmit(result);
-    onClose();
-    setStep(0);
-    setAnswers({});
-  };
+  if (!isCurrentSectionComplete()) {
+    setError("لطفاً به همه سؤال‌های این بخش پاسخ بده 🌸");
+    return;
+  }
+
+  const result = { date: new Date().toISOString(), answers };
+  onSubmit(result);
+  handleClose();
+};
 
   const currentSection = sections[step];
   if (!currentSection) return null;
@@ -51,9 +73,9 @@ export default function HealthTestModal({
       show={show}
       title={`${title} (${step + 1} از ${sections.length})`}
       description={currentSection.title}
-      onCancel={onClose}
+      onCancel={handleClose}
+      onConfirm={handleClose}
       confirmLabel="بستن"
-      onConfirm={onClose}
       showConfirmButton={false} // چون از کنترل سفارشی پایین استفاده می‌کنیم
     >
       <AnimatePresence mode="wait">
@@ -92,6 +114,12 @@ export default function HealthTestModal({
             </div>
           ))}
 
+          {error && (
+  <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl p-3">
+    {error}
+  </div>
+)}
+
          {/* 🔹 کنترل مرحله (قبلی / بعدی / ثبت) */}
 <div className="flex justify-between items-center pt-6">
   {/* ⬅️ دکمه قبلی (سمت چپ) */}
@@ -109,7 +137,13 @@ export default function HealthTestModal({
   {/* ➡️ دکمه بعدی یا ثبت (سمت راست) */}
   {step < sections.length - 1 ? (
     <button
-      onClick={() => setStep((s) => s + 1)}
+      onClick={() => {
+  if (!isCurrentSectionComplete()) {
+    setError("لطفاً به همه سؤال‌های این بخش پاسخ بده 🌸");
+    return;
+  }
+  setStep((s) => s + 1);
+}}
       className={`${c.primary} text-white font-medium px-6 py-2 rounded-xl hover:opacity-90 transition flex items-center gap-1 order-1 sm:order-2`}
     >
       بعدی <span className="text-lg">⬅️</span>

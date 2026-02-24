@@ -9,7 +9,7 @@ import gregorian from "react-date-object/calendars/gregorian";
 import { Heart, Flower2, Sun, Moon, Droplet, CalendarDays } from "lucide-react";
 import GoldenModal from "@components/Core/GoldenModal";
 import { Link } from "react-router-dom";
-import { getMyCycle, updateMyCycle } from "../services/api";
+import { getMyCycle, updateMyCycle, getWomenHealthReports, deleteWomenHealthReport } from "../services/api";
 
 const LS_KEY = "myCycle:v1";
 
@@ -187,8 +187,32 @@ function getPregnancyChance(day) {
     level = "خیلی کم";
     color = "text-gray-400";
   }
-
   return { level, color };
+}
+
+function formatFaDateTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+
+  // تاریخ + ساعت به فارسی (اعداد فارسی هم میشه)
+  return d.toLocaleString("fa-IR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatFaDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+
+  return d.toLocaleDateString("fa-IR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 
@@ -205,6 +229,45 @@ export default function MyCycle() {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [todayPersian, setTodayPersian] = useState("");
   const [todayGregorian, setTodayGregorian] = useState("");
+  const [displayName, setDisplayName] = useState("عزیز");
+  const [womenReports, setWomenReports] = useState([]);
+  const [womenReportsLoading, setWomenReportsLoading] = useState(false);
+  const [womenReportsError, setWomenReportsError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null); // {id, date}
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  // 👩‍🦰 نام کاربر برای خوش‌آمدگویی (از localStorage)
+useEffect(() => {
+  function readName() {
+    try {
+      const raw = localStorage.getItem("genino_user");
+      if (!raw) return setDisplayName("عزیز");
+
+      const u = JSON.parse(raw);
+
+      // مثل Profile.jsx: اول اسم+فامیلی، اگر نبود fullName، اگر نبود عزیز
+      const a = (u?.firstName || "").trim();
+      const b = (u?.lastName || "").trim();
+      const combined = `${a} ${b}`.trim();
+
+      setDisplayName(combined || u?.fullName || "عزیز");
+    } catch {
+      setDisplayName("عزیز");
+    }
+  }
+
+  // بار اول
+  readName();
+
+  // هر وقت پروفایل از جای دیگه آپدیت شد (تو Profile.jsx همین event رو می‌فرستی)
+  function onChanged() {
+    readName();
+  }
+  window.addEventListener("genino_user_changed", onChanged);
+
+  return () => window.removeEventListener("genino_user_changed", onChanged);
+}, []);
 
   // 🗓️ تاریخ امروز (شمسی و میلادی)
   useEffect(() => {
@@ -249,6 +312,32 @@ useEffect(() => {
       const p = getPhaseForDay(dayInCycle, cycleLength ?? 28, periodLength ?? 5);
       setPhase(p);
     }
+  })();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
+
+useEffect(() => {
+  let mounted = true;
+
+  (async () => {
+    setWomenReportsLoading(true);
+    setWomenReportsError("");
+
+    const res = await getWomenHealthReports(20);
+
+    if (!mounted) return;
+
+    if (res?.ok) {
+      setWomenReports(res.reports || []);
+    } else {
+      setWomenReports([]);
+      setWomenReportsError(res?.message || "خطا در دریافت گزارش‌های سلامت.");
+    }
+
+    setWomenReportsLoading(false);
   })();
 
   return () => {
@@ -367,7 +456,9 @@ if (res?.ok && res.cycle?.updatedAt) {
         className="text-center mb-8"
       >
         <Heart className="w-12 h-12 text-pink-500 mx-auto mb-3" />
-        <h1 className="text-3xl font-bold text-pink-600 mb-2">سلامت بانوان 🌸</h1>
+        <h1 className="text-3xl font-bold text-pink-600 mb-2">
+       سلام {displayName} عزیز 🌸
+        </h1>
         <p className="text-gray-600 text-sm">
           بدن تو چرخه‌ای از زندگی و احساس است — با عشق به خودت هماهنگ شو 💫
         </p>
@@ -685,72 +776,84 @@ if (res?.ok && res.cycle?.updatedAt) {
       </thead>
 
       <tbody className="text-[11px] sm:text-sm">
-        <tr className="border-b hover:bg-pink-50 transition-all">
-          <td className="p-2 sm:p-3">1</td>
-          <td className="p-2 sm:p-3">1404/08/02</td>
+  {womenReportsLoading && (
+    <tr>
+      <td className="p-3 text-center text-gray-500" colSpan={9}>
+        در حال دریافت گزارش‌ها...
+      </td>
+    </tr>
+  )}
 
-          {/* 🌸 پوست و مو */}
-          <td className="p-2 sm:p-3">
-            <HealthArc percent={85} color="#ec4899" />
-          </td>
+  {!womenReportsLoading && womenReportsError && (
+    <tr>
+      <td className="p-3 text-center text-red-500" colSpan={9}>
+        {womenReportsError}
+      </td>
+    </tr>
+  )}
 
-          {/* 💗 پستان‌ها */}
-          <td className="p-2 sm:p-3">
-            <HealthArc percent={65} color="#f472b6" />
-          </td>
+  {!womenReportsLoading && !womenReportsError && womenReports.length === 0 && (
+    <tr>
+      <td className="p-3 text-center text-gray-500" colSpan={9}>
+        هنوز گزارشی ثبت نشده است.
+      </td>
+    </tr>
+  )}
 
-          {/* 🌷 واژن و رحم */}
-          <td className="p-2 sm:p-3">
-            <HealthArc percent={90} color="#db2777" />
-          </td>
+  {!womenReportsLoading &&
+    !womenReportsError &&
+    womenReports.map((r, idx) => (
+      <tr key={r.id} className="border-b hover:bg-pink-50 transition-all">
+        <td className="p-2 sm:p-3">{idx + 1}</td>
+        <td className="p-2 sm:p-3">
+         <div className="flex flex-col items-center">
+          <span className="font-semibold">{formatFaDate(r.date)}</span>
+          <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
+           ثبت: {formatFaDateTime(r.createdAt)}
+          </span>
+         </div>
+        </td>
 
-          {/* 💖 تخمدان‌ها */}
-          <td className="p-2 sm:p-3">
-            <HealthArc percent={75} color="#be185d" />
-          </td>
+        <td className="p-2 sm:p-3">
+          <HealthArc percent={r?.scores?.skin ?? 0} color="#ec4899" />
+        </td>
 
-          {/* اکشن‌ها */}
-          <td
-  className="p-2 sm:p-3 text-blue-500 cursor-pointer hover:scale-110 transition-transform"
-  onClick={() =>
-    setSelectedReport({
-      id: 1,
-      date: "1404/08/02",
-      results: {
-        skin: {
-          score: 85,
-          status: "عالی 🌿",
-          advice: "پوست در وضعیت خوبی است، مراقبت فعلی را ادامه بده.",
-          interval: "هر دو هفته یک‌بار",
-        },
-        breast: {
-          score: 65,
-          status: "خوب 💛",
-          advice: "بهتر است خودآزمایی را ماهیانه انجام دهی.",
-          interval: "ماهی یک‌بار",
-        },
-        vagina: {
-          score: 90,
-          status: "عالی 🌿",
-          advice: "نشانه‌ای از التهاب دیده نمی‌شود. مراقبت روتین ادامه یابد.",
-          interval: "ماهی یک‌بار",
-        },
-        uterus: {
-          score: 75,
-          status: "خوب 💛",
-          advice: "چرخه منظم است، اما بهتر است هر سه ماه یکبار بررسی شود.",
-          interval: "هر سه ماه یک‌بار",
-        },
-      },
-    })
-  }
->
-  👁
-</td>
-          <td className="p-2 sm:p-3 text-red-500 cursor-pointer hover:scale-110 transition-transform">🗑</td>
-          <td className="p-2 sm:p-3 text-yellow-500 cursor-pointer hover:scale-110 transition-transform">🔗</td>
-        </tr>
-      </tbody>
+        <td className="p-2 sm:p-3">
+          <HealthArc percent={r?.scores?.breast ?? 0} color="#f472b6" />
+        </td>
+
+        <td className="p-2 sm:p-3">
+          <HealthArc percent={r?.scores?.vagina ?? 0} color="#db2777" />
+        </td>
+
+        <td className="p-2 sm:p-3">
+          <HealthArc percent={r?.scores?.uterus ?? 0} color="#be185d" />
+        </td>
+
+        <td
+          className="p-2 sm:p-3 text-blue-500 cursor-pointer hover:scale-110 transition-transform"
+          onClick={() => setSelectedReport(r)}
+        >
+          👁
+        </td>
+
+        <td
+        className="p-2 sm:p-3 text-red-500 cursor-pointer hover:scale-110 transition-transform"
+        onClick={() => {
+        setDeleteError("");
+        setDeleteTarget({ id: r.id, date: r.date });
+        }}
+        >
+        🗑
+        </td>
+
+        <td className="p-2 sm:p-3 text-yellow-500 cursor-pointer hover:scale-110 transition-transform">
+          🔗
+        </td>
+      </tr>
+    ))}
+</tbody>
+
     </table>
   </div>
 </section>
@@ -766,10 +869,16 @@ if (res?.ok && res.cycle?.updatedAt) {
   {selectedReport && (
     <div className="space-y-4 text-right text-sm text-gray-700">
       <p className="text-center text-gray-600 text-xs mb-2">
-        تاریخ ثبت: {selectedReport.date}
+      تاریخ تست: {formatFaDate(selectedReport.date)} 
+      {selectedReport.createdAt ? (
+      <>
+      <br />
+      زمان ثبت: {formatFaDateTime(selectedReport.createdAt)}
+        </>
+       ) : null}
       </p>
 
-      {Object.entries(selectedReport.results).map(([key, val]) => (
+      {Object.entries(selectedReport.scores || {}).map(([key, val]) => (
         <div
           key={key}
           className="border border-pink-100 rounded-xl p-3 bg-pink-50/50 hover:bg-pink-50 transition-all"
@@ -784,17 +893,63 @@ if (res?.ok && res.cycle?.updatedAt) {
               : "🌼 رحم و تخمدان‌ها"}
           </h3>
 
-          <p className={`${val.color || "text-gray-700"} text-sm mb-1`}>
-            وضعیت: {val.status}
-          </p>
           <p className="text-gray-700 text-sm mb-1">
-            توصیه ژنینو: {val.advice}
-          </p>
-          <p className="text-gray-500 text-xs">
-            ⏰ زمان انجام تست بعدی: {val.interval}
+          امتیاز: <strong>{val}٪</strong>
           </p>
         </div>
       ))}
+    </div>
+  )}
+</GoldenModal>
+
+{/*مودال حذف*/}
+<GoldenModal
+  show={!!deleteTarget}
+  title="حذف گزارش"
+  description={
+    deleteTarget
+      ? `آیا از حذف گزارش تاریخ ${formatFaDate(deleteTarget.date)} مطمئن هستید؟`
+      : ""
+  }
+  confirmLabel={deleteLoading ? "در حال حذف..." : "حذف کن"}
+  onConfirm={async () => {
+    if (!deleteTarget?.id) return;
+
+    setDeleteLoading(true);
+    setDeleteError("");
+
+    const res = await deleteWomenHealthReport(deleteTarget.id);
+
+    if (res?.ok) {
+      // ✅ حذف از جدول
+      setWomenReports((prev) => prev.filter((x) => x.id !== deleteTarget.id));
+
+      // ✅ اگر همین گزارش در مودال نمایش باز بود، ببند
+      if (selectedReport?.id === deleteTarget.id) setSelectedReport(null);
+
+      // ✅ بستن مودال حذف
+      setDeleteTarget(null);
+    } else {
+      setDeleteError(res?.message || "خطا در حذف گزارش.");
+    }
+
+    setDeleteLoading(false);
+  }}
+  onCancel={() => {
+    if (deleteLoading) return; // وسط حذف، نبند
+    setDeleteTarget(null);
+    setDeleteError("");
+  }}
+>
+  {deleteError && (
+    <div className="text-right text-sm text-red-600">
+      {deleteError}
+    </div>
+  )}
+
+  {!deleteError && (
+    <div className="text-right text-sm text-gray-600">
+      این عمل قابل بازگشت نیست.
     </div>
   )}
 </GoldenModal>
