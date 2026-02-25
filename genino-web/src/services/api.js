@@ -25,9 +25,10 @@ export async function authFetch(url, options = {}) {
   let res;
   try {
     res = await fetch(`${BASE_URL}${url}`, {
-      ...options,
-      headers,
-    });
+  ...options,
+  headers,
+  cache: "no-store", // ✅ جلوگیری از 304 و کش شدن
+});
   } catch (err) {
     console.error("AUTH FETCH NETWORK ERROR:", err);
     return { ok: false, message: "خطا در اتصال به سرور.", status: 0 };
@@ -217,5 +218,42 @@ export async function getWomenHealthReports(take = 20) {
 export async function deleteWomenHealthReport(id) {
   return authFetch(`/women-health/reports/${id}`, {
     method: "DELETE",
+  });
+}
+
+// --- Medical Records (پرونده‌های پزشکی) ---
+
+export async function listMedicalRecords() {
+  return authFetch("/medical-records", { method: "GET" });
+}
+
+export async function createMedicalRecord(payload) {
+  return authFetch("/medical-records", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateMedicalRecord(id, payload) {
+  return authFetch(`/medical-records/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteMedicalRecord(id) {
+  return authFetch(`/medical-records/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getMedicalRecordById(id) {
+  return authFetch(`/medical-records/${id}`, { method: "GET" });
+}
+
+export async function addMedicalAttachment(recordId, payload) {
+  return authFetch(`/medical-records/${recordId}/attachments`, {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }

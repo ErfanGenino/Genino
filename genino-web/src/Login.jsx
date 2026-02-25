@@ -33,6 +33,7 @@ export default function Login() {
 
       // مرحله ۲: ذخیره دائم اطلاعات (بدون Remember Me)
       localStorage.setItem("genino_token", data.token);
+      window.dispatchEvent(new Event("genino_token_changed")); // ✅ مهم
 
       // مرحله ۳: دریافت پروفایل
       const profile = await getUserProfile();

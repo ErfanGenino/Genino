@@ -1,12 +1,7 @@
 //src/pages/MyDoctor.jsx
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  PlusCircle,
-  FileHeart,
-  UploadCloud,
-  Search,
-} from "lucide-react";
+import { PlusCircle, FileHeart, UploadCloud } from "lucide-react";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
@@ -15,7 +10,10 @@ import GoldenModal from "@components/Core/GoldenModal";
 import "../App.css"; // اگه هنوز این خط نیست
 import ScrollService from "../components/Core/ScrollService";
 import logo from "../assets/logo-genino.png";
-import { getUserProfile } from "../services/api";
+import { getUserProfile, listMedicalRecords, createMedicalRecord, updateMedicalRecord } from "../services/api";
+
+
+const TOKEN_EVENT = "genino_token_changed";
 
 
 export default function MyDoctor() {
@@ -37,6 +35,16 @@ export default function MyDoctor() {
     to: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareTarget, setShareTarget] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   const requireLogin = () => {
   const token = localStorage.getItem("genino_token");
@@ -51,7 +59,7 @@ export default function MyDoctor() {
 };
 
   // 🟢 افزودن گزارش جدید
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   if (!requireLogin()) return;
   if (!form.title || !form.date || !form.category)
@@ -79,26 +87,80 @@ const handleSubmit = (e) => {
   const timestamp = gregorian.toDate().getTime();
 
   if (isEditing && editingId) {
-    // ✏️ حالت ویرایش
-    setRecords((prev) =>
-      prev.map((r) =>
-        r.id === editingId
-          ? { ...form, id: editingId, timestamp, date: `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(dateObj.day).padStart(2, "0")}` }
-          : r
-      )
-    );
-    setIsEditing(false);
-    setEditingId(null);
-  } else {
-    // ➕ حالت افزودن
-    const newRecord = {
-      ...form,
-      id: Date.now(),
-      timestamp,
-      date: `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(dateObj.day).padStart(2, "0")}`,
-      files: form.files || [],
-    };
-    setRecords([newRecord, ...records]);
+  const payload = {
+    title: form.title,
+    doctor: form.doctor || null,
+    category: form.category,
+    recordDate: new Date(timestamp).toISOString(),
+    description: form.desc || null,
+  };
+
+  const upd = await updateMedicalRecord(editingId, payload);
+
+  if (!upd?.ok) {
+    alert(upd?.message || "ویرایش گزارش ناموفق بود");
+    return;
+  }
+
+  const listRes = await listMedicalRecords();
+  if (listRes?.ok) {
+    const mapped = (listRes.items || []).map((it) => {
+      const ts = it.recordDate ? new Date(it.recordDate).getTime() : 0;
+      return {
+        id: it.id,
+        timestamp: ts,
+        date: it.recordDate ? it.recordDate.slice(0, 10) : "",
+        title: it.title || "",
+        doctor: it.doctor || "",
+        category: it.category || "",
+        desc: it.description || "",
+        files: [],
+        attachments: it.attachments || [],
+      };
+    });
+    setRecords(mapped);
+  }
+
+  setIsEditing(false);
+  setEditingId(null);
+} else {
+
+    // ➕ حالت افزودن (ذخیره روی سرور)
+  const payload = {
+    title: form.title,
+    doctor: form.doctor || null,
+    category: form.category,
+    recordDate: new Date(timestamp).toISOString(),
+    description: form.desc || null,
+  };
+
+  const res = await createMedicalRecord(payload);
+
+  if (!res?.ok) {
+    alert(res?.message || "ثبت گزارش ناموفق بود");
+    return;
+  }
+
+  // بعد از ثبت موفق، دوباره لیست را از سرور می‌گیریم
+  const listRes = await listMedicalRecords();
+  if (listRes?.ok) {
+    const mapped = (listRes.items || []).map((it) => {
+      const ts = it.recordDate ? new Date(it.recordDate).getTime() : 0;
+      return {
+        id: it.id,
+        timestamp: ts,
+        date: it.recordDate ? it.recordDate.slice(0, 10) : "",
+        title: it.title || "",
+        doctor: it.doctor || "",
+        category: it.category || "",
+        desc: it.description || "",
+        files: [],
+        attachments: it.attachments || [],
+      };
+    });
+    setRecords(mapped);
+  }
+
   }
 
   setForm({
@@ -168,69 +230,77 @@ const handleSubmit = (e) => {
     startIndex,
     startIndex + itemsPerPage
   );
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  // 🟡 وقتی صفحه بارگذاری میشه، داده‌ها از localStorage خونده میشن
+  
+  
+
+const [token, setToken] = useState(() => localStorage.getItem("genino_token"));
+
 useEffect(() => {
-  const savedRecords = localStorage.getItem("doctorRecords");
-  if (savedRecords) {
-    setRecords(JSON.parse(savedRecords));
-  }
+  const sync = () => setToken(localStorage.getItem("genino_token"));
+  window.addEventListener("storage", sync);          // وقتی توکن در تب دیگر تغییر کند
+  window.addEventListener(TOKEN_EVENT, sync);        // وقتی توکن در همین تب تغییر کند
+  return () => {
+    window.removeEventListener("storage", sync);
+    window.removeEventListener(TOKEN_EVENT, sync);
+  };
 }, []);
 
-// ✅ لود داده‌ها فقط یک بار و با پاکسازی ایمن فایل‌ها
+
 useEffect(() => {
-  const savedRecords = localStorage.getItem("doctorRecords");
-  if (savedRecords) {
-    try {
-      const parsed = JSON.parse(savedRecords);
-      // اطمینان از اینکه فایل‌ها همیشه type داشته باشن
-      const cleaned = parsed.map((r) => ({
-        ...r,
-        files: (r.files || []).map((f) => ({
-          ...f,
-          type: f.type || "",
-        })),
-      }));
-      setRecords(cleaned);
-    } catch (err) {
-      console.error("خطا در خواندن localStorage:", err);
-      setRecords([]); // اگر داده خراب بود، خالی بشه
+  if (!token) {
+    setRecords([]);
+    return;
+  }
+
+  (async () => {
+    const res = await listMedicalRecords();
+    if (res?.ok) {
+      const mapped = (res.items || []).map((it) => {
+        const ts = it.recordDate ? new Date(it.recordDate).getTime() : 0;
+        return {
+          id: it.id,
+          timestamp: ts,
+          date: it.recordDate ? it.recordDate.slice(0, 10) : "",
+          title: it.title || "",
+          doctor: it.doctor || "",
+          category: it.category || "",
+          desc: it.description || "",
+          files: [],
+          attachments: it.attachments || [],
+        };
+      });
+
+      setRecords(mapped);
+    } else {
+      console.error("LIST MEDICAL RECORDS FAILED:", res);
+      setRecords([]);
     }
-  }
-}, []);
-// ✅ هر بار که لیست گزارش‌ها تغییر می‌کند، در localStorage ذخیره می‌شود
-useEffect(() => {
-  localStorage.setItem("doctorRecords", JSON.stringify(records));
-}, [records]);
+  })();
+}, [token]);
 
-const [deleteTarget, setDeleteTarget] = useState(null);
-const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [deleteLoading, setDeleteLoading] = useState(false);
-const [showShareModal, setShowShareModal] = useState(false);
-const [shareTarget, setShareTarget] = useState(null);
-const [showFilters, setShowFilters] = useState(false);
+
 useEffect(() => {
-  const token = localStorage.getItem("genino_token");
-  if (!token) return;
+  if (!token) {
+    setUserFullName("");
+    return;
+  }
 
   (async () => {
     const res = await getUserProfile();
-console.log("MyDoctor profile response:", res);
+    console.log("MyDoctor profile response:", res);
 
-if (res?.ok) {
-  const u = res.user || {};
+    if (res?.ok) {
+      const u = res.user || {};
+      const fullName =
+        (u.fullName || "").trim() ||
+        `${u.firstName || ""} ${u.lastName || ""}`.trim();
 
-  const fullName =
-    (u.fullName || "").trim() ||
-    `${u.firstName || ""} ${u.lastName || ""}`.trim();
-
-  if (fullName) setUserFullName(fullName);
-}
+      setUserFullName(fullName || "");
+    } else {
+      setUserFullName("");
+    }
   })();
-}, []);
+}, [token]);
 
 
 

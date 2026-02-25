@@ -1,3 +1,4 @@
+//src/Navbar.jsx
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { LogIn, UserPlus, Menu, X, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -46,8 +47,14 @@ function Navbar() {
   // ⭐ خروج کاربر
   function handleLogoutConfirm() {
   localStorage.removeItem("genino_user");
-  localStorage.removeItem("genino_token"); // ✅ مهم
-  localStorage.removeItem("children");     // ✅ مهم
+  localStorage.removeItem("genino_token");
+
+  // ✅ اضافه کن
+  window.dispatchEvent(new Event("genino_user_changed"));
+  window.dispatchEvent(new Event("genino_token_changed"));
+
+  localStorage.removeItem("doctorRecords");
+  localStorage.removeItem("children");
   localStorage.removeItem("lifeStage");
   localStorage.removeItem("userData");
   localStorage.removeItem("genino_notifications");
