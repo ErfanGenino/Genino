@@ -1,4 +1,5 @@
-import { useState } from "react";
+//src/pages/MyDoctor.jsx
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PlusCircle,
@@ -12,12 +13,14 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
 import GoldenModal from "@components/Core/GoldenModal";
 import "../App.css"; // اگه هنوز این خط نیست
-import { useEffect } from "react";
 import ScrollService from "../components/Core/ScrollService";
 import logo from "../assets/logo-genino.png";
+import { getUserProfile } from "../services/api";
 
 
 export default function MyDoctor() {
+  const [userFullName, setUserFullName] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [records, setRecords] = useState([]);
   const [form, setForm] = useState({
     title: "",
@@ -35,9 +38,22 @@ export default function MyDoctor() {
   });
   const [currentPage, setCurrentPage] = useState(1);
 
+  const requireLogin = () => {
+  const token = localStorage.getItem("genino_token");
+  if (token) return true;
+
+  setShowLoginModal(true);
+
+  // ✅ برای اینکه مودال حتماً دیده شود (خصوصاً وقتی کاربر پایین صفحه است)
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  return false;
+};
+
   // 🟢 افزودن گزارش جدید
 const handleSubmit = (e) => {
   e.preventDefault();
+  if (!requireLogin()) return;
   if (!form.title || !form.date || !form.category)
     return alert("لطفاً عنوان، تاریخ و دسته درمانی را وارد کنید");
 
@@ -195,13 +211,45 @@ const [showDeleteModal, setShowDeleteModal] = useState(false);
 const [deleteLoading, setDeleteLoading] = useState(false);
 const [showShareModal, setShowShareModal] = useState(false);
 const [shareTarget, setShareTarget] = useState(null);
-const [showFilters, setShowFilters] = useState(true);
+const [showFilters, setShowFilters] = useState(false);
+useEffect(() => {
+  const token = localStorage.getItem("genino_token");
+  if (!token) return;
+
+  (async () => {
+    const res = await getUserProfile();
+console.log("MyDoctor profile response:", res);
+
+if (res?.ok) {
+  const u = res.user || {};
+
+  const fullName =
+    (u.fullName || "").trim() ||
+    `${u.firstName || ""} ${u.lastName || ""}`.trim();
+
+  if (fullName) setUserFullName(fullName);
+}
+  })();
+}, []);
+
+
 
   return (
     <main
       dir="rtl"
       className="relative z-0 min-h-screen bg-gradient-to-b from-[#fffdf8] to-[#f7f3e6] px-6 py-10 text-gray-800"
     >
+      {/* مودال تاکید به ورد */}
+<div className="relative z-[99999]">
+  <GoldenModal
+    show={showLoginModal}
+    title="نیاز به ورود"
+    description="برای استفاده از این بخش باید لاگین کرده باشید."
+    confirmLabel="متوجه شدم"
+    onConfirm={() => setShowLoginModal(false)}
+  />
+</div>
+
       {/* 🔹 عنوان صفحه */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -213,6 +261,11 @@ const [showFilters, setShowFilters] = useState(true);
         <h1 className="text-3xl font-bold text-yellow-700 mb-2">
           پزشک من 🩺
         </h1>
+        {userFullName && (
+        <p className="text-sm text-gray-700 mb-2">
+        <span className="font-semibold text-yellow-700">{userFullName}</span> خوش آمدی 🌿
+        </p>
+        )}
         <p className="text-gray-600 text-sm">
           بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو 
         </p>
@@ -232,121 +285,215 @@ const [showFilters, setShowFilters] = useState(true);
 
      {/* 🔍 فیلتر بالا با حالت باز و بسته شونده */}
 <div className="max-w-6xl mx-auto mb-6 sm:mb-10">
-  {/* دکمه‌ی باز و بسته کردن فیلتر */}
+  {/* دکمه‌ی باز و بسته کردن فیلتر (فقط موبایل) */}
   <div className="flex justify-center sm:justify-end mb-3">
     <button
-      onClick={() => setShowFilters(!showFilters)}
+      type="button"
+      onClick={() => setShowFilters((s) => !s)}
       className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium py-2 px-4 rounded-xl shadow-md transition sm:hidden"
     >
       {showFilters ? "بستن فیلترها ▲" : "نمایش فیلترها ▼"}
     </button>
   </div>
 
-  {/* باکس فیلتر */}
-  <AnimatePresence>
-    {(showFilters || window.innerWidth >= 640) && (
-      <motion.div
-        key="filters-box"
-        initial={{ height: 0, opacity: 0 }}
-        animate={{ height: "auto", opacity: 1 }}
-        exit={{ height: 0, opacity: 0 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="overflow-hidden bg-white/80 backdrop-blur-sm p-4 sm:p-5 rounded-2xl shadow-md border border-yellow-100"
-      >
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-right items-end">
-          {/* 🔸 عنوان */}
-          <div className="col-span-1">
-            <label className="block text-xs sm:text-sm text-gray-700 mb-1">عنوان</label>
-            <select
-              value={filters.title}
-              onChange={(e) => setFilters({ ...filters, title: e.target.value })}
-              className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
-                         text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
-            >
-              <option value="">همه</option>
-              <option value="چکاپ عمومی">چکاپ عمومی</option>
-              <option value="چکاپ تخصصی">چکاپ تخصصی</option>
-              <option value="آزمایش و بررسی‌های تخصصی پزشکی">آزمایش‌ها</option>
-              <option value="بستری و جراحی">بستری و جراحی</option>
-              <option value="سایر">سایر</option>
-            </select>
-          </div>
+  {/* ✅ دسکتاپ: همیشه نمایش */}
+  <div className="hidden sm:block overflow-hidden bg-white/80 backdrop-blur-sm p-4 sm:p-5 rounded-2xl shadow-md border border-yellow-100">
+    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-right items-end">
+      {/* 🔸 عنوان */}
+      <div className="col-span-1">
+        <label className="block text-xs sm:text-sm text-gray-700 mb-1">عنوان</label>
+        <select
+          value={filters.title}
+          onChange={(e) => setFilters({ ...filters, title: e.target.value })}
+          className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
+        >
+          <option value="">همه</option>
+          <option value="چکاپ عمومی">چکاپ عمومی</option>
+          <option value="چکاپ تخصصی">چکاپ تخصصی</option>
+          <option value="آزمایش و بررسی‌های تخصصی پزشکی">آزمایش‌ها</option>
+          <option value="بستری و جراحی">بستری و جراحی</option>
+          <option value="سایر">سایر</option>
+        </select>
+      </div>
 
-          {/* 🔸 دسته */}
-          <div className="col-span-1">
-            <label className="block text-xs sm:text-sm text-gray-700 mb-1">دسته</label>
-            <select
-              value={filters.category}
-              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-              className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
-                         text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
-            >
-              <option value="">همه</option>
-              <option value="عمومی">عمومی</option>
-              <option value="قلب و عروق">قلب و عروق</option>
-              <option value="مغز و اعصاب">مغز و اعصاب</option>
-              <option value="زنان">زنان</option>
-              <option value="دندانپزشکی">دندانپزشکی</option>
-              <option value="چشم‌پزشکی">چشم‌پزشکی</option>
-              <option value="پوست و مو">پوست و مو</option>
-            </select>
-          </div>
+      {/* 🔸 دسته */}
+      <div className="col-span-1">
+        <label className="block text-xs sm:text-sm text-gray-700 mb-1">دسته</label>
+        <select
+          value={filters.category}
+          onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+          className="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
+        >
+          <option value="">همه</option>
+          <option value="عمومی">عمومی</option>
+          <option value="قلب و عروق">قلب و عروق</option>
+          <option value="مغز و اعصاب">مغز و اعصاب</option>
+          <option value="زنان">زنان</option>
+          <option value="دندانپزشکی">دندانپزشکی</option>
+          <option value="چشم‌پزشکی">چشم‌پزشکی</option>
+          <option value="پوست و مو">پوست و مو</option>
+        </select>
+      </div>
 
-          {/* 🔸 از تاریخ */}
-          <div className="col-span-1">
-            <label className="block text-xs sm:text-sm text-gray-700 mb-1">از تاریخ</label>
-            <DatePicker
-              calendar={persian}
-              locale={persian_fa}
-              value={filters.from}
-              onChange={(date) =>
-                setFilters({ ...filters, from: date?.format("YYYY-MM-DD") })
-              }
-              portal
-              containerStyle={{ zIndex: 2000 }}
-              inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
-                          text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
-            />
-          </div>
+      {/* 🔸 از تاریخ */}
+      <div className="col-span-1">
+        <label className="block text-xs sm:text-sm text-gray-700 mb-1">از تاریخ</label>
+        <DatePicker
+          calendar={persian}
+          locale={persian_fa}
+          value={filters.from}
+          onChange={(date) =>
+            setFilters({ ...filters, from: date?.format("YYYY-MM-DD") })
+          }
+          portal
+          containerStyle={{ zIndex: 2000 }}
+          inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
+        />
+      </div>
 
-          {/* 🔸 تا تاریخ */}
-          <div className="col-span-1">
-            <label className="block text-xs sm:text-sm text-gray-700 mb-1">تا تاریخ</label>
-            <DatePicker
-              calendar={persian}
-              locale={persian_fa}
-              value={filters.to}
-              onChange={(date) =>
-                setFilters({ ...filters, to: date?.format("YYYY-MM-DD") })
-              }
-              portal
-              containerStyle={{ zIndex: 2000 }}
-              inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 
-                          text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
-            />
-          </div>
+      {/* 🔸 تا تاریخ */}
+      <div className="col-span-1">
+        <label className="block text-xs sm:text-sm text-gray-700 mb-1">تا تاریخ</label>
+        <DatePicker
+          calendar={persian}
+          locale={persian_fa}
+          value={filters.to}
+          onChange={(date) =>
+            setFilters({ ...filters, to: date?.format("YYYY-MM-DD") })
+          }
+          portal
+          containerStyle={{ zIndex: 2000 }}
+          inputClass="w-full border border-yellow-200 rounded-xl p-2 sm:p-2.5 text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
+        />
+      </div>
 
-          {/* 🔘 دکمه‌ها */}
-          <div className="col-span-2 sm:col-span-2 flex items-center justify-center sm:justify-start gap-2 mt-1">
-            <button
-              onClick={() => setCurrentPage(1)}
-              className="flex-1 sm:flex-none bg-yellow-500 text-white py-2 px-3 rounded-xl hover:bg-yellow-600 transition text-sm font-medium shadow-sm"
-            >
-              اعمال فیلتر
-            </button>
+      {/* 🔘 دکمه‌ها */}
+      <div className="col-span-2 sm:col-span-2 flex items-center justify-center sm:justify-start gap-2 mt-1">
+        <button
+          type="button"
+          onClick={() => setCurrentPage(1)}
+          className="flex-1 sm:flex-none bg-yellow-500 text-white py-2 px-3 rounded-xl hover:bg-yellow-600 transition text-sm font-medium shadow-sm"
+        >
+          اعمال فیلتر
+        </button>
 
-            <button
-              onClick={() => setFilters({ title: "", category: "", from: "", to: "" })}
-              className="flex-1 sm:flex-none bg-gray-200 text-gray-700 py-2 px-3 rounded-xl hover:bg-gray-300 transition text-sm"
-            >
-              حذف فیلترها
-            </button>
+        <button
+          type="button"
+          onClick={() => setFilters({ title: "", category: "", from: "", to: "" })}
+          className="flex-1 sm:flex-none bg-gray-200 text-gray-700 py-2 px-3 rounded-xl hover:bg-gray-300 transition text-sm"
+        >
+          حذف فیلترها
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {/* ✅ موبایل: با دکمه باز/بسته + انیمیشن */}
+  <div className="sm:hidden">
+    <AnimatePresence initial={false}>
+      {showFilters && (
+        <motion.div
+          key="filters-box-mobile"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
+          className="overflow-hidden bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-md border border-yellow-100"
+        >
+          <div className="grid grid-cols-2 gap-3 text-right items-end">
+            {/* 🔸 عنوان */}
+            <div className="col-span-1">
+              <label className="block text-xs text-gray-700 mb-1">عنوان</label>
+              <select
+                value={filters.title}
+                onChange={(e) => setFilters({ ...filters, title: e.target.value })}
+                className="w-full border border-yellow-200 rounded-xl p-2 text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
+              >
+                <option value="">همه</option>
+                <option value="چکاپ عمومی">چکاپ عمومی</option>
+                <option value="چکاپ تخصصی">چکاپ تخصصی</option>
+                <option value="آزمایش و بررسی‌های تخصصی پزشکی">آزمایش‌ها</option>
+                <option value="بستری و جراحی">بستری و جراحی</option>
+                <option value="سایر">سایر</option>
+              </select>
+            </div>
+
+            {/* 🔸 دسته */}
+            <div className="col-span-1">
+              <label className="block text-xs text-gray-700 mb-1">دسته</label>
+              <select
+                value={filters.category}
+                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                className="w-full border border-yellow-200 rounded-xl p-2 text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
+              >
+                <option value="">همه</option>
+                <option value="عمومی">عمومی</option>
+                <option value="قلب و عروق">قلب و عروق</option>
+                <option value="مغز و اعصاب">مغز و اعصاب</option>
+                <option value="زنان">زنان</option>
+                <option value="دندانپزشکی">دندانپزشکی</option>
+                <option value="چشم‌پزشکی">چشم‌پزشکی</option>
+                <option value="پوست و مو">پوست و مو</option>
+              </select>
+            </div>
+
+            {/* 🔸 از تاریخ */}
+            <div className="col-span-1">
+              <label className="block text-xs text-gray-700 mb-1">از تاریخ</label>
+              <DatePicker
+                calendar={persian}
+                locale={persian_fa}
+                value={filters.from}
+                onChange={(date) =>
+                  setFilters({ ...filters, from: date?.format("YYYY-MM-DD") })
+                }
+                portal
+                containerStyle={{ zIndex: 2000 }}
+                inputClass="w-full border border-yellow-200 rounded-xl p-2 text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
+              />
+            </div>
+
+            {/* 🔸 تا تاریخ */}
+            <div className="col-span-1">
+              <label className="block text-xs text-gray-700 mb-1">تا تاریخ</label>
+              <DatePicker
+                calendar={persian}
+                locale={persian_fa}
+                value={filters.to}
+                onChange={(date) =>
+                  setFilters({ ...filters, to: date?.format("YYYY-MM-DD") })
+                }
+                portal
+                containerStyle={{ zIndex: 2000 }}
+                inputClass="w-full border border-yellow-200 rounded-xl p-2 text-sm focus:ring-2 focus:ring-yellow-300 outline-none text-right"
+              />
+            </div>
+
+            {/* 🔘 دکمه‌ها */}
+            <div className="col-span-2 flex items-center justify-center gap-2 mt-1">
+              <button
+                type="button"
+                onClick={() => setCurrentPage(1)}
+                className="flex-1 bg-yellow-500 text-white py-2 px-3 rounded-xl hover:bg-yellow-600 transition text-sm font-medium shadow-sm"
+              >
+                اعمال فیلتر
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilters({ title: "", category: "", from: "", to: "" })}
+                className="flex-1 bg-gray-200 text-gray-700 py-2 px-3 rounded-xl hover:bg-gray-300 transition text-sm"
+              >
+                حذف فیلترها
+              </button>
+            </div>
           </div>
-        </div>
-      </motion.div>
-    )}
-  </AnimatePresence>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
 </div>
+
 
 
       {/* 📋 باکس گزارش‌های من */}
@@ -360,10 +507,12 @@ const [showFilters, setShowFilters] = useState(true);
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 border-b pb-3">
     <div>
       <h2 className="text-xl font-semibold text-yellow-700">گزارش‌های من 📋</h2>
+      {userFullName && (
       <p className="text-sm text-gray-500 mt-1">
-        صاحب پروفایل:{" "}
-        <span className="font-medium text-gray-700">عرفان سمواتی</span>
+       صاحب پروفایل:{" "}
+      <span className="font-medium text-gray-700">{userFullName}</span>
       </p>
+      )}
     </div>
     <p className="text-sm text-gray-600 mt-2 sm:mt-0">
       مجموع گزارش‌های ثبت‌شده:{" "}
@@ -436,6 +585,7 @@ const [showFilters, setShowFilters] = useState(true);
 
                         <button
   onClick={() => {
+    if (!requireLogin()) return;
     setForm({
       title: rec.title,
       doctor: rec.doctor,
@@ -455,6 +605,7 @@ const [showFilters, setShowFilters] = useState(true);
 
      <button
   onClick={() => {
+    if (!requireLogin()) return;
     setDeleteTarget(rec);
     setShowDeleteModal(true);
   }}
@@ -465,6 +616,7 @@ const [showFilters, setShowFilters] = useState(true);
 
 <button
   onClick={() => {
+    if (!requireLogin()) return;
     setShareTarget(rec);
     setShowShareModal(true);
   }}
@@ -630,6 +782,7 @@ const [showFilters, setShowFilters] = useState(true);
     </div>
   )}
 </GoldenModal>
+
 
 {/* 🟢 مودال اشتراک گزارش */}
 <GoldenModal
