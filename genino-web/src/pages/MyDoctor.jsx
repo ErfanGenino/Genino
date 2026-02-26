@@ -10,7 +10,7 @@ import GoldenModal from "@components/Core/GoldenModal";
 import "../App.css"; // اگه هنوز این خط نیست
 import ScrollService from "../components/Core/ScrollService";
 import logo from "../assets/logo-genino.png";
-import { getUserProfile, listMedicalRecords, createMedicalRecord, updateMedicalRecord } from "../services/api";
+import { getUserProfile, listMedicalRecords, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord } from "../services/api";
 
 
 const TOKEN_EVENT = "genino_token_changed";
@@ -19,6 +19,8 @@ const TOKEN_EVENT = "genino_token_changed";
 export default function MyDoctor() {
   const [userFullName, setUserFullName] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [records, setRecords] = useState([]);
   const [form, setForm] = useState({
     title: "",
@@ -65,33 +67,44 @@ const handleSubmit = async (e) => {
   if (!form.title || !form.date || !form.category)
     return alert("لطفاً عنوان، تاریخ و دسته درمانی را وارد کنید");
 
-  let dateObj;
-  if (typeof form.date === "object" && form.date.year) {
-    dateObj = form.date;
-  } else if (typeof form.date === "string") {
-    const [y, m, d] = form.date.split("-").map((n) =>
-      parseInt(n.replace(/[۰-۹]/g, (t) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(t)]))
-    );
-    dateObj = { year: y, month: m, day: d };
-  } else {
-    alert("تاریخ معتبر نیست");
-    return;
-  }
+  // ✅ ساخت تاریخ میلادی معتبر از تاریخ شمسی
+let persianDateObj;
 
-  const gregorian = new DateObject({
-    date: dateObj,
+if (form.date && typeof form.date === "object" && form.date.year) {
+  // اگر خود DatePicker آبجکت داد
+  persianDateObj = new DateObject(form.date);
+} else if (typeof form.date === "string" && form.date.includes("-")) {
+  // اگر رشته‌ی YYYY-MM-DD داریم
+  const en = toEnglishNumber(form.date); // از تابع بالاتر استفاده می‌کنیم
+  persianDateObj = new DateObject({
+    date: en,
+    format: "YYYY-MM-DD",
     calendar: persian,
     locale: persian_fa,
-  }).convert();
+  });
+} else {
+  alert("تاریخ معتبر نیست");
+  return;
+}
 
-  const timestamp = gregorian.toDate().getTime();
+// تبدیل شمسی به میلادی
+const gregorianObj = persianDateObj.convert("gregorian");
+const gregorianDate = gregorianObj.toDate();
+
+// ✅ اگر تاریخ خراب بود، قبل از ادامه متوقف شو
+if (!(gregorianDate instanceof Date) || isNaN(gregorianDate.getTime())) {
+  alert("تاریخ معتبر نیست (خطای تبدیل تاریخ)");
+  return;
+}
+
+const isoDate = gregorianDate.toISOString();
 
   if (isEditing && editingId) {
   const payload = {
     title: form.title,
     doctor: form.doctor || null,
     category: form.category,
-    recordDate: new Date(timestamp).toISOString(),
+    recordDate: isoDate,
     description: form.desc || null,
   };
 
@@ -101,24 +114,12 @@ const handleSubmit = async (e) => {
     alert(upd?.message || "ویرایش گزارش ناموفق بود");
     return;
   }
+  setSuccessMessage("گزارش پزشکی با موفقیت ویرایش شد ✅");
+  setShowSuccessModal(true);
 
   const listRes = await listMedicalRecords();
   if (listRes?.ok) {
-    const mapped = (listRes.items || []).map((it) => {
-      const ts = it.recordDate ? new Date(it.recordDate).getTime() : 0;
-      return {
-        id: it.id,
-        timestamp: ts,
-        date: it.recordDate ? it.recordDate.slice(0, 10) : "",
-        title: it.title || "",
-        doctor: it.doctor || "",
-        category: it.category || "",
-        desc: it.description || "",
-        files: [],
-        attachments: it.attachments || [],
-      };
-    });
-    setRecords(mapped);
+    setRecords(mapMedicalRecords(listRes.items));
   }
 
   setIsEditing(false);
@@ -130,7 +131,7 @@ const handleSubmit = async (e) => {
     title: form.title,
     doctor: form.doctor || null,
     category: form.category,
-    recordDate: new Date(timestamp).toISOString(),
+    recordDate: isoDate,
     description: form.desc || null,
   };
 
@@ -140,25 +141,13 @@ const handleSubmit = async (e) => {
     alert(res?.message || "ثبت گزارش ناموفق بود");
     return;
   }
+  setSuccessMessage("گزارش پزشکی شما با موفقیت ثبت شد ✅");
+  setShowSuccessModal(true);
 
   // بعد از ثبت موفق، دوباره لیست را از سرور می‌گیریم
   const listRes = await listMedicalRecords();
   if (listRes?.ok) {
-    const mapped = (listRes.items || []).map((it) => {
-      const ts = it.recordDate ? new Date(it.recordDate).getTime() : 0;
-      return {
-        id: it.id,
-        timestamp: ts,
-        date: it.recordDate ? it.recordDate.slice(0, 10) : "",
-        title: it.title || "",
-        doctor: it.doctor || "",
-        category: it.category || "",
-        desc: it.description || "",
-        files: [],
-        attachments: it.attachments || [],
-      };
-    });
-    setRecords(mapped);
+    setRecords(mapMedicalRecords(listRes.items));
   }
 
   }
@@ -176,6 +165,31 @@ const handleSubmit = async (e) => {
   // 🟡 تبدیل عدد فارسی به انگلیسی
   const toEnglishNumber = (str = "") =>
     str.replace(/[۰-۹]/g, (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)]);
+
+  const mapMedicalRecords = (items = []) => {
+  return items.map((it) => {
+    const ts = it.recordDate ? new Date(it.recordDate).getTime() : 0;
+
+    return {
+      id: it.id,
+      timestamp: ts,
+      date: it.recordDate
+        ? new DateObject({
+            date: new Date(it.recordDate),
+            calendar: "gregorian",
+          })
+            .convert(persian, persian_fa)
+            .format("YYYY/MM/DD")
+        : "",
+      title: it.title || "",
+      doctor: it.doctor || "",
+      category: it.category || "",
+      desc: it.description || "",
+      files: [],
+      attachments: it.attachments || [],
+    };
+  });
+};
 
   // 🟡 فیلتر گزارش‌ها
   const filteredRecords = records.filter((r) => {
@@ -255,22 +269,7 @@ useEffect(() => {
   (async () => {
     const res = await listMedicalRecords();
     if (res?.ok) {
-      const mapped = (res.items || []).map((it) => {
-        const ts = it.recordDate ? new Date(it.recordDate).getTime() : 0;
-        return {
-          id: it.id,
-          timestamp: ts,
-          date: it.recordDate ? it.recordDate.slice(0, 10) : "",
-          title: it.title || "",
-          doctor: it.doctor || "",
-          category: it.category || "",
-          desc: it.description || "",
-          files: [],
-          attachments: it.attachments || [],
-        };
-      });
-
-      setRecords(mapped);
+      setRecords(mapMedicalRecords(res.items));
     } else {
       console.error("LIST MEDICAL RECORDS FAILED:", res);
       setRecords([]);
@@ -317,6 +316,17 @@ useEffect(() => {
     description="برای استفاده از این بخش باید لاگین کرده باشید."
     confirmLabel="متوجه شدم"
     onConfirm={() => setShowLoginModal(false)}
+  />
+</div>
+
+{/* مودال ثبت موفق گزارش */}
+<div className="relative z-[99999]">
+  <GoldenModal
+    show={showSuccessModal}
+    title="عملیات موفق"
+    description={successMessage}
+    confirmLabel="باشه"
+    onConfirm={() => setShowSuccessModal(false)}
   />
 </div>
 
@@ -599,11 +609,9 @@ useEffect(() => {
     <>
       {/* مرتب‌سازی بر اساس تاریخ */}
       {(() => {
-        const sortedRecords = [...filteredRecords].sort((a, b) => {
-          const dateA = a.date ? new Date(a.date).getTime() : 0;
-          const dateB = b.date ? new Date(b.date).getTime() : 0;
-          return dateB - dateA;
-        });
+        const sortedRecords = [...filteredRecords].sort(
+          (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
+        );
 
         // صفحه‌بندی
         const itemsPerPage = 10;
@@ -823,17 +831,39 @@ useEffect(() => {
   description="آیا از حذف این گزارش مطمئن هستید؟ این عمل قابل بازگشت نیست."
   confirmLabel={deleteLoading ? "در حال حذف..." : "بله، حذف شود"}
   cancelLabel="انصراف"
-  onConfirm={() => {
-    if (!deleteTarget) return;
-    setDeleteLoading(true);
-    setTimeout(() => {
-      setRecords(records.filter((r) => r.id !== deleteTarget.id));
-      setShowDeleteModal(false);
-      setDeleteLoading(false);
-      setDeleteTarget(null);
-      setCurrentPage(1);
-    }, 600); // یه تاخیر کوچیک برای حس نرم‌تر
-  }}
+  onConfirm={async () => {
+  if (!deleteTarget) return;
+  if (!requireLogin()) return;
+
+  setDeleteLoading(true);
+
+  const res = await deleteMedicalRecord(deleteTarget.id);
+
+  if (!res?.ok) {
+    setDeleteLoading(false);
+    alert(res?.message || "حذف گزارش ناموفق بود");
+    return;
+  }
+
+  // ✅ موفق
+  setShowDeleteModal(false);
+  setDeleteTarget(null);
+  setDeleteLoading(false);
+  setCurrentPage(1);
+
+  // (اختیاری) پیام موفقیت مثل بقیه مودال‌ها
+  setSuccessMessage("گزارش پزشکی با موفقیت حذف شد ✅");
+  setShowSuccessModal(true);
+
+  // ✅ دوباره لیست را از سرور بگیر
+  const listRes = await listMedicalRecords();
+  if (listRes?.ok) {
+    const listRes = await listMedicalRecords();
+if (listRes?.ok) {
+  setRecords(mapMedicalRecords(listRes.items));
+}
+  }
+}}
   onCancel={() => {
     setShowDeleteModal(false);
     setDeleteTarget(null);
