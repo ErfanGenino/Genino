@@ -10,7 +10,7 @@ import GoldenModal from "@components/Core/GoldenModal";
 import "../App.css"; // اگه هنوز این خط نیست
 import ScrollService from "../components/Core/ScrollService";
 import logo from "../assets/logo-genino.png";
-import { getUserProfile, listMedicalRecords, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord } from "../services/api";
+import { getUserProfile, listMedicalRecords, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord, addMedicalAttachment, presignMedicalAttachmentUpload, putFileToPresignedUrl, deleteMedicalAttachment, } from "../services/api";
 
 
 const TOKEN_EVENT = "genino_token_changed";
@@ -47,6 +47,9 @@ export default function MyDoctor() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareTarget, setShareTarget] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadInfo, setUploadInfo] = useState({ total: 0, done: 0 });
+  const [editingAttachments, setEditingAttachments] = useState([]);
 
   const requireLogin = () => {
   const token = localStorage.getItem("genino_token");
@@ -60,10 +63,66 @@ export default function MyDoctor() {
   return false;
 };
 
+function getFileExt(file) {
+  const name = (file?.name || "").toLowerCase();
+  const parts = name.split(".");
+  return parts.length > 1 ? parts.pop() : "";
+}
+
+async function uploadAndAttachFiles(recordId, files = []) {
+  if (!files?.length) return { ok: true, uploaded: 0 };
+
+  let uploaded = 0;
+
+  setUploadInfo({ total: files.length, done: 0 });
+
+  for (const file of files) {
+    // 1) presign
+    const pres = await presignMedicalAttachmentUpload({
+      recordId,
+      ext: getFileExt(file),
+      contentType: file.type,
+      fileName: file.name,
+      fileSize: file.size,
+    });
+
+    if (!pres?.ok) {
+      return { ok: false, message: pres?.message || "خطا در گرفتن لینک آپلود" };
+    }
+
+    // 2) PUT to S3
+    const up = await putFileToPresignedUrl(pres.uploadUrl, file);
+    if (!up?.ok) {
+      return { ok: false, message: up?.message || "آپلود فایل ناموفق بود" };
+    }
+
+    // 3) ثبت در DB
+    const att = await addMedicalAttachment(recordId, {
+      fileName: file.name,
+      mimeType: file.type,
+      fileSize: file.size,
+      url: pres.publicUrl,
+    });
+
+    if (!att?.ok) {
+      return { ok: false, message: att?.message || "ثبت پیوست در دیتابیس ناموفق بود" };
+    }
+
+    uploaded += 1;
+    setUploadInfo((s) => ({ ...s, done: uploaded }));
+  }
+
+  return { ok: true, uploaded };
+}
+
   // 🟢 افزودن گزارش جدید
 const handleSubmit = async (e) => {
   e.preventDefault();
   if (!requireLogin()) return;
+  if (isSubmitting) return;
+  setIsSubmitting(true);
+
+  try {
   if (!form.title || !form.date || !form.category)
     return alert("لطفاً عنوان، تاریخ و دسته درمانی را وارد کنید");
 
@@ -114,6 +173,12 @@ const isoDate = gregorianDate.toISOString();
     alert(upd?.message || "ویرایش گزارش ناموفق بود");
     return;
   }
+  const upRes = await uploadAndAttachFiles(editingId, form.files);
+
+if (!upRes?.ok) {
+  alert(upRes?.message || "آپلود فایل‌ها ناموفق بود");
+  return;
+}
   setSuccessMessage("گزارش پزشکی با موفقیت ویرایش شد ✅");
   setShowSuccessModal(true);
 
@@ -141,6 +206,13 @@ const isoDate = gregorianDate.toISOString();
     alert(res?.message || "ثبت گزارش ناموفق بود");
     return;
   }
+  const recordId = res?.item?.id;
+const upRes = await uploadAndAttachFiles(recordId, form.files);
+
+if (!upRes?.ok) {
+  alert(upRes?.message || "آپلود فایل‌ها ناموفق بود");
+  return;
+}
   setSuccessMessage("گزارش پزشکی شما با موفقیت ثبت شد ✅");
   setShowSuccessModal(true);
 
@@ -160,6 +232,13 @@ const isoDate = gregorianDate.toISOString();
     desc: "",
     files: [],
   });
+
+
+
+  } finally {
+  setIsSubmitting(false);
+  setUploadInfo({ total: 0, done: 0 });
+}
 };
 
   // 🟡 تبدیل عدد فارسی به انگلیسی
@@ -670,8 +749,11 @@ useEffect(() => {
       category: rec.category,
       date: rec.date,
       desc: rec.desc,
-      files: rec.files || [],
+      files: [],
     });
+
+    setEditingAttachments(rec.attachments || []);
+
     setEditingId(rec.id);
     setIsEditing(true);
     window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); // اسکرول نرم به فرم پایین
@@ -770,33 +852,48 @@ useEffect(() => {
     )}
 
     {/* 🖼 نمایش فایل‌ها */}
-    {selectedRecord.files?.length > 0 && (
-      <div>
-        <p className="font-semibold text-yellow-700 mb-2">📎 فایل‌های پیوست‌شده:</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {selectedRecord.files.map((file, index) => (
-            <div
-              key={index}
-              onClick={() => file?.type?.startsWith("image/") && setPreviewImage(URL.createObjectURL(file))}
-              className="relative border border-yellow-200 rounded-xl overflow-hidden bg-white/60 
-                         hover:shadow-lg hover:scale-[1.03] transition cursor-pointer"
-            >
-              {file?.type?.startsWith("image/") ? (
-                <img
-                  src={URL.createObjectURL(file)}
-    alt={`file-${index}`}
-    className="w-full h-24 object-cover"
-  />
-) : (
-  <div className="flex items-center justify-center bg-yellow-50 h-24 text-yellow-700 text-xs font-medium">
-    📄 {file?.name || "فایل نامشخص"}
+    {/* 📎 پیوست‌های ذخیره‌شده روی سرور */}
+{selectedRecord.attachments?.length > 0 && (
+  <div>
+    <p className="font-semibold text-yellow-700 mb-2">📎 فایل‌های پیوست‌شده:</p>
+
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {selectedRecord.attachments.map((att) => {
+        const isImage = String(att.mimeType || "").startsWith("image/");
+        const isPdf = String(att.mimeType || "") === "application/pdf";
+
+        return (
+          <a
+            key={att.id}
+            href={att.url}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => {
+              if (isImage) {
+                e.preventDefault();
+                setPreviewImage(att.url); // ✅ مستقیم url سرور
+              }
+            }}
+            className="relative border border-yellow-200 rounded-xl overflow-hidden bg-white/60 hover:shadow-lg hover:scale-[1.03] transition cursor-pointer block"
+          >
+            {isImage ? (
+              <img
+                src={att.url}
+                alt={att.fileName || "attachment"}
+                className="w-full h-24 object-cover"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center bg-yellow-50 h-24 text-yellow-700 text-xs font-medium p-2 text-center">
+                <div className="mb-1">{isPdf ? "📄 PDF" : "📎 فایل"}</div>
+                <div className="line-clamp-2">{att.fileName || "فایل"}</div>
+              </div>
+            )}
+          </a>
+        );
+      })}
+    </div>
   </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
+)}
   </div>
 )}
 </GoldenModal>
@@ -994,6 +1091,69 @@ if (listRes?.ok) {
             className="border border-yellow-200 rounded-xl p-3 focus:ring-2 focus:ring-yellow-300 outline-none min-h-[80px]"
           />
 
+
+  {/* ✅ فایل‌های قبلی این گزارش (فقط وقتی در حالت ویرایش هستیم) */}
+{isEditing && editingAttachments.length > 0 && (
+  <div className="mb-3">
+    <p className="text-sm font-semibold text-blue-700 mb-2">
+      فایل‌های قبلی این گزارش:
+    </p>
+
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      {editingAttachments.map((att) => {
+        const isImage = String(att.mimeType || "").startsWith("image/");
+
+        return (
+          <div
+            key={att.id}
+            className="relative border border-blue-200 rounded-lg overflow-hidden bg-white/60"
+          >
+            {isImage ? (
+              <img
+                src={att.url}
+                alt={att.fileName || "attachment"}
+                className="w-full h-20 object-cover"
+                onClick={() => setPreviewImage(att.url)}
+                style={{ cursor: "pointer" }}
+              />
+            ) : (
+              <a
+                href={att.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center bg-blue-50 h-20 text-blue-700 text-xs font-medium p-2 text-center"
+              >
+                📎 {att.fileName || "فایل"}
+              </a>
+            )}
+
+            <button
+              type="button"
+              onClick={async () => {
+                const ok = window.confirm("این فایل حذف شود؟");
+                if (!ok) return;
+
+                const res = await deleteMedicalAttachment(editingId, att.id);
+                if (!res?.ok) {
+                  alert(res?.message || "حذف فایل ناموفق بود");
+                  return;
+                }
+
+                // ✅ از UI هم حذفش کن
+                setEditingAttachments((prev) => prev.filter((x) => x.id !== att.id));
+              }}
+              className="absolute top-1 right-1 bg-white/90 hover:bg-red-500 hover:text-white text-gray-600 w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md transition"
+              title="حذف"
+            >
+              ✕
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
           {/* 🟢 آپلود چندفایلی با Tooltip و پیش‌نمایش داخل باکس */}
 <div className="relative group">
   <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-yellow-300 rounded-xl cursor-pointer hover:bg-yellow-50 transition text-center min-h-[120px]">
@@ -1085,15 +1245,18 @@ if (listRes?.ok) {
 
 
           <button
-    type="submit"
-    className={`${
-      isEditing
-        ? "bg-blue-500 hover:bg-blue-600"
-        : "bg-yellow-500 hover:bg-yellow-600"
-    } text-white py-3 rounded-xl transition font-medium`}
-  >
-    {isEditing ? "ثبت تغییرات" : "ذخیره گزارش"}
-  </button>
+  type="submit"
+  disabled={isSubmitting}
+  className={`${
+    isEditing ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"
+  } text-white py-3 rounded-xl transition font-medium ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
+>
+  {isSubmitting
+  ? (uploadInfo.total > 0
+      ? `در حال آپلود... ${uploadInfo.done}/${uploadInfo.total}`
+      : "در حال ذخیره...")
+  : (isEditing ? "ثبت تغییرات" : "ذخیره گزارش")}
+</button>
 
   {/* 🔵 دکمه لغو ویرایش */}
 {isEditing && (
@@ -1102,6 +1265,7 @@ if (listRes?.ok) {
     onClick={() => {
       setIsEditing(false);
       setEditingId(null);
+      setEditingAttachments([]);
       setForm({
         title: "",
         doctor: "",

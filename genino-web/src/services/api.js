@@ -257,3 +257,38 @@ export async function addMedicalAttachment(recordId, payload) {
     body: JSON.stringify(payload),
   });
 }
+
+// --- Uploads (Presign) ---
+export async function presignMedicalAttachmentUpload(payload) {
+  // payload: { recordId, ext, contentType, fileName, fileSize }
+  return authFetch("/uploads/presign/medical-attachment", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// --- S3 PUT upload to presigned url ---
+export async function putFileToPresignedUrl(uploadUrl, file) {
+  try {
+    const res = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": file.type, // خیلی مهم
+      },
+      body: file,
+    });
+
+    if (!res.ok) {
+      return { ok: false, status: res.status, message: `آپلود ناموفق (${res.status})` };
+    }
+    return { ok: true, status: res.status };
+  } catch (e) {
+    return { ok: false, status: 0, message: "خطا در اتصال هنگام آپلود." };
+  }
+}
+
+export async function deleteMedicalAttachment(recordId, attachmentId) {
+  return authFetch(`/medical-records/${recordId}/attachments/${attachmentId}`, {
+    method: "DELETE",
+  });
+}
