@@ -1,8 +1,8 @@
-// 📦 src/components/GeninoAwarenessBox.jsx
+// 📦 src/components/Awareness/GeninoAwarenessBox.jsx
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-export default function GeninoAwarenessBox({ image, message, buttons = [] }) {
+export default function GeninoAwarenessBox({ image, message, buttons = [], onButtonClick }) {
   return (
     <motion.div
       className="bg-white/90 backdrop-blur-sm border border-yellow-200 rounded-3xl shadow-[0_0_25px_rgba(212,175,55,0.25)] p-6 text-center overflow-hidden"
@@ -62,15 +62,45 @@ export default function GeninoAwarenessBox({ image, message, buttons = [] }) {
       {/* 🔘 دکمه‌ها – هدایت بدون 404 روی Vercel */}
       <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-yellow-100 py-2 px-2">
   <div className="inline-flex gap-3 min-w-max justify-center">
-    {buttons.map((btn, index) => (
-      <Link
+    {buttons.map((btn, index) => {
+  const isActionButton = typeof onButtonClick === "function";
+  const isHashLink = typeof btn.link === "string" && btn.link.startsWith("#");
+
+  if (isActionButton) {
+    return (
+      <button
         key={index}
-        to={btn.link}
+        type="button"
+        onClick={() => onButtonClick(btn)}
         className="whitespace-nowrap px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-sm font-medium rounded-full shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.5)] transition"
       >
         {btn.title}
-      </Link>
-    ))}
+      </button>
+    );
+  }
+
+  if (isHashLink) {
+    return (
+      <a
+        key={index}
+        href={btn.link}
+        className="whitespace-nowrap px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-sm font-medium rounded-full shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.5)] transition"
+      >
+        {btn.title}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      key={index}
+      to={btn.link}
+      className="whitespace-nowrap px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-sm font-medium rounded-full shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.5)] transition"
+    >
+      {btn.title}
+    </Link>
+  );
+})}
   </div>
 </div>
     </motion.div>

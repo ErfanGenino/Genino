@@ -41,6 +41,7 @@ export default function SingleWorld() {
             title: "رشد فردی",
             desc: "افزایش تمرکز و شناخت خودت",
             icon: <Brain className="w-6 h-6 text-sky-600" />,
+            link: "/articles/personal-growth-mastery",
           },
           {
             title: "سلامت من",
@@ -52,32 +53,37 @@ export default function SingleWorld() {
             title: "آرامش ذهنی",
             desc: "مدیتیشن و آرام‌سازی ذهن برای تعادل روحی",
             icon: <Heart className="w-6 h-6 text-sky-600" />,
+            link: "/knowledge/mind-calm",
           },
           {
             title: "تناسب اندام",
             desc: "برنامه‌های ورزشی برای تقویت جسم و ذهن",
             icon: <Dumbbell className="w-6 h-6 text-sky-600" />,
-            link: "/calorie-tracker",
+            link: "/articles/fitness-for-single-world",
           },
           {
             title: "کتاب و یادگیری",
             desc: "مطالعه‌ی کتاب‌های الهام‌بخش و مهارتی",
             icon: <BookOpen className="w-6 h-6 text-sky-600" />,
+            link: "/articles/books-that-change-life",
           },
           {
             title: "موسیقی و انرژی مثبت",
             desc: "گوش دادن به پلی‌لیست‌های آرامش‌بخش",
             icon: <Music className="w-6 h-6 text-sky-600" />,
+            link: "/single-world/music",
           },
           {
             title: "الهام روزانه",
             desc: "جملات انگیزشی برای شروع روزی بهتر",
             icon: <Sparkles className="w-6 h-6 text-sky-600" />,
+            link: "/articles/daily-inspiration",
           },
           {
             title: "استراحت با قهوه",
             desc: "لحظه‌هایی برای تفکر و خلوت با خودت",
             icon: <Coffee className="w-6 h-6 text-sky-600" />,
+            link: "/articles/coffee-break",
           },
           {
             title: "دنیای دانستنی‌ها",

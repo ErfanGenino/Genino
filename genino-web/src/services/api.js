@@ -292,3 +292,46 @@ export async function deleteMedicalAttachment(recordId, attachmentId) {
     method: "DELETE",
   });
 }
+
+// --- Private Chat ---
+
+export async function getPrivateConversation(userId) {
+  return authFetch(`/chat/${userId}`, {
+    method: "GET",
+  });
+}
+
+export async function sendPrivateMessage(userId, payload) {
+  return authFetch(`/chat/${userId}/messages`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function searchGeninoUsers(query) {
+  return authFetch(`/users/search?q=${encodeURIComponent(query)}`, {
+    method: "GET",
+  });
+}
+
+export async function getConversations() {
+  try {
+    const res = await authFetch(`/chat`)
+    return res;
+  } catch (err) {
+    console.error("getConversations error:", err);
+    return { ok: false };
+  }
+}
+
+export async function updateSocialPresence() {
+  return authFetch("/users/social-presence", {
+    method: "POST",
+  });
+}
+
+export async function getOnlineUsers() {
+  return authFetch("/users/online", {
+    method: "GET",
+  });
+}

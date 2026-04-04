@@ -6,6 +6,8 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import "react-multi-date-picker/styles/colors/yellow.css";
 import DateObject from "react-date-object";
+import GeninoAwarenessBox from "../components/Awareness/GeninoAwarenessBox";
+import calorieDietCategories from "../data/calorieDietCategories";
 
 export default function CalorieTracker() {
   const [selectedDay, setSelectedDay] = useState(null);
@@ -13,6 +15,7 @@ export default function CalorieTracker() {
   const [missedDays, setMissedDays] = useState(2);
   const [totalDays, setTotalDays] = useState(0);
   const [selectedMeal, setSelectedMeal] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
 
   const [selectedFoods, setSelectedFoods] = useState({
     صبحانه: [],
@@ -131,6 +134,24 @@ const [weight, setWeight] = useState("");
 const [activityLevel, setActivityLevel] = useState("");
 const [dailyCalories, setDailyCalories] = useState(null);
 
+  const awarenessButtons = [
+  { title: "رژیم‌های عمومی", categoryId: "general-lifestyle" },
+  { title: "رژیم‌های هدف‌محور", categoryId: "goal-based" },
+  { title: "رژیم‌های درمانی", categoryId: "medical-restrictive" },
+  { title: "گروه‌های خاص", categoryId: "special-groups" },
+];
+
+const selectedCategoryData = calorieDietCategories.find(
+  (category) => category.id === activeCategory
+);
+
+const handleAwarenessButtonClick = (btn) => {
+  setActiveCategory((prev) =>
+    prev === btn.categoryId ? null : btn.categoryId
+  );
+};
+
+
   return (
     <main
       dir="rtl"
@@ -200,12 +221,58 @@ const [dailyCalories, setDailyCalories] = useState(null);
         </motion.div>
       ))}
 
+      {/* 🧠 جعبه آگاهی ژنینو + دسته‌بندی رژیم‌ها */}
+<motion.section
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.2, duration: 0.6 }}
+  className="w-full max-w-6xl mt-8 relative z-10"
+>
+  <GeninoAwarenessBox
+    image="/images/calorie-tracker/genino-diet-awareness.jpg"
+    message="در این بخش از کالری‌شمار ژنینو، می‌توانی با مهم‌ترین رژیم‌های غذایی آشنا شوی؛ از رژیم‌های عمومی و سبک زندگی گرفته تا رژیم‌های هدف‌محور، درمانی و گروه‌های خاص. هدف ما این است که محتواها علمی، ساده‌فهم و واقعاً کاربردی باشند تا هر کاربر بتواند مسیر مناسب خودش را بهتر پیدا کند."
+    buttons={awarenessButtons}
+    onButtonClick={handleAwarenessButtonClick}
+  />
+
+  <AnimatePresence initial={false}>
+  {selectedCategoryData && (
+    <motion.div
+      initial={{ opacity: 0, y: -10, height: 0 }}
+      animate={{ opacity: 1, y: 0, height: "auto" }}
+      exit={{ opacity: 0, y: -10, height: 0 }}
+      transition={{ duration: 0.3 }}
+      className="mt-6 overflow-hidden"
+    >
+      <div className="bg-white/85 backdrop-blur-sm border border-yellow-100 rounded-3xl shadow-sm p-6 text-right">
+        <h3 className="text-xl sm:text-2xl font-bold text-yellow-700 mb-5 text-center">
+          {selectedCategoryData.title}
+        </h3>
+
+        <div className="flex flex-wrap justify-center gap-3">
+          {selectedCategoryData.items.map((item) => (
+            <a
+              key={item.link}
+              href={item.link}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-sm font-medium shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.35)] transition"
+            >
+              {item.title}
+            </a>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+</motion.section>
+
       {/* ✨ جمله انگیزشی + تاریخ */}
 <motion.div
   initial={{ opacity: 0, y: -40 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 1 }}
-  className="relative z-10 bg-white/70 backdrop-blur-md border border-yellow-100 rounded-3xl shadow-lg p-6 sm:p-10 max-w-2xl text-center"
+  className="relative z-10 mt-8 bg-white/70 backdrop-blur-md border border-yellow-100 rounded-3xl shadow-lg p-6 sm:p-10 max-w-2xl text-center"
 >
   <h1 className="text-3xl sm:text-4xl font-extrabold text-yellow-600 mb-4">
     بهت تبریک می‌گم 
@@ -253,6 +320,8 @@ const [dailyCalories, setDailyCalories] = useState(null);
     </p>
   )}
 </motion.div>
+
+
 
 {/* 📊 جدول آماری پایین */}
 {selectedDay && (
@@ -428,19 +497,7 @@ const [dailyCalories, setDailyCalories] = useState(null);
 {/* 📋 جدول خلاصه وضعیت کالری دریافتی */}
 {selectedDay && (
   <>
-    {/* محاسبه پیشنهاد بهینه */}
-    {dailyCalories && (
-      <script>
-        {`
-          const suggestedCalories = {
-            صبحانه: ${dailyCalories} * 0.2,
-            ناهار: ${dailyCalories} * 0.4,
-            شام: ${dailyCalories} * 0.3,
-            "میان‌وعده": ${dailyCalories} * 0.1
-          };
-        `}
-      </script>
-    )}
+  
 
     <motion.h2
       initial={{ opacity: 0, y: 10 }}

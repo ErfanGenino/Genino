@@ -1,5 +1,5 @@
 //src/pages/MyDoctor.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusCircle, FileHeart, UploadCloud } from "lucide-react";
 import DatePicker from "react-multi-date-picker";
@@ -7,7 +7,7 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
 import GoldenModal from "@components/Core/GoldenModal";
-import "../App.css"; // اگه هنوز این خط نیست
+import "../index.css"; 
 import ScrollService from "../components/Core/ScrollService";
 import logo from "../assets/logo-genino.png";
 import { getUserProfile, listMedicalRecords, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord, addMedicalAttachment, presignMedicalAttachmentUpload, putFileToPresignedUrl, deleteMedicalAttachment, } from "../services/api";
@@ -50,6 +50,7 @@ export default function MyDoctor() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadInfo, setUploadInfo] = useState({ total: 0, done: 0 });
   const [editingAttachments, setEditingAttachments] = useState([]);
+  const fileInputRef = useRef(null);
 
   const requireLogin = () => {
   const token = localStorage.getItem("genino_token");
@@ -145,6 +146,11 @@ if (form.date && typeof form.date === "object" && form.date.year) {
   alert("تاریخ معتبر نیست");
   return;
 }
+
+const persianDisplayToFormDate = (value = "") => {
+  const en = toEnglishNumber(String(value).trim());
+  return en.replace(/\//g, "-");
+};
 
 // تبدیل شمسی به میلادی
 const gregorianObj = persianDateObj.convert("gregorian");
@@ -253,13 +259,21 @@ if (!upRes?.ok) {
       id: it.id,
       timestamp: ts,
       date: it.recordDate
-        ? new DateObject({
-            date: new Date(it.recordDate),
-            calendar: "gregorian",
-          })
-            .convert(persian, persian_fa)
-            .format("YYYY/MM/DD")
-        : "",
+  ? new DateObject({
+      date: new Date(it.recordDate),
+      calendar: "gregorian",
+    })
+      .convert(persian, persian_fa)
+      .format("YYYY/MM/DD")
+  : "",
+formDate: it.recordDate
+  ? new DateObject({
+      date: new Date(it.recordDate),
+      calendar: "gregorian",
+    })
+      .convert(persian, persian_fa)
+      .format("YYYY-MM-DD")
+  : "",
       title: it.title || "",
       doctor: it.doctor || "",
       category: it.category || "",
@@ -744,13 +758,13 @@ useEffect(() => {
   onClick={() => {
     if (!requireLogin()) return;
     setForm({
-      title: rec.title,
-      doctor: rec.doctor,
-      category: rec.category,
-      date: rec.date,
-      desc: rec.desc,
-      files: [],
-    });
+  title: rec.title,
+  doctor: rec.doctor,
+  category: rec.category,
+  date: rec.formDate || persianDisplayToFormDate(rec.date),
+  desc: rec.desc,
+  files: [],
+});
 
     setEditingAttachments(rec.attachments || []);
 
@@ -1154,77 +1168,104 @@ if (listRes?.ok) {
   </div>
 )}
 
-          {/* 🟢 آپلود چندفایلی با Tooltip و پیش‌نمایش داخل باکس */}
+          {/* 🟢 آپلود چندفایلی (نسخه امن: پیش‌نمایش جدا از دکمه انتخاب فایل) */}
 <div className="relative group">
-  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-yellow-300 rounded-xl cursor-pointer hover:bg-yellow-50 transition text-center min-h-[120px]">
-    {/* 🟡 اگر فایل انتخاب نشده */}
-    {!form.files?.length && (
-      <>
-        <UploadCloud className="w-6 h-6 text-yellow-600 mb-1" />
-        <span className="text-sm text-gray-600">
-          آپلود تصویر یا فایل آزمایش / نسخه
-        </span>
-      </>
-    )}
+  {/* input مخفی */}
+  <input
+    ref={fileInputRef}
+    type="file"
+    multiple
+    accept="image/*,.pdf,.docx"
+    className="hidden"
+    onChange={(e) => {
+  const selectedFiles = Array.from(e.target.files || []);
 
-    {/* 🖼 اگر فایل‌ها انتخاب شده‌اند */}
-    {form.files?.length > 0 && (
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
-        {form.files.map((file, index) => (
-          <div
-            key={index}
-            className="relative border border-yellow-200 rounded-lg overflow-hidden bg-white/60"
-          >
-            {file?.type?.startsWith("image/") ? (
-  <img
-    src={URL.createObjectURL(file)}
-    alt={`file-${index}`}
-    className="w-full h-20 object-cover"
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  const invalidFiles = selectedFiles.filter(
+    (file) => !allowedMimeTypes.includes(String(file.type || "").toLowerCase())
+  );
+
+  if (invalidFiles.length > 0) {
+    alert("فقط فایل‌های عکس، PDF و DOCX مجاز هستند.");
+    e.target.value = "";
+    return;
+  }
+
+  setForm((prev) => {
+    const prevFiles = prev.files || [];
+    if (selectedFiles.length + prevFiles.length > 4) {
+      alert("حداکثر ۴ فایل می‌توانید بارگذاری کنید");
+      return prev;
+    }
+    return { ...prev, files: [...prevFiles, ...selectedFiles] };
+  });
+
+  e.target.value = "";
+}}
   />
-) : (
-  <div className="flex items-center justify-center bg-yellow-50 h-20 text-yellow-700 text-xs font-medium">
-    📄 {file?.name || "فایل غیر تصویری"}
-  </div>
-)}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setForm({
-                  ...form,
-                  files: form.files.filter((_, i) => i !== index),
-                });
-              }}
-              className="absolute top-1 right-1 bg-white/90 hover:bg-red-500 hover:text-white text-gray-600 w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md transition"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
-    )}
 
-    {/* 🟢 ورودی فایل */}
-    <input
-      type="file"
-      multiple
-      accept="image/*,.pdf,.doc,.docx"
-      className="hidden"
-      onChange={(e) => {
-        const selectedFiles = Array.from(e.target.files || []);
-        if (selectedFiles.length + (form.files?.length || 0) > 4) {
-          alert("حداکثر ۴ فایل می‌توانید بارگذاری کنید");
-          return;
-        }
-        setForm({
-          ...form,
-          files: [...(form.files || []), ...selectedFiles],
-        });
-      }}
-    />
-  </label>
+  {/* پیش‌نمایش فایل‌ها */}
+  {form.files?.length > 0 && (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full mb-3">
+      {form.files.map((file, index) => (
+        <div
+          key={`${file.name}-${file.size}-${index}`}
+          className="relative border border-yellow-200 rounded-lg overflow-hidden bg-white/60"
+        >
+          {file?.type?.startsWith("image/") ? (
+            <img
+              src={URL.createObjectURL(file)}
+              alt={`file-${index}`}
+              className="w-full h-20 object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center bg-yellow-50 h-20 text-yellow-700 text-xs font-medium p-2 text-center">
+              📄 {file?.name || "فایل"}
+            </div>
+          )}
 
-  {/* 🔸 Tooltip توضیحی */}
+          <button
+            type="button"
+            onClick={() => {
+              setForm((prev) => ({
+                ...prev,
+                files: (prev.files || []).filter((_, i) => i !== index),
+              }));
+            }}
+            className="absolute top-1 right-1 bg-white/90 hover:bg-red-500 hover:text-white text-gray-600 w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md transition"
+            title="حذف"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+
+  {/* دکمه انتخاب فایل (همیشه دیده می‌شود) */}
+  <button
+    type="button"
+    onClick={() => fileInputRef.current?.click()}
+    className={`${
+  form.files?.length
+    ? "mx-auto inline-flex items-center gap-2 px-4 py-2 border border-yellow-300 rounded-lg bg-yellow-50 hover:bg-yellow-100 text-yellow-700 text-sm shadow-sm"
+    : "w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-yellow-300 rounded-xl hover:bg-yellow-50 transition text-center min-h-[140px]"
+}`}
+  >
+    <UploadCloud className="w-6 h-6 text-yellow-600 mb-1" />
+    <span className="text-sm text-gray-600">
+      {form.files?.length ? "افزودن فایل/عکس بیشتر (تا ۴ عدد)" : "آپلود تصویر یا فایل آزمایش / نسخه"}
+    </span>
+  </button>
+
+  {/* Tooltip */}
   <motion.div
     initial={{ opacity: 0, y: 5 }}
     whileInView={{ opacity: 1, y: 0 }}
