@@ -1,6 +1,6 @@
 //src/pages/social/Feed.jsx
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PlusCircle,
@@ -22,7 +22,18 @@ import {
   getConversations,
   updateSocialPresence,
   getOnlineUsers,
+  getRoomPresence,
+  getChatRooms,
+  createChatRoom,
+  deleteChatRoom,
+  updateChatRoom,
+  presignChatRoomImageUpload,
+  putFileToPresignedUrl,
+  getMyFavoriteChatRooms,
+  addFavoriteChatRoom,
+  removeFavoriteChatRoom,
 } from "../../services/api";
+import { io } from "socket.io-client";
 
 export default function Feed() {
   const [activeRoom, setActiveRoom] = useState(null);
@@ -34,35 +45,58 @@ export default function Feed() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchedUsers, setSearchedUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [roomOnlineCounts, setRoomOnlineCounts] = useState({});
+  const socketRef = useRef(null);
+  const [roomToDelete, setRoomToDelete] = useState(null);
+  const [editImagePreview, setEditImagePreview] = useState(null);
+  const [favoriteRoomIds, setFavoriteRoomIds] = useState([]);
+  const [roomToFavorite, setRoomToFavorite] = useState(null);
+  const [activeRoomTab, setActiveRoomTab] = useState("all");
+  const [roomSearchTerm, setRoomSearchTerm] = useState("");
+  const [isCreateRoomNoticeOpen, setIsCreateRoomNoticeOpen] = useState(false);
+
+  const currentUser = (() => {
+  try {
+    return JSON.parse(localStorage.getItem("genino_user") || "null");
+  } catch {
+    return null;
+  }
+})();
+
+const currentUserId = Number(currentUser?.id || 0);
 
   const fixedRooms = [
     {
-      id: "public",
+      id: "1",
       title: "اتاق عمومی",
       desc: "گفت‌وگو آزاد بین کاربران ژنینو",
       color: "bg-green-50",
       icon: <MessageSquare size={42} className="text-green-500" />,
+      onlineCount: roomOnlineCounts[1] ?? 0,
     },
     {
-      id: "kids",
+      id: "2",
       title: "کودکان",
       desc: "رشد، بازی و آموزش کودک",
       color: "bg-yellow-50",
       icon: <Baby size={42} className="text-yellow-500" />,
+      onlineCount: roomOnlineCounts[2] ?? 0,
     },
     {
-      id: "women",
+      id: "3",
       title: "بانوان",
       desc: "موضوعات مربوط به بانوان و مادران",
       color: "bg-pink-50",
       icon: <Heart size={42} className="text-pink-400" />,
+      onlineCount: roomOnlineCounts[3] ?? 0,
     },
     {
-      id: "men",
+      id: "4",
       title: "آقایان",
       desc: "گفت‌وگوهای ویژه آقایان",
       color: "bg-blue-50",
       icon: <User size={42} className="text-blue-500" />,
+      onlineCount: roomOnlineCounts[4] ?? 0,
     },
   ];
 
@@ -95,10 +129,16 @@ export default function Feed() {
 
     const res = await searchGeninoUsers(normalized);
 
+    console.log("SEARCH TERM:", normalized);
+    console.log("SEARCH RESPONSE:", res);
+
     if (!res?.ok) {
+      console.log("SEARCH FAILED");
       setSearchedUsers([]);
       return;
     }
+
+    console.log("SEARCH ITEMS:", res.items);
 
     const conversationIds = new Set(conversations.map((item) => item.id));
 
@@ -116,12 +156,13 @@ export default function Feed() {
         avatarUrl: item.avatarUrl || null,
       }));
 
+    console.log("SEARCH MAPPED:", mapped);
+
     setSearchedUsers(mapped);
   };
 
   loadSearchResults();
 }, [searchTerm, conversations]);
-
 
 useEffect(() => {
   let isMounted = true;
@@ -203,6 +244,154 @@ useEffect(() => {
   };
 }, []);
 
+useEffect(() => {
+  let isMounted = true;
+
+  const roomIds = fixedRooms.map((room) => Number(room.id)).filter(Boolean);
+
+  const loadRoomPresenceCounts = async () => {
+    const results = await Promise.all(
+      roomIds.map(async (roomId) => {
+        const res = await getRoomPresence(roomId);
+
+        return {
+          roomId,
+          count: res?.ok ? Number(res.count || 0) : 0,
+        };
+      })
+    );
+
+    if (!isMounted) return;
+
+    const mappedCounts = results.reduce((acc, item) => {
+      acc[item.roomId] = item.count;
+      return acc;
+    }, {});
+
+    setRoomOnlineCounts((prev) => ({
+  ...prev,
+  ...mappedCounts,
+}));
+  };
+
+  loadRoomPresenceCounts();
+
+  const intervalId = setInterval(() => {
+    loadRoomPresenceCounts();
+  }, 5000);
+
+  return () => {
+    isMounted = false;
+    clearInterval(intervalId);
+  };
+}, []);
+
+useEffect(() => {
+  const socketBaseUrl = import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, "");
+
+  const socket = io(socketBaseUrl, {
+    withCredentials: true,
+    transports: ["websocket", "polling"],
+  });
+
+  socketRef.current = socket;
+
+  socket.on("connect", () => {
+    console.log("🟢 Feed socket connected:", socket.id);
+  });
+
+  socket.on("room_presence_updated", async ({ roomId }) => {
+    const numericRoomId = Number(roomId);
+    if (!numericRoomId) return;
+
+    const res = await getRoomPresence(numericRoomId);
+
+    if (!res?.ok) return;
+
+    setRoomOnlineCounts((prev) => ({
+      ...prev,
+      [numericRoomId]: Number(res.count || 0),
+    }));
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔴 Feed socket disconnected:", socket.id);
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
+
+useEffect(() => {
+  let isMounted = true;
+
+  const loadChatRooms = async () => {
+    const res = await getChatRooms();
+
+    if (!isMounted) return;
+
+    if (!res?.ok) {
+      setCustomRooms([]);
+      return;
+    }
+
+    const mapped = (res.items || []).map((room) => ({
+  id: room.id,
+  title: room.title,
+  desc: room.description || "اتاق ساخته‌شده توسط کاربر",
+  imageUrl: room.imageUrl || "",
+  creatorId: Number(room.creatorId || 0),
+
+  creatorName:
+    room.creator?.fullName?.trim() ||
+    `${room.creator?.firstName || ""} ${room.creator?.lastName || ""}`.trim() ||
+    room.creator?.username ||
+    "مدیر نامشخص",
+
+  favoriteCount: Number(room?._count?.favoritedBy || 0),
+  color: "bg-gray-50",
+  icon: <MessageSquare size={42} className="text-gray-500" />,
+  onlineCount: roomOnlineCounts[Number(room.id)] ?? 0,
+}));
+
+    setCustomRooms(mapped);
+  };
+
+  loadChatRooms();
+
+  return () => {
+    isMounted = false;
+  };
+}, [roomOnlineCounts]);
+
+useEffect(() => {
+  let isMounted = true;
+
+  const loadFavoriteRooms = async () => {
+    const res = await getMyFavoriteChatRooms();
+
+    if (!isMounted) return;
+
+    if (!res?.ok) {
+      setFavoriteRoomIds([]);
+      return;
+    }
+
+    const ids = (res.items || [])
+      .map((item) => Number(item.roomId))
+      .filter(Boolean);
+
+    setFavoriteRoomIds(ids);
+  };
+
+  loadFavoriteRooms();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
+
 const filteredOnlineUsers = useMemo(() => {
   const normalized = searchTerm.trim().toLowerCase();
 
@@ -213,58 +402,265 @@ const filteredOnlineUsers = useMemo(() => {
   );
 }, [searchTerm, onlineUsers]);
 
+const visibleCustomRooms = useMemo(() => {
+  if (activeRoomTab === "favorites") {
+    return customRooms.filter((room) =>
+      favoriteRoomIds.includes(Number(room.id))
+    );
+  }
 
+  if (activeRoomTab === "mine") {
+    return customRooms.filter(
+      (room) => Number(room.creatorId) === currentUserId
+    );
+  }
 
-  const handleCreateRoom = (roomData) => {
-    const newRoom = {
-      ...roomData,
-      icon: <MessageSquare size={42} className="text-gray-500" />,
-    };
+  return customRooms;
+}, [activeRoomTab, customRooms, favoriteRoomIds, currentUserId]);
 
-    setCustomRooms((prev) => [...prev, newRoom]);
+const filteredVisibleCustomRooms = useMemo(() => {
+  const normalized = roomSearchTerm.trim().toLowerCase();
+
+  if (!normalized) return visibleCustomRooms;
+
+  return visibleCustomRooms.filter((room) => {
+    const title = (room.title || "").toLowerCase();
+    const desc = (room.desc || "").toLowerCase();
+
+    return title.includes(normalized) || desc.includes(normalized);
+  });
+}, [roomSearchTerm, visibleCustomRooms]);
+
+const roomTabCounts = useMemo(() => {
+  const allCount = customRooms.length;
+
+  const favoritesCount = customRooms.filter((room) =>
+    favoriteRoomIds.includes(Number(room.id))
+  ).length;
+
+  const myRoomsCount = customRooms.filter(
+    (room) => Number(room.creatorId) === currentUserId
+  ).length;
+
+  return {
+    all: allCount,
+    favorites: favoritesCount,
+    mine: myRoomsCount,
   };
+}, [customRooms, favoriteRoomIds, currentUserId]);
 
-  const handleDeleteRoom = (roomId) => {
-    setCustomRooms((prev) => prev.filter((room) => room.id !== roomId));
+  const handleCreateRoom = async (roomData) => {
+  const res = await createChatRoom({
+    title: roomData.title,
+    description: roomData.desc,
+    imageUrl: roomData.imageUrl || "",
+  });
 
-    if (activeRoom?.id === roomId) {
-      setActiveRoom(null);
-    }
-  };
+  if (!res?.ok || !res.item) {
+    alert(res?.message || "ساخت اتاق انجام نشد.");
+    return;
+  }
+
+  const newRoom = {
+  id: res.item.id,
+  title: res.item.title,
+  desc: res.item.description || "اتاق ساخته‌شده توسط کاربر",
+  imageUrl: res.item.imageUrl || "",
+  creatorId: Number(res.item.creatorId || 0),
+  favoriteCount: Number(res.item?._count?.favoritedBy || 0),
+  color: "bg-gray-50",
+  icon: <MessageSquare size={42} className="text-gray-500" />,
+  onlineCount: 0,
+};
+
+  setCustomRooms((prev) => [newRoom, ...prev]);
+};
+
+  const handleDeleteRoom = (room) => {
+  if (!room) return;
+  setRoomToDelete(room);
+};
+
+const confirmDeleteRoom = async () => {
+  if (!roomToDelete?.id) return;
+
+  const roomId = roomToDelete.id;
+
+  const res = await deleteChatRoom(roomId);
+
+  if (!res?.ok) {
+    alert(res?.message || "حذف اتاق انجام نشد.");
+    return;
+  }
+
+  setCustomRooms((prev) => prev.filter((room) => room.id !== roomId));
+
+  if (activeRoom?.id === roomId) {
+    setActiveRoom(null);
+  }
+
+  setRoomToDelete(null);
+};
 
   const handleStartEditRoom = (room) => {
-    setEditingRoom(room);
-    setEditTitle(room.title || "");
-    setEditDesc(room.desc || "");
-  };
+  setEditingRoom(room);
+  setEditTitle(room.title || "");
+  setEditDesc(room.desc || "");
+  setEditImagePreview(
+    room.imageUrl
+      ? {
+          url: room.imageUrl,
+          blob: null,
+          contentType: "",
+          ext: "",
+          fileSize: 0,
+        }
+      : null
+  );
+};
 
-  const handleSaveEditRoom = () => {
-    if (!editTitle.trim()) return;
+const handleAskFavoriteRoom = (room) => {
+  if (!room?.id) return;
+  setRoomToFavorite(room);
+};
 
-    setCustomRooms((prev) =>
-      prev.map((room) =>
-        room.id === editingRoom.id
-          ? {
-              ...room,
-              title: editTitle.trim(),
-              desc: editDesc.trim() || "اتاق ساخته‌شده توسط کاربر",
-            }
-          : room
-      )
+const confirmFavoriteRoom = async () => {
+  if (!roomToFavorite?.id) return;
+
+  const roomId = Number(roomToFavorite.id);
+  const isAlreadyFavorite = favoriteRoomIds.includes(roomId);
+
+  const res = isAlreadyFavorite
+    ? await removeFavoriteChatRoom(roomId)
+    : await addFavoriteChatRoom(roomId);
+
+  if (!res?.ok) {
+    alert(res?.message || "عملیات اتاق‌های مورد علاقه انجام نشد.");
+    return;
+  }
+
+  setFavoriteRoomIds((prev) =>
+    isAlreadyFavorite
+      ? prev.filter((id) => id !== roomId)
+      : [...prev, roomId]
+  );
+
+  setCustomRooms((prev) =>
+    prev.map((room) =>
+      Number(room.id) === roomId
+        ? {
+            ...room,
+            favoriteCount: Math.max(
+              0,
+              Number(room.favoriteCount || 0) + (isAlreadyFavorite ? -1 : 1)
+            ),
+          }
+        : room
+    )
+  );
+
+  if (activeRoom?.id === roomId) {
+    setActiveRoom((prev) =>
+      prev
+        ? {
+            ...prev,
+            favoriteCount: Math.max(
+              0,
+              Number(prev.favoriteCount || 0) + (isAlreadyFavorite ? -1 : 1)
+            ),
+          }
+        : prev
     );
+  }
 
-    if (activeRoom?.id === editingRoom.id) {
-      setActiveRoom((prev) => ({
-        ...prev,
-        title: editTitle.trim(),
-        desc: editDesc.trim() || "اتاق ساخته‌شده توسط کاربر",
-      }));
+  setRoomToFavorite(null);
+};
+
+const closeFavoriteModal = () => {
+  setRoomToFavorite(null);
+};
+
+  const handleSaveEditRoom = async () => {
+  if (!editingRoom?.id) return;
+
+  if (!editTitle.trim()) {
+    alert("نام اتاق الزامی است.");
+    return;
+  }
+
+  let uploadedImageUrl = editingRoom.imageUrl || "";
+
+  if (editImagePreview?.blob) {
+    const presignRes = await presignChatRoomImageUpload({
+      ext: editImagePreview.ext,
+      contentType: editImagePreview.contentType,
+      fileSize: editImagePreview.fileSize,
+    });
+
+    if (!presignRes?.ok || !presignRes.uploadUrl || !presignRes.publicUrl) {
+      alert(presignRes?.message || "آماده‌سازی آپلود عکس اتاق انجام نشد.");
+      return;
     }
 
-    setEditingRoom(null);
-    setEditTitle("");
-    setEditDesc("");
-  };
+    const uploadRes = await putFileToPresignedUrl(
+      presignRes.uploadUrl,
+      new File([editImagePreview.blob], `chat-room-image.${editImagePreview.ext}`, {
+        type: editImagePreview.contentType,
+      })
+    );
+
+    if (!uploadRes?.ok) {
+      alert(uploadRes?.message || "آپلود عکس اتاق انجام نشد.");
+      return;
+    }
+
+    uploadedImageUrl = presignRes.publicUrl;
+  }
+
+  const res = await updateChatRoom(editingRoom.id, {
+    title: editTitle.trim(),
+    description: editDesc.trim() || "اتاق ساخته‌شده توسط کاربر",
+    imageUrl: uploadedImageUrl || "",
+  });
+
+  if (!res?.ok || !res.item) {
+    alert(res?.message || "ویرایش اتاق انجام نشد.");
+    return;
+  }
+
+  setCustomRooms((prev) =>
+    prev.map((room) =>
+      room.id === editingRoom.id
+        ? {
+            ...room,
+            title: res.item.title,
+            desc: res.item.description || "اتاق ساخته‌شده توسط کاربر",
+            imageUrl: res.item.imageUrl || "",
+            creatorId: Number(res.item.creatorId || 0),
+          }
+        : room
+    )
+  );
+
+  if (activeRoom?.id === editingRoom.id) {
+    setActiveRoom((prev) =>
+      prev
+        ? {
+            ...prev,
+            title: res.item.title,
+            desc: res.item.description || "اتاق ساخته‌شده توسط کاربر",
+            imageUrl: res.item.imageUrl || "",
+            creatorId: Number(res.item.creatorId || 0),
+          }
+        : prev
+    );
+  }
+
+  setEditingRoom(null);
+  setEditTitle("");
+  setEditDesc("");
+  setEditImagePreview(null);
+};
 
   const moveConversationToTop = (userData, updater) => {
     setConversations((prev) => {
@@ -592,39 +988,97 @@ const filteredOnlineUsers = useMemo(() => {
 
             <GoldenDivider width="w-48" margin="my-12" />
 
-            <div className="flex justify-center items-center gap-6 flex-wrap mt-10">
-              {customRooms.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center">
-                  هنوز اتاقی توسط کاربران ساخته نشده است
-                </p>
-              ) : (
-                customRooms.map((room) => (
-                  <RoomCard
-                    key={room.id}
-                    room={room}
-                    onClick={setActiveRoom}
-                    onEdit={handleStartEditRoom}
-                    onDelete={handleDeleteRoom}
-                    isCustom={true}
-                  />
-                ))
-              )}
-            </div>
+<motion.div
+  initial={{ opacity: 0, scale: 0.9 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.6, ease: "easeOut" }}
+  className="flex justify-center mt-8"
+>
+  <button
+    onClick={() => setIsCreateRoomNoticeOpen(true)}
+    className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-7 py-2.5 rounded-full font-semibold shadow-md hover:shadow-lg hover:from-yellow-600 hover:to-yellow-500 transition-all"
+  >
+    <PlusCircle size={20} className="opacity-90" />
+    ساخت اتاق جدید
+  </button>
+</motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="flex justify-center mt-8"
-            >
-              <button
-                onClick={() => setIsCreateRoomOpen(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-7 py-2.5 rounded-full font-semibold shadow-md hover:shadow-lg hover:from-yellow-600 hover:to-yellow-500 transition-all"
-              >
-                <PlusCircle size={20} className="opacity-90" />
-                ساخت اتاق جدید
-              </button>
-            </motion.div>
+<div className="flex justify-center mt-4">
+  <div className="relative w-full max-w-xs">
+    <Search
+      size={16}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+    />
+    <input
+      type="text"
+      value={roomSearchTerm}
+      onChange={(e) => setRoomSearchTerm(e.target.value)}
+      placeholder="جستجو در اتاق‌ها..."
+      className="w-full rounded-full border border-yellow-100 bg-white/80 pr-9 pl-3 py-2 text-xs text-gray-700 shadow-sm outline-none focus:border-yellow-300 focus:bg-white transition"
+    />
+  </div>
+</div>
+
+<div className="flex justify-center gap-3 flex-wrap mt-8 mb-8">
+  <button
+    type="button"
+    onClick={() => setActiveRoomTab("all")}
+    className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
+      activeRoomTab === "all"
+        ? "bg-yellow-500 text-white shadow-md"
+        : "bg-white border border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+    }`}
+  >
+   همه اتاق‌ها ({roomTabCounts.all}) 
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setActiveRoomTab("favorites")}
+    className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
+      activeRoomTab === "favorites"
+        ? "bg-yellow-500 text-white shadow-md"
+        : "bg-white border border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+    }`}
+  >
+   اتاق‌های مورد علاقه من ({roomTabCounts.favorites})
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setActiveRoomTab("mine")}
+    className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
+      activeRoomTab === "mine"
+        ? "bg-yellow-500 text-white shadow-md"
+        : "bg-white border border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+    }`}
+  >
+   اتاق‌های من ({roomTabCounts.mine})
+  </button>
+</div>
+
+<div className="flex justify-center items-center gap-6 flex-wrap mt-6">
+  {filteredVisibleCustomRooms.length === 0 ? (
+    <p className="text-sm text-gray-400 text-center">
+      در این بخش هنوز اتاقی برای نمایش وجود ندارد
+    </p>
+  ) : (
+    filteredVisibleCustomRooms.map((room) => (
+      <RoomCard
+        key={room.id}
+        room={room}
+        onClick={setActiveRoom}
+        onEdit={handleStartEditRoom}
+        onDelete={handleDeleteRoom}
+        onFavorite={handleAskFavoriteRoom}
+        isCustom={room.creatorId === currentUserId}
+        isFavorite={favoriteRoomIds.includes(Number(room.id))}
+        showFavoriteButton={true}
+      />
+    ))
+  )}
+</div>
+
           </section>
         </div>
       </div>
@@ -657,6 +1111,60 @@ const filteredOnlineUsers = useMemo(() => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {isCreateRoomNoticeOpen && (
+  <div
+    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[75]"
+    onClick={() => setIsCreateRoomNoticeOpen(false)}
+  >
+    <div
+      dir="rtl"
+      className="w-[92%] max-w-md bg-white rounded-3xl border border-yellow-200 shadow-xl p-5"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-bold text-yellow-700 mb-3">
+        نکات مهم ساخت اتاق
+      </h2>
+
+      <div className="space-y-3 text-sm text-gray-600 leading-7">
+        <p>
+          اگر در اتاق ساخته‌شده به مدت{" "}
+          <span className="font-semibold text-gray-800">۷ روز</span>{" "}
+          هیچ فعالیتی انجام نشود، آن اتاق به‌صورت خودکار حذف خواهد شد.
+        </p>
+
+        <p>
+          همچنین محتوای منتشرشده در اتاق باید{" "}
+          <span className="font-semibold text-gray-800">
+            مطابق با قوانین کشور
+          </span>{" "}
+          باشد.
+        </p>
+      </div>
+
+      <div className="flex gap-3 mt-5">
+        <button
+          type="button"
+          onClick={() => {
+            setIsCreateRoomNoticeOpen(false);
+            setIsCreateRoomOpen(true);
+          }}
+          className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-semibold py-2.5 rounded-xl shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all"
+        >
+          متوجه شدم
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsCreateRoomNoticeOpen(false)}
+          className="flex-1 bg-white border border-yellow-200 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-all"
+        >
+          انصراف
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       <CreateRoomModal
         isOpen={isCreateRoomOpen}
@@ -694,6 +1202,74 @@ const filteredOnlineUsers = useMemo(() => {
                 />
               </label>
 
+              <label className="flex flex-col gap-2">
+  <span className="text-xs text-gray-600">عکس اتاق</span>
+
+  <label className="inline-flex items-center gap-2 w-fit cursor-pointer rounded-xl border border-yellow-200 bg-white px-3 py-2 text-sm text-yellow-700 hover:bg-yellow-50">
+    انتخاب عکس
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 15 * 1024 * 1024) {
+          alert("حجم عکس خیلی زیاد است");
+          return;
+        }
+
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          img.src = event.target.result;
+        };
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+
+          const MAX_WIDTH = 1280;
+          const scale = Math.min(1, MAX_WIDTH / img.width);
+
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          canvas.toBlob(
+            (blob) => {
+              const url = URL.createObjectURL(blob);
+
+              setEditImagePreview({
+                url,
+                blob,
+                contentType: "image/jpeg",
+                ext: "jpg",
+                fileSize: blob.size,
+              });
+            },
+            "image/jpeg",
+            0.8
+          );
+        };
+
+        reader.readAsDataURL(file);
+      }}
+    />
+  </label>
+
+  {editImagePreview?.url && (
+    <img
+      src={editImagePreview.url}
+      alt="preview"
+      className="w-full h-40 object-cover rounded-2xl border border-yellow-200"
+    />
+  )}
+</label>
+
               <div className="flex gap-3">
                 <button
                   onClick={handleSaveEditRoom}
@@ -707,6 +1283,7 @@ const filteredOnlineUsers = useMemo(() => {
                     setEditingRoom(null);
                     setEditTitle("");
                     setEditDesc("");
+                    setEditImagePreview(null);
                   }}
                   className="flex-1 bg-white border border-yellow-200 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-all"
                 >
@@ -717,6 +1294,111 @@ const filteredOnlineUsers = useMemo(() => {
           </div>
         </div>
       )}
+
+      {roomToDelete && (
+  <div
+    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[80]"
+    onClick={() => setRoomToDelete(null)}
+  >
+    <div
+      dir="rtl"
+      className="w-[92%] max-w-md bg-white rounded-3xl border border-yellow-200 shadow-xl p-5"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-bold text-yellow-700 mb-3">
+        حذف اتاق
+      </h2>
+
+      <p className="text-sm text-gray-600 leading-7">
+        آیا از حذف اتاق{" "}
+        <span className="font-semibold text-gray-800">
+          {roomToDelete.title}
+        </span>{" "}
+        مطمئن هستی؟
+      </p>
+
+      <p className="text-xs text-gray-400 mt-2">
+        این عملیات قابل بازگشت نیست.
+      </p>
+
+      <div className="flex gap-3 mt-5">
+        <button
+          type="button"
+          onClick={confirmDeleteRoom}
+          className="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-all"
+        >
+          بله، حذف شود
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setRoomToDelete(null)}
+          className="flex-1 bg-white border border-yellow-200 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-all"
+        >
+          انصراف
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+{roomToFavorite && (
+  <div
+    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[85]"
+    onClick={closeFavoriteModal}
+  >
+    <div
+      dir="rtl"
+      className="w-[92%] max-w-md bg-white rounded-3xl border border-yellow-200 shadow-xl p-5"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-bold text-yellow-700 mb-3">
+        {favoriteRoomIds.includes(Number(roomToFavorite.id))
+          ? "حذف از اتاق‌های مورد علاقه"
+          : "افزودن به اتاق‌های مورد علاقه"}
+      </h2>
+
+      <p className="text-sm text-gray-600 leading-7">
+        {favoriteRoomIds.includes(Number(roomToFavorite.id)) ? (
+          <>
+            آیا دوست دارید اتاق{" "}
+            <span className="font-semibold text-gray-800">
+              {roomToFavorite.title}
+            </span>{" "}
+            از لیست اتاق‌های مورد علاقه شما حذف شود؟
+          </>
+        ) : (
+          <>
+            آیا دوست دارید اتاق{" "}
+            <span className="font-semibold text-gray-800">
+              {roomToFavorite.title}
+            </span>{" "}
+            به لیست اتاق‌های مورد علاقه شما اضافه شود؟
+          </>
+        )}
+      </p>
+
+      <div className="flex gap-3 mt-5">
+        <button
+          type="button"
+          onClick={confirmFavoriteRoom}
+          className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-semibold py-2.5 rounded-xl shadow-md hover:from-yellow-600 hover:to-yellow-500 transition-all"
+        >
+          بله
+        </button>
+
+        <button
+          type="button"
+          onClick={closeFavoriteModal}
+          className="flex-1 bg-white border border-yellow-200 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-all"
+        >
+          انصراف
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {activePrivateUser && (
         <PrivateChat

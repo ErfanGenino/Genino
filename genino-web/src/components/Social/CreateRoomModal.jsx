@@ -1,40 +1,108 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MessageSquarePlus, Image as ImageIcon } from "lucide-react";
+import { presignChatRoomImageUpload, putFileToPresignedUrl } from "../../services/api";
 
 export default function CreateRoomModal({ isOpen, onClose, onCreate }) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [imagePreview, setImagePreview] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    const previewUrl = URL.createObjectURL(file);
-    setImagePreview(previewUrl);
+  if (file.size > 15 * 1024 * 1024) {
+    alert("حجم عکس خیلی زیاد است");
+    return;
+  }
+
+  const img = new Image();
+  const reader = new FileReader();
+
+  reader.onload = (event) => {
+    img.src = event.target.result;
   };
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+
+    const MAX_WIDTH = 1280;
+    const scale = Math.min(1, MAX_WIDTH / img.width);
+
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(
+      (blob) => {
+        const url = URL.createObjectURL(blob);
+
+        setImagePreview({
+          url,
+          blob,
+          contentType: "image/jpeg",
+          ext: "jpg",
+          fileSize: blob.size,
+        });
+      },
+      "image/jpeg",
+      0.8
+    );
+  };
+
+  reader.readAsDataURL(file);
+};
 
   const resetForm = () => {
-    setTitle("");
-    setDesc("");
-    setImagePreview("");
-  };
+  setTitle("");
+  setDesc("");
+  setImagePreview(null);
+};
 
-  const handleSubmit = () => {
-    if (!title.trim()) return;
+  const handleSubmit = async () => {
+  if (!title.trim()) return;
 
-    onCreate({
-      id: Date.now().toString(),
-      title: title.trim(),
-      desc: desc.trim() || "اتاق ساخته‌شده توسط کاربر",
-      color: "bg-gray-50",
-      image: imagePreview || "",
+  let uploadedImageUrl = "";
+
+  if (imagePreview?.blob) {
+    const presignRes = await presignChatRoomImageUpload({
+      ext: imagePreview.ext,
+      contentType: imagePreview.contentType,
+      fileSize: imagePreview.fileSize,
     });
 
-    resetForm();
-    onClose();
-  };
+    if (!presignRes?.ok || !presignRes.uploadUrl || !presignRes.publicUrl) {
+      alert(presignRes?.message || "آماده‌سازی آپلود عکس اتاق انجام نشد.");
+      return;
+    }
+
+    const uploadRes = await putFileToPresignedUrl(
+      presignRes.uploadUrl,
+      new File([imagePreview.blob], `chat-room-image.${imagePreview.ext}`, {
+        type: imagePreview.contentType,
+      })
+    );
+
+    if (!uploadRes?.ok) {
+      alert(uploadRes?.message || "آپلود عکس اتاق انجام نشد.");
+      return;
+    }
+
+    uploadedImageUrl = presignRes.publicUrl;
+  }
+
+  await onCreate({
+    title: title.trim(),
+    desc: desc.trim() || "اتاق ساخته‌شده توسط کاربر",
+    imageUrl: uploadedImageUrl || "",
+  });
+
+  resetForm();
+  onClose();
+};
 
   const handleClose = () => {
     resetForm();
@@ -109,13 +177,13 @@ export default function CreateRoomModal({ isOpen, onClose, onCreate }) {
                 />
               </label>
 
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="preview"
-                  className="w-full h-40 object-cover rounded-2xl border border-yellow-200"
-                />
-              )}
+              {imagePreview?.url && (
+  <img
+    src={imagePreview.url}
+    alt="preview"
+    className="w-full h-40 object-cover rounded-2xl border border-yellow-200"
+  />
+)}
             </label>
 
             <button

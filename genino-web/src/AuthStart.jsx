@@ -9,6 +9,7 @@ import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
 import PromoSlider from "@components/Social/PromoSlider";
 import ScrollProduct from "./components/Core/ScrollProduct";
 import TodayCalendarBox from "./components/Dashboard/TodayCalendarBox";
+import { getConversations } from "./services/api";
 
 
 
@@ -16,6 +17,7 @@ import TodayCalendarBox from "./components/Dashboard/TodayCalendarBox";
 export default function AuthStart() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
+  const [socialUnreadCount, setSocialUnreadCount] = useState(0);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -166,6 +168,53 @@ const cardColors = {
   pink: "bg-[#ffe4e6] border-[#fecdd3] text-[#9d174d]",   // صورتی
   yellow: "bg-[#fef9c3] border-[#fef08a] text-[#92400e]", // زرد ملایم
 };
+
+// شمارش پیام های خوانده نشده بر روی کارت شبکه اجتماعی
+useEffect(() => {
+  let isMounted = true;
+
+  const loadUnreadCount = async () => {
+    const token = localStorage.getItem("genino_token");
+
+    if (!token) {
+      if (isMounted) setSocialUnreadCount(0);
+      return;
+    }
+
+    const res = await getConversations();
+
+    if (!isMounted) return;
+
+    if (!res?.ok) {
+      setSocialUnreadCount(0);
+      return;
+    }
+
+    const totalUnread = (res.items || []).reduce((sum, item) => {
+      return sum + (Number(item.unreadCount) || 0);
+    }, 0);
+
+    setSocialUnreadCount(totalUnread);
+  };
+
+  loadUnreadCount();
+
+  const intervalId = setInterval(() => {
+    loadUnreadCount();
+  }, 5000);
+
+  const handleTokenChange = () => {
+    loadUnreadCount();
+  };
+
+  window.addEventListener("genino_token_changed", handleTokenChange);
+
+  return () => {
+    isMounted = false;
+    clearInterval(intervalId);
+    window.removeEventListener("genino_token_changed", handleTokenChange);
+  };
+}, []);
 
 
   return (
@@ -474,6 +523,13 @@ const cardColors = {
               ${cardColors[item.color] || cardColors.default}
             `}
           >
+            {item.title === "شبکه اجتماعی ژنینو" && socialUnreadCount > 0 && (
+              <div className="absolute top-3 left-3 z-20">
+                <span className="min-w-[28px] h-[28px] px-2 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                  {socialUnreadCount > 99 ? "99+" : socialUnreadCount}
+                </span>
+              </div>
+            )}
             <div className="flex flex-col items-center relative z-10">
               {item.icon}
               <h3 className="text-base font-semibold text-gray-700 mb-1">{item.title}</h3>

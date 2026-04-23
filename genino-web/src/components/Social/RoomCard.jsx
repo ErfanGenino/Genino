@@ -1,11 +1,14 @@
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Heart } from "lucide-react";
 
 export default function RoomCard({
   room,
   onClick,
   onEdit,
   onDelete,
+  onFavorite,
   isCustom = false,
+  isFavorite = false,
+  showFavoriteButton = false,
 }) {
   return (
     <div
@@ -29,7 +32,7 @@ export default function RoomCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onDelete?.(room.id);
+              onDelete?.(room);
             }}
             className="p-2 rounded-full bg-white/90 hover:bg-red-100 text-red-500 shadow-sm"
             title="حذف اتاق"
@@ -39,10 +42,37 @@ export default function RoomCard({
         </div>
       )}
 
+      {showFavoriteButton && (
+  <div className="absolute top-3 right-3 z-10 flex flex-col items-center">
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onFavorite?.(room);
+      }}
+      className={`p-2 rounded-full bg-white/90 shadow-sm transition ${
+        isFavorite
+          ? "text-red-500 hover:bg-red-50"
+          : "text-gray-400 hover:bg-pink-50 hover:text-red-400"
+      }`}
+      title={
+        isFavorite
+          ? "حذف از اتاق‌های مورد علاقه"
+          : "افزودن به اتاق‌های مورد علاقه"
+      }
+    >
+      <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+    </button>
+
+    <span className="mt-1 text-[11px] font-semibold text-gray-500 bg-white/90 px-2 py-0.5 rounded-full shadow-sm">
+      {room.favoriteCount ?? 0}
+    </span>
+  </div>
+)}
+
       <div onClick={() => onClick(room)} className="cursor-pointer">
-        {room.image ? (
+        {room.imageUrl ? (
           <img
-            src={room.image}
+            src={room.imageUrl}
             alt={room.title}
             className="w-full h-32 object-cover rounded-2xl mb-4 border border-yellow-200"
           />
@@ -58,7 +88,7 @@ export default function RoomCard({
 
         <div className="flex items-center justify-center gap-1 text-yellow-600 text-xs font-medium">
           <span>👥</span>
-          <span>۱۲ نفر آنلاین</span>
+          <span>{room.onlineCount ?? 0} نفر آنلاین</span>
         </div>
       </div>
     </div>

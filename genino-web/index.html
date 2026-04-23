@@ -5,12 +5,132 @@
 
     <link rel="icon" href="/icon.png" />
     <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#efe7dc" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Genino</title>
+
+    <style>
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: #efe7dc;
+  }
+
+  #splash-screen {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #f6efe6 0%, #efe7dc 60%, #e7dccf 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  #splash-screen.hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .family-frame {
+    background: linear-gradient(145deg, #d8b45a, #f3df9a, #b88a1a);
+    padding: 14px;
+    border-radius: 26px;
+    box-shadow:
+      0 18px 45px rgba(120, 88, 20, 0.22),
+      inset 0 2px 6px rgba(255, 255, 255, 0.45),
+      inset 0 -3px 8px rgba(90, 60, 10, 0.18);
+    max-width: min(760px, 94vw);
+    animation: splashFadeIn 1s ease;
+  }
+
+  .family-frame img {
+    display: block;
+    width: 100%;
+    max-width: 720px;
+    max-height: 82vh;
+    object-fit: contain;
+    border-radius: 18px;
+    background: #eadfd2;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  }
+
+  @keyframes splashFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @media (max-width: 768px) {
+    #splash-screen {
+      padding: 16px;
+    }
+
+    .family-frame {
+      padding: 10px;
+      border-radius: 20px;
+      max-width: 96vw;
+    }
+
+    .family-frame img {
+      max-height: 70vh;
+      border-radius: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .family-frame {
+      padding: 8px;
+      border-radius: 18px;
+    }
+
+    .family-frame img {
+      max-height: 64vh;
+      border-radius: 12px;
+    }
+  }
+</style>
   </head>
+
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+  <div id="splash-screen">
+    <div class="family-frame">
+      <img src="/images/genino-family.png" alt="Genino Family" />
+    </div>
+  </div>
+
+  <div id="root"></div>
+
+  <script>
+    const splashStartTime = Date.now();
+
+    window.addEventListener("load", function () {
+      const splash = document.getElementById("splash-screen");
+      if (!splash) return;
+
+      const minimumVisibleTime = 4200;
+      const elapsed = Date.now() - splashStartTime;
+      const remaining = Math.max(0, minimumVisibleTime - elapsed);
+
+      setTimeout(() => {
+        splash.classList.add("hide");
+        setTimeout(() => {
+          splash.remove();
+        }, 800);
+      }, remaining);
+    });
+  </script>
+
+  <script type="module" src="/src/main.jsx"></script>
+</body>
 </html>

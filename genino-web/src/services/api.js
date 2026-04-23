@@ -267,6 +267,30 @@ export async function presignMedicalAttachmentUpload(payload) {
   });
 }
 
+export async function presignChatImageUpload(payload) {
+  // payload: { ext, contentType, fileSize }
+  return authFetch("/uploads/presign/chat-image", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function presignChatVoiceUpload(payload) {
+  // payload: { ext, contentType, fileSize }
+  return authFetch("/uploads/presign/chat-voice", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function presignChatRoomImageUpload(payload) {
+  // payload: { ext, contentType, fileSize }
+  return authFetch("/uploads/presign/chat-room-image", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 // --- S3 PUT upload to presigned url ---
 export async function putFileToPresignedUrl(uploadUrl, file) {
   try {
@@ -308,6 +332,19 @@ export async function sendPrivateMessage(userId, payload) {
   });
 }
 
+export async function deletePrivateMessage(messageId) {
+  return authFetch(`/chat/messages/${messageId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function reactToPrivateMessage(messageId, emoji) {
+  return authFetch(`/chat/messages/${messageId}/reaction`, {
+    method: "POST",
+    body: JSON.stringify({ emoji }),
+  });
+}
+
 export async function searchGeninoUsers(query) {
   return authFetch(`/users/search?q=${encodeURIComponent(query)}`, {
     method: "GET",
@@ -333,5 +370,111 @@ export async function updateSocialPresence() {
 export async function getOnlineUsers() {
   return authFetch("/users/online", {
     method: "GET",
+  });
+}
+
+// --- Chat Rooms ---
+
+export async function getRoomMessages(roomId) {
+  return authFetch(`/chat-rooms/${roomId}/messages`, {
+    method: "GET",
+  });
+}
+
+export async function sendRoomMessage(roomId, payload) {
+  return authFetch(`/chat-rooms/${roomId}/messages`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteRoomMessage(messageId) {
+  return authFetch(`/chat-rooms/messages/${messageId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function reactToRoomMessage(messageId, emoji) {
+  return authFetch(`/chat-rooms/messages/${messageId}/reaction`, {
+    method: "POST",
+    body: JSON.stringify({ emoji }),
+  });
+}
+
+export async function getMutedRoomUsers(roomId) {
+  return authFetch(`/chat-rooms/${roomId}/mutes`, {
+    method: "GET",
+  });
+}
+
+export async function muteRoomUser(roomId, userId) {
+  return authFetch(`/chat-rooms/${roomId}/mutes/${userId}`, {
+    method: "POST",
+  });
+}
+
+export async function unmuteRoomUser(roomId, userId) {
+  return authFetch(`/chat-rooms/${roomId}/mutes/${userId}`, {
+    method: "DELETE",
+  });
+}
+
+// --- Chat Room Presence ---
+
+export async function upsertRoomPresence(roomId) {
+  return authFetch(`/chat-rooms/${roomId}/presence`, {
+    method: "POST",
+  });
+}
+
+export async function getRoomPresence(roomId) {
+  return authFetch(`/chat-rooms/${roomId}/presence`, {
+    method: "GET",
+  });
+}
+
+// --- Chat Rooms (Custom) ---
+
+export async function getChatRooms() {
+  return authFetch("/chat-rooms", {
+    method: "GET",
+  });
+}
+
+export async function createChatRoom(payload) {
+  return authFetch("/chat-rooms", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteChatRoom(roomId) {
+  return authFetch(`/chat-rooms/${roomId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function updateChatRoom(roomId, payload) {
+  return authFetch(`/chat-rooms/${roomId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getMyFavoriteChatRooms() {
+  return authFetch("/chat-rooms/favorites/me", {
+    method: "GET",
+  });
+}
+
+export async function addFavoriteChatRoom(roomId) {
+  return authFetch(`/chat-rooms/${roomId}/favorite`, {
+    method: "POST",
+  });
+}
+
+export async function removeFavoriteChatRoom(roomId) {
+  return authFetch(`/chat-rooms/${roomId}/favorite`, {
+    method: "DELETE",
   });
 }
