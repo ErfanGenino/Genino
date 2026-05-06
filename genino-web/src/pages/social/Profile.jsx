@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Calendar, LogOut, Save, Camera } from "lucide-react";
+import { User, Mail, Calendar, LogOut, Save, Camera, X } from "lucide-react";
 import { getUserProfile, updateUserProfile, authFetch } from "../../services/api";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
@@ -85,6 +85,12 @@ export default function Profile() {
   const [localPreview, setLocalPreview] = useState("");
   const [serverUser, setServerUser] = useState(null);
   const birthRef = useRef(null);
+  const [avatarCropFile, setAvatarCropFile] = useState(null);
+  const [avatarCropPreview, setAvatarCropPreview] = useState("");
+  const [avatarZoom, setAvatarZoom] = useState(1);
+  const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
+  const avatarCropImgRef = useRef(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
 
 
@@ -94,6 +100,13 @@ export default function Profile() {
       if (localPreview) URL.revokeObjectURL(localPreview);
     };
   }, [localPreview]);
+
+
+  useEffect(() => {
+  return () => {
+    if (avatarCropPreview) URL.revokeObjectURL(avatarCropPreview);
+  };
+}, [avatarCropPreview]);
 
   
 
@@ -252,37 +265,116 @@ function setDefaultAddress(index) {
 
   async function onPickAvatar(e) {
   const file = e.target.files?.[0];
+  e.target.value = "";
+
   if (!file) return;
 
-  console.log("picked file:", file?.name, file?.type, file?.size);
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-  // ✅ اول چک‌ها
-  if (!file.type.startsWith("image/")) {
-    alert("فقط فایل تصویر قابل قبول است.");
-    return;
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    alert("حجم عکس باید کمتر از 5 مگابایت باشد.");
+  if (!allowedTypes.includes(file.type)) {
+    alert("فعلاً فقط فرمت‌های JPG، PNG و WEBP پشتیبانی می‌شوند. لطفاً عکس HEIC را از تنظیمات گوشی به JPG تغییر بده.");
     return;
   }
 
-  // ✅ بعدش preview
+  if (file.size > 15 * 1024 * 1024) {
+    alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
+    return;
+  }
+
+  if (avatarCropPreview) {
+    URL.revokeObjectURL(avatarCropPreview);
+  }
+
   const previewUrl = URL.createObjectURL(file);
-  console.log("previewUrl:", previewUrl);
-  setLocalPreview(previewUrl);
 
-  setUploading(true);
-  const up = await uploadAvatarToArvan(file);
-  setUploading(false);
+  setAvatarCropFile(file);
+  setAvatarCropPreview(previewUrl);
+  setAvatarZoom(1);
+  setAvatarPosition({ x: 50, y: 50 });
+}
 
-  if (!up.ok) {
-    alert(up.message || "آپلود ناموفق بود.");
-    return;
+async function confirmCroppedAvatar() {
+  if (!avatarCropFile || !avatarCropPreview || !avatarCropImgRef.current) return;
+
+  const img = avatarCropImgRef.current;
+  if (!img.complete || !img.naturalWidth || !img.naturalHeight) {
+  alert("عکس هنوز کامل بارگذاری نشده. چند لحظه صبر کن و دوباره تأیید کن.");
+  return;
+}
+  const canvas = document.createElement("canvas");
+  const size = 512;
+
+  canvas.width = size;
+  canvas.height = size;
+
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+ctx.fillRect(0, 0, size, size);
+
+  const zoom = Number(avatarZoom || 1);
+  const imgRatio = img.naturalWidth / img.naturalHeight;
+
+  let drawWidth;
+  let drawHeight;
+
+  if (imgRatio > 1) {
+    drawHeight = size * zoom;
+    drawWidth = drawHeight * imgRatio;
+  } else {
+    drawWidth = size * zoom;
+    drawHeight = drawWidth / imgRatio;
   }
 
-  setField("avatarUrl", up.publicUrl);
-  setShowAvatars(false);
- // setLocalPreview(""); // (فعلاً اینو نگه دار)
+  const maxOffsetX = Math.max(0, drawWidth - size);
+  const maxOffsetY = Math.max(0, drawHeight - size);
+
+  const offsetX = (Number(avatarPosition.x) / 100) * maxOffsetX;
+  const offsetY = (Number(avatarPosition.y) / 100) * maxOffsetY;
+
+  ctx.drawImage(img, -offsetX, -offsetY, drawWidth, drawHeight);
+
+  canvas.toBlob(
+    async (blob) => {
+      if (!blob) {
+        alert("ساخت عکس پروفایل انجام نشد.");
+        return;
+      }
+
+      const croppedFile = new File([blob], "avatar.jpg", {
+        type: "image/jpeg",
+      });
+
+      setUploading(true);
+      const up = await uploadAvatarToArvan(croppedFile);
+      setUploading(false);
+
+      if (!up.ok) {
+        alert(up.message || "آپلود ناموفق بود.");
+        return;
+      }
+
+      if (localPreview) {
+        URL.revokeObjectURL(localPreview);
+      }
+
+      const previewUrl = URL.createObjectURL(blob);
+
+      setLocalPreview(previewUrl);
+      setField("avatarUrl", up.publicUrl);
+      setShowAvatars(false);
+
+      if (avatarCropPreview) {
+        URL.revokeObjectURL(avatarCropPreview);
+      }
+
+      setAvatarCropFile(null);
+      setAvatarCropPreview("");
+      setAvatarZoom(1);
+      setAvatarPosition({ x: 50, y: 50 });
+    },
+    "image/jpeg",
+    0.88
+  );
 }
 
 
@@ -466,10 +558,16 @@ if (loading) {
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
         >
-          <img src={avatarToShow} alt="avatar" className="w-full h-full object-cover" onError={(e) => {console.log("❌ avatar img error:", avatarToShow); 
-          e.currentTarget.src = "/avatars/101.png"; // fallback
-          }}
-          />
+          <img
+  src={avatarToShow}
+  alt="avatar"
+  className="w-full h-full object-cover cursor-zoom-in"
+  onClick={() => setSelectedImage(avatarToShow)}
+  onError={(e) => {
+    console.log("❌ avatar img error:", avatarToShow);
+    e.currentTarget.src = "/avatars/101.png";
+  }}
+/>
         </motion.div>
 
   {/* دکمه انتخب عکس پروفایل */}      
@@ -522,12 +620,12 @@ if (loading) {
   <Camera className="w-4 h-4" />
   {uploading ? "در حال آپلود..." : "انتخاب عکس از گالری"}
   <input
-    type="file"
-    accept="image/*"
-    className="hidden"
-    onChange={onPickAvatar}
-    disabled={uploading}
-  />
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  className="hidden"
+  onChange={onPickAvatar}
+  disabled={uploading}
+/>
 </label>
 {uploading && (
   <p className="mt-2 text-[11px] text-gray-600">
@@ -535,7 +633,7 @@ if (loading) {
   </p>
 )}
     <p className="mt-2 text-[11px] text-gray-500">
-        (فرمت تصویر و حجم کمتر از ۵ مگابایت)
+        (فرمت تصویر و حجم کمتر از ۱۵ مگابایت)
       </p>
     </div>
   </div>
@@ -741,6 +839,157 @@ if (loading) {
           نکته: با تغییر «مرحله زندگی»، دسترسی به داشبوردهای مختلف هم تغییر می‌کند.
         </p>
       </motion.div>
+
+      {avatarCropPreview && (
+  <div
+    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[90] px-4"
+    onClick={() => {
+      if (avatarCropPreview) URL.revokeObjectURL(avatarCropPreview);
+      setAvatarCropFile(null);
+      setAvatarCropPreview("");
+    }}
+  >
+    <div
+      dir="rtl"
+      className="w-full max-w-md bg-white rounded-3xl border border-yellow-200 shadow-xl p-5"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-bold text-yellow-700 mb-3">
+        تنظیم عکس پروفایل
+      </h2>
+
+      <p className="text-xs text-gray-500 mb-4">
+        با زوم و جابه‌جایی، مشخص کن کدام بخش عکس داخل پروفایل دیده شود.
+      </p>
+
+      <div className="mx-auto w-64 h-64 rounded-full overflow-hidden border-4 border-yellow-300 bg-yellow-50 shadow-inner">
+        <img
+  ref={avatarCropImgRef}
+  src={avatarCropPreview}
+  alt="تنظیم عکس پروفایل"
+  className="w-full h-full object-cover"
+  onLoad={() => {
+    console.log("✅ avatar image loaded");
+  }}
+  onError={() => {
+    alert("این عکس در مرورگر قابل نمایش نیست. لطفاً JPG، PNG یا WEBP انتخاب کن.");
+    if (avatarCropPreview) URL.revokeObjectURL(avatarCropPreview);
+    setAvatarCropFile(null);
+    setAvatarCropPreview("");
+  }}
+  style={{
+    transform: `scale(${avatarZoom})`,
+    transformOrigin: `${avatarPosition.x}% ${avatarPosition.y}%`,
+  }}
+/>
+      </div>
+
+      <div className="mt-5 space-y-4">
+        <label className="block">
+          <span className="text-xs text-gray-600">بزرگ‌نمایی</span>
+          <input
+            type="range"
+            min="1"
+            max="2.5"
+            step="0.05"
+            value={avatarZoom}
+            onChange={(e) => setAvatarZoom(Number(e.target.value))}
+            className="w-full mt-2"
+          />
+        </label>
+
+        <label className="block">
+          <span className="text-xs text-gray-600">جابه‌جایی افقی</span>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value={avatarPosition.x}
+            onChange={(e) =>
+              setAvatarPosition((prev) => ({
+                ...prev,
+                x: Number(e.target.value),
+              }))
+            }
+            className="w-full mt-2"
+          />
+        </label>
+
+        <label className="block">
+          <span className="text-xs text-gray-600">جابه‌جایی عمودی</span>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value={avatarPosition.y}
+            onChange={(e) =>
+              setAvatarPosition((prev) => ({
+                ...prev,
+                y: Number(e.target.value),
+              }))
+            }
+            className="w-full mt-2"
+          />
+        </label>
+      </div>
+
+      <div className="flex gap-3 mt-6">
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={confirmCroppedAvatar}
+          className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-semibold py-2.5 rounded-xl shadow-md hover:from-yellow-600 hover:to-yellow-500 transition disabled:opacity-60"
+        >
+          {uploading ? "در حال آپلود..." : "تأیید عکس"}
+        </button>
+
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={() => {
+            if (avatarCropPreview) URL.revokeObjectURL(avatarCropPreview);
+            setAvatarCropFile(null);
+            setAvatarCropPreview("");
+            setAvatarZoom(1);
+            setAvatarPosition({ x: 50, y: 50 });
+          }}
+          className="flex-1 bg-white border border-yellow-200 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition disabled:opacity-60"
+        >
+          انصراف
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{selectedImage && (
+  <div
+    className="fixed inset-0 bg-black/70 backdrop-blur-[2px] flex items-center justify-center z-[110] p-4"
+    onClick={() => setSelectedImage(null)}
+  >
+    <div
+      className="relative max-w-[95%] max-h-[90%]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        type="button"
+        onClick={() => setSelectedImage(null)}
+        className="absolute top-2 right-2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-9 h-9 flex items-center justify-center shadow"
+        title="بستن"
+      >
+        <X size={18} />
+      </button>
+
+      <img
+        src={selectedImage}
+        alt="عکس پروفایل"
+        className="max-w-full max-h-[85vh] rounded-2xl shadow-2xl bg-white object-contain"
+      />
+    </div>
+  </div>
+)}
 
       {/* ✨ ذرات طلایی */}
       {Array.from({ length: 12 }).map((_, i) => (

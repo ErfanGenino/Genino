@@ -231,8 +231,6 @@ export default function HypertensionDietArticle() {
           نقش نمک و سدیم در فشار خون
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/hypertension-diet/sodium" />
-
         <p>
           یکی از مهم‌ترین نکات در رژیم فشار خون،
           توجه به نمک و سدیم است.
@@ -406,8 +404,6 @@ export default function HypertensionDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم فشار خون
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/hypertension-diet/summary" />
 
         <p>
           رژیم فشار خون یکی از مهم‌ترین پایه‌های

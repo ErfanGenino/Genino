@@ -147,6 +147,7 @@ import EmployeeToEntrepreneurArticle from "./pages/articles/entrepreneurs/Employ
 import WorkLifeBalanceArticle from "./pages/articles/entrepreneurs/WorkLifeBalanceArticle";
 import CommonMistakesArticle from "./pages/articles/entrepreneurs/CommonMistakesArticle";
 import FiveGoldenPrinciplesArticle from "./pages/articles/entrepreneurs/FiveGoldenPrinciplesArticle";
+import ScrollToTop from "./components/Core/ScrollToTop.jsx";
 
 
 const Shop = lazy(() => import("./pages/Shop.jsx"));
@@ -223,6 +224,8 @@ console.log("APP ROUTES LOADED");
     <>
       {/* نوار ناوبری بالای همه‌ی صفحات */}
       <Navbar />
+
+      <ScrollToTop />
 
       {/* مسیرها */}
       <Suspense fallback={<div className="p-4 text-right">در حال بارگذاری...</div>}>

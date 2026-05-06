@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Heart, Users, Sparkles, Smile, Utensils, Dna, Activity, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
+import coverImage from "../assets/world-knowledge-pic/cover.jpg";
 
 export default function WorldKnowledge() {
   const topics = [
@@ -62,13 +63,61 @@ export default function WorldKnowledge() {
   ];
 
   const cardColors = [
-    "from-yellow-50 to-yellow-100",
-    "from-green-50 to-green-100",
-    "from-pink-50 to-pink-100",
-    "from-blue-50 to-blue-100",
-    "from-purple-50 to-purple-100",
-    "from-orange-50 to-orange-100",
-  ];
+  {
+    bg: "from-yellow-50 to-amber-100",
+    border: "border-amber-200",
+    icon: "text-amber-500",
+    title: "text-amber-700",
+  },
+  {
+    bg: "from-lime-50 to-lime-100",
+    border: "border-lime-200",
+    icon: "text-lime-500",
+    title: "text-lime-700",
+  },
+  {
+    bg: "from-pink-50 to-pink-100",
+    border: "border-pink-200",
+    icon: "text-pink-500",
+    title: "text-pink-700",
+  },
+  {
+    bg: "from-sky-50 to-sky-100",
+    border: "border-sky-200",
+    icon: "text-sky-500",
+    title: "text-sky-700",
+  },
+  {
+    bg: "from-violet-50 to-violet-100",
+    border: "border-violet-200",
+    icon: "text-violet-500",
+    title: "text-violet-700",
+  },
+  {
+    bg: "from-orange-50 to-orange-100",
+    border: "border-orange-200",
+    icon: "text-orange-500",
+    title: "text-orange-700",
+  },
+  {
+    bg: "from-emerald-50 to-emerald-100",
+    border: "border-emerald-200",
+    icon: "text-emerald-500",
+    title: "text-emerald-700",
+  },
+  {
+    bg: "from-blue-50 to-blue-100",
+    border: "border-blue-200",
+    icon: "text-blue-500",
+    title: "text-blue-700",
+  },
+  {
+    bg: "from-rose-50 to-rose-100",
+    border: "border-rose-200",
+    icon: "text-rose-500",
+    title: "text-rose-700",
+  },
+];
 
   const [shine, setShine] = React.useState(false);
 
@@ -83,10 +132,10 @@ export default function WorldKnowledge() {
   return (
     <main
       dir="rtl"
-      className="relative z-[10] min-h-screen bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 flex flex-col items-center pt-24 px-6 text-center overflow-hidden"
+      className="relative z-[10] min-h-screen bg-gradient-to-b from-[#d9d9d9] via-[#eeeeee] to-[#cfcfcf] text-gray-800 flex flex-col items-center pt-24 px-6 text-center overflow-hidden"
     >
       {/* 🌿 بک‌گراند DNA طلایی متحرک */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#fffdf8] to-[#f7f3e6] overflow-hidden z-[0] pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#e5e5e5] via-[#f3f3f3] to-[#c9c9c9] overflow-hidden z-[0] pointer-events-none">
         {Array.from({ length: 8 }).map((_, i) => (
           <motion.svg
             key={i}
@@ -141,50 +190,89 @@ export default function WorldKnowledge() {
         ))}
       </div>
 
-      {/* ✅ تیتر صفحه */}
+      {/* 🔥 HERO + COVER */}
+<section className="relative z-[10] w-full max-w-6xl mb-16">
+
+  <motion.div
+    initial={{ opacity: 0, y: -30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.8 }}
+    className="relative rounded-[32px] overflow-hidden shadow-xl"
+  >
+
+    {/* 📸 عکس کاور */}
+    <img
+      src={coverImage}
+      alt="Genino Magazine Cover"
+      className="w-full h-[260px] sm:h-[320px] object-cover"
+    />
+
+    {/* 🎨 لایه گرادینت روی عکس */}
+    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+
+    {/* ✨ متن روی کاور */}
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+
       <motion.h1
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="relative z-[10] text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-600 animate-gradient mb-8"
+        transition={{ delay: 0.3 }}
+        className="text-2xl sm:text-4xl font-extrabold text-white leading-relaxed"
       >
-       مجله ژنینو
+        مجله ژنینو ✨  
+        <br />
+        <span className="text-yellow-300">
+          جایی برای رشد، آگاهی و ساختن آینده‌ای بهتر
+        </span>
       </motion.h1>
 
       <motion.p
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.6 }}
-        className="relative z-[10] text-gray-600 max-w-2xl leading-relaxed mb-12"
+        transition={{ delay: 0.5 }}
+        className="mt-4 text-sm sm:text-base text-gray-200 max-w-2xl leading-relaxed"
       >
-        مجموعه‌ای از دانستنی‌های علمی، آموزشی و روان‌شناسی برای والدین آگاه و خانواده‌های آینده‌نگر.
+        از ژن‌ها تا ذهن، از کودک تا خانواده؛  
+        هر آنچه برای یک زندگی آگاهانه نیاز داری، اینجاست.
       </motion.p>
 
+    </div>
+  </motion.div>
+</section>
+
       {/* 🔸 کارت‌ها */}
-      <section className="relative z-[10] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mb-20">
-        {topics.map((topic, i) => (
-          <Link key={i} to={topic.link}>
-            <motion.div
-              whileHover={{
-                scale: 1.03,
-                boxShadow: "0 0 25px rgba(212,175,55,0.4)",
-              }}
-              transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              className={`bg-gradient-to-br ${cardColors[i % cardColors.length]} border border-yellow-100 rounded-3xl shadow-md p-6 text-right flex flex-col justify-between hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer`}
-            >
-              <div className="flex flex-col items-center mb-4">
-                {topic.icon}
-                <h2 className="text-lg font-bold text-yellow-600 mb-2 text-center leading-snug">
-                  {topic.title}
-                </h2>
-                <p className="text-sm text-gray-600 text-center leading-relaxed">
-                  {topic.desc}
-                </p>
-              </div>
-            </motion.div>
-          </Link>
-        ))}
-      </section>
+      <section className="relative z-[10] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-5xl mb-20">
+  {topics.map((topic, i) => {
+    const theme = cardColors[i % cardColors.length];
+
+    return (
+      <Link key={i} to={topic.link} className="block h-full">
+        <motion.div
+          whileHover={{
+            y: -4,
+            scale: 1.02,
+          }}
+          transition={{ type: "spring", stiffness: 220, damping: 18 }}
+          className={`h-44 bg-gradient-to-br ${theme.bg} border ${theme.border} rounded-2xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-all cursor-pointer`}
+        >
+          <div className={`${theme.icon} mb-2`}>
+            {React.cloneElement(topic.icon, {
+              className: "w-7 h-7",
+            })}
+          </div>
+
+          <h2 className={`text-sm font-bold ${theme.title} mb-2 text-center leading-6 line-clamp-2`}>
+            {topic.title}
+          </h2>
+
+          <p className="text-xs text-gray-600 text-center leading-6 line-clamp-2">
+            {topic.desc}
+          </p>
+        </motion.div>
+      </Link>
+    );
+  })}
+</section>
 
       {/* کارت‌های بدن زنان و مردان */}
       <section className="relative z-[20] grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-5xl mb-20">

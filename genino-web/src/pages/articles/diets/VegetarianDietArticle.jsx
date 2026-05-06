@@ -269,8 +269,6 @@ export default function VegetarianDietArticle() {
           یک روز نمونه از رژیم گیاه‌خواری
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/vegetarian-diet/sample-day" />
-
         <div className="space-y-4">
           <p>
             <strong className="text-yellow-600">صبحانه:</strong><br />
@@ -383,8 +381,6 @@ export default function VegetarianDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم گیاه‌خواری
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/vegetarian-diet/summary" />
 
         <p>
           رژیم گیاه‌خواری می‌تواند سالم، مفید و پایدار باشد،

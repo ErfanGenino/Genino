@@ -1,6 +1,26 @@
 // src/pages/articles/DailyInspirationArticle.jsx
 import { motion } from "framer-motion";
 import { Quote, Sparkles, Image as ImageIcon } from "lucide-react";
+import img1 from "../../assets/daily-inspiration-pic/1.jpg";
+import img2 from "../../assets/daily-inspiration-pic/2.jpg";
+import img3 from "../../assets/daily-inspiration-pic/3.jpg";
+import img4 from "../../assets/daily-inspiration-pic/4.jpg";
+import img5 from "../../assets/daily-inspiration-pic/5.jpg";
+import img6 from "../../assets/daily-inspiration-pic/6.jpg";
+import img7 from "../../assets/daily-inspiration-pic/7.jpg";
+import img8 from "../../assets/daily-inspiration-pic/8.jpg";
+import img9 from "../../assets/daily-inspiration-pic/9.jpg";
+import img10 from "../../assets/daily-inspiration-pic/10.jpg";
+import img11 from "../../assets/daily-inspiration-pic/11.jpg";
+import img12 from "../../assets/daily-inspiration-pic/12.jpg";
+import img13 from "../../assets/daily-inspiration-pic/13.jpg";
+import img14 from "../../assets/daily-inspiration-pic/14.jpg";
+import img15 from "../../assets/daily-inspiration-pic/15.jpg";
+import img16 from "../../assets/daily-inspiration-pic/16.jpg";
+import img17 from "../../assets/daily-inspiration-pic/17.jpg";
+import img18 from "../../assets/daily-inspiration-pic/18.jpg";
+import img19 from "../../assets/daily-inspiration-pic/19.jpg";
+import img20 from "../../assets/daily-inspiration-pic/20.jpg";
 
 const sections = [
   {
@@ -8,6 +28,7 @@ const sections = [
     title: "بخش اول: آغاز دوباره",
     subtitle: "برای روزهایی که می‌خواهی از نو شروع کنی",
     imagePosition: "right",
+    image: img1,
     imagePlaceholder: "📷 عکس پیشنهادی: یک پنجره باز، نور صبحگاهی، فنجان قهوه",
     quotes: [
       { text: "مهم نیست چند بار افتادی؛ مهم این است که دوباره برخیزی.", author: "نلسون ماندلا" },
@@ -37,6 +58,7 @@ const sections = [
     title: "بخش دوم: اعتماد به خود",
     subtitle: "برای روزهایی که باید به توانایی خودت تکیه کنی",
     imagePosition: "left",
+    image: img2,
     imagePlaceholder: "📷 عکس پیشنهادی: پرتره فردی آرام و قدرتمند کنار نور طبیعی",
     quotes: [
       { text: "کسی که به خودش ایمان دارد، نیمه راه را رفته است.", author: "تئودور روزولت" },
@@ -66,6 +88,7 @@ const sections = [
     title: "بخش سوم: نظم و استمرار",
     subtitle: "برای ساختن زندگی با قدم‌های کوچک اما ماندگار",
     imagePosition: "bottom",
+    image: img3,
     imagePlaceholder: "📷 عکس پیشنهادی: میز منظم، دفتر برنامه‌ریزی، خودکار زرشکی",
     quotes: [
       { text: "موفقیت، حاصل کارهای کوچکِ تکرارشده است.", author: "رابرت کالیر" },
@@ -95,6 +118,7 @@ const sections = [
     title: "بخش چهارم: شجاعت در تنهایی",
     subtitle: "برای وقتی که باید روی پای خودت بایستی",
     imagePosition: "right",
+    image: img4,
     imagePlaceholder: "📷 عکس پیشنهادی: فردی تنها در مسیر باریک با آسمان باز",
     quotes: [
       { text: "تنها رفتن، گاهی شجاعانه‌ترین انتخاب است.", author: "پائولو کوئیلو" },
@@ -124,6 +148,7 @@ const sections = [
     title: "بخش پنجم: امید",
     subtitle: "برای روشن نگه داشتن چراغ درون",
     imagePosition: "left",
+    image: img5,
     imagePlaceholder: "📷 عکس پیشنهادی: شمع روشن در فضای تاریک یا طلوع آفتاب",
     quotes: [
       { text: "امید، نیرویی است که از دل تاریکی هم راه می‌سازد.", author: "دزموند توتو" },
@@ -153,6 +178,7 @@ const sections = [
     title: "بخش ششم: آرامش ذهن",
     subtitle: "برای سبک شدن از شلوغی فکرها",
     imagePosition: "bottom",
+    image: img6,
     imagePlaceholder: "📷 عکس پیشنهادی: طبیعت مه‌آلود، صندلی راحتی، نور نرم",
     quotes: [
       { text: "آرامش، از رها کردن آنچه کنترلش با تو نیست می‌آید.", author: "اپیکتتوس" },
@@ -182,6 +208,7 @@ const sections = [
     title: "بخش هفتم: رشد شخصی",
     subtitle: "برای بهتر شدن، نه فقط مشغول‌تر شدن",
     imagePosition: "right",
+    image: img7,
     imagePlaceholder: "📷 عکس پیشنهادی: کتاب باز، مداد، گیاه کوچک روی میز",
     quotes: [
       { text: "رشد یعنی از دیروز خودت جلوتر باشی.", author: "جردن پیترسون" },
@@ -211,6 +238,7 @@ const sections = [
     title: "بخش هشتم: جسارت در تصمیم‌گیری",
     subtitle: "برای انتخاب‌هایی که آینده را می‌سازند",
     imagePosition: "left",
+    image: img8,
     imagePlaceholder: "📷 عکس پیشنهادی: جاده دوشاخه، فردی ایستاده در نقطه انتخاب",
     quotes: [
       { text: "گاهی بهترین تصمیم، تصمیمی است که تو را می‌ترساند اما رشد می‌دهد.", author: "شریل سندبرگ" },
@@ -240,6 +268,7 @@ const sections = [
     title: "بخش نهم: یادگیری و مطالعه",
     subtitle: "برای ذهنی که می‌خواهد زنده و بیدار بماند",
     imagePosition: "bottom",
+    image: img9,
     imagePlaceholder: "📷 عکس پیشنهادی: کتابخانه، عینک، چراغ مطالعه",
     quotes: [
       { text: "مطالعه، گفت‌وگو با بهترین ذهن‌های تاریخ است.", author: "رنه دکارت" },
@@ -269,6 +298,7 @@ const sections = [
     title: "بخش دهم: کار و معنا",
     subtitle: "برای ساختن مسیری که فقط درآمد نباشد",
     imagePosition: "right",
+    image: img10,
     imagePlaceholder: "📷 عکس پیشنهادی: میز کار مینیمال، لپ‌تاپ، نور زرشکی ملایم",
     quotes: [
       { text: "کاری را انجام بده که به آن معنا می‌دهی، نه فقط زمان.", author: "ویکتور فرانکل" },
@@ -298,6 +328,7 @@ const sections = [
     title: "بخش یازدهم: عشق به زندگی",
     subtitle: "برای دیدن زیبایی در روزهای معمولی",
     imagePosition: "left",
+    image: img11,
     imagePlaceholder: "📷 عکس پیشنهادی: خیابان بارانی، گل، نور گرم عصر",
     quotes: [
       { text: "زندگی در جزئیات کوچک هم می‌درخشد.", author: "آنه فرانک" },
@@ -327,6 +358,7 @@ const sections = [
     title: "بخش دوازدهم: عبور از شکست",
     subtitle: "برای وقتی که زمین خورده‌ای اما تمام نشده‌ای",
     imagePosition: "bottom",
+    image: img12,
     imagePlaceholder: "📷 عکس پیشنهادی: کفش‌های خاکی، جاده ادامه‌دار، نور امید",
     quotes: [
       { text: "شکست، پایان نیست؛ بخشی از آموزش است.", author: "توماس ادیسون" },
@@ -356,6 +388,7 @@ const sections = [
     title: "بخش سیزدهم: مهربانی با خود",
     subtitle: "برای آرام‌کردن منتقد درونی",
     imagePosition: "right",
+    image: img13,
     imagePlaceholder: "📷 عکس پیشنهادی: پتو، نور گرم، فضای آرام و امن",
     quotes: [
       { text: "با خودت همان‌قدر مهربان باش که با یک دوست خوب.", author: "کریستین نف" },
@@ -385,6 +418,7 @@ const sections = [
     title: "بخش چهاردهم: رابطه با زمان",
     subtitle: "برای زندگی نکردن در تعقیب همیشگی",
     imagePosition: "left",
+    image: img14,
     imagePlaceholder: "📷 عکس پیشنهادی: ساعت کلاسیک، نور نرم، دفتر باز",
     quotes: [
       { text: "زمان، چیزی نیست که فقط بگذرد؛ چیزی است که خرج می‌کنی.", author: "کارل سندبرگ" },
@@ -414,6 +448,7 @@ const sections = [
     title: "بخش پانزدهم: رویا و آینده",
     subtitle: "برای زنده نگه داشتن چشم‌اندازهای بزرگ",
     imagePosition: "bottom",
+    image: img15,
     imagePlaceholder: "📷 عکس پیشنهادی: آسمان شب، ستاره‌ها، دفتر رویاها",
     quotes: [
       { text: "آینده به کسانی تعلق دارد که به رؤیاهایشان ایمان دارند.", author: "النور روزولت" },
@@ -443,6 +478,7 @@ const sections = [
     title: "بخش شانزدهم: مرزگذاری و احترام به خود",
     subtitle: "برای حفظ کرامت در روابط و زندگی",
     imagePosition: "right",
+    image: img16,
     imagePlaceholder: "📷 عکس پیشنهادی: در نیمه‌باز، نور قوی، فضای محترمانه",
     quotes: [
       { text: "مرزگذاری یعنی به خودت بگویی من هم مهمم.", author: "برنه براون" },
@@ -472,6 +508,7 @@ const sections = [
     title: "بخش هفدهم: سلامت جسم",
     subtitle: "برای یادآوری اینکه بدن، خانه روح است",
     imagePosition: "left",
+    image: img17,
     imagePlaceholder: "📷 عکس پیشنهادی: کفش ورزشی، بطری آب، فضای مینیمال",
     quotes: [
       { text: "بدن تو، جایی است که تمام عمر در آن زندگی می‌کنی.", author: "جیم ران" },
@@ -501,6 +538,7 @@ const sections = [
     title: "بخش هجدهم: خلاقیت",
     subtitle: "برای بیدار کردن صدای منحصربه‌فرد درون",
     imagePosition: "bottom",
+    image: img18,
     imagePlaceholder: "📷 عکس پیشنهادی: دفتر طراحی، رنگ، لپ‌تاپ، ایده‌پردازی",
     quotes: [
       { text: "خلاقیت یعنی جرئت متفاوت دیدن.", author: "آلبرت اینشتین" },
@@ -530,6 +568,7 @@ const sections = [
     title: "بخش نوزدهم: قدردانی",
     subtitle: "برای دیدن داشته‌ها در میانه نداشته‌ها",
     imagePosition: "right",
+    image: img19,
     imagePlaceholder: "📷 عکس پیشنهادی: دفتر شکرگزاری، نور طلایی، گل خشک",
     quotes: [
       { text: "قدردانی، فراوانی را به زندگی دعوت می‌کند.", author: "اوپرا وینفری" },
@@ -559,6 +598,7 @@ const sections = [
     title: "بخش بیستم: ساختن بهترین نسخه خود",
     subtitle: "جمع‌بندی نهایی برای زیستن آگاهانه، قوی و شریف",
     imagePosition: "left",
+    image: img20,
     imagePlaceholder: "📷 عکس پیشنهادی: فردی رو به افق، لباس ساده، نور باشکوه",
     quotes: [
       { text: "بهترین نسخه تو، با انتخاب‌های روزانه ساخته می‌شود.", author: "جیمز کلیر" },
@@ -592,7 +632,7 @@ function QuoteCard({ text, author, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.35, delay: index * 0.015 }}
-      className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 hover:bg-white/10 transition-all duration-300"
+      className="relative overflow-hidden rounded-2xl border border-[#ffffff15] bg-gradient-to-br from-[#7a1e2c] to-[#5a1420] p-4 transition-all duration-300 hover:brightness-110 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] before:bg-[size:6px_6px] before:opacity-40 before:rounded-2xl"
     >
       <div className="flex items-start gap-3">
         <div className="shrink-0 mt-1">
@@ -609,7 +649,20 @@ function QuoteCard({ text, author, index }) {
   );
 }
 
-function ImagePlaceholder({ text, position }) {
+function ImagePlaceholder({ text, position, src, alt }) {
+  if (src) {
+    return (
+      <div className="rounded-3xl overflow-hidden border border-rose-200/20 bg-[#3b0713] shadow-xl min-h-[220px]">
+        <img
+          src={src}
+          alt={alt || text}
+          className="w-full h-full min-h-[220px] object-cover"
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
   const baseClass =
     "rounded-3xl border border-dashed border-rose-300/40 bg-gradient-to-br from-rose-200/10 to-rose-950/20 p-6 min-h-[220px] flex flex-col items-center justify-center text-center";
 
@@ -631,15 +684,112 @@ export default function DailyInspirationArticle() {
   return (
     <main
       dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-[#3b0713] via-[#5b1024] to-[#22040d] text-white"
+      className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f7efe2] via-[#ead8bd] to-[#c9a77f] text-white"
     >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-40">
+  <svg
+    className="absolute -top-10 right-[-120px] w-[900px] h-[420px] rotate-12"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 900 420"
+  >
+    <defs>
+      <linearGradient id="dnaGold1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#b8871b" stopOpacity="0.18" />
+        <stop offset="50%" stopColor="#f6d365" stopOpacity="0.34" />
+        <stop offset="100%" stopColor="#b8871b" stopOpacity="0.18" />
+      </linearGradient>
+    </defs>
+
+    <path d="M0 120 Q 150 40 300 120 T 600 120 T 900 120" stroke="url(#dnaGold1)" strokeWidth="2.2" fill="none" />
+    <path d="M0 230 Q 150 310 300 230 T 600 230 T 900 230" stroke="url(#dnaGold1)" strokeWidth="2.2" fill="none" />
+
+    {[...Array(16)].map((_, i) => (
+      <line
+        key={i}
+        x1={i * 60}
+        y1={120 + Math.sin(i * 0.9) * 35}
+        x2={i * 60}
+        y2={230 - Math.sin(i * 0.9) * 35}
+        stroke="#d4a017"
+        strokeOpacity="0.22"
+        strokeWidth="1.2"
+      />
+    ))}
+  </svg>
+
+  <svg
+    className="absolute top-[22%] left-[-160px] w-[760px] h-[360px] -rotate-12"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 760 360"
+  >
+    <path d="M0 100 Q 125 25 250 100 T 500 100 T 760 100" stroke="#c89422" strokeOpacity="0.28" strokeWidth="2" fill="none" />
+    <path d="M0 210 Q 125 285 250 210 T 500 210 T 760 210" stroke="#f3c65a" strokeOpacity="0.26" strokeWidth="2" fill="none" />
+
+    {[...Array(14)].map((_, i) => (
+      <line
+        key={i}
+        x1={i * 58}
+        y1={100 + Math.sin(i) * 32}
+        x2={i * 58}
+        y2={210 - Math.sin(i) * 32}
+        stroke="#d4a017"
+        strokeOpacity="0.18"
+        strokeWidth="1"
+      />
+    ))}
+  </svg>
+
+  <svg
+    className="absolute top-[52%] right-[-180px] w-[820px] h-[390px] rotate-6"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 820 390"
+  >
+    <path d="M0 110 Q 135 30 270 110 T 540 110 T 820 110" stroke="#b8871b" strokeOpacity="0.26" strokeWidth="2" fill="none" />
+    <path d="M0 220 Q 135 300 270 220 T 540 220 T 820 220" stroke="#f6d365" strokeOpacity="0.26" strokeWidth="2" fill="none" />
+
+    {[...Array(15)].map((_, i) => (
+      <line
+        key={i}
+        x1={i * 58}
+        y1={110 + Math.sin(i * 0.85) * 34}
+        x2={i * 58}
+        y2={220 - Math.sin(i * 0.85) * 34}
+        stroke="#d4a017"
+        strokeOpacity="0.2"
+        strokeWidth="1"
+      />
+    ))}
+  </svg>
+
+  <svg
+    className="absolute bottom-[-60px] left-[-120px] w-[900px] h-[420px] -rotate-6"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 900 420"
+  >
+    <path d="M0 130 Q 150 50 300 130 T 600 130 T 900 130" stroke="#c89422" strokeOpacity="0.28" strokeWidth="2.2" fill="none" />
+    <path d="M0 250 Q 150 330 300 250 T 600 250 T 900 250" stroke="#f6d365" strokeOpacity="0.24" strokeWidth="2.2" fill="none" />
+
+    {[...Array(16)].map((_, i) => (
+      <line
+        key={i}
+        x1={i * 60}
+        y1={130 + Math.sin(i * 0.9) * 38}
+        x2={i * 60}
+        y2={250 - Math.sin(i * 0.9) * 38}
+        stroke="#d4a017"
+        strokeOpacity="0.2"
+        strokeWidth="1.2"
+      />
+    ))}
+  </svg>
+</div>
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-6 pt-14 pb-10">
         <motion.div
           initial={{ opacity: 0, y: -18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-12 shadow-2xl"
+          className="rounded-[32px] border border-rose-200/15 bg-gradient-to-br from-[#3b0713] via-[#5b1024] to-[#22040d] p-8 md:p-12 shadow-2xl text-center"
         >
           <div className="flex flex-wrap items-center gap-3 mb-5">
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-200/10 border border-rose-200/20 text-rose-100 text-sm">
@@ -653,20 +803,19 @@ export default function DailyInspirationArticle() {
             <span className="block text-rose-200">قوی‌ترین و شریف‌ترین نسخه خودت</span>
           </h1>
 
-          <p className="mt-6 text-rose-100/90 leading-8 max-w-4xl text-sm md:text-base">
-            این مقاله برای لحظه‌هایی طراحی شده که انسانِ مجرد می‌خواهد
+          <p className="mt-6 mx-auto text-center text-rose-100/90 leading-8 max-w-4xl text-sm md:text-base">
+            این مقاله برای لحظه‌هایی طراحی شده که انسان می‌خواهد
             در سکوت، استقلال، رشد فردی، آرامش ذهن، نظم، امید، معنا، کار،
             سلامت و رویاهایش عمیق‌تر شود. در هر بخش، مجموعه‌ای از جملات
-            الهام‌بخش آمده و برای زیباتر شدن صفحه نیز جاهای مشخصی برای
-            قرار دادن تصویر در نظر گرفته شده است.
+            الهام‌بخش آمده که با تکرار و تفکر در آنها نسخه بهتری از خود را خواهی ساخت.
           </p>
 
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              "۲۰ بخش الهام‌بخش",
-              "۴۰۰ جمله کوتاه",
-              "تم زرشکی و احساسی",
-              "جای مشخص برای تصویرها",
+              "مهربانی با خود",
+              "امید و اراده",
+              "بازگشت به درون",
+              "نظم و شجاعت",
             ].map((item, i) => (
               <div
                 key={i}
@@ -687,6 +836,8 @@ export default function DailyInspirationArticle() {
               <ImagePlaceholder
                 text={section.imagePlaceholder}
                 position={section.imagePosition}
+                src={section.image}
+                alt={section.title}
               />
             </div>
           );
@@ -698,7 +849,7 @@ export default function DailyInspirationArticle() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
                 transition={{ duration: 0.45 }}
-                className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-sm p-6 md:p-8"
+                className="rounded-[28px] border border-rose-200/15 bg-gradient-to-br from-[#3b0713] via-[#5b1024] to-[#22040d] p-6 md:p-8 shadow-xl"
               >
                 <div className="mb-6">
                   <p className="text-sm text-rose-200 mb-2">بخش {section.id}</p>

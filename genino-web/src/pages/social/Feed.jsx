@@ -35,6 +35,42 @@ import {
 } from "../../services/api";
 import { io } from "socket.io-client";
 
+function SocialAvatar({ person, size = "w-10 h-10", active = false, color = "yellow" }) {
+  const fallback = "/avatars/101.png";
+  const avatarUrl = person?.avatarUrl || fallback;
+  const firstLetter = person?.name?.charAt(0) || "ژ";
+
+  const colorClass =
+    color === "green"
+      ? active
+        ? "bg-green-200 text-green-800"
+        : "bg-green-100 text-green-700"
+      : color === "blue"
+      ? "bg-blue-100 text-blue-700"
+      : active
+      ? "bg-yellow-300 text-yellow-800"
+      : "bg-yellow-200 text-yellow-700";
+
+  return (
+    <div
+      className={`${size} rounded-full overflow-hidden flex items-center justify-center font-bold text-sm ${colorClass}`}
+    >
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt={person?.name || "کاربر ژنینو"}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      ) : (
+        firstLetter
+      )}
+    </div>
+  );
+}
+
 export default function Feed() {
   const [activeRoom, setActiveRoom] = useState(null);
   const [activePrivateUser, setActivePrivateUser] = useState(null);
@@ -746,8 +782,13 @@ const closeFavoriteModal = () => {
   const isActiveUser = (personId) => activePrivateUser?.id === personId;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-yellow-50 pt-20 pb-16 px-4 md:px-6 relative">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen bg-[#1f2fb2] pt-20 pb-16 px-4 md:px-6 relative overflow-hidden">
+      {/* بک‌گراند مخملی آبی */}
+<div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.16),transparent_26%),radial-gradient(circle_at_80%_15%,rgba(0,0,0,0.22),transparent_28%),radial-gradient(circle_at_25%_80%,rgba(0,0,0,0.20),transparent_30%),linear-gradient(135deg,#0b2f5b,#15508c_45%,#08284f)]" />
+
+{/* بافت طرح‌دار پارچه */}
+<div className="absolute inset-0 pointer-events-none opacity-35 mix-blend-soft-light bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.08)_0px,rgba(255,255,255,0.08)_1px,transparent_1px,transparent_12px),repeating-linear-gradient(-45deg,rgba(0,0,0,0.18)_0px,rgba(0,0,0,0.18)_1px,transparent_1px,transparent_16px)]" />
+      <div className="relative z-10 max-w-7xl mx-auto">
         {/* عنوان */}
         <div className="text-center mb-10">
           <motion.h1
@@ -755,10 +796,10 @@ const closeFavoriteModal = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl font-bold text-yellow-600 mb-3"
           >
-            شبکه اجتماعی ژنینو 🌿
+            شبکه اجتماعی ژنینو 
           </motion.h1>
-          <p className="text-gray-600 text-sm max-w-md mx-auto">
-            وارد یکی از اتاق‌های گفتگو شو یا اتاق خودت رو بساز 💛
+          <p className="text-white font-semibold text-sm max-w-md mx-auto drop-shadow-sm">
+            وارد یکی از اتاق‌های گفتگو شو یا اتاق خودت رو بساز 
           </p>
         </div>
 
@@ -811,15 +852,12 @@ const closeFavoriteModal = () => {
                         }`}
                       >
                         <div className="relative shrink-0">
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                              isActiveUser(person.id)
-                                ? "bg-yellow-300 text-yellow-800"
-                                : "bg-yellow-200 text-yellow-700"
-                            }`}
-                          >
-                            {person.name.charAt(0)}
-                          </div>
+                          <SocialAvatar
+                            person={person}
+                            size="w-10 h-10"
+                            active={isActiveUser(person.id)}
+                            color="yellow"
+                          />
 
                           <span
                             className={`absolute -bottom-0.5 -left-0.5 w-3 h-3 rounded-full border-2 border-white ${
@@ -890,9 +928,11 @@ const closeFavoriteModal = () => {
                           className="w-full text-right flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/60 hover:bg-blue-100 px-3 py-3 transition"
                         >
                           <div className="relative shrink-0">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
-                              {person.name.charAt(0)}
-                            </div>
+                            <SocialAvatar
+                              person={person}
+                              size="w-10 h-10"
+                              color="blue"
+                            />
 
                             <span
                               className={`absolute -bottom-0.5 -left-0.5 w-3 h-3 rounded-full border-2 border-white ${
@@ -948,15 +988,12 @@ const closeFavoriteModal = () => {
                       }`}
                     >
                       <div className="relative shrink-0">
-                        <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm ${
-                            isActiveUser(person.id)
-                              ? "bg-green-200 text-green-800"
-                              : "bg-green-100 text-green-700"
-                          }`}
-                        >
-                          {person.name.charAt(0)}
-                        </div>
+                        <SocialAvatar
+                          person={person}
+                          size="w-9 h-9"
+                          active={isActiveUser(person.id)}
+                          color="green"
+                        />
 
                         <span className="absolute -bottom-0.5 -left-0.5 w-3 h-3 rounded-full border-2 border-white bg-green-500" />
                       </div>

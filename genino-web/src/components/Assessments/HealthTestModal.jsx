@@ -91,7 +91,7 @@ const handleClose = () => {
           {currentSection.questions.map((q, i) => (
             <div key={i}>
               <p className="font-medium text-gray-800 mb-2">{q.q}</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {q.options.map((opt) => {
                   const selected = answers[currentSection.id]?.[i] === opt;
                   return (
@@ -100,7 +100,7 @@ const handleClose = () => {
                       onClick={() =>
                         handleAnswer(currentSection.id, i, opt)
                       }
-                      className={`px-4 py-2 rounded-xl border text-sm transition-all ${
+                      className={`w-full min-h-[44px] px-2 py-2 rounded-xl border text-sm transition-all text-center ${
                         selected
                           ? `${c.primary} text-white shadow-md`
                           : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"

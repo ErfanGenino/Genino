@@ -66,8 +66,6 @@ export default function LowSaltDietArticle() {
           چرا رژیم کم‌نمک مهم است؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/low-salt-diet/importance" />
-
         <p>
           بدن به مقدار کمی سدیم نیاز دارد،
           اما مصرف زیاد آن می‌تواند برای سلامت مناسب نباشد.
@@ -230,8 +228,6 @@ export default function LowSaltDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           سدیم پنهان در چه غذاهایی بیشتر دیده می‌شود؟
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/low-salt-diet/hidden-sodium" />
 
         <p>
           خیلی از افراد تصور می‌کنند فقط خوراکی‌های خیلی شور
@@ -411,8 +407,6 @@ export default function LowSaltDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم کم‌نمک
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/low-salt-diet/summary" />
 
         <p>
           رژیم کم‌نمک یعنی ساختن یک

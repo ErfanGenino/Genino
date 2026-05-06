@@ -340,8 +340,6 @@ export default function IntermittentFastingArticle() {
           جمع‌بندی نهایی روزه‌داری متناوب
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/intermittent-fasting/summary" />
-
         <p>
           روزه‌داری متناوب یک ابزار است، نه یک معجزه.
           برای بعضی افراد می‌تواند راهی ساده برای نظم دادن به غذا خوردن باشد،

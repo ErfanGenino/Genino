@@ -8,6 +8,7 @@ import gregorian from "react-date-object/calendars/gregorian";
 import HorizontalScrollGallery from "@components/Social/HorizontalScrollGallery";
 import HealthTestModal from "@components/Assessments/HealthTestModal";
 import { createWomenHealthReport } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -88,6 +89,7 @@ function computeSectionScores(answers, sections) {
 }
 
 export default function MyWomenHealthTest() {
+  const navigate = useNavigate();
   const [todayPersian, setTodayPersian] = useState("");
   const [todayGregorian, setTodayGregorian] = useState("");
 
@@ -152,6 +154,7 @@ const handleSaveTestResult = async (result) => {
 
     setShowTestModal(false);
     alert("✅ نتیجه تست با موفقیت ذخیره شد.");
+    navigate("/my-cycle");
   } catch (err) {
     console.error(err);
     alert("خطا در ذخیره نتیجه تست.");

@@ -1,5 +1,5 @@
 // src/pages/MyMenHealth.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Heart,
@@ -7,7 +7,7 @@ import {
   Flame,
   Pill,
   Moon,
-  Accessibility,
+  Ruler,
 } from "lucide-react";
 import GoldenModal from "@components/Core/GoldenModal";
 import DatePicker from "react-multi-date-picker";
@@ -17,12 +17,19 @@ import GeninoHealthButton from "@components/Assessments/GeninoHealthButton";
 import { HeartPulse } from "lucide-react";
 import { Link } from "react-router-dom";
 import GeninoAwarenessBox from "@components/Awareness/GeninoAwarenessBox";
+import {
+  createMenHealthReport,
+  getMenHealthReports,
+  deleteMenHealthReport,
+} from "../services/api";
 
 
 
 export default function MyMenHealth() {
   const [selectedTest, setSelectedTest] = useState(null);
   const [results, setResults] = useState([]); // نتایج تست‌ها
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsError, setResultsError] = useState("");
   const [form, setForm] = useState({ height: "", weight: "" });
 
   // 🫀 پاسخ‌های تست سلامت قلب
@@ -33,7 +40,7 @@ export default function MyMenHealth() {
     habit: "",
   });
 
-  // 🔥 پاسخ‌های تست متابولیسم
+  //  پاسخ‌های تست متابولیسم
   const [metabolismAnswers, setMetabolismAnswers] = useState({
     energy: "",
     sleep: "",
@@ -65,8 +72,34 @@ export default function MyMenHealth() {
     phone: "",
   });
 
+  useEffect(() => {
+  let mounted = true;
+
+  (async () => {
+    setResultsLoading(true);
+    setResultsError("");
+
+    const res = await getMenHealthReports(50);
+
+    if (!mounted) return;
+
+    if (res?.ok) {
+      setResults(res.reports || []);
+    } else {
+      setResults([]);
+      setResultsError(res?.message || "خطا در دریافت گزارش‌های سلامت آقایان.");
+    }
+
+    setResultsLoading(false);
+  })();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
+
   // 🧮 محاسبه BMI و ثبت تاریخ
-  const handleBmiCalculate = () => {
+  const handleBmiCalculate = async () => {
     const { height, weight } = form;
     if (!height || !weight) return;
 
@@ -89,17 +122,26 @@ export default function MyMenHealth() {
       tip = "با پزشک مشورت کن؛ برنامه‌ی غذایی و تحرک روزانه لازم است.";
     }
 
-    const date = new Date().toLocaleDateString("fa-IR");
-    const newResult = {
-      id: Date.now(),
-      type: "تست BMI و ترکیب بدن",
-      bmi,
-      status,
-      tip,
-      date,
-    };
+    const payload = {
+  date: new Date().toISOString(),
+  type: "تست BMI و ترکیب بدن",
+  score: bmi,
+  status,
+  tip,
+  answers: {
+    height,
+    weight,
+  },
+};
 
-    setResults((prev) => [...prev, newResult]);
+const res = await createMenHealthReport(payload);
+
+if (res?.ok && res.report) {
+  setResults((prev) => [res.report, ...prev]);
+} else {
+  alert(res?.message || "خطا در ذخیره نتیجه تست.");
+  return;
+}
     setSelectedTest(null);
     setForm({ height: "", weight: "" });
   };
@@ -108,43 +150,43 @@ export default function MyMenHealth() {
   const tests = [
     {
       id: "bmi",
-      icon: <Accessibility className="w-8 h-8 text-yellow-600" />,
-      title: "تست BMI و ترکیب بدن ⚖️",
+      icon: <Ruler className="w-8 h-8 text-yellow-600" />,
+      title: "تست BMI و ترکیب بدن ",
       desc: "محاسبه شاخص توده بدنی و درصد چربی برای بررسی تناسب اندام.",
       bg: "bg-gradient-to-br from-yellow-50 to-white",
     },
     {
       id: "heart",
       icon: <Heart className="w-8 h-8 text-red-500" />,
-      title: "تست سلامت قلب ❤️",
+      title: "تست سلامت قلب ",
       desc: "بررسی استرس، نبض و سلامت عمومی قلب.",
       bg: "bg-gradient-to-br from-red-50 to-white",
     },
     {
       id: "metabolism",
       icon: <Flame className="w-8 h-8 text-orange-500" />,
-      title: "تست متابولیسم 🔥",
+      title: "تست متابولیسم ",
       desc: "تحلیل سوخت‌وساز و میزان کالری مورد نیاز بدن.",
       bg: "bg-gradient-to-br from-orange-50 to-white",
     },
     {
       id: "hormone",
       icon: <Pill className="w-8 h-8 text-blue-500" />,
-      title: "تست تعادل هورمونی 💊",
+      title: "تست تعادل هورمونی ",
       desc: "بررسی علائم افت انرژی، تمرکز و تستوسترون.",
       bg: "bg-gradient-to-br from-blue-50 to-white",
     },
     {
       id: "sleep",
       icon: <Moon className="w-8 h-8 text-indigo-500" />,
-      title: "تست کیفیت خواب 😴",
+      title: "تست کیفیت خواب ",
       desc: "تحلیل خواب شبانه، انرژی صبحگاهی و استراحت ذهن.",
       bg: "bg-gradient-to-br from-indigo-50 to-white",
     },
     {
       id: "focus",
       icon: <Brain className="w-8 h-8 text-green-600" />,
-      title: "تست تمرکز و انگیزه 🧠",
+      title: "تست تمرکز و انگیزه ",
       desc: "بررسی تعادل ذهن، تمرکز و سطح انگیزه کاری.",
       bg: "bg-gradient-to-br from-green-50 to-white",
     },
@@ -154,7 +196,7 @@ export default function MyMenHealth() {
   const [filterExactDate, setFilterExactDate] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
+  const [showFiltersMobile, setShowFiltersMobile] = useState(false); 
 
   // 📊 فیلتر کردن نتایج
   const filteredResults = results
@@ -164,13 +206,17 @@ export default function MyMenHealth() {
         ? r.date === filterExactDate.format("YYYY/MM/DD")
         : true
     )
-    .sort((a, b) => new Date(b.id) - new Date(a.id)); // آخرین گزارش بالا باشه
-
+    .sort((a, b) => new Date(b.date) - new Date(a.date)); // آخرین گزارش بالا باشه
+  
+  function formatDate(date) {
+  return new Date(date).toLocaleDateString("fa-IR");
+}
 
   return (
     <main
       dir="rtl"
-      className="min-h-screen pb-72 bg-gradient-to-b from-[#fffdf7] to-[#fff9e8] flex flex-col items-center px-6 py-10 text-gray-800"
+      className="min-h-screen pb-72 flex flex-col items-center px-6 py-10 text-gray-800 bg-[#4b0614]
+bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.10),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(255,215,160,0.10),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.05)_0%,transparent_35%,rgba(0,0,0,0.25)_100%),repeating-linear-gradient(90deg,rgba(255,255,255,0.035)_0px,rgba(255,255,255,0.035)_1px,transparent_1px,transparent_7px),repeating-linear-gradient(0deg,rgba(0,0,0,0.08)_0px,rgba(0,0,0,0.08)_1px,transparent_1px,transparent_6px)]"
     >
       {/* 🔹 عنوان صفحه */}
       <motion.div
@@ -182,7 +228,7 @@ export default function MyMenHealth() {
         <h1 className="text-3xl font-bold text-yellow-600 mb-2">
           سلامت آقایان 💪
         </h1>
-        <p className="text-gray-600 text-sm">
+        <p className="text-white text-lg sm:text-xl font-medium">
           بررسی علمی و شخصی سلامت جسم، ذهن و هورمون‌ها — مخصوص آقایان.
         </p>
       </motion.div>
@@ -222,7 +268,7 @@ export default function MyMenHealth() {
       {/* ⚖️ تست BMI */}
       <GoldenModal
         show={selectedTest === "bmi"}
-        title="⚖️ محاسبه BMI و ترکیب بدن"
+        title=" محاسبه BMI و ترکیب بدن"
         description="وزن و قد خود را وارد کنید تا شاخص توده بدنی شما محاسبه شود."
         confirmLabel="محاسبه"
         onConfirm={handleBmiCalculate}
@@ -316,10 +362,10 @@ export default function MyMenHealth() {
       {/* ❤️ تست سلامت قلب */}
       <GoldenModal
         show={selectedTest === "heart"}
-        title="❤️ تست سلامت قلب و استرس روزانه"
+        title=" تست سلامت قلب و استرس روزانه"
         description="به چند سؤال ساده پاسخ بده تا سطح سلامت قلبت تخمین زده بشه."
         confirmLabel="محاسبه سلامت قلب ❤️"
-        onConfirm={() => {
+        onConfirm={async () => {
           let score = 0;
           heartAnswers.activity === "good" && (score += 2);
           heartAnswers.activity === "medium" && (score += 1);
@@ -343,21 +389,27 @@ export default function MyMenHealth() {
             status = "متوسط 💛";
             tip = "قلبت در وضعیت متوسطه؛ بهتره خواب، استرس و فعالیتت رو تنظیم کنی.";
           } else {
-            status = "نیاز به توجه ❤️‍🔥";
+            status = "نیاز به توجه ❤️‍";
             tip = "علائم استرس یا خستگی زیاد داری. به تغذیه، استراحت و ورزش اهمیت بده.";
           }
 
-          const date = new Date().toLocaleDateString("fa-IR");
-          const newResult = {
-            id: Date.now(),
-            type: "تست سلامت قلب ❤️",
-            bmi: `${score}/10`,
-            status,
-            tip,
-            date,
-          };
+          const payload = {
+  date: new Date().toISOString(),
+  type: "تست سلامت قلب ",
+  score: `${score}/10`,
+  status,
+  tip,
+  answers: heartAnswers,
+};
 
-          setResults((prev) => [...prev, newResult]);
+const res = await createMenHealthReport(payload);
+
+if (res?.ok && res.report) {
+  setResults((prev) => [res.report, ...prev]);
+} else {
+  alert(res?.message || "خطا در ذخیره نتیجه تست.");
+  return;
+}
           setSelectedTest(null);
           setHeartAnswers({
             activity: "",
@@ -380,10 +432,10 @@ export default function MyMenHealth() {
           {/* 🏃‍♂️ فعالیت بدنی */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۱. میزان فعالیت بدنی شما چقدره؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, activity: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.activity === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -393,7 +445,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, activity: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.activity === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -403,7 +455,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, activity: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.activity === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -417,10 +469,10 @@ export default function MyMenHealth() {
           {/* 😣 استرس */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۲. چقدر در طول روز احساس استرس داری؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, stress: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.stress === "low"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -430,7 +482,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, stress: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.stress === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -440,7 +492,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, stress: "high" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.stress === "high"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -454,10 +506,10 @@ export default function MyMenHealth() {
           {/* 💤 خواب */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۳. میانگین ساعت خواب شبانه شما؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, sleep: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.sleep === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -467,7 +519,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, sleep: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.sleep === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -477,7 +529,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, sleep: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.sleep === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -491,10 +543,10 @@ export default function MyMenHealth() {
           {/* ☕ عادت‌ها */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۴. مصرف سیگار، قهوه زیاد یا نوشیدنی انرژی‌زا داری؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, habit: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.habit === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -504,7 +556,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, habit: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.habit === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -514,7 +566,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHeartAnswers({ ...heartAnswers, habit: "bad" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   heartAnswers.habit === "bad"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -560,7 +612,7 @@ export default function MyMenHealth() {
                   </tr>
                   <tr className="hover:bg-yellow-50">
                     <td className="py-1.5 px-3">۰ تا ۴</td>
-                    <td className="py-1.5 px-3 text-red-600 font-medium">❤️‍🔥 نیاز به توجه</td>
+                    <td className="py-1.5 px-3 text-red-600 font-medium">❤️‍ نیاز به توجه</td>
                     <td className="py-1.5 px-3">
                       به استراحت، تغذیه سالم و مشاوره پزشکی توجه کن.
                     </td>
@@ -572,13 +624,13 @@ export default function MyMenHealth() {
         </div>
       </GoldenModal>
 
-      {/* 🔥 تست متابولیسم */}
+      {/*  تست متابولیسم */}
       <GoldenModal
         show={selectedTest === "metabolism"}
-        title="🔥 تست متابولیسم (سوخت‌وساز بدن)"
+        title=" تست متابولیسم (سوخت‌وساز بدن)"
         description="به چند سؤال کوتاه پاسخ بده تا سطح سوخت‌وساز بدنت مشخص بشه."
-        confirmLabel="محاسبه متابولیسم 🔥"
-        onConfirm={() => {
+        confirmLabel="محاسبه متابولیسم "
+        onConfirm={async () => {
           let score = 0;
           metabolismAnswers.energy === "good" && (score += 2);
           metabolismAnswers.energy === "medium" && (score += 1);
@@ -596,7 +648,7 @@ export default function MyMenHealth() {
           let tip = "";
 
           if (score >= 8) {
-            status = "🔥 سریع";
+            status = " سریع";
             tip = "بدنت سوخت‌وساز بالایی داره؛ مراقب باش کالری کافی دریافت کنی.";
           } else if (score >= 5) {
             status = "⚖️ نرمال";
@@ -606,17 +658,23 @@ export default function MyMenHealth() {
             tip = "احتمالاً متابولیسمت پایینه؛ تحرک، خواب کافی و پروتئین بیشتر لازمه.";
           }
 
-          const date = new Date().toLocaleDateString("fa-IR");
-          const newResult = {
-            id: Date.now(),
-            type: "تست متابولیسم 🔥",
-            bmi: `${score}/10`,
-            status,
-            tip,
-            date,
-          };
+          const payload = {
+  date: new Date().toISOString(),
+  type: "تست متابولیسم ",
+  score: `${score}/10`,
+  status,
+  tip,
+  answers: metabolismAnswers,
+};
 
-          setResults((prev) => [...prev, newResult]);
+const res = await createMenHealthReport(payload);
+
+if (res?.ok && res.report) {
+  setResults((prev) => [res.report, ...prev]);
+} else {
+  alert(res?.message || "خطا در ذخیره نتیجه تست.");
+  return;
+}
           setSelectedTest(null);
           setMetabolismAnswers({
             energy: "",
@@ -639,10 +697,10 @@ export default function MyMenHealth() {
           {/* ⚡ انرژی روزانه */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۱. احساس انرژی روزانه‌ات چطوره؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, energy: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.energy === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -652,7 +710,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, energy: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.energy === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -662,7 +720,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, energy: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.energy === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -676,10 +734,10 @@ export default function MyMenHealth() {
           {/* 🌙 خواب شبانه */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۲. الگوی خواب شبانه‌ات چطوره؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, sleep: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.sleep === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -689,7 +747,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, sleep: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.sleep === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -699,7 +757,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, sleep: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.sleep === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -713,10 +771,10 @@ export default function MyMenHealth() {
           {/* 🍽️ وعده‌های غذایی */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۳. وعده‌های غذایی‌ات چطوره؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, food: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.food === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -726,7 +784,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, food: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.food === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -736,7 +794,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, food: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.food === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -750,10 +808,10 @@ export default function MyMenHealth() {
           {/* 🏃‍♂️ فعالیت بدنی */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۴. ورزش یا تحرک بدنی چقدر داری؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, activity: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.activity === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -763,7 +821,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, activity: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.activity === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -773,7 +831,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setMetabolismAnswers({ ...metabolismAnswers, activity: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   metabolismAnswers.activity === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -801,7 +859,7 @@ export default function MyMenHealth() {
                 <tbody>
                   <tr className="hover:bg-yellow-50">
                     <td className="py-1.5 px-3">۸ تا ۱۰</td>
-                    <td className="py-1.5 px-3 text-orange-600 font-medium">🔥 سریع</td>
+                    <td className="py-1.5 px-3 text-orange-600 font-medium"> سریع</td>
                     <td className="py-1.5 px-3">کالری کافی دریافت کن، مراقب تحلیل عضله باش.</td>
                   </tr>
                   <tr className="hover:bg-yellow-50">
@@ -827,7 +885,7 @@ export default function MyMenHealth() {
         title="💊 تست تعادل هورمونی آقایان"
         description="به چند سؤال کوتاه پاسخ بده تا وضعیت هورمون‌های حیاتی بدنت بررسی بشه."
         confirmLabel="محاسبه تعادل هورمونی 💛"
-        onConfirm={() => {
+        onConfirm={async () => {
           let score = 0;
           hormoneAnswers.energy === "good" && (score += 2);
           hormoneAnswers.energy === "medium" && (score += 1);
@@ -855,17 +913,23 @@ export default function MyMenHealth() {
             tip = "نشانه‌های افت تستوسترون یا استرس مزمن دیده می‌شه؛ مشاوره پزشکی مفیده.";
           }
 
-          const date = new Date().toLocaleDateString("fa-IR");
-          const newResult = {
-            id: Date.now(),
-            type: "تست تعادل هورمونی 💊",
-            bmi: `${score}/10`,
-            status,
-            tip,
-            date,
-          };
+          const payload = {
+  date: new Date().toISOString(),
+  type: "تست تعادل هورمونی 💊",
+  score: `${score}/10`,
+  status,
+  tip,
+  answers: hormoneAnswers,
+};
 
-          setResults((prev) => [...prev, newResult]);
+const res = await createMenHealthReport(payload);
+
+if (res?.ok && res.report) {
+  setResults((prev) => [res.report, ...prev]);
+} else {
+  alert(res?.message || "خطا در ذخیره نتیجه تست.");
+  return;
+}
           setSelectedTest(null);
           setHormoneAnswers({
             energy: "",
@@ -888,10 +952,10 @@ export default function MyMenHealth() {
           {/* ⚡ انرژی روزانه */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۱. در طول روز چقدر احساس انرژی داری؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, energy: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.energy === "good"
                     ? "bg-blue-100 border-blue-400"
                     : "border-blue-200 hover:bg-blue-50"
@@ -901,7 +965,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, energy: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.energy === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-blue-200 hover:bg-blue-50"
@@ -911,7 +975,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, energy: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.energy === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -925,10 +989,10 @@ export default function MyMenHealth() {
           {/* 🎯 تمرکز ذهنی */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۲. تمرکز و عملکرد ذهنی‌ات در طول روز چطوره؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, focus: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.focus === "good"
                     ? "bg-blue-100 border-blue-400"
                     : "border-blue-200 hover:bg-blue-50"
@@ -938,7 +1002,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, focus: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.focus === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-blue-200 hover:bg-blue-50"
@@ -948,7 +1012,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, focus: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.focus === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -962,10 +1026,10 @@ export default function MyMenHealth() {
           {/* 🌙 خواب شبانه */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۳. کیفیت خواب و بیداری صبح‌ات چطوره؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, sleep: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.sleep === "good"
                     ? "bg-blue-100 border-blue-400"
                     : "border-blue-200 hover:bg-blue-50"
@@ -975,7 +1039,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, sleep: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.sleep === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-blue-200 hover:bg-blue-50"
@@ -985,7 +1049,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, sleep: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.sleep === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -999,10 +1063,10 @@ export default function MyMenHealth() {
           {/* 🙂 خلق و خو */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۴. خلق‌و‌خو و انگیزه‌ات در روزهای اخیر؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, mood: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.mood === "good"
                     ? "bg-blue-100 border-blue-400"
                     : "border-blue-200 hover:bg-blue-50"
@@ -1012,7 +1076,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, mood: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.mood === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-blue-200 hover:bg-blue-50"
@@ -1022,7 +1086,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setHormoneAnswers({ ...hormoneAnswers, mood: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   hormoneAnswers.mood === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1076,7 +1140,7 @@ export default function MyMenHealth() {
         title="😴 تست کیفیت خواب شبانه"
         description="به چند سؤال ساده پاسخ بده تا میزان کیفیت و عمق خواب شبانه‌ات مشخص بشه."
         confirmLabel="محاسبه کیفیت خواب 🌙"
-        onConfirm={() => {
+        onConfirm={async () => {
           let score = 0;
           sleepAnswers.hours === "good" && (score += 2);
           sleepAnswers.hours === "medium" && (score += 1);
@@ -1104,17 +1168,23 @@ export default function MyMenHealth() {
             tip = "کم‌خوابی یا استرس مانع خواب عمیقته. سعی کن خواب و آرامش رو در اولویت بذاری.";
           }
 
-          const date = new Date().toLocaleDateString("fa-IR");
-          const newResult = {
-            id: Date.now(),
-            type: "تست کیفیت خواب 😴",
-            bmi: `${score}/10`,
-            status,
-            tip,
-            date,
-          };
+          const payload = {
+  date: new Date().toISOString(),
+  type: "تست کیفیت خواب 😴",
+  score: `${score}/10`,
+  status,
+  tip,
+  answers: sleepAnswers,
+};
 
-          setResults((prev) => [...prev, newResult]);
+const res = await createMenHealthReport(payload);
+
+if (res?.ok && res.report) {
+  setResults((prev) => [res.report, ...prev]);
+} else {
+  alert(res?.message || "خطا در ذخیره نتیجه تست.");
+  return;
+}
           setSelectedTest(null);
           setSleepAnswers({
             hours: "",
@@ -1137,10 +1207,10 @@ export default function MyMenHealth() {
           {/* 🕐 مدت خواب */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۱. به‌طور میانگین چند ساعت در شب می‌خوابی؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, hours: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.hours === "good"
                     ? "bg-indigo-100 border-indigo-400"
                     : "border-indigo-200 hover:bg-indigo-50"
@@ -1150,7 +1220,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, hours: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.hours === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-indigo-200 hover:bg-indigo-50"
@@ -1160,7 +1230,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, hours: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.hours === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1174,10 +1244,10 @@ export default function MyMenHealth() {
           {/* 🌃 بیدار شدن شبانه */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۲. در طول شب چند بار از خواب بیدار می‌شی؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, wakeups: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.wakeups === "good"
                     ? "bg-indigo-100 border-indigo-400"
                     : "border-indigo-200 hover:bg-indigo-50"
@@ -1187,7 +1257,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, wakeups: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.wakeups === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-indigo-200 hover:bg-indigo-50"
@@ -1197,7 +1267,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, wakeups: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.wakeups === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1211,10 +1281,10 @@ export default function MyMenHealth() {
           {/* ☀️ انرژی صبح */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۳. احساس انرژی‌ات بعد از بیدار شدن چطوره؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, energy: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.energy === "good"
                     ? "bg-indigo-100 border-indigo-400"
                     : "border-indigo-200 hover:bg-indigo-50"
@@ -1224,7 +1294,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, energy: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.energy === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-indigo-200 hover:bg-indigo-50"
@@ -1234,7 +1304,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, energy: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.energy === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1248,10 +1318,10 @@ export default function MyMenHealth() {
           {/* 📱 استفاده از موبایل */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۴. قبل از خواب از موبایل یا تلویزیون استفاده می‌کنی؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, screen: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.screen === "good"
                     ? "bg-indigo-100 border-indigo-400"
                     : "border-indigo-200 hover:bg-indigo-50"
@@ -1261,7 +1331,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, screen: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.screen === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-indigo-200 hover:bg-indigo-50"
@@ -1271,7 +1341,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setSleepAnswers({ ...sleepAnswers, screen: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   sleepAnswers.screen === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1325,7 +1395,7 @@ export default function MyMenHealth() {
         title="🧠 تست تمرکز و انگیزه"
         description="با چند سؤال ساده، میزان تمرکز و انگیزه ذهنی خودت رو بسنج."
         confirmLabel="محاسبه تمرکز و انگیزه 💪"
-        onConfirm={() => {
+        onConfirm={async () => {
           let score = 0;
           focusAnswers.attention === "good" && (score += 2);
           focusAnswers.attention === "medium" && (score += 1);
@@ -1353,17 +1423,23 @@ export default function MyMenHealth() {
             tip = "ذهن خسته‌ست. استراحت، ورزش و هدف‌گذاری جدید کمکت می‌کنه.";
           }
 
-          const date = new Date().toLocaleDateString("fa-IR");
-          const newResult = {
-            id: Date.now(),
-            type: "تست تمرکز و انگیزه 🧠",
-            bmi: `${score}/10`,
-            status,
-            tip,
-            date,
-          };
+          const payload = {
+  date: new Date().toISOString(),
+  type: "تست تمرکز و انگیزه 🧠",
+  score: `${score}/10`,
+  status,
+  tip,
+  answers: focusAnswers,
+};
 
-          setResults((prev) => [...prev, newResult]);
+const res = await createMenHealthReport(payload);
+
+if (res?.ok && res.report) {
+  setResults((prev) => [res.report, ...prev]);
+} else {
+  alert(res?.message || "خطا در ذخیره نتیجه تست.");
+  return;
+}
           setSelectedTest(null);
           setFocusAnswers({
             attention: "",
@@ -1386,10 +1462,10 @@ export default function MyMenHealth() {
           {/* 🎯 تمرکز */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۱. در طول کار یا مطالعه چقدر تمرکز داری؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, attention: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.attention === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -1399,7 +1475,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, attention: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.attention === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -1409,7 +1485,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, attention: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.attention === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1423,10 +1499,10 @@ export default function MyMenHealth() {
           {/* 💪 انگیزه */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۲. احساس انگیزه برای انجام کارهات چقدره؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, motivation: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.motivation === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -1436,7 +1512,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, motivation: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.motivation === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -1446,7 +1522,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, motivation: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.motivation === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1460,10 +1536,10 @@ export default function MyMenHealth() {
           {/* 🧘‍♂️ خستگی ذهنی */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۳. در طول روز چقدر احساس خستگی ذهنی داری؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, tired: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.tired === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -1473,7 +1549,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, tired: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.tired === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -1483,7 +1559,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, tired: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.tired === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1497,10 +1573,10 @@ export default function MyMenHealth() {
           {/* 📱 حواس‌پرتی دیجیتال */}
           <div>
             <p className="font-semibold text-gray-800 mb-2">۴. هنگام کار از موبایل یا شبکه اجتماعی استفاده می‌کنی؟</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, phone: "good" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.phone === "good"
                     ? "bg-yellow-200 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -1510,7 +1586,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, phone: "medium" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.phone === "medium"
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-yellow-200 hover:bg-yellow-50"
@@ -1520,7 +1596,7 @@ export default function MyMenHealth() {
               </button>
               <button
                 onClick={() => setFocusAnswers({ ...focusAnswers, phone: "low" })}
-                className={`px-3 py-1 rounded-xl border ${
+                className={`w-full px-3 py-2 rounded-xl border text-center ${
                   focusAnswers.phone === "low"
                     ? "bg-gray-100 border-yellow-200"
                     : "border-yellow-100 hover:bg-yellow-50"
@@ -1643,10 +1719,10 @@ export default function MyMenHealth() {
         >
           <div className="flex justify-between mb-1">
             <span className="text-gray-700 font-medium">{r.type}</span>
-            <span className="text-xs text-gray-500">{r.date}</span>
+            <span className="text-xs text-gray-500">{formatDate(r.date)}</span>
           </div>
           <p className="text-gray-600">
-            <strong>نتیجه:</strong> {r.bmi}
+            <strong>نتیجه:</strong> {r.score}
           </p>
           <p className="text-gray-600">
             <strong>وضعیت:</strong> {r.status}
@@ -1726,22 +1802,22 @@ export default function MyMenHealth() {
               key={r.id}
               className="border-b border-yellow-50 hover:bg-yellow-50 transition"
             >
-              <td className="py-2 px-3">{r.date}</td>
+              <td className="py-2 px-3">{formatDate(r.date)}</td>
               <td className="py-2 px-3 font-medium text-yellow-700">{r.type}</td>
-              <td className="py-2 px-3">{r.bmi}</td>
+              <td className="py-2 px-3">{r.score}</td>
               <td className="py-2 px-3">{r.status}</td>
               <td className="py-2 px-3 text-gray-600">{r.tip}</td>
               <td className="py-2 px-3 text-center">
-                <button
-                  onClick={() => {
-                    setDeleteTarget({ type: "single", id: r.id });
-                    setShowDeleteModal(true);
-                  }}
-                  className="text-red-600 hover:text-red-800 transition-colors"
-                >
-                  🗑️
-                </button>
-              </td>
+  <button
+    onClick={() => {
+      setDeleteTarget({ type: "single", id: r.id });
+      setShowDeleteModal(true);
+    }}
+    className="text-red-600 hover:text-red-800 transition-colors"
+  >
+    🗑️
+  </button>
+</td>
             </tr>
           ))
         ) : (
@@ -1779,12 +1855,19 @@ export default function MyMenHealth() {
         : "آیا مطمئنی می‌خواهی این گزارش را حذف کنی؟"
     }
     confirmLabel="بله، حذف کن"
-    onConfirm={() => {
+    onConfirm={async () => {
       if (deleteTarget?.type === "all") {
         setResults([]);
       } else if (deleteTarget?.type === "single" && deleteTarget.id) {
-        setResults((prev) => prev.filter((item) => item.id !== deleteTarget.id));
-      }
+  const res = await deleteMenHealthReport(deleteTarget.id);
+
+  if (res?.ok) {
+    setResults((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+  } else {
+    alert(res?.message || "خطا در حذف گزارش.");
+    return;
+  }
+}
       setShowDeleteModal(false);
     }}
     onCancel={() => setShowDeleteModal(false)}
@@ -1793,6 +1876,8 @@ export default function MyMenHealth() {
       حذف گزارش غیرقابل بازگشت است. لطفاً قبل از تأیید مطمئن شوید 💛
     </p>
   </GoldenModal>
+
+
 </motion.div>
 
 
@@ -1837,7 +1922,7 @@ export default function MyMenHealth() {
       </motion.div>
       {/* 🧠 جعبه آگاهی ژنینو */}
       <motion.div
-        className="relative z-[6] -mt-8 mb-2 w-full max-w-2xl"
+        className="relative z-[6] -mt-2 mb-2 w-full max-w-2xl"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -1851,7 +1936,8 @@ export default function MyMenHealth() {
             { title: "بدن زنان", link: "/articles/body-women" },
             { title: "ژن چیست؟", link: "/articles/what-is-gene" },
             { title: "اپی‌ژنتیک رفتاری", link: "/articles/behavioral-epigenetics" },
-            { title: "مقاله", link: "/articles/empathy" },
+            { title: "۵ اصل طلایی موفقیت در کارآفرینی", link: "/articles/entrepreneurs/five-golden-principles" },
+            { title: "نقش نظم شخصی در موفقیت", link: "/articles/entrepreneurs/personal-discipline" },
           ]}
         />
       </motion.div>

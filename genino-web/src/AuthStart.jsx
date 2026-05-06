@@ -3,13 +3,38 @@ import logo from "./assets/logo-genino.png";
 import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby, DollarSign, PartyPopper, Play, LetterText, FileHeart } from "lucide-react";
 import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
 import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
 import PromoSlider from "@components/Social/PromoSlider";
 import ScrollProduct from "./components/Core/ScrollProduct";
 import TodayCalendarBox from "./components/Dashboard/TodayCalendarBox";
 import { getConversations } from "./services/api";
+import myChildBg from "./assets/outhstart-cards/mychild-bg.png";
+import shopBg from "./assets/outhstart-cards/shop-bg.png";
+import womenHealthBg from "./assets/outhstart-cards/women-health-bg.png";
+import menHealthBg from "./assets/outhstart-cards/men-health-bg.png";
+import myDoctorBg from "./assets/outhstart-cards/my-doctor-bg.png";
+import calorieTrackerBg from "./assets/outhstart-cards/calorie-tracker-bg.png";
+import magazineBg from "./assets/outhstart-cards/magazine-bg.png";
+import socialBg from "./assets/outhstart-cards/social-bg.png";
+import funBg from "./assets/outhstart-cards/fun-bg.png";
+import eventsBg from "./assets/outhstart-cards/events-bg.png";
+import singleWorldBg from "./assets/outhstart-cards/single-world-bg.png";
+import familyFinanceBg from "./assets/outhstart-cards/family-finance-bg.png";
+import AuthFeatureCircleSlider from "./components/AuthStart/AuthFeatureCircleSlider";
+import myChildIcon from "./assets/authstart-icons/mychild.png";
+import shopIcon from "./assets/authstart-icons/shop.png";
+import womenHealthIcon from "./assets/authstart-icons/women-health.png";
+import menHealthIcon from "./assets/authstart-icons/men-health.png";
+import myDoctorIcon from "./assets/authstart-icons/my-doctor.png";
+import calorieIcon from "./assets/authstart-icons/calorie.png";
+import magazineIcon from "./assets/authstart-icons/magazine.png";
+import socialIcon from "./assets/authstart-icons/social.png";
+import funIcon from "./assets/authstart-icons/fun.png";
+import eventsIcon from "./assets/authstart-icons/events.png";
+import singleWorldIcon from "./assets/authstart-icons/single-world.png";
+import familyFinanceIcon from "./assets/authstart-icons/family-finance.png";
 
 
 
@@ -18,6 +43,8 @@ export default function AuthStart() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const [socialUnreadCount, setSocialUnreadCount] = useState(0);
+  const navigate = useNavigate();
+  const [showChildChoiceModal, setShowChildChoiceModal] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -30,86 +57,90 @@ export default function AuthStart() {
   }, []);
 
   const features = [
-  { icon: <Baby className="w-8 h-8 text-yellow-500 mb-3" />, title: "کودک من", desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.", link: "/mychild" },
-  { icon: <ShoppingBag className="w-8 h-8 text-yellow-500 mb-3" />, title: "فروشگاه تخصصی", desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.", link: "/shop" },
   {
-  icon: (
-    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-pink-400 via-pink-300 to-pink-200 shadow-md mb-3">
-      <Flower2 className="w-6 h-6 text-white" />
-    </div>
-  ),
-  title: "سلامت بانوان",
-  desc: "پیگیری چرخه قاعدگی، شناخت بدن و دریافت پیشنهادهای آرام‌بخش روزانه",
-  link: "/my-cycle",
-  color: "pink",
-},
-{
-  icon: (
-    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-400 via-blue-300 to-blue-200 shadow-md mb-3">
-      <Flower2 className="w-6 h-6 text-white" />
-    </div>
-  ),
-  title: "سلامت آقایان",
-  desc: "بررسی علمی وضعیت جسمی، ذهنی و هورمونی آقایان با تست‌های تخصصی و شخصی‌سازی‌شده",
-  link: "/my-men-health",
-  color: "blue",
-},
-{
-  icon: (
-    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-300 via-yellow-200 to-emerald-100 shadow-md mb-3">
-      <FileHeart className="w-7 h-7 text-yellow-700" />
-    </div>
-  ),
-  title: "پزشک من",
-  desc: "بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو.",
-  link: "/my-doctor",
-  color: "green",
-},
-  { icon: <Apple className="w-8 h-8 text-yellow-500 mb-3" />, title: "کالری شمار", desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.", link: "/calorie-tracker",color: "pink",},  
+    title: "کودک من",
+    desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.",
+    link: "/mychild",
+    image: myChildBg,
+    icon: myChildIcon,
+  },
   {
-  specialMagazineCard: true,
-  icon: (
-    <div className="relative w-14 h-14 flex items-center justify-center mb-3">
-      {/* 🔥 حلقه طلایی چرخان */}
-      <motion.div
-        className="absolute inset-0 rounded-full border-2 border-yellow-400"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        style={{ boxShadow: "0 0 12px rgba(212,175,55,0.35)" }}
-      />
-
-      {/* 🌟 قرص مرکزی */}
-      <div className="relative z-10 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-200 flex items-center justify-center shadow-md">
-        <BookCheck className="w-7 h-7 text-white drop-shadow" />
-      </div>
-    </div>
-  ),
-  title: "مجله ژنینو",
-  desc: "مرجع علمی رشد، آگاهی و والدگری مدرن — DNA طلایی ذهن شما.",
-  link: "/world-knowledge",
-  color: "yellow",
-},
-
+    title: "فروشگاه تخصصی",
+    desc: "دسترسی به محصولات و خدمات منتخب ویژه‌ی والدین و فرزندان.",
+    link: "/shop",
+    image: shopBg,
+    icon: shopIcon,
+  },
   {
-    icon: <UsersRound className="w-8 h-8 text-yellow-500 mb-3" />,
+    title: "سلامت بانوان",
+    desc: "پیگیری چرخه قاعدگی، شناخت بدن و دریافت پیشنهادهای آرام‌بخش روزانه",
+    link: "/my-cycle",
+    image: womenHealthBg,
+    icon: womenHealthIcon,
+  },
+  {
+    title: "سلامت آقایان",
+    desc: "بررسی علمی وضعیت جسمی، ذهنی و هورمونی آقایان با تست‌های تخصصی و شخصی‌سازی‌شده",
+    link: "/my-men-health",
+    image: menHealthBg,
+    icon: menHealthIcon,
+  },
+  {
+    title: "پزشک من",
+    desc: "بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو.",
+    link: "/my-doctor",
+    image: myDoctorBg,
+    icon: myDoctorIcon,
+  },
+  {
+    title: "کالری شمار",
+    desc: "تغذیه سالم و به اندازه، ضامن سلامت شماست.",
+    link: "/calorie-tracker",
+    image: calorieTrackerBg,
+    icon: calorieIcon,
+  },
+  {
+    title: "مجله ژنینو",
+    desc: "مرجع علمی رشد، آگاهی و والدگری مدرن — DNA طلایی ذهن شما.",
+    link: "/world-knowledge",
+    image: magazineBg,
+    icon: magazineIcon,
+  },
+  {
     title: "شبکه اجتماعی ژنینو",
     desc: "در ژنینو با والدین دیگر در ارتباط باشید، تجربه‌ها را به اشتراک بگذارید و از لحظات طلایی کودکی الهام بگیرید 💬✨",
     link: "/social",
-    color: "blue",
+    image: socialBg,
+    icon: socialIcon,
   },
-  { icon: <Puzzle className="w-8 h-8 text-yellow-500 mb-3" />, title: "بازی و سرگرمی", desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.", link: "/fun", color: "pink", },
-  { icon: <PartyPopper className="w-8 h-8 text-yellow-500 mb-3" />, title: "رویدادها و جشن‌ها", desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما", link: "/events", color: "green", },
-{
-  icon: (
-    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-200 shadow-md mb-3">
-      <Smile className="w-6 h-6 text-yellow-700" />
-    </div>
-  ),
-  title: "جهان مجردها",
-  desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو.", link: "/single-world", color: "yellow",
-},
-{ icon: <DollarSign className="w-8 h-8 text-yellow-500 mb-3" />, title: "اقتصاد و حسابداری خانواده", desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده", link: "/family-finance" },
-  
+  {
+    title: "بازی و سرگرمی",
+    desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.",
+    link: "/fun",
+    image: funBg,
+    icon: funIcon,
+  },
+  {
+    title: "رویدادها و جشن‌ها",
+    desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما",
+    link: "/events",
+    image: eventsBg,
+    icon: eventsIcon,
+  },
+  {
+    title: "جهان مجردها",
+    desc: "ویژه افراد مجرد — محتوای آموزشی، سرگرمی و رشد فردی در ژنینو.",
+    link: "/single-world",
+    image: singleWorldBg,
+    icon: singleWorldIcon,
+  },
+  {
+    title: "اقتصاد و حسابداری خانواده",
+    desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده",
+    link: "/family-finance",
+    image: familyFinanceBg,
+    icon: familyFinanceIcon,
+  },
 ];
 
 // ✅ تقسیم کارت‌ها به دسته‌های ۴تایی
@@ -376,6 +407,8 @@ useEffect(() => {
 
 <TodayCalendarBox className="mt-2 sm:mt-3 lg:mt-4" />
 
+<AuthFeatureCircleSlider items={features} />
+
 <motion.div
   className="relative w-full max-w-4xl my-10 rounded-3xl overflow-hidden z-20"
   initial={{ opacity: 0, y: 10 }}
@@ -432,63 +465,43 @@ useEffect(() => {
       }}
     >
       {featuresChunks?.[0]?.map((item, i) => (
-        <Link key={`f0-${i}`} to={item.link || "#"} className="group">
+        <Link
+  key={`f0-${i}`}
+  to={item.title === "کودک من" ? "#" : item.link || "#"}
+  onClick={(e) => {
+    if (item.title === "کودک من") {
+      e.preventDefault();
+      setShowChildChoiceModal(true);
+    }
+  }}
+  className="group"
+>
           {/* کارت خودت (بدون تغییر) */}
           <motion.div
-            whileHover={{ scale: 1.05, y: -4, boxShadow: "0 0 20px rgba(212,175,55,0.32)" }}
-            animate={
-              item.title === "فروشگاه تخصصی" && highlight
-                ? { scale: [1, 1.08, 1], rotate: [0, -3, 0] }
-                : item.title === "کودک من" && pulse
-                ? { scale: [1, 1.03, 1] }
-                : {}
-            }
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className={`
-              relative p-4 rounded-2xl border 
-              h-full min-h-[170px] lg:min-h-[190px]
-              flex flex-col justify-between cursor-pointer
-              transition-all duration-300
+  whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
+  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+  className="flex flex-col justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[360px] cursor-pointer hover:shadow-lg"
+>
+  {/* عکس کارت */}
+  <div className="h-56 overflow-hidden flex-shrink-0">
+    <img
+      src={item.image || logo}
+      alt={item.title}
+      className="w-full h-full object-contain sm:object-cover bg-[#fff8e6] hover:scale-105 transition-transform duration-500"
+    />
+  </div>
 
-              ${item.specialMagazineCard ? "bg-[#fff9d9] border-yellow-300 shadow-lg" : ""}
+  {/* متن کارت */}
+  <div className="p-4 text-center flex-grow flex flex-col items-center justify-center">
+    <h3 className="text-base font-extrabold text-yellow-700 mb-2 leading-snug">
+      {item.title}
+    </h3>
 
-              ${
-                item.title === "کودک من"
-                  ? "bg-gradient-to-br from-yellow-300 to-yellow-100 border-yellow-400 shadow-xl"
-                  : item.title === "فروشگاه تخصصی"
-                  ? "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-200 shadow-md"
-                  : item.title === "اقتصاد و حسابداری خانواده"
-                  ? "bg-gradient-to-br from-[#fff8e1] via-[#f4f9ef] to-[#ffffff] border-[#d4af37] text-[#8c7729] shadow-[0_0_12px_rgba(212,175,55,0.15)]"
-                  : cardColors[item.color] || cardColors.default
-              }
-            `}
-          >
-            <div className="flex flex-col items-center relative z-10">
-              {item.title === "کودک من" ? (
-                <Baby className="w-10 h-10 text-yellow-700 mb-3 drop-shadow-md" />
-              ) : (
-                item.icon
-              )}
-
-              <h3
-                className={`${
-                  item.title === "کودک من"
-                    ? "text-lg font-extrabold text-yellow-800"
-                    : "text-base font-semibold text-gray-700"
-                } mb-1`}
-              >
-                {item.title}
-              </h3>
-
-              <p
-                className={`${
-                  item.title === "کودک من" ? "text-gray-700" : "text-gray-500"
-                } text-sm leading-relaxed`}
-              >
-                {item.desc}
-              </p>
-            </div>
-          </motion.div>
+    <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
+      {item.desc}
+    </p>
+  </div>
+</motion.div>
         </Link>
       ))}
     </motion.section>
@@ -510,34 +523,40 @@ useEffect(() => {
       }}
     >
       {featuresChunks?.[1]?.map((item, i) => (
-        <Link key={`f1-${i}`} to={item.link || "#"} className="group">
-          {/* کارت خودت (همون قبلی) */}
-          <motion.div
-            whileHover={{ scale: 1.05, y: -4, boxShadow: "0 0 20px rgba(212,175,55,0.32)" }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className={`
-              relative p-4 rounded-2xl border 
-              h-full min-h-[170px] lg:min-h-[190px]
-              flex flex-col justify-between cursor-pointer
-              transition-all duration-300
-              ${cardColors[item.color] || cardColors.default}
-            `}
-          >
-            {item.title === "شبکه اجتماعی ژنینو" && socialUnreadCount > 0 && (
-              <div className="absolute top-3 left-3 z-20">
-                <span className="min-w-[28px] h-[28px] px-2 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center shadow-md">
-                  {socialUnreadCount > 99 ? "99+" : socialUnreadCount}
-                </span>
-              </div>
-            )}
-            <div className="flex flex-col items-center relative z-10">
-              {item.icon}
-              <h3 className="text-base font-semibold text-gray-700 mb-1">{item.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-            </div>
-          </motion.div>
-        </Link>
-      ))}
+  <Link key={`f1-${i}`} to={item.link || "#"} className="group">
+    <motion.div
+      whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
+      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+      className="relative flex flex-col justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[360px] cursor-pointer hover:shadow-lg"
+    >
+      {item.title === "شبکه اجتماعی ژنینو" && socialUnreadCount > 0 && (
+        <div className="absolute top-3 left-3 z-20">
+          <span className="min-w-[28px] h-[28px] px-2 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center shadow-md">
+            {socialUnreadCount > 99 ? "99+" : socialUnreadCount}
+          </span>
+        </div>
+      )}
+
+      <div className="h-56 overflow-hidden flex-shrink-0">
+        <img
+          src={item.image || logo}
+          alt={item.title}
+          className="w-full h-full object-contain sm:object-cover bg-[#fff8e6] hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+
+      <div className="p-4 text-center flex-grow flex flex-col items-center justify-center">
+        <h3 className="text-base font-extrabold text-yellow-700 mb-2 leading-snug">
+          {item.title}
+        </h3>
+
+        <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
+          {item.desc}
+        </p>
+      </div>
+    </motion.div>
+  </Link>
+))}
     </motion.section>
   </div>
 
@@ -557,20 +576,32 @@ useEffect(() => {
       }}
     >
       {featuresChunks?.slice(2).flat().map((item, i) => (
-        <Link key={`rest-${i}`} to={item.link || "#"} className="group">
-          <motion.div
-            whileHover={{ scale: 1.05, y: -4, boxShadow: "0 0 20px rgba(212,175,55,0.32)" }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className={`${cardColors[item.color] || cardColors.default} relative p-4 rounded-2xl border h-full min-h-[170px] lg:min-h-[190px] flex flex-col justify-between`}
-          >
-            <div className="flex flex-col items-center relative z-10">
-              {item.icon}
-              <h3 className="text-base font-semibold text-gray-700 mb-1">{item.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-            </div>
-          </motion.div>
-        </Link>
-      ))}
+  <Link key={`rest-${i}`} to={item.link || "#"} className="group">
+    <motion.div
+      whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
+      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+      className="flex flex-col justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[360px] cursor-pointer hover:shadow-lg"
+    >
+      <div className="h-56 overflow-hidden flex-shrink-0">
+        <img
+          src={item.image || logo}
+          alt={item.title}
+          className="w-full h-full object-contain sm:object-cover bg-[#fff8e6] hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+
+      <div className="p-4 text-center flex-grow flex flex-col items-center justify-center">
+        <h3 className="text-base font-extrabold text-yellow-700 mb-2 leading-snug">
+          {item.title}
+        </h3>
+
+        <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
+          {item.desc}
+        </p>
+      </div>
+    </motion.div>
+  </Link>
+))}
     </motion.section>
   </div>
 
@@ -593,6 +624,67 @@ useEffect(() => {
 />
 
 
+<AnimatePresence>
+  {showChildChoiceModal && (
+    <motion.div
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setShowChildChoiceModal(false)}
+    >
+      <motion.div
+        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-yellow-200 text-center"
+        initial={{ scale: 0.9, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.9, y: 20, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Baby className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
+
+        <h3 className="text-lg font-extrabold text-yellow-800 mb-2">
+          کدام مسیر را انتخاب می‌کنید؟
+        </h3>
+
+        <p className="text-sm text-gray-500 mb-5">
+          لطفاً انتخاب کنید وارد بخش کودک من شوید یا دنیای کودکان.
+        </p>
+
+        <div className="grid grid-cols-1 gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setShowChildChoiceModal(false);
+              navigate("/mychild");
+            }}
+            className="w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-3 font-bold shadow-md"
+          >
+            کودک من
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setShowChildChoiceModal(false);
+              navigate("/children-world");
+            }}
+            className="w-full rounded-2xl border border-yellow-300 bg-yellow-50 text-yellow-800 py-3 font-bold"
+          >
+            دنیای کودکان
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowChildChoiceModal(false)}
+            className="w-full rounded-2xl text-gray-400 py-2 text-sm"
+          >
+            انصراف
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
             <Footer className="relative z-[2]" />
     </main>

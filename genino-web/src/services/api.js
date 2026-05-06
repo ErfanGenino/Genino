@@ -1,5 +1,6 @@
 //src/services/api.js
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+console.log("BASE URL IS:", BASE_URL);
 
 function getAuthToken() {
   return localStorage.getItem("genino_token");
@@ -24,6 +25,9 @@ export async function authFetch(url, options = {}) {
 
   let res;
   try {
+    console.log("AUTH FETCH URL:", `${BASE_URL}${url}`);
+    console.log("AUTH FETCH METHOD:", options.method || "GET");
+    console.log("AUTH FETCH HAS TOKEN:", !!token);
     res = await fetch(`${BASE_URL}${url}`, {
   ...options,
   headers,
@@ -217,6 +221,26 @@ export async function getWomenHealthReports(take = 20) {
 
 export async function deleteWomenHealthReport(id) {
   return authFetch(`/women-health/reports/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// --- Men Health Reports (تست سلامت آقایان) ---
+export async function createMenHealthReport(payload) {
+  return authFetch("/men-health/reports", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getMenHealthReports(take = 20) {
+  return authFetch(`/men-health/reports?take=${encodeURIComponent(take)}`, {
+    method: "GET",
+  });
+}
+
+export async function deleteMenHealthReport(id) {
+  return authFetch(`/men-health/reports/${id}`, {
     method: "DELETE",
   });
 }

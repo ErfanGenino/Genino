@@ -28,6 +28,7 @@ import {
 } from "../../services/api";
 
 
+
 export default function PrivateChat({
   user,
   onClose,
@@ -59,6 +60,7 @@ export default function PrivateChat({
   const [isRecording, setIsRecording] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(30);
   const [voicePreview, setVoicePreview] = useState(null);
+  const [selectedProfileImage, setSelectedProfileImage] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const recordingStreamRef = useRef(null);
@@ -273,23 +275,30 @@ useEffect(() => {
     }, 1200);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
   const file = e.target.files?.[0];
+  e.target.value = "";
+
   if (!file) return;
+
   if (filePreview?.url?.startsWith("blob:")) {
     URL.revokeObjectURL(filePreview.url);
   }
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  if (!allowedTypes.includes(file.type)) {
+    alert("فعلاً فقط فرمت‌های JPG، PNG و WEBP پشتیبانی می‌شوند. لطفاً اگر عکس HEIC است، آن را از تنظیمات گوشی به JPG تغییر بده.");
+    return;
+  }
+
   if (file.size > 15 * 1024 * 1024) {
-  alert("حجم عکس خیلی زیاد است");
-  return;
-}
+    alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
+    return;
+  }
 
   const img = new Image();
-  const reader = new FileReader();
-
-  reader.onload = (event) => {
-    img.src = event.target.result;
-  };
+  const previewUrl = URL.createObjectURL(file);
 
   img.onload = () => {
     const canvas = document.createElement("canvas");
@@ -297,14 +306,23 @@ useEffect(() => {
     const MAX_WIDTH = 1280;
     const scale = Math.min(1, MAX_WIDTH / img.width);
 
-    canvas.width = img.width * scale;
-    canvas.height = img.height * scale;
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
 
     const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    URL.revokeObjectURL(previewUrl);
 
     canvas.toBlob(
       (blob) => {
+        if (!blob) {
+          alert("آماده‌سازی تصویر انجام نشد.");
+          return;
+        }
+
         const url = URL.createObjectURL(blob);
 
         setFilePreview({
@@ -317,11 +335,16 @@ useEffect(() => {
         });
       },
       "image/jpeg",
-      0.8 // کیفیت (بین 0 تا 1)
+      0.82
     );
   };
 
-  reader.readAsDataURL(file);
+  img.onerror = () => {
+    URL.revokeObjectURL(previewUrl);
+    alert("این عکس در مرورگر قابل نمایش نیست. لطفاً JPG، PNG یا WEBP انتخاب کن.");
+  };
+
+  img.src = previewUrl;
 };
 
 const sendVoiceMessage = async ({ blob, duration }) => {
@@ -1011,15 +1034,33 @@ const getRecordedDurationSeconds = () => {
         className="bg-white w-[90%] max-w-md h-[70vh] rounded-3xl shadow-xl border border-yellow-200 flex flex-col relative"
       >
         {/* هدر */}
-        <div className="flex items-center justify-between p-4 border-b border-yellow-200">
-          <div className="flex flex-col">
-            <h2 className="text-yellow-700 font-semibold">
-              چت با {user.name}
-            </h2>
-            <span className="text-[11px] text-gray-400 mt-1">
-              گفت‌وگوی خصوصی
-            </span>
-          </div>
+<div className="flex items-center justify-between p-4 border-b border-yellow-200">
+  <div className="flex items-center gap-3 min-w-0">
+    <button
+  type="button"
+  onClick={() => setSelectedProfileImage(user?.avatarUrl || "/avatars/101.png")}
+  className="w-11 h-11 rounded-full overflow-hidden bg-yellow-100 border border-yellow-200 flex items-center justify-center shrink-0 cursor-zoom-in"
+  title="مشاهده عکس پروفایل"
+>
+  <img
+    src={user?.avatarUrl || "/avatars/101.png"}
+    alt={user?.name || "کاربر ژنینو"}
+    className="w-full h-full object-cover"
+    onError={(e) => {
+      e.currentTarget.src = "/avatars/101.png";
+    }}
+  />
+</button>
+
+    <div className="flex flex-col min-w-0">
+      <h2 className="text-yellow-700 font-semibold truncate">
+        چت با {user?.name || "کاربر ژنینو"}
+      </h2>
+      <span className="text-[11px] text-gray-400 mt-1">
+        گفت‌وگوی خصوصی
+      </span>
+    </div>
+  </div>
 
           <button
             type="button"
@@ -1054,7 +1095,7 @@ const getRecordedDurationSeconds = () => {
   className={`
     ${msg.deletedForEveryone 
   ? "max-w-[40%] px-1 py-[2px] text-[10px] opacity-60 italic text-gray-400 mx-auto text-center bg-transparent shadow-none"
-  : `max-w-[70%] p-2 rounded-xl text-sm ${
+  : `max-w-[85%] sm:max-w-[70%] p-2 rounded-xl text-sm break-words [overflow-wrap:anywhere] ${
       msg.sender === "me"
         ? "bg-yellow-100 ml-auto"
         : "bg-gray-100"
@@ -1117,8 +1158,10 @@ const getRecordedDurationSeconds = () => {
 )}
 
     {msg.type === "text" && (
-      <p className="whitespace-pre-wrap">{msg.text}</p>
-    )}
+  <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-6">
+  {msg.text}
+</p>
+)}
 
     {msg.type === "voice" && (
   <div className="mt-1">
@@ -1129,7 +1172,9 @@ const getRecordedDurationSeconds = () => {
       </p>
     ) : null}
     {msg.text ? (
-      <p className="mt-2 whitespace-pre-wrap">{msg.text}</p>
+      <p className="mt-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+  {msg.text}
+</p>
     ) : null}
   </div>
 )}
@@ -1149,7 +1194,9 @@ const getRecordedDurationSeconds = () => {
     </button>
 
     {msg.text ? (
-      <p className="mt-2 whitespace-pre-wrap">{msg.text}</p>
+      <p className="mt-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+  {msg.text}
+</p>
     ) : null}
   </>
 )}
@@ -1258,7 +1305,7 @@ const getRecordedDurationSeconds = () => {
 
         {/* preview فایل */}
         {filePreview && (
-  <div className="absolute bottom-20 left-3 bg-white border border-yellow-200 rounded-xl p-1.5 shadow z-10 relative max-w-[120px]">
+  <div className="absolute bottom-20 left-3 bg-white border border-yellow-200 rounded-xl p-1.5 shadow z-10 max-w-[120px]">
 
     {/* ❌ دکمه حذف */}
     <button
@@ -1447,11 +1494,11 @@ const getRecordedDurationSeconds = () => {
   <label className="p-2 rounded-lg hover:bg-yellow-100 cursor-pointer shrink-0">
     <ImageIcon size={20} className="text-yellow-600" />
     <input
-      type="file"
-      accept="image/*"
-      className="hidden"
-      onChange={handleFileChange}
-    />
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  className="hidden"
+  onChange={handleFileChange}
+/>
   </label>
 </form>
       </motion.div>
@@ -1573,6 +1620,33 @@ const getRecordedDurationSeconds = () => {
           حذف
         </button>
       </div>
+    </div>
+  </div>
+)}
+
+{selectedProfileImage && (
+  <div
+    className="absolute inset-0 bg-black/70 backdrop-blur-[2px] flex items-center justify-center z-[95] p-4"
+    onClick={() => setSelectedProfileImage(null)}
+  >
+    <div
+      className="relative max-w-[95%] max-h-[90%]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        type="button"
+        onClick={() => setSelectedProfileImage(null)}
+        className="absolute top-2 right-2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-9 h-9 flex items-center justify-center shadow"
+        title="بستن"
+      >
+        <X size={18} />
+      </button>
+
+      <img
+        src={selectedProfileImage}
+        alt="عکس پروفایل"
+        className="max-w-full max-h-[85vh] rounded-2xl shadow-2xl bg-white object-contain"
+      />
     </div>
   </div>
 )}

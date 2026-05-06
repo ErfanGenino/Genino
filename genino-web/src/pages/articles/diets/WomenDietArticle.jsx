@@ -717,8 +717,6 @@ export default function WomenDietArticle() {
           نمونه برنامه غذایی ۷ روزه برای زنان
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/women-diet/7-day-plan" />
-
         <p>
           این برنامه یک نمونه عمومی و آموزشی است،
           نه نسخه شخصی‌سازی‌شده پزشکی.
@@ -874,8 +872,6 @@ export default function WomenDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم غذایی زنان
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/women-diet/summary" />
 
         <p>
           رژیم زنان باید چیزی فراتر از یک برنامه لاغری باشد.

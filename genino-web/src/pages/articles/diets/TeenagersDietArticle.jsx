@@ -295,8 +295,6 @@ export default function TeenagersDietArticle() {
           جمع‌بندی رژیم نوجوانان
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/teenagers-diet/summary" />
-
         <p>
           دوران نوجوانی یکی از مهم‌ترین مراحل رشد بدن است.
           تغذیه مناسب می‌تواند پایه سلامت آینده را بسازد.

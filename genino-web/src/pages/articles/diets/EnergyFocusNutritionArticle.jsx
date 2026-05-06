@@ -237,8 +237,6 @@ export default function EnergyFocusNutritionArticle() {
           چه غذاهایی بیشتر به انرژی و تمرکز کمک می‌کنند؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/energy-focus-nutrition/best-foods" />
-
         <p>
           هیچ غذای جادویی وجود ندارد،
           اما بعضی انتخاب‌ها معمولاً با الگوی تغذیه متعادل سازگارترند:
@@ -288,8 +286,6 @@ export default function EnergyFocusNutritionArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           یک روز نمونه برای تغذیه انرژی و تمرکز
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/energy-focus-nutrition/sample-day" />
 
         <div className="space-y-4">
           <p>
@@ -419,8 +415,6 @@ export default function EnergyFocusNutritionArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی تغذیه برای انرژی و تمرکز
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/energy-focus-nutrition/summary" />
 
         <p>
           انرژی و تمرکز بهتر معمولاً از یک

@@ -68,8 +68,6 @@ export default function MuscleGainDietArticle() {
           چرا رژیم عضله‌سازی باید اصولی باشد؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/muscle-gain-diet/importance" />
-
         <p>
           بعضی افراد فکر می‌کنند برای عضله‌سازی فقط باید خیلی زیاد غذا بخورند.
           اما بالا رفتن وزن همیشه به معنی عضله‌سازی نیست.
@@ -114,8 +112,6 @@ export default function MuscleGainDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           اصول اصلی یک رژیم عضله‌سازی سالم
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/muscle-gain-diet/principles" />
 
         <p>
           برای اینکه عضله‌سازی منطقی و سالم باشد،
@@ -231,8 +227,6 @@ export default function MuscleGainDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           نقش ورزش در عضله‌سازی
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/muscle-gain-diet/exercise" />
 
         <p>
           عضله‌سازی واقعی معمولاً زمانی بهتر رخ می‌دهد که
@@ -408,8 +402,6 @@ export default function MuscleGainDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم عضله‌سازی
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/muscle-gain-diet/summary" />
 
         <p>
           عضله‌سازی موفق یعنی ترکیب

@@ -79,7 +79,8 @@ export default function ScrollProduct({
       {/* 🔄 لیست محصولات */}
       <div
         ref={scrollRef}
-        className="overflow-x-auto snap-x snap-mandatory no-scrollbar touch-pan-x"
+        className="overflow-x-auto snap-x snap-mandatory no-scrollbar"
+        style={{ touchAction: "pan-y pan-x" }}
       >
         <div className="grid grid-flow-col 
                 auto-cols-[60%] 

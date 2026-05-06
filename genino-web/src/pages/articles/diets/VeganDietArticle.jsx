@@ -170,8 +170,6 @@ export default function VeganDietArticle() {
           مواد مغذی مهمی که در رژیم وگان باید جدی گرفته شوند
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/vegan-diet/nutrients" />
-
         <p>
           منابع معتبر تغذیه روی چند ماده مغذی در رژیم وگان تأکید ویژه دارند.
           این به معنی ناسالم بودن رژیم وگان نیست؛
@@ -284,8 +282,6 @@ export default function VeganDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           یک روز نمونه از رژیم وگان
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/vegan-diet/sample-day" />
 
         <div className="space-y-4">
           <p>
@@ -400,8 +396,6 @@ export default function VeganDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم وگان
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/vegan-diet/summary" />
 
         <p>
           رژیم وگان می‌تواند یک الگوی غذایی سالم و آگاهانه باشد،

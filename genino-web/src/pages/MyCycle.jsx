@@ -8,7 +8,7 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
 import { Heart, Flower2, Sun, Moon, Droplet, CalendarDays } from "lucide-react";
 import GoldenModal from "@components/Core/GoldenModal";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getMyCycle, updateMyCycle, getWomenHealthReports, deleteWomenHealthReport } from "../services/api";
 
 const LS_KEY = "myCycle:v1";
@@ -217,6 +217,7 @@ function formatFaDate(iso) {
 
 
 export default function MyCycle() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     lastPeriod: "",
     cycleLength: 28,
@@ -236,6 +237,8 @@ export default function MyCycle() {
   const [deleteTarget, setDeleteTarget] = useState(null); // {id, date}
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [showMaleBlockModal, setShowMaleBlockModal] = useState(false);
+  const [isMaleUser, setIsMaleUser] = useState(false);
 
   // 👩‍🦰 نام کاربر برای خوش‌آمدگویی (از localStorage)
 useEffect(() => {
@@ -245,6 +248,14 @@ useEffect(() => {
       if (!raw) return setDisplayName("عزیز");
 
       const u = JSON.parse(raw);
+
+      // ✅ تشخیص جنسیت کاربر
+if (u?.gender === "male") {
+  setIsMaleUser(true);
+  setShowMaleBlockModal(true);
+} else {
+  setIsMaleUser(false);
+}
 
       // مثل Profile.jsx: اول اسم+فامیلی، اگر نبود fullName، اگر نبود عزیز
       const a = (u?.firstName || "").trim();
@@ -313,6 +324,7 @@ useEffect(() => {
       setPhase(p);
     }
   })();
+
 
   return () => {
     mounted = false;
@@ -421,6 +433,58 @@ if (res?.ok && res.cycle?.updatedAt) {
     [form.cycleLength]
   );
   const [selectedReport, setSelectedReport] = useState(null);
+
+  if (isMaleUser) {
+  return (
+    <main
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-b from-[#fffafc] to-[#fff7f4] flex items-center justify-center px-6 py-10"
+    >
+      <GoldenModal
+        show={showMaleBlockModal}
+        title={`سلام ${displayName} عزیز `}
+        description="این بخش برای سلامت بانوان طراحی شده است."
+        confirmLabel="رفتن به مجله ژنینو"
+        cancelLabel="بازگشت به صفحه اصلی"
+        onConfirm={() => navigate("/world-knowledge")}
+        onCancel={() => navigate("/")}
+      >
+        <div className="text-right text-sm text-gray-600 leading-7">
+          برای آگاهی بیشتر از بدن زنان، می‌توانید از بخش مجله ژنینو، قسمت بدن زنان را مطالعه کنید.
+        </div>
+      </GoldenModal>
+    </main>
+  );
+}
+
+const TEST_SECTIONS = {
+  skin: [
+    "آیا در چند ماه اخیر پوستتان جوش‌های جدید یا ریزش موی غیرعادی داشته؟",
+    "آیا از ضدآفتاب روزانه و شستشوی مناسب استفاده می‌کنید؟",
+    "آیا تغییرات پوستی در حوالی قاعدگی دارید؟",
+    "مصرف میوه، سبزیجات و آب چقدر است؟",
+  ],
+  breast: [
+    "آیا در ماه گذشته خودآزمایی پستان انجام داده‌اید؟",
+    "آیا توده یا درد غیرطبیعی دیده‌اید؟",
+    "آیا تغییر ظاهری در پستان‌ها حس کردید؟",
+    "آخرین معاینه پزشک چه زمانی بود؟",
+  ],
+  vagina: [
+    "آیا ترشح غیرعادی دارید؟",
+    "آیا سوزش یا خارش داشتید؟",
+    "نوع لباس زیر چگونه است؟",
+    "سابقه عفونت دارید؟",
+    "آیا در رابطه درد دارید؟",
+  ],
+  uterus: [
+    "آیا قاعدگی منظم دارید؟",
+    "آیا درد غیرمعمول دارید؟",
+    "آیا خون‌ریزی غیرطبیعی دارید؟",
+    "سابقه کیست یا تنبلی تخمدان دارید؟",
+    "آیا مشکل بارداری داشتید؟",
+  ],
+};
 
   return (
     <main
@@ -878,26 +942,43 @@ if (res?.ok && res.cycle?.updatedAt) {
        ) : null}
       </p>
 
-      {Object.entries(selectedReport.scores || {}).map(([key, val]) => (
-        <div
-          key={key}
-          className="border border-pink-100 rounded-xl p-3 bg-pink-50/50 hover:bg-pink-50 transition-all"
-        >
-          <h3 className="font-semibold text-pink-600 mb-1">
-            {key === "skin"
-              ? "💆‍♀️ پوست و مو"
-              : key === "breast"
-              ? "🎀 پستان‌ها"
-              : key === "vagina"
-              ? "🌷 واژن و تناسلی"
-              : "🌼 رحم و تخمدان‌ها"}
-          </h3>
+      {Object.entries(selectedReport.scores || {}).map(([key, val]) => {
+  const answers = selectedReport.answers?.[key] || {};
+  const questions = TEST_SECTIONS[key] || [];
 
-          <p className="text-gray-700 text-sm mb-1">
-          امتیاز: <strong>{val}٪</strong>
-          </p>
-        </div>
-      ))}
+  return (
+    <div
+      key={key}
+      className="border border-pink-100 rounded-xl p-3 bg-pink-50/50 hover:bg-pink-50 transition-all"
+    >
+      <h3 className="font-semibold text-pink-600 mb-2">
+        {key === "skin"
+          ? "💆‍♀️ پوست و مو"
+          : key === "breast"
+          ? "🎀 پستان‌ها"
+          : key === "vagina"
+          ? "🌷 واژن و تناسلی"
+          : "🌼 رحم و تخمدان‌ها"}
+      </h3>
+
+      <p className="text-gray-700 text-sm mb-2">
+        امتیاز: <strong>{val}٪</strong>
+      </p>
+
+      {/* 👇 نمایش سوال و جواب */}
+      <div className="space-y-2 mt-2">
+        {Object.entries(answers).map(([index, answer]) => (
+          <div key={index} className="text-xs text-gray-700">
+            <p className="font-medium">
+              {questions[index] || "سوال"}
+            </p>
+            <p className="text-pink-600">پاسخ: {answer}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+})}
     </div>
   )}
 </GoldenModal>

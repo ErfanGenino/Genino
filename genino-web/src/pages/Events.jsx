@@ -14,8 +14,13 @@ export default function Events() {
   }));
 
   return (
-    <GeninoDNABackground opacity={0.45} strands={10} duration={70}>
-      <main className="relative min-h-screen flex flex-col items-center justify-start text-gray-800 pt-24 pb-24">
+    <GeninoDNABackground
+  opacity={0.55}
+  strands={10}
+  duration={70}
+  className="bg-gradient-to-br from-[#ede9fe] via-[#ddd6fe] to-[#c4b5fd]"
+>
+      <main className="relative min-h-screen flex flex-col items-center justify-start text-white pt-24 pb-24">
         {/* 🎉 تیتر صفحه */}
         <motion.div
           className="text-center mb-6"
@@ -23,10 +28,10 @@ export default function Events() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-yellow-700 drop-shadow-[0_0_12px_rgba(255,220,100,0.6)]">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-purple-800 drop-shadow-[0_0_12px_rgba(255,220,100,0.6)]">
             رویدادها و جشن‌های ژنینو
           </h1>
-          <div className="mt-2 flex justify-center items-center gap-2 text-yellow-600 font-semibold text-lg">
+          <div className="mt-2 flex justify-center items-center gap-2 text-purple-700 font-semibold text-lg">
             <PartyPopper className="w-6 h-6" />
             <span>هر روز، فرصتی برای شادی و یادگیری 🌟</span>
           </div>
@@ -46,7 +51,7 @@ export default function Events() {
 
         {/* 🧩 باکس رویدادهای ژنینویی */}
         <section className="w-full max-w-7xl px-6">
-          <h2 className="text-2xl font-bold text-yellow-700 mb-6 text-center">
+          <h2 className="text-2xl font-bold text-purple-800 mb-6 text-center">
             رویدادهای ژنینویی 💫
           </h2>
 

@@ -65,8 +65,6 @@ export default function FatLossDietArticle() {
           تفاوت چربی‌سوزی با کاهش وزن چیست؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/fat-loss-diet/difference" />
-
         <p>
           کاهش وزن می‌تواند شامل کم شدن
           <strong> آب بدن، گلیکوژن، عضله یا چربی </strong>
@@ -222,8 +220,6 @@ export default function FatLossDietArticle() {
           نقش ورزش در چربی‌سوزی
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/fat-loss-diet/exercise" />
-
         <p>
           تغذیه نقش اصلی را در ایجاد کسری کالری دارد،
           اما ورزش می‌تواند روند چربی‌سوزی را هوشمندانه‌تر و سالم‌تر کند.
@@ -267,8 +263,6 @@ export default function FatLossDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           یک روز نمونه از رژیم چربی‌سوزی
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/fat-loss-diet/sample-day" />
 
         <div className="space-y-4">
           <p>
@@ -383,8 +377,6 @@ export default function FatLossDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم چربی‌سوزی
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/fat-loss-diet/summary" />
 
         <p>
           چربی‌سوزی موفق یعنی کم کردن چربی بدن به شکلی تدریجی،

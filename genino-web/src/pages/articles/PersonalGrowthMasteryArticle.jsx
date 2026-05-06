@@ -1,4 +1,31 @@
 import { motion } from "framer-motion";
+import img1 from "../../assets/personal-growth-pic/1.jpg";
+import img2 from "../../assets/personal-growth-pic/2.jpg";
+import img3 from "../../assets/personal-growth-pic/3.jpg";
+import img4 from "../../assets/personal-growth-pic/4.jpg";
+import img5 from "../../assets/personal-growth-pic/5.jpg";
+import img6 from "../../assets/personal-growth-pic/6.jpg";
+import img7 from "../../assets/personal-growth-pic/7.jpg";
+import img8 from "../../assets/personal-growth-pic/8.jpg";
+import img9 from "../../assets/personal-growth-pic/9.jpg";
+import img10 from "../../assets/personal-growth-pic/10.jpg";
+import img11 from "../../assets/personal-growth-pic/11.jpg";
+import img12 from "../../assets/personal-growth-pic/12.jpg";
+import img13 from "../../assets/personal-growth-pic/13.jpg";
+
+
+function ArticleImage({ src, alt }) {
+  return (
+    <div className="h-80 overflow-hidden rounded-2xl bg-emerald-50 shadow-sm">
+      <img
+        src={src}
+        alt={alt}
+        className="h-full w-full object-cover"
+        loading="lazy"
+      />
+    </div>
+  );
+}
 
 export default function PersonalGrowthMasteryArticle() {
   return (
@@ -54,9 +81,10 @@ className="max-w-4xl text-center mb-20"
 
 </div>
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-محل تصویر مفهومی رشد انسان
-</div>
+<ArticleImage
+  src={img1}
+  alt="تصویر مفهومی رشد فردی"
+/>
 
 </section>
 
@@ -64,9 +92,7 @@ className="max-w-4xl text-center mb-20"
 
 <section className="max-w-5xl mb-24 grid md:grid-cols-2 gap-12 items-center">
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر مسیر رشد فردی
-</div>
+<ArticleImage src={img2} alt="تصویر ذهنیت رشد و ذهنیت ثابت" />
 
 <div className="space-y-6">
 
@@ -114,18 +140,14 @@ className="max-w-4xl text-center mb-20"
 
 </div>
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر خودشناسی
-</div>
+<ArticleImage src={img3} alt="تصویر خودشناسی" />
 
 </section>
 {/* SECTION 4 */}
 
 <section className="max-w-5xl mb-24 grid md:grid-cols-2 gap-12 items-center">
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر عادت‌های روزانه
-</div>
+<ArticleImage src={img4} alt="تصویر عادت‌های روزانه" />
 
 <div className="space-y-6">
 
@@ -183,9 +205,7 @@ className="max-w-4xl text-center mb-20"
 
 </div>
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر تمرکز عمیق
-</div>
+<ArticleImage src={img5} alt="تصویر تمرکز عمیق" />
 
 </section>
 
@@ -195,9 +215,7 @@ className="max-w-4xl text-center mb-20"
 
 <section className="max-w-5xl mb-24 grid md:grid-cols-2 gap-12 items-center">
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر انضباط شخصی
-</div>
+<ArticleImage src={img6} alt="تصویر انضباط شخصی" />
 
 <div className="space-y-6">
 
@@ -255,9 +273,7 @@ className="max-w-4xl text-center mb-20"
 
 </div>
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر عبور از شکست
-</div>
+<ArticleImage src={img7} alt="تصویر عبور از شکست" />
 
 </section>
 
@@ -265,9 +281,7 @@ className="max-w-4xl text-center mb-20"
 
 <section className="max-w-5xl mb-24 grid md:grid-cols-2 gap-12 items-center">
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر یادگیری مادام‌العمر
-</div>
+<ArticleImage src={img8} alt="تصویر یادگیری مادام‌العمر" />
 
 <div className="space-y-6">
 
@@ -325,9 +339,7 @@ className="max-w-4xl text-center mb-20"
 
 </div>
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر ارتباط ذهن و بدن
-</div>
+<ArticleImage src={img9} alt="تصویر ارتباط ذهن و بدن" />
 
 </section>
 
@@ -337,9 +349,7 @@ className="max-w-4xl text-center mb-20"
 
 <section className="max-w-5xl mb-24 grid md:grid-cols-2 gap-12 items-center">
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر محیط و دوستان
-</div>
+<ArticleImage src={img10} alt="تصویر محیط و دوستان" />
 
 <div className="space-y-6">
 
@@ -397,18 +407,14 @@ className="max-w-4xl text-center mb-20"
 
 </div>
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر هدف‌گذاری
-</div>
+<ArticleImage src={img11} alt="تصویر هدف‌گذاری" />
 
 </section>
 {/* SECTION 12 */}
 
 <section className="max-w-5xl mb-24 grid md:grid-cols-2 gap-12 items-center">
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر اشتباهات مسیر رشد
-</div>
+<ArticleImage src={img12} alt="تصویر اشتباهات مسیر رشد فردی" />
 
 <div className="space-y-6">
 
@@ -466,9 +472,7 @@ className="max-w-4xl text-center mb-20"
 
 </div>
 
-<div className="h-80 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-sm">
-تصویر نسخه بهتر خود
-</div>
+<ArticleImage src={img13} alt="تصویر نسخه بهتر خود" />
 
 </section>
 

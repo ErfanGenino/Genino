@@ -301,8 +301,6 @@ export default function ChildrenDietArticle() {
           جمع‌بندی رژیم غذایی کودکان
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/children-diet/summary" />
-
         <p>
           تغذیه مناسب در کودکی یکی از مهم‌ترین پایه‌های سلامت آینده است.
         </p>

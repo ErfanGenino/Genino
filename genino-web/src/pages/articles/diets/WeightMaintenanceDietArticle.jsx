@@ -114,8 +114,6 @@ export default function WeightMaintenanceDietArticle() {
           اصول اصلی یک رژیم تثبیت وزن سالم
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/weight-maintenance-diet/principles" />
-
         <p>
           برای اینکه وزن در یک محدوده سالم باقی بماند،
           این چند اصل خیلی مهم‌اند:
@@ -231,8 +229,6 @@ export default function WeightMaintenanceDietArticle() {
           نقش فعالیت بدنی در تثبیت وزن
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/weight-maintenance-diet/activity" />
-
         <p>
           فعالیت بدنی منظم یکی از مهم‌ترین پایه‌های حفظ وزن است.
           این موضوع در توصیه‌های CDC و NIDDK هم دیده می‌شود.
@@ -275,8 +271,6 @@ export default function WeightMaintenanceDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           یک روز نمونه از رژیم تثبیت وزن
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/weight-maintenance-diet/sample-day" />
 
         <div className="space-y-4">
           <p>
@@ -399,8 +393,6 @@ export default function WeightMaintenanceDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم تثبیت وزن
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/weight-maintenance-diet/summary" />
 
         <p>
           تثبیت وزن موفق یعنی ساختن یک سبک زندگی

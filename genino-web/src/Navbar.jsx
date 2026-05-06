@@ -140,28 +140,10 @@ useEffect(() => {
             </Link>
           </div>
 
-          {/* 🔸 لینک‌های وسط */}
-          <div className="hidden md:flex items-center justify-center flex-1 gap-8">
-            {links.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  [
-                    "text-sm transition-all",
-                    isActive
-                      ? "text-yellow-600 font-semibold"
-                      : "text-gray-600 hover:text-yellow-600",
-                  ].join(" ")
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
+          
 
           {/* 🔸 سمت چپ */}
-          <div className="hidden md:flex items-center justify-end gap-3 flex-shrink-0">
+          <div className="hidden md:flex items-center gap-3 mr-auto">
             {user ? (
               <>
                 {/* نمایش نام کاربر */}
@@ -275,7 +257,7 @@ useEffect(() => {
 
           {/* 🔸 منوی موبایل */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-yellow-50 transition"
+            className="p-2 rounded-lg hover:bg-yellow-50 transition"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? (
@@ -288,8 +270,8 @@ useEffect(() => {
 
         {/* 🔹 منوی موبایل */}
         {menuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 py-4 px-5 
-                flex flex-col gap-3 text-right">
+          <div className="bg-white border-t border-gray-100 py-4 px-5 
+      flex flex-col gap-3 text-right">
 
             {links.map((item) => (
               <NavLink

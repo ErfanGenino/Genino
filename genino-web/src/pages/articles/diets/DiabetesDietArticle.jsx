@@ -66,8 +66,6 @@ export default function DiabetesDietArticle() {
           چرا رژیم دیابت مهم است؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/diabetes-diet/importance" />
-
         <p>
           غذا مستقیماً روی قند خون اثر می‌گذارد،
           مخصوصاً غذاهایی که کربوهیدرات دارند.
@@ -272,8 +270,6 @@ export default function DiabetesDietArticle() {
           یک روز نمونه از رژیم دیابت
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/diabetes-diet/sample-day" />
-
         <div className="space-y-4">
           <p>
             <strong className="text-yellow-600">صبحانه:</strong><br />
@@ -399,8 +395,6 @@ export default function DiabetesDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم دیابت
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/diabetes-diet/summary" />
 
         <p>
           رژیم دیابت یعنی ساختن یک

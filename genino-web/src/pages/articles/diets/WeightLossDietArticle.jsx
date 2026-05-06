@@ -58,7 +58,6 @@ export default function WeightLossDietArticle() {
           چرا رژیم کاهش وزن باید اصولی باشد؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/weight-loss-diet/importance" />
 
         <p>
           خیلی از افراد بارها رژیم می‌گیرند، سریع وزن کم می‌کنند، و بعد دوباره وزنشان برمی‌گردد.
@@ -100,8 +99,6 @@ export default function WeightLossDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           اصول اصلی یک رژیم کاهش وزن سالم
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/weight-loss-diet/principles" />
 
         <p>
           برای اینکه کاهش وزن درست و قابل‌دوام باشد، چند اصل مهم باید رعایت شود:
@@ -209,8 +206,6 @@ export default function WeightLossDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           سرعت مناسب کاهش وزن چقدر است؟
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/weight-loss-diet/rate" />
 
         <p>
           یکی از مهم‌ترین نکات علمی این است که کاهش وزن خیلی سریع معمولاً
@@ -373,8 +368,6 @@ export default function WeightLossDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم کاهش وزن
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/weight-loss-diet/summary" />
 
         <p>
           رژیم کاهش وزن موفق، رژیمی نیست که فقط سریع جواب بدهد؛

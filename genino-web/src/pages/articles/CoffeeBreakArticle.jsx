@@ -16,6 +16,18 @@ import {
   MapPinned,
   CheckCircle2,
 } from "lucide-react";
+import img1 from "../../assets/coffee-break-pic/1.jpg";
+import img2 from "../../assets/coffee-break-pic/2.jpg";
+import img3 from "../../assets/coffee-break-pic/3.jpg";
+import img4 from "../../assets/coffee-break-pic/4.jpg";
+import img5 from "../../assets/coffee-break-pic/5.jpg";
+import img6 from "../../assets/coffee-break-pic/6.jpg";
+import img7 from "../../assets/coffee-break-pic/7.jpg";
+import img8 from "../../assets/coffee-break-pic/8.jpg";
+import img9 from "../../assets/coffee-break-pic/9.jpg";
+import alfredPeetImg from "../../assets/coffee-break-pic/alfred-peet.jpg";
+import howardSchultzImg from "../../assets/coffee-break-pic/howard-schultz.jpg";
+import ernestoIllyImg from "../../assets/coffee-break-pic/ernesto-illy.jpg";
 
 function SectionTitle({ icon, title, subtitle }) {
   return (
@@ -33,18 +45,17 @@ function SectionTitle({ icon, title, subtitle }) {
   );
 }
 
-function ImagePlaceholder({ title, className = "" }) {
+function ArticleImage({ src, alt, className = "" }) {
   return (
     <div
-      className={`w-full min-h-[220px] md:min-h-[300px] rounded-3xl border border-amber-200 bg-gradient-to-br from-stone-200 via-amber-100 to-stone-300 shadow-inner flex items-center justify-center text-center p-6 ${className}`}
+      className={`w-full min-h-[220px] md:min-h-[300px] rounded-3xl overflow-hidden border border-amber-200 bg-white shadow-sm ${className}`}
     >
-      <div>
-        <div className="text-4xl mb-3">☕</div>
-        <p className="text-stone-700 font-semibold">{title}</p>
-        <p className="text-stone-500 text-sm mt-2">
-          اینجا محل مناسب برای قرار دادن تصویر مرتبط است
-        </p>
-      </div>
+      <img
+        src={src}
+        alt={alt}
+        className="w-full h-full min-h-[220px] md:min-h-[300px] object-cover"
+        loading="lazy"
+      />
     </div>
   );
 }
@@ -162,14 +173,17 @@ const coffeeJobs = [
 const famousPeople = [
   {
     name: "آلفرد پیت",
+    image: alfredPeetImg,
     bio: "از چهره‌های اثرگذار در فرهنگ قهوه تخصصی مدرن. او در آمریکا نگاه تازه‌ای به کیفیت برشته‌کاری و انتخاب دانه ایجاد کرد و بر موج جدید کافه‌داری تاثیر گذاشت.",
   },
   {
     name: "هاوارد شولتز",
+    image: howardSchultzImg,
     bio: "نقش مهمی در گسترش تجربه کافه‌نشینی مدرن و تبدیل قهوه به بخشی از سبک زندگی شهری ایفا کرد. تاثیر او بیشتر در تجربه برند، فضای کافه و فرهنگ مصرف دیده می‌شود.",
   },
   {
     name: "ارنستو ایلی",
+    image: ernestoIllyImg,
     bio: "در توسعه نگاه علمی، صنعتی و کیفی به قهوه و نیز ترویج آموزش و فرهنگ قهوه در سطح جهانی نقش مهمی داشته است.",
   },
 ];
@@ -229,7 +243,11 @@ export default function CoffeeBreakArticle() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <ImagePlaceholder title="تصویر اصلی قهوه / فنجان / میز کافه / دانه قهوه" className="min-h-[320px] md:min-h-[480px]" />
+            <ArticleImage
+  src={img1}
+  alt="فنجان قهوه ژنینو"
+  className="min-h-[320px] md:min-h-[480px]"
+/>
           </motion.div>
         </div>
       </section>
@@ -289,7 +307,10 @@ export default function CoffeeBreakArticle() {
               </p>
             </InfoCard>
 
-            <ImagePlaceholder title="تصویر مناسب برای تاریخچه قهوه: اتیوپی / یمن / قهوه‌خانه‌های قدیمی" />
+            <ArticleImage
+  src={img2}
+  alt="تاریخچه قهوه"
+/>
           </div>
 
           <div className="mt-8 grid md:grid-cols-2 gap-6">
@@ -335,7 +356,10 @@ export default function CoffeeBreakArticle() {
           />
 
           <div className="grid gap-8">
-            <ImagePlaceholder title="اینجا می‌توانی نقشه جهان قهوه یا تصویر مزارع کشورهای مختلف را بگذاری" />
+            <ArticleImage
+  src={img3}
+  alt="نقشه جهان قهوه"
+/>
 
             <div className="grid lg:grid-cols-2 gap-6">
               <InfoCard title="کمربند قهوه چیست؟">
@@ -382,7 +406,10 @@ export default function CoffeeBreakArticle() {
           />
 
           <div className="grid lg:grid-cols-2 gap-8 items-center mb-8">
-            <ImagePlaceholder title="محل قرار دادن عکس دانه‌های مختلف قهوه یا نمای نزدیک از دانه عربیکا و روبوستا" />
+            <ArticleImage
+  src={img4}
+  alt="دانه‌های عربیکا و روبوستا"
+/>
             <InfoCard title="چرا شناخت دانه مهم است؟">
               <p>
                 وقتی از قهوه صحبت می‌کنیم، فقط با یک ماده ساده روبه‌رو نیستیم.
@@ -436,7 +463,10 @@ export default function CoffeeBreakArticle() {
               <BulletList items={grindLevels} />
             </InfoCard>
 
-            <ImagePlaceholder title="اینجا مناسب عکس مقایسه‌ای درجات مختلف آسیاب قهوه است" />
+            <ArticleImage
+  src={img5}
+  alt="درجات مختلف آسیاب قهوه"
+/>
           </div>
         </div>
       </section>
@@ -493,7 +523,10 @@ export default function CoffeeBreakArticle() {
               />
             </InfoCard>
 
-            <ImagePlaceholder title="محل مناسب برای تصویر گالری نوشیدنی‌ها و دسرهای مرتبط با قهوه" />
+            <ArticleImage
+  src={img6}
+  alt="نوشیدنی‌ها و دسرهای قهوه"
+/>
           </div>
         </div>
       </section>
@@ -621,7 +654,10 @@ export default function CoffeeBreakArticle() {
               </p>
             </InfoCard>
 
-            <ImagePlaceholder title="محل مناسب برای عکس باریستا، رُستر، مزرعه یا فضای کار حرفه‌ای قهوه" />
+           <ArticleImage
+  src={img7}
+  alt="باریستا و فضای حرفه‌ای قهوه"
+/>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -708,7 +744,10 @@ export default function CoffeeBreakArticle() {
           />
 
           <div className="grid lg:grid-cols-2 gap-8 items-center mb-8">
-            <ImagePlaceholder title="محل مناسب برای عکس تجارت قهوه، گونی‌های دانه سبز، بندر یا بازار جهانی قهوه" />
+            <ArticleImage
+  src={img8}
+  alt="تجارت جهانی قهوه"
+/>
 
             <InfoCard title="تجارت قهوه شامل چه بخش‌هایی می‌شود؟">
               <p>
@@ -774,8 +813,13 @@ export default function CoffeeBreakArticle() {
                 key={person.name}
                 className="bg-white/90 rounded-3xl border border-amber-100 shadow-sm p-6"
               >
-                <div className="w-16 h-16 rounded-2xl bg-stone-200 flex items-center justify-center text-2xl mb-4">
-                  👤
+                <div className="w-16 h-16 rounded-2xl overflow-hidden mb-4 border border-amber-200">
+                  <img
+                    src={person.image}
+                    alt={person.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
                 <h3 className="text-lg font-bold text-stone-800 mb-3">
                   {person.name}
@@ -948,7 +992,10 @@ export default function CoffeeBreakArticle() {
               </p>
             </InfoCard>
 
-            <ImagePlaceholder title="محل مناسب برای تصویر DNA، دانه قهوه و اینفوگرافیک ژنتیک" />
+            <ArticleImage
+  src={img9}
+  alt="DNA و ژنتیک قهوه"
+/>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">

@@ -112,8 +112,6 @@ export default function FattyLiverDietArticle() {
           اصول اصلی یک رژیم کبد چرب سالم
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/fatty-liver-diet/principles" />
-
         <p>
           برای اینکه رژیم کبد چرب واقعاً مفید باشد،
           این چند اصل خیلی مهم‌اند:
@@ -409,8 +407,6 @@ export default function FattyLiverDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم کبد چرب
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/fatty-liver-diet/summary" />
 
         <p>
           رژیم کبد چرب یعنی ساختن یک

@@ -580,25 +580,30 @@ const handleInputChange = (e) => {
   }, 1200);
 };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
   const file = e.target.files?.[0];
+  e.target.value = "";
+
   if (!file) return;
 
   if (filePreview?.url?.startsWith("blob:")) {
     URL.revokeObjectURL(filePreview.url);
   }
 
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  if (!allowedTypes.includes(file.type)) {
+    alert("فعلاً فقط فرمت‌های JPG، PNG و WEBP پشتیبانی می‌شوند. لطفاً اگر عکس HEIC است، آن را از تنظیمات گوشی به JPG تغییر بده.");
+    return;
+  }
+
   if (file.size > 15 * 1024 * 1024) {
-    alert("حجم عکس خیلی زیاد است");
+    alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
     return;
   }
 
   const img = new Image();
-  const reader = new FileReader();
-
-  reader.onload = (event) => {
-    img.src = event.target.result;
-  };
+  const previewUrl = URL.createObjectURL(file);
 
   img.onload = () => {
     const canvas = document.createElement("canvas");
@@ -606,14 +611,23 @@ const handleInputChange = (e) => {
     const MAX_WIDTH = 1280;
     const scale = Math.min(1, MAX_WIDTH / img.width);
 
-    canvas.width = img.width * scale;
-    canvas.height = img.height * scale;
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
 
     const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    URL.revokeObjectURL(previewUrl);
 
     canvas.toBlob(
       (blob) => {
+        if (!blob) {
+          alert("آماده‌سازی تصویر انجام نشد.");
+          return;
+        }
+
         const url = URL.createObjectURL(blob);
 
         setFilePreview({
@@ -626,11 +640,16 @@ const handleInputChange = (e) => {
         });
       },
       "image/jpeg",
-      0.8
+      0.82
     );
   };
 
-  reader.readAsDataURL(file);
+  img.onerror = () => {
+    URL.revokeObjectURL(previewUrl);
+    alert("این عکس در مرورگر قابل نمایش نیست. لطفاً JPG، PNG یا WEBP انتخاب کن.");
+  };
+
+  img.src = previewUrl;
 };
 
 const reloadMutedUsers = async () => {
@@ -1150,7 +1169,7 @@ if (typingUsersList.length === 1) {
     className={`${
       msg.deletedForEveryone
         ? "max-w-[40%] px-1 py-[2px] text-[10px] opacity-60 italic text-gray-400 mx-auto text-center bg-transparent shadow-none"
-        : `max-w-[70%] p-2 rounded-xl text-sm ${
+        : `max-w-[85%] sm:max-w-[70%] p-2 rounded-xl text-sm break-words [overflow-wrap:anywhere] ${
             msg.sender === "me"
               ? "bg-yellow-100 ml-auto"
               : "bg-gray-100"
@@ -1173,7 +1192,9 @@ if (typingUsersList.length === 1) {
         </p>
 
         {msg.type === "text" && (
-          <p className="whitespace-pre-wrap">{msg.text}</p>
+          <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-6">
+  {msg.text}
+</p>
         )}
 
         {msg.type === "image" && (
@@ -1214,7 +1235,9 @@ if (typingUsersList.length === 1) {
     </div>
 
     {msg.text ? (
-      <p className="mt-2 whitespace-pre-wrap">{msg.text}</p>
+      <p className="mt-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+  {msg.text}
+</p>
     ) : null}
   </>
 )}
@@ -1226,7 +1249,11 @@ if (typingUsersList.length === 1) {
               controls
               className="rounded-xl max-h-40 mt-1"
             />
-            {msg.text ? <p className="mt-2">{msg.text}</p> : null}
+            {msg.text ? (
+  <p className="mt-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+    {msg.text}
+  </p>
+) : null}
           </>
         )}
         {msg.type === "audio" && (
@@ -1244,7 +1271,9 @@ if (typingUsersList.length === 1) {
     ) : null}
 
     {msg.text ? (
-      <p className="mt-2 whitespace-pre-wrap">{msg.text}</p>
+      <p className="mt-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+  {msg.text}
+</p>
     ) : null}
   </div>
 )}
@@ -1344,7 +1373,7 @@ if (typingUsersList.length === 1) {
 
         {/* preview فایل */}
         {filePreview && (
-  <div className="fixed bottom-4 left-3 z-[60] bg-white border border-yellow-200 rounded-xl p-1.5 shadow z-10 relative max-w-[120px]">
+  <div className="fixed bottom-4 left-3 z-[60] bg-white border border-yellow-200 rounded-xl p-1.5 shadow max-w-[120px]">
     <button
       type="button"
       onClick={() => {
@@ -1376,7 +1405,7 @@ if (typingUsersList.length === 1) {
 
 {/* preview صدا */}
 {audioBlob && audioPreviewUrl && (
-  <div className="fixed bottom-4 left-36 z-[60] bg-white border border-yellow-200 rounded-xl p-2 shadow z-10 flex items-center gap-2">
+  <div className="fixed bottom-4 left-36 z-[60] bg-white border border-yellow-200 rounded-xl p-2 shadow flex items-center gap-2">
     <button
       type="button"
       onClick={() => {
@@ -1497,11 +1526,11 @@ if (typingUsersList.length === 1) {
   <label className="p-2 rounded-lg hover:bg-yellow-100 cursor-pointer shrink-0">
     <ImageIcon size={20} className="text-yellow-600" />
     <input
-     type="file"
-     accept="image/*"
-     className="hidden"
-     onChange={handleFileChange}
-    />
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  className="hidden"
+  onChange={handleFileChange}
+/>
   </label>
 </form>
 

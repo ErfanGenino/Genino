@@ -11,6 +11,7 @@ import "../index.css";
 import ScrollService from "../components/Core/ScrollService";
 import logo from "../assets/logo-genino.png";
 import { getUserProfile, listMedicalRecords, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord, addMedicalAttachment, presignMedicalAttachmentUpload, putFileToPresignedUrl, deleteMedicalAttachment, } from "../services/api";
+import doctorCover from "../assets/my-doctor-pic/cover.jpg";
 
 
 const TOKEN_EVENT = "genino_token_changed";
@@ -398,9 +399,14 @@ useEffect(() => {
 
   return (
     <main
-      dir="rtl"
-      className="relative z-0 min-h-screen bg-gradient-to-b from-[#fffdf8] to-[#f7f3e6] px-6 py-10 text-gray-800"
-    >
+  dir="rtl"
+  className="relative z-0 min-h-screen px-6 py-10 text-gray-800 overflow-hidden bg-[#d8e8c8]"
+>
+  {/* بک‌گراند سبز مغزپسته‌ای با حس پارچه‌ای */}
+<div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.35),transparent_28%),radial-gradient(circle_at_82%_20%,rgba(95,130,80,0.22),transparent_30%),radial-gradient(circle_at_30%_85%,rgba(60,100,70,0.18),transparent_35%),linear-gradient(135deg,#e8f2dc,#d7e8c5_45%,#c8dcb2)]" />
+
+{/* بافت ملایم پارچه */}
+<div className="absolute inset-0 pointer-events-none opacity-25 mix-blend-soft-light bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.22)_0px,rgba(255,255,255,0.22)_1px,transparent_1px,transparent_14px),repeating-linear-gradient(-45deg,rgba(80,110,70,0.22)_0px,rgba(80,110,70,0.22)_1px,transparent_1px,transparent_18px)]" />
       {/* مودال تاکید به ورد */}
 <div className="relative z-[99999]">
   <GoldenModal
@@ -423,41 +429,60 @@ useEffect(() => {
   />
 </div>
 
-      {/* 🔹 عنوان صفحه */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-10"
-      >
-        <FileHeart className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
-        <h1 className="text-3xl font-bold text-yellow-700 mb-2">
-          پزشک من 🩺
-        </h1>
-        {userFullName && (
-        <p className="text-sm text-gray-700 mb-2">
-        <span className="font-semibold text-yellow-700">{userFullName}</span> خوش آمدی 🌿
-        </p>
-        )}
-        <p className="text-gray-600 text-sm">
-          بایگانی پرونده‌های پزشکی، نسخه‌ها و آزمایش‌های شما در ژنینو 
-        </p>
-      </motion.div>
+      {/* 🩺 HERO + COVER پزشک من */}
+<section className="relative z-10 w-full max-w-6xl mx-auto mb-10">
+  <motion.div
+    initial={{ opacity: 0, y: 24 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.7 }}
+    className="relative overflow-hidden rounded-[32px] shadow-xl border border-white/40"
+  >
+    <img
+      src={doctorCover}
+      alt="کاور پزشک من"
+      className="w-full h-[260px] sm:h-[340px] object-cover"
+    />
 
-      <ScrollService
-  title="پزشکان متخصص ژنینو"
-  color="yellow"
-  items={[
-    { id: 1, name: "دکتر نازنین شریفی", specialty: "متخصص کودکان", image: logo },
-    { id: 2, name: "دکتر آرش طاهری", specialty: "متخصص تغذیه", image: logo },
-    { id: 3, name: "دکتر الهام قنبری", specialty: "روان‌شناس کودک", image: logo },
-    { id: 4, name: "دکتر سارا کریمی", specialty: "چشم‌پزشک", image: logo },
-  ]}
-/>
+    <div className="absolute inset-0 bg-gradient-to-l from-black/65 via-black/35 to-transparent" />
+
+    <div className="absolute inset-0 flex flex-col items-start justify-center text-right px-6 sm:px-12">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md border border-white/30">
+        <FileHeart className="w-8 h-8 text-yellow-300" />
+      </div>
+
+      <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-4 leading-relaxed">
+        پزشک من
+      </h1>
+
+      {userFullName && (
+        <p className="text-sm sm:text-base text-yellow-200 mb-3">
+          <span className="font-semibold">{userFullName}</span> خوش آمدی 🌿
+        </p>
+      )}
+
+      <p className="text-sm sm:text-base text-gray-100 max-w-xl leading-8">
+        بایگانی امن پرونده‌های پزشکی، نسخه‌ها، آزمایش‌ها و گزارش‌های درمانی شما در ژنینو
+      </p>
+    </div>
+  </motion.div>
+</section>
+
+      <div className="relative z-10">
+  <ScrollService
+    title="پزشکان متخصص ژنینو"
+    color="yellow"
+    items={[
+      { id: 1, name: "دکتر نازنین شریفی", specialty: "متخصص کودکان", image: logo },
+      { id: 2, name: "دکتر آرش طاهری", specialty: "متخصص تغذیه", image: logo },
+      { id: 3, name: "دکتر الهام قنبری", specialty: "روان‌شناس کودک", image: logo },
+      { id: 4, name: "دکتر سارا کریمی", specialty: "چشم‌پزشک", image: logo },
+    ]}
+  />
+</div>
 
 
      {/* 🔍 فیلتر بالا با حالت باز و بسته شونده */}
-<div className="max-w-6xl mx-auto mb-6 sm:mb-10">
+<div className="relative z-30 max-w-6xl mx-auto mb-6 sm:mb-10">
   {/* دکمه‌ی باز و بسته کردن فیلتر (فقط موبایل) */}
   <div className="flex justify-center sm:justify-end mb-3">
     <button
@@ -562,16 +587,15 @@ useEffect(() => {
   </div>
 
   {/* ✅ موبایل: با دکمه باز/بسته + انیمیشن */}
-  <div className="sm:hidden">
+  <div className="sm:hidden relative z-[50]">
     <AnimatePresence initial={false}>
       {showFilters && (
         <motion.div
-          key="filters-box-mobile"
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.25, ease: "easeInOut" }}
-          className="overflow-hidden bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-md border border-yellow-100"
+           initial={{ height: 0, opacity: 0 }}
+           animate={{ height: "auto", opacity: 1 }}
+           exit={{ height: 0, opacity: 0 }}
+           transition={{ duration: 0.25, ease: "easeInOut" }}
+           className="relative z-[60] overflow-hidden bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-md border border-yellow-100"
         >
           <div className="grid grid-cols-2 gap-3 text-right items-end">
             {/* 🔸 عنوان */}

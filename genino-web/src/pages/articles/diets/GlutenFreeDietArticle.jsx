@@ -69,8 +69,6 @@ export default function GlutenFreeDietArticle() {
           چه کسانی واقعاً به رژیم بدون گلوتن نیاز دارند؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/gluten-free-diet/who-needs-it" />
-
         <p>
           همه افرادی که اسم «گلوتن» را شنیده‌اند،
           لزوماً به رژیم بدون گلوتن نیاز ندارند.
@@ -273,8 +271,6 @@ export default function GlutenFreeDietArticle() {
           آلودگی متقاطع یعنی چه و چرا مهم است؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/gluten-free-diet/cross-contamination" />
-
         <p>
           در رژیم بدون گلوتن، فقط مواد اولیه مهم نیستند.
           حتی مقدار خیلی کم گلوتن هم
@@ -320,8 +316,6 @@ export default function GlutenFreeDietArticle() {
           آیا قبل از تشخیص باید رژیم بدون گلوتن را شروع کرد؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/diets/gluten-free-diet/diagnosis" />
-
         <p>
           اگر کسی به سلیاک مشکوک است،
           بهتر است قبل از قطعی شدن بررسی پزشکی،
@@ -354,8 +348,6 @@ export default function GlutenFreeDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           یک روز نمونه از رژیم بدون گلوتن
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/gluten-free-diet/sample-day" />
 
         <div className="space-y-4">
           <p>
@@ -482,8 +474,6 @@ export default function GlutenFreeDietArticle() {
         <p className="text-2xl font-bold text-yellow-700">
           جمع‌بندی نهایی رژیم بدون گلوتن
         </p>
-
-        <HorizontalScrollGallery folder="articles/diets/gluten-free-diet/summary" />
 
         <p>
           رژیم بدون گلوتن یک رژیم
