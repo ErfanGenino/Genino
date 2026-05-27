@@ -28,11 +28,24 @@ export async function authFetch(url, options = {}) {
     console.log("AUTH FETCH URL:", `${BASE_URL}${url}`);
     console.log("AUTH FETCH METHOD:", options.method || "GET");
     console.log("AUTH FETCH HAS TOKEN:", !!token);
-    res = await fetch(`${BASE_URL}${url}`, {
-  ...options,
-  headers,
-  cache: "no-store", // ✅ جلوگیری از 304 و کش شدن
-});
+    const doRequest = () =>
+  fetch(`${BASE_URL}${url}`, {
+    ...options,
+    headers,
+    cache: "no-store",
+  });
+
+res = await doRequest();
+
+// ✅ تلاش دوباره برای خطاهای موقت احراز هویت بعد از deploy/restart
+if ((res.status === 401 || res.status === 403) && token) {
+  console.warn("AUTH TEMP ERROR - RETRYING ONCE:", res.status);
+
+  await new Promise((resolve) => setTimeout(resolve, 700));
+
+  res = await doRequest();
+}
+
   } catch (err) {
     console.error("AUTH FETCH NETWORK ERROR:", err);
     return { ok: false, message: "خطا در اتصال به سرور.", status: 0 };
@@ -63,13 +76,31 @@ export async function authFetch(url, options = {}) {
   // هندل استاندارد
     // اگر خطا بود
   if (!res.ok) {
-    return {
-      ok: false,
-      status: res.status,
-      message: (data && data.message) || `خطای سرور (${res.status})`,
-      data,
-    };
+  let message =
+    (data && data.message) || `خطای سرور (${res.status})`;
+
+  const lowerMessage = String(message).toLowerCase();
+
+  const isAuthError =
+    res.status === 401 ||
+    res.status === 403 ||
+    lowerMessage.includes("token") ||
+    lowerMessage.includes("jwt") ||
+    lowerMessage.includes("expired") ||
+    lowerMessage.includes("unauthorized");
+
+  if (isAuthError) {
+    message =
+      "ارتباط حساب کاربری شما نیاز به تازه‌سازی دارد. لطفاً یک‌بار از حساب خارج شوید و دوباره وارد شوید 💛";
   }
+
+  return {
+    ok: false,
+    status: res.status,
+    message,
+    data,
+  };
+}
 
   // ✅ نکته مهم: اگر خروجی آرایه بود، آرایه را دستکاری نکن
   if (Array.isArray(data)) {
@@ -500,5 +531,100 @@ export async function addFavoriteChatRoom(roomId) {
 export async function removeFavoriteChatRoom(roomId) {
   return authFetch(`/chat-rooms/${roomId}/favorite`, {
     method: "DELETE",
+  });
+}
+
+// --- Memory Albums ---
+
+export async function getChildMemoryAlbums(childId) {
+  return authFetch(`/memory-albums/child/${childId}`, {
+    method: "GET",
+  });
+}
+
+export async function createMemoryAlbum(childId, payload) {
+  // payload: { title, description }
+  return authFetch(`/memory-albums/child/${childId}`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function presignMemoryAlbumPhotoUpload(payload) {
+  // payload: { albumId, ext, contentType, fileName, fileSize }
+  return authFetch("/uploads/presign/memory-album-photo", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function addMemoryAlbumPhoto(albumId, payload) {
+  // payload: { url, fileName, mimeType, fileSize, caption? }
+  return authFetch(`/memory-albums/${albumId}/photos`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteMemoryAlbumPhoto(photoId) {
+  return authFetch(`/memory-albums/photos/${photoId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function deleteMemoryAlbum(albumId) {
+  return authFetch(`/memory-albums/${albumId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function toggleMemoryAlbumLike(albumId) {
+  return authFetch(`/memory-albums/${albumId}/like`, {
+    method: "POST",
+  });
+}
+
+export async function addMemoryAlbumComment(albumId, text) {
+  return authFetch(`/memory-albums/${albumId}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ text }),
+  });
+}
+
+export async function deleteMemoryAlbumComment(commentId) {
+  return authFetch(`/memory-albums/comments/${commentId}`, {
+    method: "DELETE",
+  });
+}
+
+// --- Genino Children ---
+
+export async function getGeninoChildren() {
+  return authFetch("/children/public", {
+    method: "GET",
+  });
+}
+
+export async function getFollowedGeninoChildren() {
+  return authFetch("/children/followed", {
+    method: "GET",
+  });
+}
+
+export async function createChildFollowRequest(payload) {
+  return authFetch("/child-follow-requests", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function createSpiritualChildAchievement({ childId, title, description }) {
+  return authFetch("/child-achievements/spiritual", {
+    method: "POST",
+    body: JSON.stringify({
+      childId,
+      title,
+      description,
+    }),
   });
 }

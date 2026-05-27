@@ -30,14 +30,19 @@ export default function TodayCalendarBox({ color = "pink", className = "" }) {
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ delay: 0.3, duration: 0.5 }}
-  className={`relative z-[5] bg-white border ${c.border} rounded-2xl shadow-sm px-5 py-5 mb-8 flex flex-col items-center justify-center text-center ${c.text} w-[85%] sm:w-[70%] md:w-[55%] lg:w-[45%] mx-auto ${className}`}
+  className={`relative z-[5] bg-white/90 backdrop-blur-sm border ${c.border} rounded-xl shadow-sm px-3 py-2 mb-3 flex flex-col items-center justify-center text-center ${c.text} w-fit min-w-[220px] mx-auto ${className}`}
 >
-  <div className="flex items-center gap-2 mb-1">
-    <CalendarDays className={`w-5 h-5 ${c.icon}`} />
-    <span className="font-bold text-base">امروز</span>
-  </div>
-  <p className="text-base font-semibold leading-tight">{todayPersian}</p>
-  <p className="text-sm text-gray-600 mt-1">{todayGregorian}</p>
+  <div className="flex items-center gap-1 mb-0.5">
+  <CalendarDays className={`w-4 h-4 ${c.icon}`} />
+  <span className="font-bold text-xs">امروز</span>
+</div>
+  <p className="text-sm font-semibold leading-tight">
+  {todayPersian}
+</p>
+
+<p className="text-[11px] text-gray-500 mt-0.5">
+  {todayGregorian}
+</p>
 </motion.div>
   );
 }

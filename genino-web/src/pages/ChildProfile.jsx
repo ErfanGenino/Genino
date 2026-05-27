@@ -7,6 +7,10 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useSearchParams } from "react-router-dom";
 import { authFetch } from "../services/api";
+import DateObject from "react-date-object";
+import gregorian from "react-date-object/calendars/gregorian";
+import { prepareImage } from "../utils/image/prepareImage";
+
 
 
 export default function ChildProfile() {
@@ -15,11 +19,13 @@ export default function ChildProfile() {
   const [childName, setChildName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("girl");
+  const [interests, setInterests] = useState("");
   const [childPhoto, setChildPhoto] = useState("");
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode"); // edit | null
   const editId = searchParams.get("id");
   const isEdit = mode === "edit";
+  
 
 
 
@@ -52,10 +58,12 @@ export default function ChildProfile() {
       setChildName(child.fullName);
       setBirthDate(child.birthDate);
       setGender(child.gender);
+      setInterests(child.interests || "");
       setChildPhoto(child.photo || "");
     }
   }
 }, [mode, editId]);
+
 
 
   // 💾 ذخیره در localStorage و بازگشت
@@ -69,7 +77,23 @@ const handleSave = async () => {
       return;
     }
 
-    const payload = { fullName: childName, gender, birthDate };
+    if (!childName.trim()) {
+  alert("نام کودک وارد نشده است");
+  return;
+}
+
+if (!birthDate) {
+  alert("تاریخ تولد کودک وارد نشده است");
+  return;
+}
+
+    const payload = {
+  fullName: childName,
+  gender,
+  interests,
+  birthDate,
+  photo: childPhoto,
+};
     const isEditMode = mode === "edit" && editId;
     const method = isEditMode ? "PUT" : "POST";
 
@@ -110,7 +134,10 @@ if (childrenArr.length === 0) {
 
 // ذخیره در localStorage
 localStorage.setItem("children", JSON.stringify(childrenArr));
-localStorage.setItem("activeChildId", String(childrenArr[0].id));
+localStorage.setItem(
+  "activeChildId",
+  String(isEditMode ? editId : childrenArr[0].id)
+);
 
 // تریگر برای MyChild که از localStorage دوباره بخونه
 window.dispatchEvent(new Event("storage"));
@@ -167,14 +194,32 @@ window.dispatchEvent(new Event("storage"));
             </div>
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,.heic,.heif"
               className="hidden"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (ev) => setChildPhoto(ev.target.result);
-                  reader.readAsDataURL(file);
+                if (!file) return;
+
+                try {
+                  const compressedFile = await prepareImage(file, {
+  maxSizeMB: 0.8,
+  maxWidthOrHeight: 700,
+  quality: 0.82,
+  outputFileName: "child-photo.jpg",
+});
+
+const { default: imageCompression } = await import("browser-image-compression");
+const compressedPhoto = await imageCompression.getDataUrlFromFile(compressedFile);
+
+setChildPhoto(compressedPhoto);
+                } catch (err) {
+                  console.error("CHILD PHOTO PREPARE ERROR:", err);
+console.log("FILE INFO:", {
+  name: file.name,
+  type: file.type,
+  size: file.size,
+});
+alert(err?.message || "آماده‌سازی عکس انجام نشد");
                 }
               }}
             />
@@ -203,7 +248,14 @@ window.dispatchEvent(new Event("storage"));
               تاریخ تولد (شمسی)
             </label>
             <DatePicker
-              value={birthDate ? new Date(birthDate) : ""}
+  value={
+  birthDate
+    ? new DateObject({
+        date: birthDate,
+        calendar: gregorian,
+      }).convert(persian, persian_fa)
+    : ""
+}
               onChange={(date) => {
                 if (date) {
                   const gregorian = date.toDate?.(); // تبدیل از شمسی به میلادی
@@ -231,6 +283,21 @@ window.dispatchEvent(new Event("storage"));
               <option value="boy">پسر</option>
             </select>
           </div>
+
+          <div>
+  <label className="block text-sm font-medium text-yellow-700 mb-1">
+    علایق کودک
+  </label>
+
+  <input
+    type="text"
+    value={interests}
+    onChange={(e) => setInterests(e.target.value)}
+    placeholder="مثلاً: نقاشی، فوتبال، موسیقی، لگو..."
+    className="w-full border border-yellow-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+  />
+
+</div>
 
           {birthDate && (
             <div className="text-center mt-4 text-yellow-800 font-medium">

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Baby } from "lucide-react";
 import { HeartPulse } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -25,10 +25,84 @@ const [confirmDelete, setConfirmDelete] = useState(false);
 const [showInviteModal, setShowInviteModal] = useState(false);
 const [inviteEmail, setInviteEmail] = useState("");
 const [invitePhone, setInvitePhone] = useState("");
+const [inviteUsername, setInviteUsername] = useState("");
 const [selectedChildForTree, setSelectedChildForTree] = useState(null);
 const [isInviting, setIsInviting] = useState(false);
 const [childAdmins, setChildAdmins] = useState([]);
+const [showWishlistModal, setShowWishlistModal] = useState(false);
+const [activeTab, setActiveTab] = useState("mine");
+const [selectedFollowedChild, setSelectedFollowedChild] = useState(null);
+const [showSpiritualAchievementModal, setShowSpiritualAchievementModal] = useState(false);
+const [showFullSpiritualInfo, setShowFullSpiritualInfo] = useState(true);
+const [showSpiritualSuccessModal, setShowSpiritualSuccessModal] = useState(false);
+const [showMonthlyLimitModal, setShowMonthlyLimitModal] = useState(false);
+const [hasGivenSpiritualAchievementThisMonth, setHasGivenSpiritualAchievementThisMonth] =
+  useState(false);
 
+
+const [spiritualAchievementTitle, setSpiritualAchievementTitle] =
+  useState("رضایت خانواده به دلیل مهربانی");
+
+const [spiritualAchievementDescription, setSpiritualAchievementDescription] =
+  useState("");
+
+
+const handleOpenSpiritualAchievementModal = async () => {
+  try {
+    const res = await authFetch(
+      `/child-achievements/spiritual/status/${activeChild.id}`
+    );
+
+    if (res?.hasGivenThisMonth) {
+      setHasGivenSpiritualAchievementThisMonth(true);
+      setShowMonthlyLimitModal(true);
+      return;
+    }
+
+    setHasGivenSpiritualAchievementThisMonth(false);
+    setShowSpiritualAchievementModal(true);
+
+  } catch (err) {
+    console.error("خطا در بررسی وضعیت دستاورد معنوی:", err);
+    alert("بررسی وضعیت دستاورد انجام نشد");
+  }
+};
+
+
+
+const getChildAgeText = (child) => {
+  if (child?.ageText) return child.ageText;
+  if (!child?.birthDate) return "سن ثبت نشده";
+
+  const birth = new Date(child.birthDate);
+  const today = new Date();
+
+  let years = today.getFullYear() - birth.getFullYear();
+  let months = today.getMonth() - birth.getMonth();
+
+  if (today.getDate() < birth.getDate()) months--;
+
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  return `${years} سال و ${months} ماه`;
+};
+
+const getParentCityText = () => {
+  const parent = mother || father;
+
+  return (
+    parent?.city ||
+    parent?.province ||
+    "شهر ثبت نشده"
+  );
+};
+
+const getChildCityText = (child) => {
+  return child?.city || child?.province || child?.address || "شهر ثبت نشده";
+};
 
 
   // 🌳 استیت‌های درختواره
@@ -55,94 +129,62 @@ const [activeChildId, setActiveChildId] = useState(
 useEffect(() => {
   async function loadChildrenFromApi() {
     try {
-      const token = localStorage.getItem("genino_token"); // همون JWT که بعد از لاگین ذخیره کردی
+      setIsLoading(true);
+      setChildAdmins([]);
+
+      const token = localStorage.getItem("genino_token");
       if (!token) throw new Error("no token");
 
-      const res = await authFetch("/children");
+      const endpoint =
+        activeTab === "mine" ? "/children" : "/children/followed";
 
-      // ✅ اگر بک‌اند آرایه داد یا آبجکت {children: []}
-      const data = Array.isArray(res) ? res : (res?.children || []);
+      const res = await authFetch(endpoint);
+      const data = Array.isArray(res) ? res : res?.children || [];
 
-      // اگر باز هم آرایه نبود، برو fallback
       if (!Array.isArray(data)) {
-      throw new Error(res?.message || "children invalid");
+        throw new Error(res?.message || "children invalid");
       }
 
+      setChildrenList(data);
 
-// اگر از بک‌اند داده داریم
-if (data.length > 0) {
-  setChildrenList(data);
-  localStorage.setItem("children", JSON.stringify(data));
+      const validChildren = data.filter((c) => c.birthDate);
 
-  const savedActiveChildId = localStorage.getItem("activeChildId");
-  const exists = data.find(c => String(c.id) === String(savedActiveChildId));
-  setActiveChildId(exists ? exists.id : data[0].id);
+if (validChildren.length > 0) {
+  const savedActiveChildId = localStorage.getItem(
+    activeTab === "mine" ? "activeChildId" : "activeFollowedChildId"
+  );
 
-  setIsLoading(false);
-  return;
-}
+  const exists = validChildren.find(
+    (c) => String(c.id) === String(savedActiveChildId)
+  );
 
-    } catch (e) {
-      // fallback
-    }
-
-    // fallback به localStorage
-    const stored = localStorage.getItem("children");
-let parsed = [];
-try {
-  parsed = stored ? JSON.parse(stored) : [];
-} catch (e) {
-  console.error("children in localStorage is invalid JSON", e);
-  localStorage.removeItem("children");
-  localStorage.removeItem("activeChildId");
-  parsed = [];
-}
-if (!Array.isArray(parsed)) parsed = [];
-
-if (parsed.length === 0) {
-  navigate("/child-profile?mode=createFirst", { replace: true });
+  setActiveChildId(
+    exists ? exists.id : validChildren[0].id
+  );
 } else {
-  setChildrenList(parsed);
-  const savedActiveChildId = localStorage.getItem("activeChildId");
-  const exists = parsed.find(c => String(c.id) === String(savedActiveChildId));
-  setActiveChildId(exists ? exists.id : parsed[0].id);
-  setIsLoading(false);
-
+  setActiveChildId(null);
 }
+    } catch (e) {
+      console.error("خطا در دریافت کودکان:", e);
+      setChildrenList([]);
+      setActiveChildId(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-}
-
-  loadChildrenFromApi();  
-}, []);
+  loadChildrenFromApi();
+}, [activeTab]);
 
 
 useEffect(() => {
-  const sync = () => {
-    const stored = localStorage.getItem("children");
-    let parsed = [];
-try {
-  parsed = stored ? JSON.parse(stored) : [];
-} catch (e) {
-  console.error("children in localStorage is invalid JSON", e);
-  localStorage.removeItem("children");
-  localStorage.removeItem("activeChildId");
-  parsed = [];
-}
-if (!Array.isArray(parsed)) parsed = [];
-    setChildrenList(parsed);
+  if (!activeChildId) return;
 
-    // اگر activeChildId خالی بود و حداقل یک کودک داریم
-    if (!activeChildId && parsed.length > 0) {
-      setActiveChildId(parsed[0].id);
-    }
-  };
-
-  sync();
-
-  // وقتی در تب دیگری هم تغییر کرد
-  window.addEventListener("storage", sync);
-  return () => window.removeEventListener("storage", sync);
-}, [activeChildId]);
+  localStorage.setItem(
+    activeTab === "mine" ? "activeChildId" : "activeFollowedChildId",
+    activeChildId
+  );
+}, [activeChildId, activeTab]);
 
 
 
@@ -163,19 +205,41 @@ useEffect(() => {
 }, [activeChildId]);
 
 
-useEffect(() => {
-  if (activeChildId) {
-    localStorage.setItem("activeChildId", activeChildId);
-  }
-}, [activeChildId]);
 
 
 
 const activeChild = childrenList.find(
   (child) => String(child.id) === String(activeChildId)
 );
-const father = childAdmins.find((a) => a.role === "father");
-const mother = childAdmins.find((a) => a.role === "mother");
+const father = childAdmins.find(
+  (a) => a.role === "father" && a.status === "CONNECTED"
+);
+
+const mother = childAdmins.find(
+  (a) => a.role === "mother" && a.status === "CONNECTED"
+);
+
+const pendingFatherInvite = childAdmins.find(
+  (a) => a.role === "father" && a.status === "PENDING"
+);
+
+const pendingMotherInvite = childAdmins.find(
+  (a) => a.role === "mother" && a.status === "PENDING"
+);
+
+const currentUser = JSON.parse(localStorage.getItem("genino_user") || "null");
+
+const currentUserAsParent = childAdmins.find(
+  (a) =>
+    String(a.userId) === String(currentUser?.id) &&
+    (a.role === "father" || a.role === "mother") &&
+    a.status === "CONNECTED"
+);
+
+const canAddChild = Boolean(currentUserAsParent);
+const isMineTab = activeTab === "mine";
+const isFollowedTab = activeTab === "followed";
+const canManageChild = isMineTab && canAddChild;
 
 
 if (isLoading) {
@@ -188,9 +252,85 @@ if (isLoading) {
 
 if (!activeChild) {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      هیچ کودکی ثبت نشده است
-    </div>
+    <main
+      dir="rtl"
+      className="relative min-h-screen flex flex-col items-center overflow-hidden bg-[#fffaf0] text-gray-800 pt-8 pb-4"
+    >
+      {/* 🧭 تب‌ها */}
+      <div className="relative z-[10] w-full px-4 mb-10">
+        <div className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-xl border border-yellow-100 rounded-3xl p-2 shadow-[0_10px_35px_rgba(255,190,0,0.14)] grid grid-cols-2 gap-2">
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("mine")}
+            className={`
+              rounded-2xl py-3 text-sm font-extrabold transition-all
+              ${
+                activeTab === "mine"
+                  ? "bg-gradient-to-l from-yellow-400 to-amber-300 text-yellow-950 shadow-md"
+                  : "bg-white/60 text-yellow-800 hover:bg-yellow-50"
+              }
+            `}
+          >
+            کودک من
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("followed")}
+            className={`
+              rounded-2xl py-3 text-sm font-extrabold transition-all
+              ${
+                activeTab === "followed"
+                  ? "bg-gradient-to-l from-yellow-400 to-amber-300 text-yellow-950 shadow-md"
+                  : "bg-white/60 text-yellow-800 hover:bg-yellow-50"
+              }
+            `}
+          >
+            کودکان فالو شده
+          </button>
+        </div>
+      </div>
+
+      {/* 📭 حالت خالی */}
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+
+        <div className="text-7xl mb-5">
+          {activeTab === "mine" ? "👶" : "🌱"}
+        </div>
+
+        <h2 className="text-2xl font-extrabold text-yellow-900 mb-3">
+          {activeTab === "mine"
+            ? "هنوز کودکی ثبت نشده"
+            : "هنوز کودکی را فالو نکرده‌اید"}
+        </h2>
+
+        <p className="text-sm text-gray-500 leading-7 max-w-sm">
+          {activeTab === "mine"
+            ? "برای شروع، پروفایل کودک خود را در ژنینو ایجاد کنید."
+            : "وقتی به درختواره کودکی متصل شوید، در این بخش نمایش داده می‌شود."}
+        </p>
+
+        {activeTab === "mine" && (
+          <Link
+            to="/child-profile"
+            className="
+              mt-6
+              px-6 py-3
+              rounded-2xl
+              bg-gradient-to-l from-yellow-400 to-amber-300
+              text-yellow-950
+              font-extrabold
+              shadow-[0_10px_25px_rgba(245,158,11,0.25)]
+              hover:scale-[1.03]
+              transition-all
+            "
+          >
+            افزودن کودک
+          </Link>
+        )}
+      </div>
+    </main>
   );
 }
 
@@ -259,33 +399,147 @@ const handleDeleteChild = async (childId) => {
 };
 
 const handleSendInvitation = async () => {
-  if (!inviteEmail && !invitePhone) {
-    alert("ایمیل یا شماره موبایل را وارد کنید");
+  if (!inviteEmail && !invitePhone && !inviteUsername) {
+    alert("ایمیل، شماره موبایل یا نام کاربری را وارد کنید");
     return;
   }
 
   try {
     setIsInviting(true);
 
-    await authFetch("/invitations", {
-      method: "POST",
-      body: JSON.stringify({
-        childId: activeChild.id,
-        email: inviteEmail || undefined,
-        phone: invitePhone || undefined,
-      }),
-    });
+    const missingRole = !father ? "father" : "mother";
+
+await authFetch("/invitations", {
+  method: "POST",
+  body: JSON.stringify({
+    childId: activeChild.id,
+    email: inviteEmail || undefined,
+    phone: invitePhone || undefined,
+    username: inviteUsername || undefined,
+
+    relationType: missingRole,
+    slot: 0,
+    roleLabel: missingRole === "mother" ? "مادر" : "پدر",
+  }),
+});
 
     alert("دعوت با موفقیت ارسال شد");
+
+    const adminsRes = await authFetch(`/children/${activeChild.id}/admins`);
+if (adminsRes?.ok) {
+  setChildAdmins(adminsRes.admins || []);
+}
 
     setShowInviteModal(false);
     setInviteEmail("");
     setInvitePhone("");
+    setInviteUsername("");
   } catch (err) {
     console.error(err);
     alert("ارسال دعوت انجام نشد");
   } finally {
     setIsInviting(false);
+  }
+};
+
+const handleCancelParentInvite = async (invitationId) => {
+  if (!invitationId) return;
+
+  const ok = window.confirm("دعوت لغو شود؟");
+  if (!ok) return;
+
+  try {
+    await authFetch(`/invitations/${invitationId}`, {
+      method: "DELETE",
+    });
+
+    const adminsRes = await authFetch(
+      `/children/${activeChild.id}/admins`
+    );
+
+    if (adminsRes?.ok) {
+      setChildAdmins(adminsRes.admins || []);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("لغو دعوت انجام نشد");
+  }
+};
+
+const handleOpenParentChat = (parent) => {
+  if (!parent?.userId) {
+    alert("اطلاعات کاربر برای چت کامل نیست.");
+    return;
+  }
+
+  navigate("/social", {
+    state: {
+      openPrivateChatUser: {
+        id: Number(parent.userId),
+        name: parent.fullName || "کاربر ژنینو",
+        avatarUrl: parent.avatarUrl || null,
+        username: parent.username || "",
+      },
+    },
+  });
+};
+
+const handleSubmitSpiritualAchievement = async () => {
+  try {
+    if (!spiritualAchievementDescription.trim()) {
+      alert("لطفاً متن دستاورد را وارد کنید");
+      return;
+    }
+
+    const res = await authFetch("/child-achievements/spiritual", {
+  method: "POST",
+  body: JSON.stringify({
+    childId: activeChild.id,
+    title: spiritualAchievementTitle,
+    description: spiritualAchievementDescription,
+  }),
+});
+
+console.log("SPIRITUAL RES:", res);
+
+if (!res.ok) {
+  if (res.code === "MONTHLY_LIMIT_REACHED" || res.status === 409) {
+    setShowSpiritualAchievementModal(false);
+    setShowMonthlyLimitModal(true);
+    return;
+  }
+
+  alert(res.message || "ثبت دستاورد انجام نشد");
+  return;
+}
+
+
+    setShowSpiritualAchievementModal(false);
+
+    setSpiritualAchievementDescription("");
+
+    setHasGivenSpiritualAchievementThisMonth(true);
+
+    setShowSpiritualSuccessModal(true);
+
+  } catch (err) {
+    console.error(err);
+
+const errorData = err?.response || err;
+
+if (
+  errorData?.code === "MONTHLY_LIMIT_REACHED" ||
+  errorData?.status === 409
+) {
+  setShowSpiritualAchievementModal(false);
+  setShowMonthlyLimitModal(true);
+  return;
+}
+
+alert(
+  err?.message ||
+  "ثبت دستاورد انجام نشد"
+);
   }
 };
 
@@ -297,170 +551,200 @@ console.log("MOTHER:", mother);
 
   return (
     <main
-      dir="rtl"
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden 
-           bg-gradient-to-b from-[#fff5cc] via-[#ffe88a] to-[#ffd95c] text-gray-800 pt-12 sm:pt-10 pb-24"
+       dir="rtl"
+       className="relative min-h-screen flex flex-col items-center overflow-hidden bg-[#fffaf0] text-gray-800 pt-8 pb-4"
     >
-      {/* ☀️ نور طلایی بالا */}
-      <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-[#fff8dc]/90 to-transparent z-[2] blur-2xl pointer-events-none" />
+    
+    {/* 🌟 بک‌گراند لطیف کودک من */}
+<div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
+  <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-yellow-200/60 blur-3xl" />
+  <div className="absolute top-40 -left-24 w-80 h-80 rounded-full bg-amber-300/30 blur-3xl" />
+  <div className="absolute bottom-0 right-1/4 w-[420px] h-[420px] rounded-full bg-orange-100/80 blur-3xl" />
 
-      {/* 🧬 DNA طلایی پراکنده */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#fffce6] to-[#ffefb3] overflow-hidden z-[1]">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <motion.svg
-            key={i}
-            viewBox="0 0 100 200"
-            xmlns="http://www.w3.org/2000/svg"
-            className="absolute opacity-30"
-            style={{
-              top: `${Math.random() * 90}%`,
-              left: `${Math.random() * 90}%`,
-              transformOrigin: "center",
-            }}
-            animate={{ rotate: [0, i % 2 === 0 ? 360 : -360] }}
-            transition={{
-              duration: 80 + Math.random() * 30,
-              repeat: Infinity,
-              ease: "linear",
-            }}
+  <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(circle_at_1px_1px,#facc15_1px,transparent_0)] [background-size:28px_28px]" />
+
+  <motion.div
+    className="absolute top-24 right-[12%] text-5xl opacity-20"
+    animate={{ y: [0, -16, 0], rotate: [0, 8, 0] }}
+    transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+  >
+    👶
+  </motion.div>
+
+  <motion.div
+    className="absolute top-72 left-[10%] text-5xl opacity-20"
+    animate={{ y: [0, 18, 0], rotate: [0, -8, 0] }}
+    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+  >
+    ✨
+  </motion.div>
+
+  <motion.div
+    className="absolute bottom-40 right-[18%] text-5xl opacity-20"
+    animate={{ y: [0, -14, 0], scale: [1, 1.08, 1] }}
+    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+  >
+    💛
+  </motion.div>
+</div>
+
+{/* 📅 باکس تقویم امروز */}
+<TodayCalendarBox color="yellow" className="mt-2 mb-4" />
+
+{/* 🧭 تب‌های کودک من و کودکان فالو شده */}
+<div className="relative z-[10] w-full px-4 mb-4">
+  <div className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-xl border border-yellow-100 rounded-3xl p-2 shadow-[0_10px_35px_rgba(255,190,0,0.14)] grid grid-cols-2 gap-2">
+    <button
+      type="button"
+      onClick={() => setActiveTab("mine")}
+      className={`
+        rounded-2xl py-3 text-sm font-extrabold transition-all
+        ${
+          activeTab === "mine"
+            ? "bg-gradient-to-l from-yellow-400 to-amber-300 text-yellow-950 shadow-md"
+            : "bg-white/60 text-yellow-800 hover:bg-yellow-50"
+        }
+      `}
+    >
+      کودک من
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setActiveTab("followed")}
+      className={`
+        rounded-2xl py-3 text-sm font-extrabold transition-all
+        ${
+          activeTab === "followed"
+            ? "bg-gradient-to-l from-yellow-400 to-amber-300 text-yellow-950 shadow-md"
+            : "bg-white/60 text-yellow-800 hover:bg-yellow-50"
+        }
+      `}
+    >
+      کودکان فالو شده
+    </button>
+  </div>
+</div>
+
+
+
+      
+{/* 👨‍👩‍👧 نوار انتخاب فرزند */}
+<div className="relative z-[10] w-full px-4 mb-6">
+  <div
+    className="
+      w-full max-w-4xl mx-auto
+      overflow-x-auto overflow-y-hidden whitespace-nowrap
+      rounded-3xl
+      bg-white/70 backdrop-blur-xl
+      border border-white/70
+      shadow-[0_12px_45px_rgba(255,190,0,0.16)]
+      px-4 py-4
+      scrollbar-thin scrollbar-thumb-yellow-300 scrollbar-track-transparent
+    "
+  >
+    <div className="grid grid-cols-4 sm:flex sm:items-center sm:justify-center gap-2 sm:gap-4">
+      {childrenList
+  .filter((child) => child.birthDate)
+  .map((child) => (
+        <motion.button
+          key={child.id}
+          type="button"
+          whileHover={{ y: -3, scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => setActiveChildId(child.id)}
+          className={`
+            flex flex-col sm:flex-row items-center justify-center
+            gap-1 sm:gap-3
+            rounded-xl sm:rounded-2xl
+            px-1 py-2 sm:px-3 sm:py-2
+            text-center
+            transition-all duration-300
+            ${
+              String(activeChildId) === String(child.id)
+                ? "bg-gradient-to-l from-yellow-300 to-amber-200 shadow-[0_8px_24px_rgba(245,158,11,0.28)]"
+                : "bg-white/80 hover:bg-yellow-50 border border-yellow-100"
+            }
+          `}
+        >
+          <div
+            className={`
+              w-10 h-10 sm:w-14 sm:h-14 rounded-full p-[3px]
+              ${
+                String(activeChildId) === String(child.id)
+                  ? "bg-gradient-to-br from-yellow-500 via-yellow-300 to-amber-500"
+                  : "bg-gradient-to-br from-yellow-200 to-amber-100"
+              }
+            `}
           >
-            <defs>
-              <linearGradient id={`dnaGrad-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ffd700" />
-                <stop offset="100%" stopColor="#b8860b" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M30,10 C50,30 50,70 30,90 C10,110 10,150 30,170"
-              stroke={`url(#dnaGrad-${i})`}
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <path
-              d="M70,10 C50,30 50,70 70,90 C90,110 90,150 70,170"
-              stroke={`url(#dnaGrad-${i})`}
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          </motion.svg>
-        ))}
-      </div>
+            <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
+              {child.photo ? (
+                <img
+                  src={child.photo}
+                  alt={child.fullName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-xl">👶</span>
+              )}
+            </div>
+          </div>
 
-      {/* 👨‍👩‍👧 نوار تب‌های فرزندان من */}
-{/* 🪙 نوار فرزندان (دقیقاً شبیه AchievementsBar) */}
-<div
-  className="relative z-[10] w-full overflow-x-auto overflow-y-hidden whitespace-nowrap py-5 px-6 mb-6
-             bg-gradient-to-r from-[#fff7cf] via-[#ffef99] to-[#ffe66e] backdrop-blur-sm shadow-inner border-b border-yellow-300
-             scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-yellow-100"
+          <div className="text-right">
+            <p className="text-[10px] sm:text-sm font-extrabold text-yellow-900 leading-5">
+              {child.fullName}
+            </p>
+            <p className="text-[11px] text-yellow-700/70">
+              پروفایل کودک
+            </p>
+          </div>
+        </motion.button>
+      ))}
+ 
+{canManageChild && (
+      <Link
+  to="/child-profile"
+  className="
+    flex flex-col sm:flex-row items-center justify-center
+    gap-1 sm:gap-3
+    rounded-2xl px-4 py-3
+    bg-white/60 backdrop-blur-md
+    border border-yellow-100
+    hover:border-yellow-300
+    hover:bg-white/90
+    transition-all duration-300
+  "
 >
-  <div className="flex space-x-5 rtl:space-x-reverse">
-    {childrenList.map((child) => (
-      <motion.div
-        key={child.id}
-        whileHover={{
-          rotateY: 15,
-          scale: 1.12,
-          boxShadow: "0 0 40px rgba(255, 215, 0, 0.9)",
-        }}
-        transition={{ type: "spring", stiffness: 200, damping: 12 }}
-        onClick={() => setActiveChildId(child.id)}
-        className="flex flex-col items-center justify-center text-center cursor-pointer"
-      >
-        {/* 🪙 سکه طلایی */}
-        <div
-          className={`relative w-20 h-20 rounded-full bg-gradient-to-br from-[#fff8c7] via-[#ffd84d] to-[#d6a700]
-                      shadow-[0_0_35px_rgba(212,175,55,0.6)] border-[3px] border-[#f8e47a]
-                      flex items-center justify-center overflow-hidden
-                      ${activeChildId === child.id
-                      ? "ring-4 ring-yellow-400 shadow-[0_0_45px_rgba(255,215,0,0.9)]"
-                      : "opacity-80"}
-                      `}
-        >
-          {/* ✨ درخشش دائمی طلایی */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
-            animate={{ x: ["-150%", "150%"] }}
-            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-            style={{ transform: "rotate(20deg)" }}
-          />
+  <div
+    className="
+      w-9 h-9 sm:w-11 sm:h-11 rounded-full
+      bg-gradient-to-br from-yellow-100 to-amber-100
+      flex items-center justify-center
+      text-xl text-yellow-700
+    "
+  >
+    +
+  </div>
 
-          {/* 🌕 نور متحرک درخشان */}
-          <motion.div
-            className="absolute inset-0 rounded-full bg-gradient-to-br from-transparent via-yellow-200/40 to-transparent blur-[10px]"
-            animate={{ rotate: [0, 360] }}
-            transition={{ repeat: Infinity, duration: 7, ease: "linear" }}
-          />
+  <div className="text-right">
+    <p className="text-sm font-bold text-yellow-900">
+      افزودن فرزند
+    </p>
 
-          {/* 👶 عکس کودک یا آیکن */}
-          <div className="relative z-[2] w-full h-full flex items-center justify-center">
-            {child.photo ? (
-              <img
-                src={child.photo}
-                alt={child.fullName}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-2xl">👶</span>
-            )}
-          </div>
-        </div>
-
-        {/* 📝 اسم کودک */}
-        <p className="text-xs mt-3 font-semibold text-yellow-800 drop-shadow-[0_0_6px_rgba(255,255,180,0.7)]">
-          {child.fullName}
-        </p>
-      </motion.div>
-    ))}
-
-    {/* ➕ افزودن فرزند (همان استایل سکه) */}
-    <Link to="/child-profile" className="flex flex-col items-center justify-center text-center cursor-pointer">
-      <motion.div
-        whileHover={{
-          rotateY: 15,
-          scale: 1.12,
-          boxShadow: "0 0 40px rgba(255, 215, 0, 0.9)",
-        }}
-        transition={{ type: "spring", stiffness: 200, damping: 12 }}
-        className="flex flex-col items-center justify-center"
-      >
-        <div
-          className="relative w-20 h-20 rounded-full bg-gradient-to-br from-[#fff8c7] via-[#ffd84d] to-[#d6a700]
-                     shadow-[0_0_35px_rgba(212,175,55,0.6)] border-[3px] border-[#f8e47a]
-                     flex items-center justify-center overflow-hidden"
-        >
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
-            animate={{ x: ["-150%", "150%"] }}
-            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-            style={{ transform: "rotate(20deg)" }}
-          />
-          <motion.div
-            className="absolute inset-0 rounded-full bg-gradient-to-br from-transparent via-yellow-200/40 to-transparent blur-[10px]"
-            animate={{ rotate: [0, 360] }}
-            transition={{ repeat: Infinity, duration: 7, ease: "linear" }}
-          />
-
-          <div className="relative z-[2] text-3xl text-[#cfa500] drop-shadow-[0_0_8px_rgba(255,220,120,0.9)]">
-            ➕
-          </div>
-        </div>
-
-        <p className="text-xs mt-3 font-semibold text-yellow-800 drop-shadow-[0_0_6px_rgba(255,255,180,0.7)]">
-          افزودن فرزند
-        </p>
-      </motion.div>
-    </Link>
+    <p className="text-[11px] text-yellow-700/60">
+      پروفایل جدید
+    </p>
+  </div>
+</Link>
+)}
+    </div>
   </div>
 </div>
 
 
       {/* 🏅 نوار دستاوردهای کودک */}
-      <AchievementsBar />
+      <AchievementsBar childId={activeChild?.id} />
 
-      {/* 📅 باکس تقویم امروز */}
-<TodayCalendarBox color="yellow" />
 
 
 
@@ -472,26 +756,77 @@ console.log("MOTHER:", mother);
   transition={{ duration: 0.6 }}
 >
   <div
-    className="bg-gradient-to-br from-[#fff7cc] via-[#fffbe6] to-white 
-               backdrop-blur-sm border border-yellow-300 
-               rounded-3xl shadow-lg p-6 text-center"
-  >
+  className={`
+    relative overflow-hidden
+    ${
+      activeChild?.gender === "girl"
+  ? "bg-pink-100/80"
+  : "bg-blue-100/80"
+    }
+    backdrop-blur-xl
+    border border-white/60
+    rounded-[2rem]
+    shadow-[0_20px_80px_rgba(255,200,0,0.18)]
+    p-6 sm:p-8
+    text-center
+  `}
+>
+  {/* ✨ نور داخلی کارت */}
+  <div className="absolute inset-0 pointer-events-none">
+    <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-200/40 rounded-full blur-3xl" />
+    <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-100/50 rounded-full blur-2xl" />
+  </div>
+
     {/* 🧒 تصویر کودک */}
-    <div className="flex justify-center -mt-16 mb-4">
-      <div className="w-52 h-52 rounded-full p-[4px] bg-gradient-to-tr from-yellow-500 via-yellow-300 to-yellow-100 shadow-lg">
-        <div className="w-full h-full rounded-full bg-white overflow-hidden flex items-center justify-center">
-          {activeChild?.photo ? (
-            <img
-              src={activeChild.photo}
-              alt={activeChild.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <Baby className="w-20 h-20 text-yellow-700" />
-          )}
-        </div>
-      </div>
+<div className="relative flex justify-center mt-2 mb-5">
+
+  {/* 🌟 هاله نور */}
+  <div className="absolute w-52 h-52 rounded-[2rem] bg-yellow-200/35 blur-3xl" />
+
+  {/* قاب مربعی تصویر */}
+  <div
+    className="
+      relative z-10
+      w-40 h-40 sm:w-44 sm:h-44
+      rounded-[2rem]
+      p-[5px]
+      bg-gradient-to-br from-[#fff7b2] via-[#ffd54d] to-[#ffb300]
+      shadow-[0_12px_45px_rgba(255,200,0,0.38)]
+    "
+  >
+    <div
+  onClick={() => {
+    if (isFollowedTab) setSelectedFollowedChild(activeChild);
+  }}
+  className={`
+    w-full h-full rounded-[1.7rem] overflow-hidden bg-white flex items-center justify-center
+    ${isFollowedTab ? "cursor-pointer" : ""}
+  `}
+>
+      {activeChild?.photo ? (
+        <img
+  src={activeChild.photo}
+  alt={activeChild.name}
+  className={`
+    w-full h-full object-cover
+    ${isFollowedTab ? "cursor-pointer hover:scale-105 transition duration-300" : ""}
+  `}
+/>
+      ) : (
+        <Baby className="w-20 h-20 text-yellow-700" />
+      )}
     </div>
+
+    {/* ✨ درخشش گوشه قاب */}
+    <motion.div
+      className="absolute top-4 left-5 text-2xl"
+      animate={{ scale: [1, 1.25, 1], rotate: [0, 12, 0] }}
+      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+    >
+      ✨
+    </motion.div>
+  </div>
+</div>
 
     {/* 📝 نام کودک */}
     <h2 className="text-2xl font-extrabold text-yellow-800 mb-1">
@@ -504,91 +839,267 @@ console.log("MOTHER:", mother);
       {activeChild?.gender === "girl" ? "دختر" : "پسر"}
       )
     </p>
+
+    {activeChild?.interests && (
+  <>
+    <p className="text-xs font-bold text-yellow-700 mb-2">
+      علایق کودک
+    </p>
+
+    <div className="flex flex-wrap justify-center gap-2 mb-5">
+    {activeChild.interests
+      .split("،")
+      .map((item, index) => (
+        <span
+          key={index}
+          className="
+            px-3 py-1.5
+            rounded-full
+            text-xs font-bold
+            bg-gradient-to-l from-yellow-100 to-amber-50
+            border border-yellow-200
+            text-yellow-800
+            shadow-sm
+          "
+        >
+          ✨ {item.trim()}
+        </span>
+      ))}
+    </div>
+  </>
+)}
     
     {/* 👨‍👩‍👧 والدین کودک */}
-<div className="mt-4 mb-4 space-y-2 text-sm text-gray-700">
+<div className="relative z-10 mt-6 mb-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+  <div className="rounded-2xl bg-white/75 border border-yellow-100 shadow-sm px-4 py-3">
+  <p className="text-xs text-gray-500 mb-1">پدر</p>
 
-  {/* 👨 پدر */}
-<div className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2">
-  <span>👨 پدر</span>
-  <span className="font-semibold">
-    {father ? father.fullName : "ثبت نشده"}
-  </span>
-</div>
+  <div className="flex flex-col items-center justify-center gap-2 text-center">
+    <p className="font-extrabold text-gray-800 text-center flex items-center justify-center gap-2">
+  {father && (
+    <img
+      src={father.avatarUrl || "/avatars/101.png"}
+      alt={father.fullName || "پدر"}
+      className="w-8 h-8 rounded-full object-cover border border-yellow-300 bg-white"
+    />
+  )}
+  <span>{father ? father.fullName : "ثبت نشده"}</span>
 
-{/* 👩 مادر */}
-<div className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2">
-  <span>👩 مادر</span>
+  {father && (
+  <button
+    type="button"
+    onClick={() => handleOpenParentChat(father)}
+    className="text-[10px] px-2 py-[2px] rounded-full bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 transition"
+  >
+    چت
+  </button>
+)}
 
-  <div className="flex items-center gap-2">
-    <span className="font-semibold">
-      {mother ? mother.fullName : "ثبت نشده"}
-    </span>
+</p>
 
-    {!mother && (
+    {canManageChild && !father && !pendingFatherInvite && (
       <button
         onClick={() => setShowInviteModal(true)}
-        className="text-xs px-2 py-1 rounded-lg border border-yellow-400 text-yellow-700 hover:bg-yellow-100 transition"
+        className="text-xs px-3 py-1.5 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200 hover:bg-yellow-200 transition"
       >
-        ➕ دعوت
+        دعوت
       </button>
     )}
+    {canManageChild && !father && pendingFatherInvite && (
+  <div className="flex items-center gap-2">
+    <span className="text-xs px-3 py-1.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200">
+      دعوت ارسال شده
+    </span>
+
+    <button
+      onClick={() => handleCancelParentInvite(pendingFatherInvite.invitationId)}
+      className="text-xs px-3 py-1.5 rounded-full bg-white text-red-500 border border-red-200 hover:bg-red-50 transition"
+    >
+      لغو دعوت
+    </button>
+  </div>
+)}
+  </div>
+</div>
+
+  <div className="rounded-2xl bg-white/75 border border-yellow-100 shadow-sm px-4 py-3">
+    <p className="text-xs text-gray-500 mb-1">مادر</p>
+
+    <div className="flex flex-col items-center justify-center gap-2 text-center">
+      <p className="font-extrabold text-gray-800 text-center flex items-center justify-center gap-2">
+  {mother && (
+    <img
+      src={mother.avatarUrl || "/avatars/101.png"}
+      alt={mother.fullName || "مادر"}
+      className="w-8 h-8 rounded-full object-cover border border-yellow-300 bg-white"
+    />
+  )}
+  <span>{mother ? mother.fullName : "ثبت نشده"}</span>
+
+  {mother && (
+  <button
+    type="button"
+    onClick={() => handleOpenParentChat(mother)}
+    className="text-[10px] px-2 py-[2px] rounded-full bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 transition"
+  >
+    چت
+  </button>
+)}
+
+</p>
+
+      {canManageChild && !mother && !pendingMotherInvite && (
+        <button
+          onClick={() => setShowInviteModal(true)}
+          className="text-xs px-3 py-1.5 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200 hover:bg-yellow-200 transition"
+        >
+          دعوت
+        </button>
+      )}
+      {canManageChild && !mother && pendingMotherInvite && (
+  <div className="flex items-center gap-2">
+    <span className="text-xs px-3 py-1.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200">
+      دعوت ارسال شده
+    </span>
+
+    <button
+      onClick={() => handleCancelParentInvite(pendingMotherInvite.invitationId)}
+      className="text-xs px-3 py-1.5 rounded-full bg-white text-red-500 border border-red-200 hover:bg-red-50 transition"
+    >
+      لغو دعوت
+    </button>
+  </div>
+)}
+    </div>
   </div>
 </div>
 
 
-</div>
-
-
     {/* 📊 اطلاعات خلاصه */}
-    <div className="grid grid-cols-2 gap-4 text-sm text-gray-700 mb-5">
-      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-        🎂 {daysLeft} روز مانده تا تولد
-      </div>
-      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-        🌸 جنسیت: {activeChild?.gender === "girl" ? "دختر" : "پسر"}
-      </div>
-    </div>
+<div className="relative z-10 grid grid-cols-2 gap-3 text-sm mb-6">
+  <div className="rounded-2xl bg-gradient-to-br from-yellow-50 to-white border border-yellow-100 shadow-sm p-4">
+  <p className="text-xl mb-1">🎂</p>
 
-    <div className="mt-4 flex gap-3">
+  <p className="text-[10px] text-gray-400">
+    تاریخ تولد
+  </p>
 
-  {/* ✏️ ویرایش */}
-  <Link
-    to={`/child-profile?mode=edit&id=${activeChild.id}`}
-    className="flex-1 inline-flex items-center justify-center gap-2
-               bg-gradient-to-r from-yellow-500 to-yellow-400
-               text-white py-2 rounded-xl font-semibold shadow-md
-               hover:from-yellow-600 hover:to-yellow-500 transition"
-  >
-    ✏️ ویرایش
-  </Link>
+  <p className="text-sm font-bold text-yellow-800 mt-0.5">
+    {birth.toLocaleDateString("fa-IR")}
+  </p>
 
-  {/* 🗑️ حذف */}
-  {!confirmDelete ? (
-    <button
-      onClick={() => setConfirmDelete(true)}
-      className="flex-1 inline-flex items-center justify-center gap-2
-                 bg-white border border-gray-300 text-gray-600
-                 py-2 rounded-xl font-semibold
-                 hover:border-red-300 hover:text-red-600
-                 hover:bg-red-50 transition"
-    >
-      🗑️ حذف
-    </button>
-  ) : (
-    <button
-      onClick={() => {
-        setConfirmDelete(false);
-        handleDeleteChild(activeChild.id);
-      }}
-      className="flex-1 inline-flex items-center justify-center gap-2
-                 bg-red-600 text-white py-2 rounded-xl font-semibold
-                 hover:bg-red-700 transition"
-    >
-      حذف قطعی
-    </button>
-  )}
+  <div className="my-2 border-t border-yellow-100/70" />
+
+  <p className="text-[10px] text-gray-400">
+    تا تولد بعدی
+  </p>
+
+  <p className="text-sm font-bold text-yellow-800 mt-0.5">
+    {daysLeft} روز
+  </p>
 </div>
+
+  <div className="rounded-2xl bg-gradient-to-br from-yellow-50 to-white border border-yellow-100 shadow-sm p-4">
+    <p className="text-2xl mb-1">
+      {activeChild?.gender === "girl" ? "🌸" : "🧸"}
+    </p>
+    <p className="text-xs text-gray-500">جنسیت کودک</p>
+    <p className="font-extrabold text-yellow-800 mt-1">
+      {activeChild?.gender === "girl" ? "دختر" : "پسر"}
+    </p>
+    <button
+  type="button"
+  onClick={() => setShowWishlistModal(true)}
+  className={`
+  mt-3
+  text-[11px]
+  px-4 py-2
+  rounded-full
+  text-white
+  font-bold
+  hover:scale-[1.03]
+  active:scale-[0.98]
+  transition-all
+  ${
+    activeChild?.gender === "girl"
+      ? "bg-gradient-to-l from-pink-500 to-rose-400 shadow-[0_8px_20px_rgba(244,63,94,0.28)] hover:shadow-[0_10px_28px_rgba(244,63,94,0.38)]"
+      : "bg-gradient-to-l from-blue-500 to-cyan-400 shadow-[0_8px_20px_rgba(59,130,246,0.28)] hover:shadow-[0_10px_28px_rgba(59,130,246,0.38)]"
+  }
+`}
+>
+  مشاهده کالاهای مورد علاقه {activeChild?.fullName || "کودک"}
+</button>
+  </div>
+</div>
+
+{canManageChild && (
+  <div className="relative z-10 mt-5 space-y-3">
+
+    <button
+      type="button"
+      onClick={handleOpenSpiritualAchievementModal}
+      className="
+        w-full inline-flex items-center justify-center gap-2
+        bg-gradient-to-l from-amber-400 via-yellow-300 to-yellow-500
+        text-yellow-950 py-3 rounded-2xl font-extrabold
+        shadow-[0_10px_25px_rgba(245,158,11,0.25)]
+        hover:scale-[1.02] active:scale-[0.98]
+        transition-all
+      "
+    >
+      ✨ اهدای دستاورد معنوی به {activeChild?.fullName || "فرزندم"}
+    </button>
+
+    <div className="flex gap-3">
+      <Link
+        to={`/child-profile?mode=edit&id=${activeChild.id}`}
+        className="
+          flex-1 inline-flex items-center justify-center gap-2
+          bg-gradient-to-l from-yellow-400 to-amber-300
+          text-yellow-950 py-3 rounded-2xl font-extrabold
+          shadow-[0_10px_25px_rgba(245,158,11,0.25)]
+          hover:scale-[1.02] active:scale-[0.98]
+          transition-all
+        "
+      >
+        ✏️ ویرایش پروفایل
+      </Link>
+
+      {!confirmDelete ? (
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="
+            flex-1 inline-flex items-center justify-center gap-2
+            bg-white/80 border border-red-100 text-red-500
+            py-3 rounded-2xl font-extrabold
+            hover:bg-red-50 hover:border-red-200
+            hover:scale-[1.02] active:scale-[0.98]
+            transition-all
+          "
+        >
+          🗑️ حذف
+        </button>
+      ) : (
+        <button
+          onClick={() => {
+            setConfirmDelete(false);
+            handleDeleteChild(activeChild.id);
+          }}
+          className="
+            flex-1 inline-flex items-center justify-center gap-2
+            bg-red-500 text-white
+            py-3 rounded-2xl font-extrabold
+            shadow-[0_10px_25px_rgba(239,68,68,0.25)]
+            hover:bg-red-600 active:scale-[0.98]
+            transition-all
+          "
+        >
+          حذف قطعی؟
+        </button>
+      )}
+    </div>
+  </div>
+)}
 
 
   </div>
@@ -596,46 +1107,81 @@ console.log("MOTHER:", mother);
 
 
 
-{/* 🧩 باکس دسترسی‌های کودک */}
+{/* 🧩 دسترسی‌های کودک */}
 <motion.div
-  className="relative z-[5] mt-10 mb-12 w-full max-w-3xl px-4"
+  className="relative z-[6] mt-6 mb-12 w-full max-w-3xl px-4"
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.6 }}
 >
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-    {/* 🌳 درختواره کودک */}
     <button
       onClick={() => {
         if (!activeChild) return;
         setSelectedChildForTree(activeChild);
         setShowFamilyTree(true);
       }}
-      className={`flex items-center justify-center gap-3 h-24 rounded-3xl
-        bg-gradient-to-br from-yellow-400 via-yellow-300 to-yellow-500
-        text-white font-extrabold text-lg
-        shadow-[0_0_18px_rgba(251,191,36,0.55)]
-        hover:scale-[1.03] hover:shadow-[0_0_28px_rgba(251,191,36,0.75)]
-        transition-all
+      disabled={!activeChild}
+      className={`
+        group relative overflow-hidden
+        min-h-[120px] rounded-[2rem]
+        bg-white/80 backdrop-blur-xl
+        border border-white/70
+        shadow-[0_16px_45px_rgba(255,190,0,0.16)]
+        p-5 text-right
+        hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(255,190,0,0.24)]
+        transition-all duration-300
         ${!activeChild ? "opacity-50 cursor-not-allowed" : ""}
       `}
-      disabled={!activeChild}
     >
-      🌳 درختواره کودک
+      <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full bg-yellow-200/50 blur-2xl" />
+
+      <div className="relative z-10 flex items-center gap-4">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center text-3xl shadow-lg">
+          🌳
+        </div>
+
+        <div>
+          <h3 className="font-extrabold text-yellow-900 text-lg">
+            درختواره کودک
+          </h3>
+          <p className="text-xs text-gray-500 mt-1 leading-6">
+            مشاهده ارتباط کودک با اعضای خانواده
+          </p>
+        </div>
+      </div>
     </button>
 
-    {/* 📸 آلبوم خاطرات */}
     <Link
-      to="/memory-album"
-      className="flex items-center justify-center gap-3 h-24 rounded-3xl
-                 bg-gradient-to-br from-[#fde68a] via-[#facc15] to-[#f59e0b]
-                 text-white font-extrabold text-lg
-                 shadow-[0_0_18px_rgba(251,191,36,0.55)]
-                 hover:scale-[1.03] hover:shadow-[0_0_28px_rgba(251,191,36,0.75)]
-                 transition-all"
+      to={`/memory-album?childId=${activeChild?.id}${isFollowedTab ? "&mode=view" : ""}`}
+      className="
+        group relative overflow-hidden
+        min-h-[120px] rounded-[2rem]
+        bg-white/80 backdrop-blur-xl
+        border border-white/70
+        shadow-[0_16px_45px_rgba(255,190,0,0.16)]
+        p-5 text-right
+        hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(255,190,0,0.24)]
+        transition-all duration-300
+      "
     >
-      📸 آلبوم خاطرات
+      <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full bg-amber-200/50 blur-2xl" />
+
+      <div className="relative z-10 flex items-center gap-4">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 to-yellow-500 flex items-center justify-center text-3xl shadow-lg">
+          📸
+        </div>
+
+        <div>
+          <h3 className="font-extrabold text-yellow-900 text-lg">
+            آلبوم خاطرات
+          </h3>
+          <p className="text-xs text-gray-500 mt-1 leading-6">
+            ثبت لحظه‌های شیرین رشد کودک
+          </p>
+        </div>
+      </div>
     </Link>
 
   </div>
@@ -659,7 +1205,7 @@ console.log("MOTHER:", mother);
 
 {/* 🧠 جعبه آگاهی ژنینو */}
 <motion.div
-  className="relative z-[6] -mt-8 mb-10 w-full max-w-2xl"
+  className="relative z-[6] mt-0 mb-8 w-full max-w-3xl px-4"  
   initial={{ opacity: 0, y: 30 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.6 }}
@@ -678,9 +1224,11 @@ console.log("MOTHER:", mother);
   />
 </motion.div>
 
+
 {/* 🌕 دکمه سکه‌ای پایش سلامت کودک */}
+{isMineTab && (
 <motion.div
-  className="relative z-[10] mt-6 mb-12 flex justify-center"
+  className="relative z-[10] mt-0 mb-12 flex justify-center px-4"
   initial={{ opacity: 0, y: 30 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.6 }}
@@ -696,10 +1244,22 @@ console.log("MOTHER:", mother);
 </Link>
 
 </motion.div>
+)}
 
 {showInviteModal && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    onClick={() => {
+      setShowInviteModal(false);
+      setInviteEmail("");
+      setInvitePhone("");
+      setInviteUsername("");
+    }}
+  >
+    <div
+      className="bg-white rounded-2xl p-6 w-full max-w-md mx-4"
+      onClick={(e) => e.stopPropagation()}
+    >
       <h2 className="text-lg font-extrabold text-gray-800 mb-4">
         دعوت والد دوم برای {activeChild?.fullName}
       </h2>
@@ -722,12 +1282,22 @@ console.log("MOTHER:", mother);
         className="w-full border rounded-xl px-3 py-2 mt-1 mb-5"
       />
 
+      <label className="text-sm text-gray-600">یا نام کاربری</label>
+      <input
+        value={inviteUsername}
+        onChange={(e) => setInviteUsername(e.target.value)}
+        type="text"
+        placeholder="مثلاً Test-Test"
+        className="w-full border rounded-xl px-3 py-2 mt-1 mb-5"
+      />
+
       <div className="flex justify-end gap-2">
         <button
           onClick={() => {
             setShowInviteModal(false);
             setInviteEmail("");
             setInvitePhone("");
+            setInviteUsername("");
           }}
           className="px-4 py-2 rounded-xl border"
         >
@@ -751,6 +1321,406 @@ console.log("MOTHER:", mother);
     </div>
   </div>
 )}
+
+{showWishlistModal && (
+  <div
+    className="fixed inset-0 z-[120] bg-black/40 flex items-center justify-center px-4"
+    onClick={() => setShowWishlistModal(false)}
+  >
+    <div
+      className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      {/* هدر */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-yellow-100">
+        <h3 className="text-lg font-extrabold text-yellow-900">
+          کالاهای مورد علاقه {activeChild?.fullName}
+        </h3>
+
+        <button
+          onClick={() => setShowWishlistModal(false)}
+          className="text-gray-400 hover:text-gray-700 transition"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* لیست نمونه کالاها */}
+      <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
+
+        {[1, 2, 3].map((item) => (
+          <div
+            key={item}
+            className="flex items-center gap-3 rounded-2xl border border-yellow-100 bg-yellow-50/40 p-3"
+          >
+            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white border border-yellow-100 flex items-center justify-center text-3xl">
+              🧸
+            </div>
+
+            <div className="flex-1 text-right">
+              <p className="font-bold text-gray-800">
+                اسباب بازی کودک
+              </p>
+
+              <p className="text-sm text-yellow-700 mt-1">
+                ۱٬۲۵۰٬۰۰۰ تومان
+              </p>
+            </div>
+
+            <button
+              className="
+                px-3 py-2
+                rounded-xl
+                bg-gradient-to-l from-yellow-400 via-amber-300 to-yellow-500
+                hover:from-yellow-500 hover:to-amber-400
+                text-yellow-950
+                text-xs
+                font-extrabold
+                shadow-[0_8px_22px_rgba(245,158,11,0.30)]
+                hover:shadow-[0_10px_28px_rgba(245,158,11,0.42)]
+                transition-all
+              "
+            >
+              ارسال هدیه
+            </button>
+          </div>
+        ))}
+
+      </div>
+    </div>
+  </div>
+)}
+
+
+{showSpiritualAchievementModal && (
+  <div
+    className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/50 px-4"
+    onClick={() => setShowSpiritualAchievementModal(false)}
+  >
+    <div
+      className="w-full max-w-lg max-h-[88vh] overflow-y-auto rounded-[2rem] border-2 border-[#d4af37] bg-gradient-to-b from-yellow-50 to-white p-5 shadow-2xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-yellow-200 to-amber-400 text-4xl shadow-lg">
+          ✨
+        </div>
+
+        <h2 className="text-xl font-extrabold text-yellow-900">
+          اهدای دستاورد معنوی به {activeChild?.fullName || "کودک"}
+        </h2>
+
+        <div className="mt-4 rounded-3xl border border-yellow-100 bg-white/80 p-4 text-right text-xs leading-7 text-gray-600">
+  <p>
+    کاربر ژنینویی عزیز، اهدای دستاورد معنوی به {activeChild?.fullName || "کودک"}
+    می‌تواند او را در مسیر رشد، انگیزه، مهربانی و تعالی همراهی کند.
+  </p>
+
+  {showFullSpiritualInfo && (
+    <p className="mt-2">
+      هر ۱۰ دستاورد معنوی، یک امتیاز برای شرکت {activeChild?.fullName || "کودک"}
+      در قرعه‌کشی جوایز ژنینویی محسوب می‌شود. همچنین به پاس مهربانی شما،
+      اگر {activeChild?.fullName || "کودک"} در قرعه‌کشی ژنینو برنده شود،
+      شما نیز به عنوان یکی از صادرکنندگان دستاورد برای او، وارد قرعه‌کشی ویژه صادرکنندگان خواهید شد.
+      هر دستاورد صادرشده توسط شما، یک امتیاز برای این قرعه‌کشی دارد.
+    </p>
+  )}
+
+  <button
+    type="button"
+    onClick={() => setShowFullSpiritualInfo((prev) => !prev)}
+    className="mt-2 text-xs font-extrabold text-yellow-700"
+  >
+    {showFullSpiritualInfo ? "نمایش کمتر" : "بیشتر بخوانید"}
+  </button>
+
+  <span className="mt-2 block font-extrabold text-yellow-800">
+    توجه: هر کاربر فقط ماهی یک‌بار می‌تواند به {activeChild?.fullName || "کودک"} دستاورد معنوی اهدا کند.
+  </span>
+</div>
+      </div>
+
+      <div className="mt-5 space-y-4 text-right">
+        <div>
+          <label className="mb-1 block text-xs font-extrabold text-yellow-800">
+            عنوان دستاورد
+          </label>
+
+          <select
+  value={spiritualAchievementTitle}
+  onChange={(e) => setSpiritualAchievementTitle(e.target.value)}
+  className="w-full rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-bold text-gray-700 outline-none focus:ring-4 focus:ring-yellow-100">
+  <option>رضایت خانواده به دلیل مهربانی</option>
+  <option>رضایت خانواده به دلیل تلاش درسی</option>
+  <option>رضایت خانواده به دلیل کمک در خانه</option>
+  <option>رضایت خانواده به دلیل صداقت</option>
+  <option>رضایت خانواده به دلیل مسئولیت‌پذیری</option>
+  <option>رضایت خانواده به دلیل احترام به بزرگ‌ترها</option>
+  <option>رضایت خانواده به دلیل نظم شخصی</option>
+  <option>رضایت خانواده به دلیل صبر و آرامش</option>
+  <option>رضایت خانواده به دلیل همکاری با اعضای خانواده</option>
+  <option>رضایت خانواده به دلیل مراقبت از خواهر یا برادر</option>
+  <option>رضایت خانواده به دلیل شجاعت</option>
+  <option>رضایت خانواده به دلیل پشتکار</option>
+  <option>رضایت خانواده به دلیل قدرشناسی</option>
+  <option>رضایت خانواده به دلیل کمک به دیگران</option>
+  <option>رضایت خانواده به دلیل رفتار محترمانه</option>
+  <option>رضایت خانواده به دلیل پیشرفت اخلاقی</option>
+</select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-extrabold text-yellow-800">
+            متن دستاورد
+          </label>
+
+          <textarea
+  rows={3}
+  value={spiritualAchievementDescription}
+  onChange={(e) =>
+    setSpiritualAchievementDescription(e.target.value)
+  }
+  placeholder="متن اهدای دستاورد را به دلخواه خود وارد کنید"
+  className="w-full resize-none rounded-2xl border border-yellow-200 bg-white px-4 py-3 text-sm leading-7 text-gray-700 outline-none placeholder:text-gray-400 focus:ring-4 focus:ring-yellow-100"
+/>
+        </div>
+
+        <div className="rounded-2xl border border-yellow-100 bg-white/80 p-4 text-xs leading-7 text-gray-600">
+          <p>
+            <span className="font-extrabold text-yellow-800">صادرکننده:</span>{" "}
+            عضو خانواده / درختواره {activeChild?.fullName || "کودک"}
+          </p>
+
+          <p>
+            <span className="font-extrabold text-yellow-800">تاریخ صدور:</span>{" "}
+            {new Date().toLocaleDateString("fa-IR")}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-3">
+        <button
+  type="button"
+  onClick={handleSubmitSpiritualAchievement}
+  className="w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 px-6 py-3 text-sm font-extrabold text-white shadow-md"
+>
+  ثبت و اهدای دستاورد
+</button>
+
+        <button
+          type="button"
+          onClick={() => setShowSpiritualAchievementModal(false)}
+          className="w-full rounded-2xl border border-yellow-300 bg-white px-6 py-3 text-sm font-extrabold text-yellow-700"
+        >
+          بستن
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+<AnimatePresence>
+  {showMonthlyLimitModal && (
+    <motion.div
+      className="fixed inset-0 z-[100001] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setShowMonthlyLimitModal(false)}
+    >
+      <motion.div
+        className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border-2 border-[#d4af37] bg-gradient-to-b from-yellow-50 to-white p-6 text-center shadow-2xl"
+        initial={{ scale: 0.85, y: 24, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.85, y: 24, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 220, damping: 22 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-yellow-300/35 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-amber-300/25 blur-3xl" />
+
+        <motion.div
+          className="relative z-10 mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full border-[4px] border-[#f8e47a] bg-gradient-to-br from-[#fff8c7] via-[#ffd84d] to-[#d6a700] text-5xl shadow-[0_0_35px_rgba(212,175,55,0.7)]"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          💛
+        </motion.div>
+
+        <motion.h2
+          className="relative z-10 text-xl font-black text-yellow-900"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          سپاس از مهربانی شما
+        </motion.h2>
+
+        <motion.p
+          className="relative z-10 mt-4 text-sm leading-8 text-gray-600"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          شما در ماه جاری، گواهی دستاورد معنوی خود را به{" "}
+          {activeChild?.fullName || "این کودک"} اهدا کرده‌اید.
+          <br />
+          در ماه آینده دوباره می‌توانید برای{" "}
+          {activeChild?.fullName || "این کودک"} گواهی دستاورد معنوی اهدا کنید.
+        </motion.p>
+
+        <button
+          type="button"
+          onClick={() => setShowMonthlyLimitModal(false)}
+          className="relative z-10 mt-6 w-full rounded-2xl border border-yellow-300 bg-white px-6 py-3 text-sm font-extrabold text-yellow-700 transition hover:bg-yellow-50"
+        >
+          متوجه شدم
+        </button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+<AnimatePresence>
+  {showSpiritualSuccessModal && (
+    <motion.div
+      className="fixed inset-0 z-[100001] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setShowSpiritualSuccessModal(false)}
+    >
+      <motion.div
+        className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border-2 border-[#d4af37] bg-gradient-to-b from-yellow-50 to-white p-6 text-center shadow-2xl"
+        initial={{ scale: 0.85, y: 24, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.85, y: 24, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 220, damping: 22 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-yellow-300/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-amber-300/30 blur-3xl" />
+
+        <motion.div
+          className="relative z-10 mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full border-[4px] border-[#f8e47a] bg-gradient-to-br from-[#fff8c7] via-[#ffd84d] to-[#d6a700] text-5xl shadow-[0_0_35px_rgba(212,175,55,0.75)]"
+          animate={{ scale: [1, 1.08, 1], rotate: [0, 4, -4, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          ✨
+        </motion.div>
+
+        <motion.h2
+          className="relative z-10 text-xl font-black text-yellow-900"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          دستاورد معنوی شما با موفقیت به {activeChild?.fullName || "کودک"} اهدا شد.
+        </motion.h2>
+
+        <motion.p
+          className="relative z-10 mt-4 text-sm leading-8 text-gray-600"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          «مهربانی و توجه شما،<br />
+          بخشی از خاطرات طلایی کودکی او خواهد شد.»
+        </motion.p>
+
+        <button
+          type="button"
+          onClick={() => setShowSpiritualSuccessModal(false)}
+          className="relative z-10 mt-6 w-full rounded-2xl border border-yellow-300 bg-white px-6 py-3 text-sm font-extrabold text-yellow-700 transition hover:bg-yellow-50"
+        >
+          بازگشت
+        </button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+<AnimatePresence>
+  {selectedFollowedChild && (
+    <motion.div
+      className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/40 px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setSelectedFollowedChild(null)}
+    >
+      <motion.div
+        className="w-full max-w-sm rounded-3xl border-2 border-[#d4af37] bg-gradient-to-b from-yellow-50 to-[#fff4cc] p-5 text-center shadow-2xl"
+        initial={{ scale: 0.9, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.9, y: 20, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex h-48 items-center justify-center overflow-hidden rounded-2xl border-2 border-[#d4af37] bg-white">
+          {selectedFollowedChild.photo ? (
+            <img
+              src={selectedFollowedChild.photo}
+              alt={selectedFollowedChild.fullName}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <Baby className="h-24 w-24 text-yellow-500" />
+          )}
+        </div>
+
+        <h2 className="text-xl font-extrabold text-yellow-800">
+          {selectedFollowedChild.fullName}
+        </h2>
+
+        <div className="mt-4 space-y-2 text-sm font-medium text-gray-700">
+          <p>{getChildAgeText(selectedFollowedChild)}</p>
+
+          <p>
+  {getParentCityText() !== "شهر ثبت نشده"
+  ? `از ${getParentCityText()}`
+  : "شهر ثبت نشده"}
+</p>
+
+          {selectedFollowedChild.interests ? (
+            <p>
+              <span className="font-extrabold text-yellow-800">عاشق: </span>
+              {selectedFollowedChild.interests}
+            </p>
+          ) : (
+            <p className="text-xs text-gray-400">
+              این بخش هنوز توسط والدین کودک تکمیل نشده است
+            </p>
+          )}
+        </div>
+
+        <div className="mt-6 flex flex-col gap-3">
+          <button
+            type="button"
+            className="w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 px-6 py-3 text-sm font-extrabold text-white shadow-md"
+          >
+            آنفالو
+          </button>
+
+          <button
+            type="button"
+            className="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-rose-400 px-6 py-3 text-sm font-extrabold text-white shadow-md"
+          >
+            ارسال هدیه
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedFollowedChild(null)}
+            className="w-full rounded-2xl border border-yellow-300 bg-white px-6 py-3 text-sm font-extrabold text-yellow-700"
+          >
+            بستن
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
 
 </main>

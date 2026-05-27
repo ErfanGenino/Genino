@@ -45,22 +45,22 @@ export default function PromoSlider({
     touchEndX.current = e.changedTouches[0].clientX;
     const distance = touchEndX.current - touchStartX.current;
     if (Math.abs(distance) > 50) {
-      if (distance > 0) prevSlide();
-      else nextSlide();
-    }
+  if (distance > 0) nextSlide();
+  else prevSlide();
+}
   };
 
   const variants = {
-    enter: (dir) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
-  };
+  enter: (dir) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
+};
 
   if (!slides.length) return null;
 
   return (
     <div
-      className={`relative w-full ${height} overflow-hidden rounded-3xl select-none ${className}`}
+      className={`relative w-full ${height} overflow-visible rounded-3xl select-none pb-14 sm:pb-0 ${className}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       style={{
@@ -70,7 +70,7 @@ export default function PromoSlider({
     >
       <AnimatePresence initial={false} mode="wait" custom={direction}>
         <motion.div
-          key={slides[index].id || index}
+          key={`slide-${index}-${slides[index]?.id || slides[index]?.image || slides[index]?.text || "item"}`}
           custom={direction}
           variants={variants}
           initial="enter"
@@ -84,7 +84,7 @@ export default function PromoSlider({
             backgroundImage: slides[index].image
               ? `url(${slides[index].image})`
               : "none",
-            backgroundSize: "cover",
+            backgroundSize: "contain",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
@@ -92,7 +92,7 @@ export default function PromoSlider({
           {/* 🔹 حذف افکت‌های پس‌زمینه — فقط متن باقی می‌ماند */}
           <div className="relative z-10 px-6">
             <motion.h2
-              key={slides[index].text}
+              key={`title-${index}-${slides[index]?.image || slides[index]?.text || "slide"}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -101,7 +101,7 @@ export default function PromoSlider({
               {slides[index].text}
             </motion.h2>
             <motion.p
-              key={slides[index].sub}
+              key={`sub-${index}-${slides[index]?.image || slides[index]?.sub || "slide"}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.1 }}
@@ -113,27 +113,64 @@ export default function PromoSlider({
         </motion.div>
       </AnimatePresence>
 
-      {/* 🔸 دکمه‌ها بدون زمینه — فقط آیکون نیمه‌شفاف */}
-      <div className="absolute bottom-6 flex justify-between w-full px-6 z-20">
-        <button
-          onClick={prevSlide}
-          className="p-2 text-white/80 hover:text-white bg-transparent"
-        >
-          ‹
-        </button>
-        <button
-          onClick={nextSlide}
-          className="p-2 text-white/80 hover:text-white bg-transparent"
-        >
-          ›
-        </button>
-      </div>
+      {/* دکمه‌های چپ و راست */}
+<div
+  className="
+    absolute z-20 flex gap-3
+    left-1/2 -translate-x-1/2
+    -bottom-12
+
+    sm:left-0 sm:right-0 sm:bottom-auto
+    sm:top-1/2 sm:-translate-y-1/2
+    sm:translate-x-0
+    sm:justify-between
+    sm:px-3
+  "
+>
+  <button
+    onClick={prevSlide}
+    className="
+      w-7 h-7 sm:w-10 sm:h-10
+      rounded-full
+      bg-black/20
+      backdrop-blur-sm
+      text-white
+      text-xl sm:text-3xl
+      font-bold
+      flex items-center justify-center
+      hover:bg-black/40
+      transition-all
+      shadow-sm
+    "
+  >
+    ‹
+  </button>
+
+  <button
+    onClick={nextSlide}
+    className="
+      w-7 h-7 sm:w-10 sm:h-10
+      rounded-full
+      bg-black/20
+      backdrop-blur-sm
+      text-white
+      text-xl sm:text-3xl
+      font-bold
+      flex items-center justify-center
+      hover:bg-black/40
+      transition-all
+      shadow-sm
+    "
+  >
+    ›
+  </button>
+</div>
 
       {/* 🔸 نقاط وضعیت (شفاف و مینیمال) */}
       <div className="absolute bottom-3 flex gap-2 justify-center w-full z-20">
         {slides.map((_, i) => (
           <motion.div
-            key={i}
+            key={`dot-${i}-${slides[i]?.image || slides[i]?.text || "slide"}`}
             animate={{
               scale: i === index ? [1, 1.3, 1] : 1,
               opacity: i === index ? 1 : 0.4,

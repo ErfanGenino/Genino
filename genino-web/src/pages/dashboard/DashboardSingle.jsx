@@ -1,4 +1,5 @@
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import LifeStageSwitcher from "@components/Dashboard/LifeStageSwitcher";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -29,11 +30,12 @@ try {
 
   const cards = [
     {
-      title: "رشد شخصی من",
-      desc: "یادگیری مهارت‌های جدید و کشف استعدادهای درونیت",
-      icon: <Brain size={26} className="text-sky-600" />,
-      highlight: true,
-    },
+  title: "نسخه بهتر من",
+  desc: "اعتمادبه‌نفس، عادت‌های خوب و ساختن آینده‌ای که دوست داری",
+  icon: <Sparkles size={26} className="text-sky-600" />,
+  highlight: true,
+  link: "/personal-growth",
+},
     {
       title: "سلامت و تناسب اندام",
       desc: "برنامه‌ی ورزشی برای انرژی روزانه",
@@ -53,42 +55,47 @@ try {
       link: "/knowledge/mind-calm",
     },
     {
-      title: "الهام روزانه",
-      desc: "جملات مثبت و انگیزشی برای شروع روزی پرانرژی",
-      icon: <Sparkles size={26} className="text-sky-600" />,
-    },
+  title: "حال خوب امروز",
+  desc: "جمله‌ها و یادآوری‌هایی برای انرژی، انگیزه و ادامه دادن",
+  icon: <Sparkles size={26} className="text-sky-600" />,
+  link: "/inspiration",
+},
     {
-      title: "کتاب‌خانه‌ی من",
-      desc: "مطالعه‌ی کتاب‌های الهام‌بخش در زمینه‌ی موفقیت و آرامش",
-      icon: <BookOpen size={26} className="text-sky-600" />,
-    },
+  title: "کتاب‌های حال خوب",
+  desc: "کتاب‌هایی برای رشد ذهن، آرامش و ساختن آینده‌ای بهتر",
+  icon: <BookOpen size={26} className="text-sky-600" />,
+  link: "/books-positive-energy",
+},
     {
-      title: "ماجراجویی و سفر",
-      desc: "کشف مکان‌های جدید و تجربه‌های تازه",
-      icon: <Mountain size={26} className="text-sky-600" />,
-    },
+  title: "سفر و تجربه‌های تازه",
+  desc: "مکان‌ها، تجربه‌ها و حس‌هایی که زندگی را رنگی‌تر می‌کنند",
+  icon: <Mountain size={26} className="text-sky-600" />,
+  link: "/travel-experience",
+},
     {
       title: "استراحت با قهوه",
       desc: "زمان‌هایی برای آرامش، خلوت و فکر کردن به خودت",
       icon: <Coffee size={26} className="text-sky-600" />,
+      link: "/articles/coffee-break",
     },
     {
-      title: "مدیریت مالی شخصی",
-      desc: "یادگیری هوشمندانه خرج کردن و پس‌انداز",
-      icon: <DollarSign size={26} className="text-sky-600" />,
-      link: "/family-finance",
-    },
+  title: "پول، آرامش و آینده",
+  desc: "مدیریت پول، ذهن مالی و ساختن آینده‌ای آرام‌تر",
+  icon: <DollarSign size={26} className="text-sky-600" />,
+  link: "/money-and-future",
+},
     {
-      title: "موسیقی و انرژی مثبت",
-      desc: "گوش دادن به پلی‌لیست‌هایی برای تمرکز یا آرامش",
-      icon: <Music size={26} className="text-sky-600" />,
-    },
+  title: "دنیای موسیقی و ذهن",
+  desc: "شناخت موسیقی، سازها و تأثیر صداها روی ذهن و احساسات",
+  icon: <Music size={26} className="text-sky-600" />,
+  link: "/music-and-mind",
+},
     {
-      title: "جهان من",
-      desc: "اخبار، فناوری و دانستنی‌های روز دنیا",
-      icon: <Globe size={26} className="text-sky-600" />,
-      link: "/world-knowledge",
-    },
+  title: "رها و رو به جلو",
+  desc: "آرامش در پذیرش، توکل و ادامه دادن بدون کنترل افراطی",
+  icon: <Sparkles size={26} className="text-sky-600" />,
+  link: "/let-go-and-grow",
+},
     {
   title: "علایق من",
   desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
@@ -115,6 +122,9 @@ try {
         <p className="text-gray-600 text-sm">
          ژنینو فضایی برای رشد، آرامش و شادی است؛ هر روز فرصتی برای ارتقای آگاهانه‌ی توانمندی‌های فردی.
         </p>
+        <div className="mt-5 flex justify-center">
+          <LifeStageSwitcher currentStage="single" />
+        </div>
       </motion.div>
 
       {/* 🌊 کارت‌ها */}

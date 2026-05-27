@@ -1,26 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, Film, Puzzle, Brain, Languages, Smile, X, Car } from "lucide-react";
+import { Gamepad2, Film, Puzzle, Brain, Languages, Smile, X, Car, BookOpen } from "lucide-react";
+import { stories } from "../components/fun/Story/storiesData";
 
 import MemoryMatchGame from "../components/fun/games/MemoryMatchGame";
 import ColorTapGame from "../components/fun/games/ColorTapGame";
 import OddOneOutGame from "../components/fun/games/OddOneOutGame";
-import NumberOrderGame from "../components/fun/games/NumberOrderGame";
 import ShapeMatchGame from "../components/fun/games/ShapeMatchGame";
 import BalloonPopGame from "../components/fun/games/BalloonPopGame";
-import FireflyCatchGame from "../components/fun/games/FireflyCatchGame";
 import MeteorDodgeGame from "../components/fun/games/MeteorDodgeGame";
-
-// ✅ بازی جدید
-import AuroraSwitchGame from "../components/fun/games/AuroraSwitchGame";
-
 import NeonAimShooterGame from "../components/fun/games/NeonAimShooterGame";
 import NeonRhythmTapGame from "../components/fun/games/NeonRhythmTapGame";
-import ZenRippleGardenGame from "../components/fun/games/ZenRippleGardenGame";
 import LaserMirrorGame from "../components/fun/games/LaserMirrorGame";
-import BombDefuserGame from "../components/fun/games/BombDefuserGame";
-import StealthMazeGame from "../components/fun/games/StealthMazeGame";
 import GeninoCarRaceGame from "../components/fun/games/GeninoCarRaceGame";
+import funHero from "../assets/fun/fun-hero.webp";
+import PinocchioStory from "../components/fun/Story/PinocchioStory";
+
 
 /** ✅ جلوگیری از صفحه سفید اگر یک بازی کرش کرد */
 class GameErrorBoundary extends React.Component {
@@ -232,16 +227,6 @@ const GAME_REGISTRY = [
     props: { grid: 6 },
   },
   {
-    id: "number-order",
-    type: "numbers",
-    title: "ترتیب اعداد",
-    category: "شناخت اعداد",
-    hint: "عددها را از کوچک به بزرگ انتخاب کن 🔢",
-    icon: Brain,
-    Component: NumberOrderGame,
-    props: { count: 8, max: 20 },
-  },
-  {
     id: "shape-match",
     type: "shape",
     title: "شکل مشابه را پیدا کن",
@@ -262,16 +247,6 @@ const GAME_REGISTRY = [
     props: { duration: 20 },
   },
   {
-    id: "firefly-catch",
-    type: "firefly",
-    title: "کرم‌های شب‌تاب رو بگیر",
-    category: "واکنش و تمرکز",
-    hint: "کرم‌های نورانی رو بگیر ✨ | طلایی = +۳ | تیره = −۱",
-    icon: Smile,
-    Component: FireflyCatchGame,
-    props: { duration: 25 },
-  },
-  {
     id: "meteor-dodge",
     type: "meteor",
     title: "فرار از شهاب‌سنگ‌ها",
@@ -280,18 +255,6 @@ const GAME_REGISTRY = [
     icon: Gamepad2,
     Component: MeteorDodgeGame,
     props: { duration: 25 },
-  },
-
-  // ✅ جایگزین Neon Runner با بازی جدید
-  {
-    id: "aurora-switch",
-    type: "runner",
-    title: "سوئیچ شفق قطبی (Aurora Switch)",
-    category: "ری‌اکشن + تصمیم سریع",
-    hint: "کلیک روی هسته = تغییر رنگ | Space = Dash 🌌",
-    icon: Gamepad2,
-    Component: AuroraSwitchGame,
-    props: { duration: 40, livesStart: 3 },
   },
 
   {
@@ -315,16 +278,6 @@ const GAME_REGISTRY = [
     props: { duration: 35, bpm: 108, speed: 260, lanes: 4 },
   },
   {
-    id: "zen-ripple-garden",
-    type: "zen",
-    title: "باغ ذن",
-    category: "آرامش + تمرکز",
-    hint: "هرجا لمس کنی موج می‌سازی 🌿",
-    icon: Smile,
-    Component: ZenRippleGardenGame,
-    props: { duration: 25, petalsPerTap: 10 },
-  },
-  {
     id: "laser-mirror",
     type: "laser",
     title: "لیزر و آینه‌ها",
@@ -333,26 +286,6 @@ const GAME_REGISTRY = [
     icon: Brain,
     Component: LaserMirrorGame,
     props: { levelIndex: 0 },
-  },
-  {
-    id: "bomb-defuser",
-    type: "bomb",
-    title: "خنثی‌سازی بمب",
-    category: "منطق + استرس شیرین",
-    hint: "فقط یک سیم رو قطع کن 💣",
-    icon: Gamepad2,
-    Component: BombDefuserGame,
-    props: { duration: 18, wiresCount: 4, difficulty: 2 },
-  },
-  {
-    id: "stealth-maze",
-    type: "maze",
-    title: "هزارتوی سایه‌روشن",
-    category: "تمرکز + واکنش سریع",
-    hint: "فقط در تاریکی حرکت کن 🕶️",
-    icon: Smile,
-    Component: StealthMazeGame,
-    props: { duration: 35 },
   },
   {
   id: "car-race",
@@ -367,18 +300,234 @@ const GAME_REGISTRY = [
 ];
 
 export default function FunAndPlay() {
-  const [activeTab, setActiveTab] = useState("games");
+  const [activeTab, setActiveTab] = useState("videos");
 
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
+  const [isLearningOpen, setIsLearningOpen] = useState(false);
+  const [selectedLearning, setSelectedLearning] = useState(null);
+  const [previewLesson, setPreviewLesson] = useState(null);
+  const [selectedStory, setSelectedStory] = useState(null);
+
+  useEffect(() => {
+  const hasModalOpen =
+    isLearningOpen ||
+    isGameOpen ||
+    previewLesson ||
+    selectedStory;
+
+  if (!hasModalOpen) return;
+
+  window.history.pushState({ modal: true }, "");
+
+  const handlePopState = () => {
+    if (previewLesson) {
+      setPreviewLesson(null);
+      return;
+    }
+
+    if (selectedStory) {
+      setSelectedStory(null);
+      return;
+    }
+
+    if (isLearningOpen) {
+      closeLearning();
+      return;
+    }
+
+    if (isGameOpen) {
+      closeGame();
+    }
+  };
+
+  window.addEventListener("popstate", handlePopState);
+
+  return () => {
+    window.removeEventListener("popstate", handlePopState);
+  };
+}, [
+  isLearningOpen,
+  isGameOpen,
+  previewLesson,
+  selectedStory,
+]);
 
   const games = GAME_REGISTRY;
 
+  const origamiLessons = [
+  {
+    id: 1,
+    title: "اوریگامی هواپیما",
+    subtitle: "آموزش ساخت هواپیما",
+    image: "/images/origami/origami-1.webp",
+  },
+  {
+    id: 2,
+    title: "اوریگامی قایق",
+    subtitle: "آموزش ساخت قایق",
+    image: "/images/origami/origami-2.webp",
+  },
+  {
+    id: 3,
+    title: "اوریگامی پروانه",
+    subtitle: "آموزش ساخت پروانه",
+    image: "/images/origami/origami-3.webp",
+  },
+  {
+    id: 4,
+    title: "اوریگامی قورباغه",
+    subtitle: "آموزش ساخت قورباغه",
+    image: "/images/origami/origami-4.webp",
+  },
+  {
+    id: 5,
+    title: "اوریگامی جعبه هدیه",
+    subtitle: "آموزش ساخت جعبه هدیه",
+    image: "/images/origami/origami-5.webp",
+  },
+  {
+    id: 6,
+    title: "اوریگامی ماهی",
+    subtitle: "آموزش ساخت ماهی",
+    image: "/images/origami/origami-6.webp",
+  },
+  {
+    id: 7,
+    title: "اوریگامی پنگوئن",
+    subtitle: "آموزش ساخت پنگوئن",
+    image: "/images/origami/origami-7.webp",
+  },
+  {
+    id: 8,
+    title: "اوریگامی ماشین",
+    subtitle: "آموزش ساخت ماشین",
+    image: "/images/origami/origami-8.webp",
+  },
+  {
+    id: 9,
+    title: "اوریگامی فیل",
+    subtitle: "آموزش ساخت فیل",
+    image: "/images/origami/origami-9.webp",
+  },
+];
+
+  const learningLessons = [
+  {
+    id: 1,
+    title: "درس اول",
+    subtitle: "حیوانات",
+    image: "/images/learning/lesson-1.webp",
+  },
+  {
+    id: 2,
+    title: "درس دوم",
+    subtitle: "حشرات",
+    image: "/images/learning/lesson-2.webp",
+  },
+  {
+    id: 3,
+    title: "درس سوم",
+    subtitle: "اعضای بدن",
+    image: "/images/learning/lesson-3.webp",
+  },
+  {
+    id: 4,
+    title: "درس چهارم",
+    subtitle: "میوه ها",
+    image: "/images/learning/lesson-4.webp",
+  },
+  {
+    id: 5,
+    title: "درس پنجم",
+    subtitle: "لباس ها",
+    image: "/images/learning/lesson-5.webp",
+  },
+  {
+    id: 6,
+    title: "درس ششم",
+    subtitle: "وسائل نقلیه",
+    image: "/images/learning/lesson-6.webp",
+  },
+  {
+    id: 7,
+    title: "درس هفتم",
+    subtitle: "طبیعت",
+    image: "/images/learning/lesson-7.webp",
+  },
+  {
+    id: 8,
+    title: "درس هشتم",
+    subtitle: "وسائل خانه",
+    image: "/images/learning/lesson-8.webp",
+  },
+  {
+    id: 9,
+    title: "درس نهم",
+    subtitle: "رنگ ها",
+    image: "/images/learning/lesson-9.webp",
+  },
+  {
+    id: 10,
+    title: "درس دهم",
+    subtitle: "شغل ها",
+    image: "/images/learning/lesson-10.webp",
+  },
+  {
+    id: 11,
+    title: "درس یازدهم",
+    subtitle: "مدرسه و کلاس",
+    image: "/images/learning/lesson-11.webp",
+  },
+  {
+    id: 12,
+    title: "درس دوازدهم",
+    subtitle: "احساسات",
+    image: "/images/learning/lesson-12.webp",
+  },
+  {
+    id: 13,
+    title: "درس سیزدهم",
+    subtitle: "مکالمه های ساده کودکانه",
+    image: "/images/learning/lesson-13.webp",
+  },
+  {
+    id: 14,
+    title: "درس چهاردهم",
+    subtitle: "ادامه مکالمه های ساده کودکانه",
+    image: "/images/learning/lesson-14.webp",
+  },
+  {
+    id: 15,
+    title: "درس پانزدهم",
+    subtitle: "اعضای خانواده",
+    image: "/images/learning/lesson-15.webp",
+  },
+
+];
+
+
   const videos = [
-    { id: "v1", title: "کارتون آموزش زبان انگلیسی", category: "آموزشی", icon: <Languages className="w-16 h-16 text-yellow-500" /> },
-    { id: "v2", title: "کارتون پرورش مهارت همکاری", category: "تربیتی", icon: <Brain className="w-16 h-16 text-yellow-500" /> },
-    { id: "v3", title: "انیمیشن احساسات من", category: "هیجانی", icon: <Smile className="w-16 h-16 text-yellow-500" /> },
-  ];
+  {
+    id: "v1",
+    title: "آموزش زبان انگلیسی",
+    category: "یادگیری زبان",
+    icon: <Languages className="w-16 h-16 text-yellow-500" />,
+  },
+  {
+  id: "v2",
+  title: "آموزش اوریگامی",
+  category: "خلاقیت و کاردستی",
+  icon: <Puzzle className="w-16 h-16 text-yellow-500" />,
+},
+   {
+  id: "v3",
+  title: "داستان‌های کودکان",
+  category: "قصه و خیال‌پردازی",
+  icon: <BookOpen className="w-16 h-16 text-yellow-500" />,
+  Component: PinocchioStory,
+},
+];
 
   const openGame = (game) => {
     setSelectedGame(game);
@@ -390,13 +539,23 @@ export default function FunAndPlay() {
     setSelectedGame(null);
   };
 
+  const openLearning = (item) => {
+  setSelectedLearning(item);
+  setIsLearningOpen(true);
+};
+
+const closeLearning = () => {
+  setIsLearningOpen(false);
+  setSelectedLearning(null);
+};
+
   const GameComponent = selectedGame?.Component;
   const gameProps = selectedGame?.props || {};
 
   return (
     <main
       dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 flex flex-col items-center pt-28 px-6 relative overflow-hidden"
+      className="min-h-screen bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 flex flex-col items-center pt-12 sm:pt-20 px-4 sm:px-6 pb-32 relative overflow-hidden"
     >
       {/* بک‌گراند DNA */}
       <div className="absolute inset-0 opacity-25 z-0">
@@ -426,13 +585,90 @@ export default function FunAndPlay() {
         ))}
       </div>
 
-      <h1 className="text-4xl font-extrabold text-yellow-700 mb-10 z-10 drop-shadow-md">
-        🎮 بازی و سرگرمی ژنینو
-      </h1>
+      <motion.section
+  className="
+relative z-10 w-full max-w-5xl
+rounded-[2.2rem]
+border border-white/60
+bg-white/70 backdrop-blur-2xl
+shadow-[0_20px_60px_rgba(212,175,55,0.16)]
+px-4 sm:px-10
+py-5 sm:py-8
+mb-6 sm:mb-8
+overflow-hidden
+"
+  initial={{ opacity: 0, y: 18 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, ease: "easeOut" }}
+>
+  <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full bg-yellow-300/20 blur-3xl" />
+  <div className="absolute -bottom-16 -left-16 w-44 h-44 rounded-full bg-amber-400/20 blur-3xl" />
+
+  <div className="relative flex flex-col lg:flex-row items-center justify-between gap-5 sm:gap-10">
+
+  {/* متن */}
+  <div className="flex-1 text-center lg:text-right">
+
+    <div className="
+w-14 h-14 sm:w-16 sm:h-16
+rounded-[1.6rem]
+bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600
+text-white
+flex items-center justify-center
+shadow-[0_10px_30px_rgba(212,175,55,0.35)]
+mb-3 sm:mb-4
+mx-auto lg:mx-0
+border border-yellow-200/50
+">
+      <Gamepad2 className="w-8 h-8" />
+    </div>
+
+    <h1 className="
+text-[1.7rem] sm:text-4xl
+font-black
+leading-[2.4rem] sm:leading-relaxed
+bg-gradient-to-r from-yellow-700 via-amber-600 to-yellow-500
+bg-clip-text text-transparent
+">
+      دنیای بازی، یادگیری و سرگرمی ژنینو
+    </h1>
+  </div>
+
+  {/* عکس */}
+  <div className="flex-1 flex justify-center">
+    <img
+      src={funHero}
+      alt="Genino Fun"
+      className="
+        w-full max-w-[430px]
+        object-contain
+        drop-shadow-[0_12px_30px_rgba(212,175,55,0.18)]
+        pointer-events-none
+        select-none
+      "
+      loading="lazy"
+    />
+  </div>
+
+</div>
+</motion.section>
 
       {/* تب‌ها */}
       <div className="flex justify-center gap-4 mb-10 z-10">
+        
         <button
+  onClick={() => setActiveTab("videos")}
+  className={`flex items-center gap-2 px-6 py-2 rounded-xl font-semibold transition-all ${
+    activeTab === "videos"
+      ? "bg-yellow-500 text-white shadow-lg"
+      : "bg-white border border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+  }`}
+>
+  <Film className="w-5 h-5" />
+  آموزش و یادگیری
+</button>
+
+<button
           onClick={() => setActiveTab("games")}
           className={`flex items-center gap-2 px-6 py-2 rounded-xl font-semibold transition-all ${
             activeTab === "games"
@@ -442,17 +678,6 @@ export default function FunAndPlay() {
         >
           <Gamepad2 className="w-5 h-5" />
           بازی‌ها
-        </button>
-        <button
-          onClick={() => setActiveTab("videos")}
-          className={`flex items-center gap-2 px-6 py-2 rounded-xl font-semibold transition-all ${
-            activeTab === "videos"
-              ? "bg-yellow-500 text-white shadow-lg"
-              : "bg-white border border-yellow-300 text-yellow-700 hover:bg-yellow-50"
-          }`}
-        >
-          <Film className="w-5 h-5" />
-          فیلم و کارتون
         </button>
       </div>
 
@@ -473,7 +698,13 @@ export default function FunAndPlay() {
               key={item.id}
               whileHover={{ scale: 1.04, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => activeTab === "games" && openGame(item)}
+              onClick={() => {
+  if (activeTab === "games") {
+    openGame(item);
+  } else {
+    openLearning(item);
+  }
+}}
               className={[
                 "rounded-3xl shadow-lg overflow-hidden cursor-pointer transition-all",
                 "flex flex-col items-center justify-center py-10 relative",
@@ -511,6 +742,177 @@ export default function FunAndPlay() {
           );
         })}
       </motion.div>
+
+      
+
+      <AnimatePresence>
+  {isLearningOpen && (
+    <motion.div
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={closeLearning}
+    >
+      <motion.div
+        className="w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-white rounded-[2rem] border border-yellow-200 shadow-2xl p-6 relative"
+        initial={{ scale: 0.96, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.96, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={closeLearning}
+          className="absolute left-4 top-4 w-10 h-10 rounded-xl bg-yellow-50 border border-yellow-200 flex items-center justify-center hover:bg-yellow-100"
+        >
+          <X className="w-5 h-5 text-yellow-700" />
+        </button>
+
+        <div className="mb-8 text-center">
+          <h2 className="text-3xl font-black text-yellow-700">
+            {selectedLearning?.title}
+          </h2>
+
+          <p className="text-gray-500 mt-2">
+            {selectedLearning?.id === "v3"
+              ? "داستان‌های شیرین و آموزنده برای کودکان"
+              : selectedLearning?.id === "v2"
+              ? "آموزش‌های تصویری اوریگامی ژنینو"
+              : "درس‌های تصویری و جذاب ژنینو"}
+          </p>
+        </div>
+
+        {selectedLearning?.id === "v3" ? (
+          selectedStory ? (
+            <>
+              <button
+                onClick={() => setSelectedStory(null)}
+                className="mb-6 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-bold text-yellow-700 hover:bg-yellow-100"
+              >
+                بازگشت به لیست داستان‌ها
+              </button>
+
+              <selectedStory.Component />
+            </>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {stories.map((story) => (
+                <button
+                  key={story.id}
+                  onClick={() => setSelectedStory(story)}
+                  className="text-right bg-white border border-yellow-200 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all"
+                >
+                  <img
+                    src={story.image}
+                    alt={story.title}
+                    className="w-full aspect-[3/2] object-contain bg-yellow-50"
+                    loading="lazy"
+                  />
+
+                  <div className="p-4">
+                    <h3 className="text-lg font-black text-yellow-700">
+                      {story.title}
+                    </h3>
+
+                    <p className="text-sm text-gray-600 mt-2 leading-7">
+                      {story.description}
+                    </p>
+
+                    <div className="mt-4 text-center rounded-xl bg-yellow-500 text-white py-2 font-bold">
+                      مشاهده داستان
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(
+              selectedLearning?.id === "v2"
+                ? origamiLessons
+                : learningLessons
+            ).map((lesson) => (
+              <motion.div
+                key={lesson.id}
+                whileHover={{ y: -4, scale: 1.02 }}
+                className="bg-white border border-yellow-200 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all"
+              >
+                <button
+                  type="button"
+                  onClick={() => setPreviewLesson(lesson)}
+                  className="w-full bg-gradient-to-br from-yellow-50 to-white p-3"
+                >
+                  <img
+                    src={lesson.image}
+                    alt={lesson.subtitle}
+                    className="w-full aspect-[3/2] object-contain rounded-2xl"
+                    loading="lazy"
+                  />
+                </button>
+
+                <div className="p-4 text-center">
+                  <h3 className="text-lg font-black text-yellow-700">
+                    {lesson.title}
+                  </h3>
+
+                  <p className="text-gray-600 mt-1 font-semibold">
+                    {lesson.subtitle}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+<AnimatePresence>
+  {previewLesson && (
+    <motion.div
+      className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-3 sm:p-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setPreviewLesson(null)}
+    >
+      <motion.div
+        className="relative w-full max-w-6xl bg-white rounded-3xl border border-yellow-200 shadow-2xl p-3 sm:p-5"
+        initial={{ scale: 0.95, opacity: 0, y: 10 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 10 }}
+        transition={{ duration: 0.2 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={() => setPreviewLesson(null)}
+          className="absolute left-3 top-3 z-10 w-10 h-10 rounded-xl bg-white/90 border border-yellow-200 flex items-center justify-center hover:bg-yellow-50"
+          aria-label="بستن تصویر"
+        >
+          <X className="w-5 h-5 text-yellow-700" />
+        </button>
+
+        <div className="text-center mb-3 pt-10 sm:pt-2">
+          <h3 className="text-xl sm:text-2xl font-black text-yellow-700">
+            {previewLesson.title}
+          </h3>
+          <p className="text-sm sm:text-base text-gray-600 font-semibold mt-1">
+            {previewLesson.subtitle}
+          </p>
+        </div>
+
+        <img
+          src={previewLesson.image}
+          alt={previewLesson.subtitle}
+          className="w-full max-h-[72vh] object-contain rounded-2xl bg-yellow-50"
+        />
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
       {/* مودال بازی */}
       <AnimatePresence>

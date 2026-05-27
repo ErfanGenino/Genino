@@ -42,7 +42,6 @@ export default function HomeWorkoutWithoutEquipmentArticle() {
           ۱) چرا ورزش بدون تجهیزات مؤثر است؟
         </p>
 
-        <HorizontalScrollGallery folder="articles/home-workout/no-equipment/benefits" />
 
         <ul className="list-disc pr-6 space-y-3">
           <li>درگیرشدن هم‌زمان چند گروه عضلانی</li>
@@ -123,7 +122,6 @@ export default function HomeWorkoutWithoutEquipmentArticle() {
           ۳) برنامه تمرینی ساده برای شروع (بدون تجهیزات)
         </p>
 
-        <HorizontalScrollGallery folder="articles/home-workout/no-equipment/program" />
 
         <ul className="list-disc pr-6 space-y-3">
           <li>۳ جلسه در هفته (یک روز در میان)</li>
@@ -149,7 +147,7 @@ export default function HomeWorkoutWithoutEquipmentArticle() {
           ۴) اشتباهات رایج در ورزش خانگی
         </p>
 
-        <HorizontalScrollGallery folder="articles/home-workout/no-equipment/mistakes" />
+      
 
         <ul className="list-disc pr-6 space-y-3">
           <li>شروع با شدت بالا و ناگهانی</li>
@@ -171,7 +169,7 @@ export default function HomeWorkoutWithoutEquipmentArticle() {
           جمع‌بندی: ورزش در خانه، ساده اما قدرتمند
         </p>
 
-        <HorizontalScrollGallery folder="articles/home-workout/no-equipment/summary" />
+      
 
         <ul className="list-disc pr-6 space-y-2">
           <li>برای شروع نیازی به تجهیزات نیست</li>

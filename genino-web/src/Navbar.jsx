@@ -1,16 +1,30 @@
 //src/Navbar.jsx
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { LogIn, UserPlus, Menu, X, LogOut } from "lucide-react";
-import { useState, useEffect } from "react";
+import { LogIn, UserPlus, Menu, X, LogOut, Play, Pause } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import logo from "./assets/logo-genino.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell } from "lucide-react";
+import { authFetch, getUserProfile } from "./services/api";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [user, setUser] = useState(null);
+  const audioRef = useRef(null);
+  const playlistRef = useRef([]);
+  const currentTrackIndexRef = useRef(0);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+
+  const tracks = Array.from({ length: 20 }, (_, i) => {
+  const num = String(i + 1).padStart(2, "0");
+  return `/audio/meditation/track-${num}.mp3`;
+});
+
+function shuffleArray(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
 
   const navigate = useNavigate();
 
@@ -23,10 +37,19 @@ function Navbar() {
 
   // ⭐ بارگذاری کاربر + واکنش به تغییرات localStorage
   useEffect(() => {
-  const updateUser = () => {
-    const storedUser = localStorage.getItem("genino_user");
-    setUser(storedUser ? JSON.parse(storedUser) : null);
-  };
+  const updateUser = async () => {
+  const storedUser = localStorage.getItem("genino_user");
+  setUser(storedUser ? JSON.parse(storedUser) : null);
+
+  const token = localStorage.getItem("genino_token");
+  if (!token) return;
+
+  const fresh = await getUserProfile();
+  if (fresh?.ok && fresh.user) {
+    localStorage.setItem("genino_user", JSON.stringify(fresh.user));
+    setUser(fresh.user);
+  }
+};
 
   // بار اول
   updateUser();
@@ -37,9 +60,12 @@ function Navbar() {
   // وقتی localStorage از تب دیگر تغییر کند
   window.addEventListener("storage", updateUser);
 
+  window.addEventListener("focus", updateUser);
+
   return () => {
     window.removeEventListener("genino_user_changed", updateUser);
     window.removeEventListener("storage", updateUser);
+    window.removeEventListener("focus", updateUser);
   };
 }, []);
 
@@ -68,38 +94,122 @@ function Navbar() {
 
 
   const links = [
-    { to: "/", label: "خانه" },
-    { to: "/shop", label: "فروشگاه" },
-    { to: "/social", label: "شبکه اجتماعی ژنینو" },
-    { to: "/social/profile", label: "پروفایل" },
-  ];
+  { to: "/", label: "خانه" },
+  { to: "/mychild", label: "کودک من و کودکان ژنینویی" },
+  { to: "/shop", label: "فروشگاه تخصصی" },
+  { to: "/my-cycle", label: "سلامت بانوان" },
+  { to: "/my-men-health", label: "سلامت آقایان" },
+  { to: "/my-doctor", label: "پزشک من" },
+  { to: "/calorie-tracker", label: "کالری شمار" },
+  { to: "/world-knowledge", label: "مجله ژنینو" },
+  { to: "/social", label: "شبکه اجتماعی ژنینو" },
+  { to: "/fun", label: "بازی و سرگرمی" },
+  { to: "/events", label: "رویدادها و جشن‌ها" },
+  { to: "/single-world", label: "جهان مجردها" },
+  { to: "/family-finance", label: "اقتصاد و حسابداری خانواده" },
+  { to: "/social/profile", label: "پروفایل" },
+];
 
   const inDashboard = window.location.pathname.startsWith("/dashboard");
   const [unreadCount, setUnreadCount] = useState(0);
 
 useEffect(() => {
-  const loadUnread = () => {
+  let intervalId;
+
+  const loadUnread = async () => {
     try {
-      const raw = localStorage.getItem("genino_notifications");
-      const list = raw ? JSON.parse(raw) : [];
-      const unread = Array.isArray(list) ? list.filter((n) => !n.read).length : 0;
-      setUnreadCount(unread);
-    } catch {
+      const token = localStorage.getItem("genino_token");
+
+      if (!token) {
+        setUnreadCount(0);
+        return;
+      }
+
+      const res = await authFetch("/notifications");
+
+      if (res?.ok && Array.isArray(res.notifications)) {
+        const unread = res.notifications.filter((n) => {
+          const isRead = n.read ?? n.isRead ?? false;
+          return !isRead;
+        }).length;
+
+        setUnreadCount(unread);
+      } else {
+        setUnreadCount(0);
+      }
+    } catch (err) {
+      console.error("خطا در دریافت تعداد اعلان‌ها:", err);
       setUnreadCount(0);
     }
   };
 
   loadUnread();
 
-  // وقتی اعلان‌ها یا کاربر تغییر کرد
+  // ✅ هر ۱۵ ثانیه اعلان‌ها را دوباره از سرور بگیر
+  intervalId = setInterval(loadUnread, 15000);
+
+  // ✅ وقتی کاربر برمی‌گردد به تب مرورگر، دوباره چک کن
+  const handleFocus = () => loadUnread();
+
+  window.addEventListener("focus", handleFocus);
   window.addEventListener("genino_notifications_changed", loadUnread);
+  window.addEventListener("genino_token_changed", loadUnread);
+  window.addEventListener("genino_user_changed", loadUnread);
   window.addEventListener("storage", loadUnread);
 
   return () => {
+    clearInterval(intervalId);
+    window.removeEventListener("focus", handleFocus);
     window.removeEventListener("genino_notifications_changed", loadUnread);
+    window.removeEventListener("genino_token_changed", loadUnread);
+    window.removeEventListener("genino_user_changed", loadUnread);
     window.removeEventListener("storage", loadUnread);
   };
 }, []);
+
+
+async function toggleMusic() {
+  try {
+    let audio = audioRef.current;
+
+    // اگر هنوز ساخته نشده
+    if (!audio) {
+      playlistRef.current = shuffleArray(tracks);
+      currentTrackIndexRef.current = 0;
+
+      audio = new Audio(playlistRef.current[0]);
+      audio.volume = 0.18;
+
+      audio.addEventListener("ended", () => {
+        currentTrackIndexRef.current += 1;
+
+        if (currentTrackIndexRef.current >= playlistRef.current.length) {
+          playlistRef.current = shuffleArray(tracks);
+          currentTrackIndexRef.current = 0;
+        }
+
+        audio.src =
+          playlistRef.current[currentTrackIndexRef.current];
+
+        audio.play().catch(console.error);
+      });
+
+      audioRef.current = audio;
+    }
+
+    // پلی / استاپ
+    if (audio.paused) {
+      await audio.play();
+      setIsMusicPlaying(true);
+    } else {
+      audio.pause();
+      setIsMusicPlaying(false);
+    }
+
+  } catch (err) {
+    console.error("MUSIC ERROR:", err);
+  }
+}
 
 
   return (
@@ -114,7 +224,7 @@ useEffect(() => {
       >
         <nav
           dir="rtl"
-          className="w-full flex items-center justify-between px-8 py-3"
+          className="w-full flex items-center justify-between px-3 sm:px-8 py-3"
         >
           {/* 🔸 لوگو */}
           <div className="flex-shrink-0">
@@ -143,7 +253,19 @@ useEffect(() => {
           
 
           {/* 🔸 سمت چپ */}
-          <div className="hidden md:flex items-center gap-3 mr-auto">
+          <div className="hidden md:flex items-center gap-2 mr-auto">
+            <button
+  onClick={toggleMusic}
+  className="flex items-center justify-center
+           w-7 h-7 rounded-md
+           text-yellow-600/70
+           hover:text-yellow-700
+           transition-all duration-300"
+  aria-label={isMusicPlaying ? "توقف موسیقی آرامش‌بخش" : "پخش موسیقی آرامش‌بخش"}
+  title={isMusicPlaying ? "توقف موسیقی" : "پخش موسیقی"}
+>
+  {isMusicPlaying ? <Pause size={11} strokeWidth={2.3} /> : <Play size={11} strokeWidth={2.3} />}
+</button>
             {user ? (
               <>
                 {/* نمایش نام کاربر */}
@@ -169,12 +291,14 @@ useEffect(() => {
                 {/* 🔔 اعلان‌ها */}
                 <button
                   onClick={() => navigate("/notifications")}
-                  className="relative flex items-center justify-center w-10 h-10 rounded-xl
-                             bg-white border border-yellow-300 text-yellow-700
-                             hover:bg-yellow-50 transition shadow-sm"
+                  className="relative flex items-center justify-center
+                             w-7 h-7 rounded-md
+                             text-yellow-600/70
+                             hover:text-yellow-700
+                             transition-all duration-300"
                   aria-label="اعلان‌ها"
                 >
-                <Bell size={20} />
+                <Bell size={14} strokeWidth={2.3} />
                 {unreadCount > 0 && (
                 <span
                 className="absolute -top-2 -left-2 min-w-[20px] h-5 px-1
@@ -190,9 +314,12 @@ useEffect(() => {
                 {/* خروج */}
                 <button
                   onClick={() => setShowLogoutConfirm(true)}
-                  className="flex items-center gap-1.5 text-red-500 border border-red-300 px-3 py-1.5 rounded-xl text-sm font-medium hover:bg-red-50 hover:text-red-600 transition-all shadow-sm hover:shadow-md"
+                  className="flex items-center gap-1
+                             text-red-400/80
+                             hover:text-red-500
+                             transition-all duration-300"
                 >
-                  <LogOut size={17} className="opacity-80" />
+                  <LogOut size={13} strokeWidth={2.3} />
                   <span>خروج</span>
                 </button>
               </>
@@ -254,115 +381,168 @@ useEffect(() => {
   </button>
 )}
 
+<button
+  onClick={toggleMusic}
+  className="md:hidden flex items-center justify-center
+           w-7 h-7 rounded-md
+           text-yellow-600/70
+           hover:text-yellow-700
+           transition-all duration-300"
+  aria-label={isMusicPlaying ? "توقف موسیقی آرامش‌بخش" : "پخش موسیقی آرامش‌بخش"}
+>
+  {isMusicPlaying ? <Pause size={11} strokeWidth={2.3} /> : <Play size={11} strokeWidth={2.3} />}
+</button>
 
           {/* 🔸 منوی موبایل */}
           <button
-            className="p-2 rounded-lg hover:bg-yellow-50 transition"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? (
-              <X size={24} className="text-yellow-600" />
-            ) : (
-              <Menu size={24} className="text-gray-700" />
-            )}
-          </button>
+  className="relative flex items-center justify-center
+           w-7 h-7 rounded-md
+           text-yellow-600/70
+           hover:text-yellow-700
+           transition-all duration-300"
+  onClick={() => setMenuOpen(!menuOpen)}
+>
+  {menuOpen ? (
+  <X size={15} strokeWidth={2.3} />
+) : (
+  <Menu size={15} strokeWidth={2.3} />
+)}
+
+  {!menuOpen && unreadCount > 0 && (
+    <span
+      className="absolute -top-1 -left-1 min-w-[18px] h-[18px]
+                 px-1 rounded-full bg-red-500 text-white
+                 text-[10px] font-bold flex items-center justify-center shadow"
+    >
+      {unreadCount > 99 ? "99+" : unreadCount}
+    </span>
+  )}
+</button>
         </nav>
 
-        {/* 🔹 منوی موبایل */}
-        {menuOpen && (
-          <div className="bg-white border-t border-gray-100 py-4 px-5 
-      flex flex-col gap-3 text-right">
-
-            {links.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => setMenuOpen(false)}
-                className={({ isActive }) =>
-                  [
-                    "text-sm py-1 transition-all",
-                    isActive
-                      ? "text-yellow-600 font-semibold"
-                      : "text-gray-700 hover:text-yellow-600",
-                  ].join(" ")
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-
-            <hr className="my-2 border-gray-200" />
-
-            <div className="flex flex-col gap-2">
-              {user ? (
-                <>
-
-                <button
-                  onClick={() => {
-                   setMenuOpen(false);
-                   navigate("/notifications");
-                  }}
-                className="flex items-center justify-between
-                           border border-yellow-300 text-yellow-700
-                           px-3 py-2 rounded-lg text-sm hover:bg-yellow-50"
-                >
-               <span className="flex items-center gap-2">
-                     <Bell size={18} />
-                     اعلان‌ها
-               </span>
-
-             {unreadCount > 0 && (
-                <span className="min-w-[22px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px]
-                                 flex items-center justify-center font-bold">
-             {unreadCount > 99 ? "99+" : unreadCount}
-                 </span>
-                   )}
-                </button>
-
-                
-
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setShowLogoutConfirm(true);
-                    }}
-                    className="flex items-center justify-between
-                      border border-red-300 text-red-500
-                      px-3 py-2 rounded-lg text-sm hover:bg-red-50"
-                  >
-                    <span>خروج</span>
-                    <LogOut size={17} />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-between
-                      border border-yellow-300 text-yellow-700
-                      px-3 py-2 rounded-lg text-sm hover:bg-yellow-50"
-                  >
-                    <span>ورود</span>
-                    <LogIn size={17} />
-                  </Link>
-
-                  <Link
-                    to="/signup"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-between
-                      bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm
-                      hover:bg-yellow-600 shadow"
-                  >
-                    <span>ثبت‌نام</span>
-                    <UserPlus size={17} />
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
+        
       </header>
+
+{/* 🔹 منوی آبشاری */}
+<AnimatePresence>
+  {menuOpen && (
+    <motion.div
+      className="fixed inset-0 z-[90] bg-black/35 backdrop-blur-[2px]"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setMenuOpen(false)}
+    >
+      <motion.div
+        dir="rtl"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: -14, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -10, scale: 0.98 }}
+        transition={{ duration: 0.22 }}
+        className="
+          fixed top-[82px] left-3 sm:left-6
+          w-[calc(100%-24px)] sm:w-80
+          max-h-[72vh] overflow-y-auto
+          rounded-3xl
+          bg-white/95 backdrop-blur-xl
+          border border-yellow-200
+          shadow-[0_20px_60px_rgba(120,80,0,0.22)]
+          p-4
+          flex flex-col gap-2 text-right
+        "
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-extrabold text-yellow-800">
+            منوی ژنینو
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen(false)}
+            className="w-9 h-9 rounded-full bg-yellow-50 text-yellow-700 flex items-center justify-center hover:bg-yellow-100 transition"
+          >
+            <X size={19} />
+          </button>
+        </div>
+
+        {links.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) =>
+              [
+                "rounded-2xl px-4 py-3 text-sm font-bold transition-all",
+                isActive
+                  ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                  : "text-gray-700 hover:bg-yellow-50 hover:text-yellow-700",
+              ].join(" ")
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
+
+        <div className="my-2 h-px bg-gradient-to-l from-transparent via-yellow-200 to-transparent" />
+
+        {user ? (
+          <>
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                navigate("/notifications");
+              }}
+              className="flex items-center justify-between rounded-2xl border border-yellow-200 bg-yellow-50/70 px-4 py-3 text-sm font-bold text-yellow-800"
+            >
+              <span className="flex items-center gap-2">
+                <Bell size={18} />
+                اعلان‌ها
+              </span>
+
+              {unreadCount > 0 && (
+                <span className="min-w-[22px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] flex items-center justify-center font-bold">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                setShowLogoutConfirm(true);
+              }}
+              className="flex items-center justify-between rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-bold text-red-500"
+            >
+              <span>خروج</span>
+              <LogOut size={14} strokeWidth={2.3} />
+            </button>
+          </>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-between rounded-2xl border border-yellow-200 bg-yellow-50/70 px-4 py-3 text-sm font-bold text-yellow-800"
+            >
+              <span>ورود</span>
+              <LogIn size={17} />
+            </Link>
+
+            <Link
+              to="/signup"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-between rounded-2xl bg-gradient-to-l from-yellow-500 to-amber-400 px-4 py-3 text-sm font-bold text-white shadow-lg"
+            >
+              <span>ثبت‌نام</span>
+              <UserPlus size={17} />
+            </Link>
+          </>
+        )}
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
       {/* 🌟 پاپ‌آپ خروج */}
       <AnimatePresence>

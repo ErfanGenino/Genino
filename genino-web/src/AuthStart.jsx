@@ -5,23 +5,23 @@ import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
-import { Smile, Flower2, UsersRound, Puzzle } from "lucide-react";
+import { Smile, Flower2, UsersRound, Puzzle, Sparkles } from "lucide-react";
 import PromoSlider from "@components/Social/PromoSlider";
 import ScrollProduct from "./components/Core/ScrollProduct";
 import TodayCalendarBox from "./components/Dashboard/TodayCalendarBox";
 import { getConversations } from "./services/api";
-import myChildBg from "./assets/outhstart-cards/mychild-bg.png";
-import shopBg from "./assets/outhstart-cards/shop-bg.png";
-import womenHealthBg from "./assets/outhstart-cards/women-health-bg.png";
-import menHealthBg from "./assets/outhstart-cards/men-health-bg.png";
-import myDoctorBg from "./assets/outhstart-cards/my-doctor-bg.png";
-import calorieTrackerBg from "./assets/outhstart-cards/calorie-tracker-bg.png";
-import magazineBg from "./assets/outhstart-cards/magazine-bg.png";
-import socialBg from "./assets/outhstart-cards/social-bg.png";
-import funBg from "./assets/outhstart-cards/fun-bg.png";
-import eventsBg from "./assets/outhstart-cards/events-bg.png";
-import singleWorldBg from "./assets/outhstart-cards/single-world-bg.png";
-import familyFinanceBg from "./assets/outhstart-cards/family-finance-bg.png";
+import shopBg from "./assets/optimized/outhstart-cards/shop-bg.webp";
+import womenHealthBg from "./assets/optimized/outhstart-cards/women-health-bg.webp";
+import menHealthBg from "./assets/optimized/outhstart-cards/men-health-bg.webp";
+import myDoctorBg from "./assets/optimized/outhstart-cards/my-doctor-bg.webp";
+import calorieTrackerBg from "./assets/optimized/outhstart-cards/calorie-tracker-bg.webp";
+import magazineBg from "./assets/optimized/outhstart-cards/magazine-bg.webp";
+import socialBg from "./assets/optimized/outhstart-cards/social-bg.webp";
+import funBg from "./assets/optimized/outhstart-cards/fun-bg.webp";
+import eventsBg from "./assets/optimized/outhstart-cards/events-bg.webp";
+import singleWorldBg from "./assets/optimized/outhstart-cards/single-world-bg.webp";
+import familyFinanceBg from "./assets/optimized/outhstart-cards/family-finance-bg.webp";
+import myChildBg from "./assets/optimized/outhstart-cards/mychild-bg.webp";
 import AuthFeatureCircleSlider from "./components/AuthStart/AuthFeatureCircleSlider";
 import myChildIcon from "./assets/authstart-icons/mychild.png";
 import shopIcon from "./assets/authstart-icons/shop.png";
@@ -45,6 +45,7 @@ export default function AuthStart() {
   const [socialUnreadCount, setSocialUnreadCount] = useState(0);
   const navigate = useNavigate();
   const [showChildChoiceModal, setShowChildChoiceModal] = useState(false);
+  const [showAppModal, setShowAppModal] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -58,7 +59,7 @@ export default function AuthStart() {
 
   const features = [
   {
-    title: "کودک من",
+    title: "کودک من و کودکان ژنینویی",
     desc: "پیگیری رشد ذهنی، عاطفی و فیزیکی کودک با ابزارهای هوشمند ژنینو.",
     link: "/mychild",
     image: myChildBg,
@@ -248,125 +249,84 @@ useEffect(() => {
 }, []);
 
 
+const CrystalDust = () => {
+  const particles = [
+    { top: "18%", left: "12%", size: 1.5 },
+    { top: "28%", left: "28%", size: 1 },
+    { top: "20%", left: "48%", size: 1.2 },
+    { top: "34%", left: "70%", size: 1.4 },
+    { top: "52%", left: "18%", size: 1 },
+    { top: "62%", left: "38%", size: 1.3 },
+    { top: "55%", left: "58%", size: 1 },
+    { top: "72%", left: "78%", size: 1.5 },
+    { top: "42%", left: "88%", size: 1 },
+    { top: "78%", left: "52%", size: 1.2 },
+  ];
+
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-6 sm:pt-10 lg:pt-12 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
+    <motion.div
+      className="absolute inset-0 pointer-events-none"
+      animate={{ opacity: [0.35, 0.9, 0.35] }}
+      transition={{
+        duration: 5,
+        repeat: Infinity,
+        repeatType: "mirror",
+        ease: "easeInOut",
+      }}
+    >
+      {particles.map((p, i) => (
+        <span
+          key={i}
+          className="absolute rounded-full bg-white"
+          style={{
+            top: p.top,
+            left: p.left,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            boxShadow:
+              "0 0 5px rgba(255,255,255,0.95), 0 0 12px rgba(255,232,150,0.75)",
+          }}
+        />
+      ))}
+    </motion.div>
+  );
+};
+
+
+  return (
+    <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-3 sm:pt-6 lg:pt-8 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
 
       
-  {/* 🔹 دکمه دریافت اپ - نسخه نهایی با انیمیشن باز و بسته طبیعی */}
+  {/* 🔹 دکمه دریافت اپ */}
 <motion.div
-  ref={menuRef}
-  className="fixed bottom-6 left-1/2 -translate-x-1/2 sm:bottom-8 sm:left-8 sm:translate-x-0 z-50 flex flex-col items-center sm:items-start"
-  onMouseEnter={() => setOpen(true)}
-  onMouseLeave={() => setOpen(false)}
+  className="
+fixed bottom-0 left-0 right-0
+sm:bottom-8 sm:left-8 sm:right-auto
+sm:translate-x-0
+z-50
+flex justify-center sm:justify-start
+"
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.8, ease: "easeOut" }}
 >
-  {/* 🔸 دسکتاپ */}
-  <div className="hidden sm:flex flex-col items-center relative">
-    <motion.button
-      whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(212,175,55,0.4)" }}
-      whileTap={{ scale: 0.97 }}
-      className="items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg hover:from-yellow-600 hover:to-yellow-500 transition-all w-44"
-    >
-      📱 دریافت اپ ژنینو
-    </motion.button>
-
-    {/* 🔸 افکت سایه طلایی بالا */}
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          key="gold-shadow"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="absolute top-0 -translate-y-full h-2 w-full bg-gradient-to-b from-yellow-400/30 to-transparent blur-md rounded-t-xl pointer-events-none"
-        ></motion.div>
-      )}
-    </AnimatePresence>
-
-    {/* 🔸 منوی بازشونده (از بالا باز و بسته می‌شود با fade) */}
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          key="menu"
-          initial={{ opacity: 0, y: -5, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -5, scale: 0.97 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="absolute bottom-full left-0 w-full bg-white shadow-xl rounded-t-xl border border-yellow-100 overflow-hidden text-center"
-        >
-          <a
-            href="#"
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition"
-          >
-            📲 نسخه Android
-          </a>
-          <a
-            href="#"
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition"
-          >
-            🍎 نسخه iOS
-          </a>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </div>
-
-  {/* 🔸 موبایل */}
-<AnimatePresence>
-  {!open && (
-    <motion.button
-      key="mobileButton"
-      onClick={() => setOpen(true)}
-      whileTap={{ scale: 0.98 }}
-      className="sm:hidden fixed bottom-0 left-0 right-0 z-40 w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-4 text-base font-medium shadow-[0_-2px_10px_rgba(0,0,0,0.1)] hover:from-yellow-600 hover:to-yellow-500 transition-all"
-    >
-      📱 دریافت اپ ژنینو
-    </motion.button>
-  )}
-
-  {open && (
-    <>
-      {/* پس‌زمینه تار */}
-      <motion.div
-        key="overlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.4 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="sm:hidden fixed inset-0 bg-black z-40"
-        onClick={() => setOpen(false)}
-      />
-      {/* کارت پایین */}
-      <motion.div
-        key="sheet"
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl p-5 pt-6 text-center"
-      >
-        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-5" />
-        <h3 className="text-gray-700 font-semibold mb-3">انتخاب نسخه اپ</h3>
-        <a
-          href="#"
-          className="block w-full py-3 mb-3 rounded-xl border border-yellow-300 text-yellow-600 font-medium hover:bg-yellow-50 transition"
-        >
-          📲 نسخه Android
-        </a>
-        <a
-          href="#"
-          className="block w-full py-3 rounded-xl border border-yellow-300 text-yellow-600 font-medium hover:bg-yellow-50 transition"
-        >
-          🍎 نسخه iOS
-        </a>
-      </motion.div>
-    </>
-  )}
-</AnimatePresence>
-
+  <button
+    type="button"
+    onClick={() => setShowAppModal(true)}
+    className="
+w-full sm:w-52
+rounded-none sm:rounded-xl
+bg-gradient-to-r from-yellow-500 to-yellow-400
+text-white
+px-5 py-4
+text-sm font-bold
+shadow-2xl
+hover:shadow-xl hover:scale-105 active:scale-95
+transition-all
+"
+  >
+    📱 دریافت اپ ژنینو
+  </button>
 </motion.div>
 
 
@@ -405,12 +365,51 @@ useEffect(() => {
         ))}
       </div>
 
-<TodayCalendarBox className="mt-2 sm:mt-3 lg:mt-4" />
+<TodayCalendarBox className="mt-0" />
 
-<AuthFeatureCircleSlider items={features} />
+<div className="w-full mt-1 z-20">
+  <AuthFeatureCircleSlider items={features} />
+</div>
 
 <motion.div
-  className="relative w-full max-w-4xl my-10 rounded-3xl overflow-hidden z-20"
+  className="relative z-20 w-full flex justify-center mt-2 mb-1 px-4"
+  initial={{ opacity: 0, y: 14 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.7, ease: "easeOut" }}
+>
+  <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+  <motion.button
+    type="button"
+    onClick={() => navigate("/mychild")}
+    whileHover={{ scale: 1.04 }}
+    whileTap={{ scale: 0.97 }}
+    className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-6 py-4 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
+  >
+    <CrystalDust />
+    <span className="relative flex items-center justify-center gap-2 text-xs sm:text-base">
+      <Baby className="w-4 h-4 sm:w-5 sm:h-5" />
+      کودک من
+    </span>
+  </motion.button>
+
+  <motion.button
+    type="button"
+    onClick={() => navigate("/genino-children")}
+    whileHover={{ scale: 1.04 }}
+    whileTap={{ scale: 0.97 }}
+    className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-6 py-4 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
+  >
+    <CrystalDust /> 
+    <span className="relative flex items-center justify-center gap-2 text-xs sm:text-base">
+      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+      کودکان ژنینویی
+    </span>
+  </motion.button>
+</div>
+</motion.div>
+
+<motion.div
+  className="relative w-full max-w-4xl mt-2 mb-4 sm:mt-4 sm:mb-8 rounded-3xl overflow-hidden z-20"
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -420,16 +419,18 @@ useEffect(() => {
     interval={6}
 
     /* 🌟 ارتفاع بزرگ‌تر */
-    height="h-80 sm:h-96 md:h-[30rem]"
+    height="h-56 sm:h-80 md:h-[30rem]"
 
     className="rounded-3xl overflow-hidden shadow-[0_10px_25px_rgba(212,175,55,0.25)]"
     slides={[
-      { id: 1, text: "هر کودک، یک دنیا نوآوری", sub: "ژنینو، همراه رشد و خلاقیت فرزندتان.", image: "/images/slides/authstart/1.jpg" },
-      { id: 2, text: "سلامت بانوان", sub: "با تحلیل داده‌ها و پیشنهادهای تخصصی.", image: "/images/slides/authstart/2.jpg" },
-      { id: 3, text: "سلامت آقایان", sub: "همراه شما برای ساخت آینده‌ای سالم.", image: "/images/slides/authstart/3.jpg" },
-      { id: 4, text: "پزشک من", sub: "بایگانی پرونده‌های پزشکی شما در ژنینو.", image: "/images/slides/authstart/4.jpg" },
-      { id: 5, text: "فروشگاه تخصصی", sub: "خرید آسان و تخصصی کالاها و خدمات مورد نیاز شما.", image: "/images/slides/authstart/5.jpg" },
-    ]}
+  { id: 1, text: "", sub: "", image: "/images/slides/authstart/1.jpg" },
+  { id: 2, text: "", sub: "", image: "/images/slides/authstart/2.jpg" },
+  { id: 3, text: "", sub: "", image: "/images/slides/authstart/3.jpg" },
+  { id: 4, text: "", sub: "", image: "/images/slides/authstart/4.jpg" },
+  { id: 5, text: "", sub: "", image: "/images/slides/authstart/5.jpg" },
+  { id: 6, text: "", sub: "", image: "/images/slides/authstart/6.jpg" },
+  { id: 7, text: "", sub: "", image: "/images/slides/authstart/7.jpg" },
+]}
   />
 </motion.div>
 
@@ -467,9 +468,9 @@ useEffect(() => {
       {featuresChunks?.[0]?.map((item, i) => (
         <Link
   key={`f0-${i}`}
-  to={item.title === "کودک من" ? "#" : item.link || "#"}
+  to={item.title === "کودک من و کودکان ژنینویی" ? "#" : item.link || "#"}
   onClick={(e) => {
-    if (item.title === "کودک من") {
+    if (item.title === "کودک من و کودکان ژنینویی") {
       e.preventDefault();
       setShowChildChoiceModal(true);
     }
@@ -647,40 +648,113 @@ useEffect(() => {
         </h3>
 
         <p className="text-sm text-gray-500 mb-5">
-          لطفاً انتخاب کنید وارد بخش کودک من شوید یا دنیای کودکان.
+         یکی از مسیرهای زیر را انتخاب کنید. 
         </p>
 
         <div className="grid grid-cols-1 gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setShowChildChoiceModal(false);
-              navigate("/mychild");
-            }}
-            className="w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 text-white py-3 font-bold shadow-md"
-          >
-            کودک من
-          </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setShowChildChoiceModal(false);
-              navigate("/children-world");
-            }}
-            className="w-full rounded-2xl border border-yellow-300 bg-yellow-50 text-yellow-800 py-3 font-bold"
-          >
-            دنیای کودکان
-          </button>
+  <button
+    type="button"
+    onClick={() => {
+      setShowChildChoiceModal(false);
+      navigate("/mychild");
+    }}
+    className="
+      group w-full
+      rounded-2xl
+      bg-gradient-to-l from-yellow-400 via-amber-300 to-yellow-500
+      hover:from-yellow-500 hover:to-amber-400
+      text-yellow-950
+      py-4
+      font-extrabold
+      shadow-[0_10px_25px_rgba(245,158,11,0.22)]
+      hover:shadow-[0_14px_35px_rgba(245,158,11,0.34)]
+      transition-all duration-300
+      hover:-translate-y-1
+    "
+  >
+    <div className="flex items-center justify-center gap-2">
+      👶
+     کودک من و کودکان فالو شده
+    </div>
+  </button>
 
-          <button
-            type="button"
-            onClick={() => setShowChildChoiceModal(false)}
-            className="w-full rounded-2xl text-gray-400 py-2 text-sm"
-          >
-            انصراف
-          </button>
-        </div>
+
+  <button
+    type="button"
+    onClick={() => {
+      setShowChildChoiceModal(false);
+      navigate("/genino-children");
+    }}
+    className="
+      group w-full
+      rounded-2xl
+      bg-gradient-to-l from-yellow-400 via-amber-300 to-yellow-500
+      hover:from-yellow-500 hover:to-amber-400
+      text-yellow-950
+      py-4
+      font-extrabold
+      shadow-[0_10px_25px_rgba(245,158,11,0.22)]
+      hover:shadow-[0_14px_35px_rgba(245,158,11,0.34)]
+      transition-all duration-300
+      hover:-translate-y-1
+    "
+  >
+    <div className="flex items-center justify-center gap-2">
+      ✨
+      کودکان ژنینویی
+    </div>
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setShowChildChoiceModal(false)}
+    className="
+      w-full rounded-2xl
+      py-2 text-sm text-gray-400
+      hover:text-gray-600 transition
+    "
+  >
+    انصراف
+  </button>
+
+</div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+<AnimatePresence>
+  {showAppModal && (
+    <motion.div
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setShowAppModal(false)}
+    >
+      <motion.div
+        className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border border-yellow-200 text-center"
+        initial={{ scale: 0.9, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.9, y: 20, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-4xl mb-3">📱</div>
+
+        <p className="text-sm sm:text-base text-gray-600 leading-8 font-bold">
+          اپلیکیشن رسمی ژنینو
+          <br />
+          ژانویه ۲۰۲۷ افتتاح می‌شود ✨
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setShowAppModal(false)}
+          className="mt-6 w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 py-3 text-white font-bold shadow-md hover:shadow-lg transition"
+        >
+          متوجه شدم
+        </button>
       </motion.div>
     </motion.div>
   )}

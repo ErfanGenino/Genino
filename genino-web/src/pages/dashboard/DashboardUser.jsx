@@ -1,4 +1,5 @@
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import LifeStageSwitcher from "@components/Dashboard/LifeStageSwitcher";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -29,7 +30,7 @@ try {
     {
       title: "دانشنامه ژنینو",
       desc: "صدها مقاله علمی و ژنینویی برای رشد و آگاهی",
-      icon: <BookOpen size={26} className="text-yellow-600" />,
+      icon: <BookOpen size={26} className="text-stone-600" />,
       link: "/world-knowledge",
       highlight: true,
     },
@@ -64,10 +65,16 @@ try {
       link: "/awareness-center",
     },
     {
+  title: "پذیرش و توکل",
+  desc: "رها کردن کنترل افراطی و آرام‌تر زندگی کردن",
+  icon: <Sparkles size={26} className="text-yellow-600" />,
+  link: "/acceptance-and-trust",
+},
+    {
       title: "پروفایل من",
       desc: "مدیریت اطلاعات و تنظیمات حساب کاربری",
       icon: <User size={26} className="text-yellow-600" />,
-      link: "/profile",
+      link: "/social/profile",
     },
     {
   title: "علایق من",
@@ -86,7 +93,7 @@ try {
         transition={{ duration: 0.6 }}
         className="text-center mb-10"
       >
-        <h2 className="text-2xl font-bold text-yellow-700 mb-2">
+        <h2 className="text-2xl font-bold text-stone-700 mb-2">
               خوش آمدی{" "}
 {user?.fullName || user?.firstName || user?.name
   ? `${user?.fullName || user?.firstName || user?.name} عزیز`
@@ -95,6 +102,9 @@ try {
         <p className="text-gray-600 text-sm">
          ژنینو مرکز رشد شماست؛ فضایی برای حرکت آگاهانه به‌سوی نسخه‌ای بهتر از خود.
         </p>
+        <div className="mt-5 flex justify-center">
+        <LifeStageSwitcher currentStage="normal" />
+        </div>
       </motion.div>
 
       {/* 🟡 کارت‌ها */}
@@ -114,8 +124,8 @@ try {
                 {...cardProps}
                 className={`block rounded-2xl p-6 border transition-all duration-300 ${
                   card.highlight
-                    ? "bg-gradient-to-r from-yellow-300 to-yellow-200 border-yellow-300 text-white shadow-[0_0_25px_rgba(255,220,100,0.7)] hover:shadow-[0_0_40px_rgba(255,220,100,0.9)]"
-                    : "bg-gradient-to-b from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-[0_0_20px_rgba(255,220,100,0.4)]"
+                    ? "bg-gradient-to-r from-stone-400 to-amber-200 border-stone-300 text-white shadow-[0_0_25px_rgba(120,113,108,0.25)] hover:shadow-[0_0_40px_rgba(180,150,90,0.35)]"
+                    : "bg-gradient-to-b from-stone-50 to-amber-50 border-stone-200 hover:shadow-[0_0_20px_rgba(120,113,108,0.18)]"
                 } hover:-translate-y-1`}
               >
                 <div className="flex flex-col items-center gap-3 mb-2">
@@ -123,14 +133,14 @@ try {
                     className={`${
                       card.highlight
                         ? "bg-white/30"
-                        : "bg-yellow-100/80 border border-yellow-200"
+                        : "bg-stone-100/80 border border-stone-200"
                     } p-3 rounded-full shadow-inner`}
                   >
                     {card.icon}
                   </div>
                   <h3
                     className={`font-semibold text-lg ${
-                      card.highlight ? "text-white" : "text-yellow-700"
+                      card.highlight ? "text-white" : "text-stone-700"
                     }`}
                   >
                     {card.title}

@@ -14,6 +14,7 @@ export default function InviteModal({
 }) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
@@ -22,6 +23,7 @@ export default function InviteModal({
     if (!open) return;
     setEmail("");
     setPhone("");
+    setUsername("");
     setErr("");
     setLoading(false);
   }, [open, target?.childId, target?.relationType, target?.slot]);
@@ -53,8 +55,8 @@ export default function InviteModal({
       return;
     }
 
-    if (!email && !phone) {
-      setErr("ایمیل یا شماره موبایل را وارد کنید.");
+    if (!email && !phone && !username) {
+      setErr("ایمیل، شماره موبایل یا نام کاربری را وارد کنید.");
       return;
     }
 
@@ -69,6 +71,7 @@ export default function InviteModal({
         childId: target.childId,
         email: email || undefined,
         phone: phone || undefined,
+        username: username || undefined,
         relationType: relationTypeNormalized,
         slot: Number.isFinite(target.slot) ? target.slot : undefined,
         roleLabel: target.roleLabel || target.label,
@@ -94,6 +97,7 @@ export default function InviteModal({
       // پاک کردن ورودی‌ها (ایمنی بیشتر)
       setEmail("");
       setPhone("");
+      setUsername("");
       setErr("");
     } catch (e) {
       setErr("خطا در اتصال به سرور.");
@@ -141,6 +145,12 @@ export default function InviteModal({
               placeholder="موبایل (اختیاری)"
               className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="نام کاربری (اختیاری)"
+              className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
 
             {err && (
               <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
@@ -155,6 +165,7 @@ export default function InviteModal({
                 setErr("");
                 setEmail("");
                 setPhone("");
+                setUsername("");
                 onClose?.();
               }}
               disabled={loading}

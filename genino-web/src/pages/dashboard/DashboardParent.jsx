@@ -1,4 +1,5 @@
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import LifeStageSwitcher from "@components/Dashboard/LifeStageSwitcher";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -118,6 +119,9 @@ try {
         <p className="text-gray-600 text-sm">
          ژنینو همراه شما در مسیر رشد فردی، تحکیم خانواده و پرورش آگاهانه فرزندتان است؛ هر روز گامی سنجیده برای ساخت آینده‌ای سالم‌تر و پایدارتر.
         </p>
+        <div className="mt-5 flex justify-center">
+        <LifeStageSwitcher currentStage="parent" />
+        </div>
       </motion.div>
 
       {/* 🟡 کارت‌ها */}

@@ -1,4 +1,5 @@
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import LifeStageSwitcher from "@components/Dashboard/LifeStageSwitcher";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -12,6 +13,7 @@ import {
   Apple,
   HandHeart,
   Sparkles,
+  Home,
 } from "lucide-react";
 
 export default function DashboardCouple() {
@@ -27,26 +29,30 @@ try {
 
   const cards = [
     {
-      title: "رابطه‌ی عاشقانه",
-      desc: "راهکارهایی برای افزایش صمیمیت، عشق و آرامش در رابطه‌تون",
-      icon: <Heart size={26} className="text-pink-500" />,
-      highlight: true,
-    },
+  title: "رابطه‌ی عاشقانه",
+  desc: "راهکارهایی برای افزایش صمیمیت، عشق و آرامش در رابطه‌تون",
+  icon: <Heart size={26} className="text-pink-500" />,
+  highlight: true,
+  link: "/love-relationship",
+},
     {
-      title: "تفریحات دونفره",
-      desc: "ایده‌هایی برای وقت‌گذرونی‌های خاص و خاطره‌انگیز دونفره",
-      icon: <Coffee size={26} className="text-pink-500" />,
-    },
+  title: "قرارهای دونفره",
+  desc: "ایده‌هایی برای ساختن خاطره، صمیمیت و لحظه‌های خاص",
+  icon: <Coffee size={26} className="text-pink-500" />,
+  link: "/couple-dates",
+},
     {
-      title: "گفت‌وگوی سالم",
-      desc: "یادگیری مهارت‌های گفت‌وگو و حل تعارض در رابطه",
-      icon: <Users size={26} className="text-pink-500" />,
-    },
+  title: "حرف زدن بدون دلخوری",
+  desc: "مهارت‌هایی برای گفت‌وگوی آرام، شنیدن بهتر و حل اختلاف",
+  icon: <Users size={26} className="text-pink-500" />,
+  link: "/healthy-conversation",
+},
     {
-      title: "آرامش ذهنی و مدیتیشن",
-      desc: "تمرین‌های ذهن‌آگاهی و آرامش برای هر دو نفر",
-      icon: <Leaf size={26} className="text-pink-500" />,
-    },
+  title: "آرامش ذهن و مدیتیشن",
+  desc: "تمرین‌هایی ساده برای آرام‌تر شدن ذهن و کاهش استرس",
+  icon: <Leaf size={26} className="text-pink-500" />,
+  link: "/mind-peace",
+},
     {
       title: "اقتصاد مشترک",
       desc: "مدیریت بودجه، خرید و سرمایه‌گذاری به سبک زوج‌های موفق",
@@ -54,21 +60,41 @@ try {
       link: "/family-finance",
     },
     {
-      title: "تغذیه‌ی سالم زوجی",
-      desc: "برنامه غذایی و کالری‌شمار ویژه زوج‌ها",
-      icon: <Apple size={26} className="text-pink-500" />,
-      link: "/calorie-tracker",
-    },
+  title: "تغذیه سالم زوجی",
+  desc: "عادت‌های غذایی بهتر برای انرژی، سلامت و حال خوب دونفره",
+  icon: <Apple size={26} className="text-pink-500" />,
+  link: "/couple-nutrition",
+},
     {
-      title: "برنامه بارداری آینده",
-      desc: "آمادگی جسمی و ذهنی برای ورود به دنیای والدگری",
-      icon: <CalendarHeart size={26} className="text-pink-500" />,
-    },
+  title: "آمادگی برای والد شدن",
+  desc: "نگاه‌هایی ساده برای آماده شدن ذهن، رابطه و سبک زندگی قبل از فرزند",
+  icon: <CalendarHeart size={26} className="text-pink-500" />,
+  link: "/future-parenting",
+},
     {
-      title: "موسیقی و حس خوب",
-      desc: "پلی‌لیست‌های مخصوص زوج‌ها برای لحظه‌های دونفره",
-      icon: <Music size={26} className="text-pink-500" />,
-    },
+  title: "خانه و زندگی دونفره",
+  desc: "ایده‌هایی برای آرام‌تر، گرم‌تر و قشنگ‌تر شدن فضای زندگی مشترک",
+  icon: <Home size={26} className="text-pink-500" />,
+  link: "/couple-home",
+},
+    {
+  title: "زوج‌های موفق",
+  desc: "نگاه‌هایی واقعی به رابطه‌های پایدار، بالغ و آرام",
+  icon: <Sparkles size={26} className="text-pink-500" />,
+  link: "/successful-couples",
+},
+    {
+  title: "آرامش در زندگی مشترک",
+  desc: "کم کردن تنش‌ها و ساختن فضای امن و آرام در رابطه",
+  icon: <Leaf size={26} className="text-pink-500" />,
+  link: "/peaceful-marriage",
+},
+    {
+  title: "پذیرش و توکل",
+  desc: "یاد گرفتن رها کردن کنترل افراطی و آرام‌تر زندگی کردن",
+  icon: <Sparkles size={26} className="text-pink-500" />,
+  link: "/acceptance-and-trust",
+},
     {
       title: "علایق من",
       desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
@@ -95,6 +121,9 @@ try {
         <p className="text-gray-600 text-sm">
          عشق، در رشد متقابل معنا می‌یابد؛ ژنینو فضایی برای تقویت رابطه، آرامش پایدار و لبخندهای مشترک است.
         </p>
+        <div className="mt-5 flex justify-center">
+        <LifeStageSwitcher currentStage="married" />
+        </div>
       </motion.div>
 
       {/* 💗 کارت‌ها */}

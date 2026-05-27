@@ -8,6 +8,8 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
 import gregorian from "react-date-object/calendars/gregorian";
 import { useRef } from "react";
+import { prepareImage } from "../../utils/image/prepareImage";
+
 
 
 
@@ -91,6 +93,17 @@ export default function Profile() {
   const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
   const avatarCropImgRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
+
+  const cropBoxRef = useRef(null);
+  const dragStateRef = useRef({
+  isDragging: false,
+  startX: 0,
+  startY: 0,
+  startPosX: 50,
+  startPosY: 50,
+  startDistance: 0,
+  startZoom: 1,
+});
 
 
 
@@ -198,6 +211,117 @@ export default function Profile() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
+  function canBrowserPreview(file) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(true);
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(false);
+    };
+
+    img.src = url;
+  });
+}
+  function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getTouchDistance(touches) {
+  if (!touches || touches.length < 2) return 0;
+
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function startCropDrag(clientX, clientY) {
+  dragStateRef.current = {
+    ...dragStateRef.current,
+    isDragging: true,
+    startX: clientX,
+    startY: clientY,
+    startPosX: avatarPosition.x,
+    startPosY: avatarPosition.y,
+  };
+}
+
+function moveCropDrag(clientX, clientY) {
+  const box = cropBoxRef.current;
+  if (!box || !dragStateRef.current.isDragging) return;
+
+  const rect = box.getBoundingClientRect();
+
+  const dx = ((clientX - dragStateRef.current.startX) / rect.width) * 100;
+  const dy = ((clientY - dragStateRef.current.startY) / rect.height) * 100;
+
+  setAvatarPosition({
+    x: clamp(dragStateRef.current.startPosX - dx, 0, 100),
+    y: clamp(dragStateRef.current.startPosY - dy, 0, 100),
+  });
+}
+
+function stopCropDrag() {
+  dragStateRef.current.isDragging = false;
+}
+
+function handleCropWheel(e) {
+  e.preventDefault();
+
+  const delta = e.deltaY > 0 ? -0.08 : 0.08;
+
+  setAvatarZoom((prev) => clamp(Number(prev) + delta, 1, 3));
+}
+
+function handleCropTouchStart(e) {
+  if (e.touches.length === 1) {
+    startCropDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }
+
+  if (e.touches.length === 2) {
+    dragStateRef.current.startDistance = getTouchDistance(e.touches);
+    dragStateRef.current.startZoom = avatarZoom;
+  }
+}
+
+function handleCropTouchMove(e) {
+  e.preventDefault();
+
+  if (e.touches.length === 1) {
+    moveCropDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }
+
+  if (e.touches.length === 2) {
+    const currentDistance = getTouchDistance(e.touches);
+    const startDistance = dragStateRef.current.startDistance || currentDistance;
+
+    const ratio = currentDistance / startDistance;
+    const nextZoom = dragStateRef.current.startZoom * ratio;
+
+    setAvatarZoom(clamp(nextZoom, 1, 3));
+  }
+}
+
+function handleCropMouseDown(e) {
+  e.preventDefault();
+  startCropDrag(e.clientX, e.clientY);
+}
+
+function handleCropMouseMove(e) {
+  moveCropDrag(e.clientX, e.clientY);
+}
+
+function handleCropMouseUp() {
+  stopCropDrag();
+}
+
   // ====================
 // مدیریت آدرس‌ها
 // ====================
@@ -263,21 +387,55 @@ function setDefaultAddress(index) {
   });
 }
 
-  async function onPickAvatar(e) {
-  const file = e.target.files?.[0];
+ async function onPickAvatar(e) {
+  const originalFile = e.target.files?.[0];
   e.target.value = "";
 
-  if (!file) return;
+  if (!originalFile) return;
 
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-  if (!allowedTypes.includes(file.type)) {
-    alert("فعلاً فقط فرمت‌های JPG، PNG و WEBP پشتیبانی می‌شوند. لطفاً عکس HEIC را از تنظیمات گوشی به JPG تغییر بده.");
+  if (originalFile.size > 15 * 1024 * 1024) {
+    alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
     return;
   }
 
-  if (file.size > 15 * 1024 * 1024) {
-    alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
+  let fileForPreview = originalFile;
+
+  const fileName = originalFile.name?.toLowerCase() || "";
+  const isHeic =
+    originalFile.type === "image/heic" ||
+    originalFile.type === "image/heif" ||
+    fileName.endsWith(".heic") ||
+    fileName.endsWith(".heif");
+
+    if (isHeic) {
+  alert(
+    "عکس‌های HEIC فعلاً در بعضی گوشی‌ها پشتیبانی کامل ندارند. لطفاً در تنظیمات دوربین، فرمت عکس را روی JPG قرار بده."
+  );
+  return;
+}
+
+  const browserCanPreviewOriginal = await canBrowserPreview(originalFile);
+
+  if (isHeic || !browserCanPreviewOriginal) {
+    try {
+      fileForPreview = await prepareImage(originalFile, {
+        quality: 0.9,
+        outputFileName: "avatar.jpg",
+      });
+    } catch (err) {
+      console.error("AVATAR PREPARE FALLBACK ERROR:", err);
+      alert(
+        err?.message ||
+          "این عکس قابل پردازش نیست. لطفاً عکس دیگری انتخاب کن."
+      );
+      return;
+    }
+  }
+
+  const browserCanPreviewFinal = await canBrowserPreview(fileForPreview);
+
+  if (!browserCanPreviewFinal) {
+    alert("این عکس در مرورگر قابل نمایش نیست. لطفاً یک عکس دیگر انتخاب کن.");
     return;
   }
 
@@ -285,9 +443,9 @@ function setDefaultAddress(index) {
     URL.revokeObjectURL(avatarCropPreview);
   }
 
-  const previewUrl = URL.createObjectURL(file);
+  const previewUrl = URL.createObjectURL(fileForPreview);
 
-  setAvatarCropFile(file);
+  setAvatarCropFile(fileForPreview);
   setAvatarCropPreview(previewUrl);
   setAvatarZoom(1);
   setAvatarPosition({ x: 50, y: 50 });
@@ -621,7 +779,7 @@ if (loading) {
   {uploading ? "در حال آپلود..." : "انتخاب عکس از گالری"}
   <input
   type="file"
-  accept="image/jpeg,image/png,image/webp"
+  accept="image/*,.heic,.heif"
   className="hidden"
   onChange={onPickAvatar}
   disabled={uploading}
@@ -842,98 +1000,62 @@ if (loading) {
 
       {avatarCropPreview && (
   <div
-    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[90] px-4"
-    onClick={() => {
-      if (avatarCropPreview) URL.revokeObjectURL(avatarCropPreview);
-      setAvatarCropFile(null);
-      setAvatarCropPreview("");
-    }}
+    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[90] px-4"
+    onMouseMove={handleCropMouseMove}
+    onMouseUp={handleCropMouseUp}
+    onMouseLeave={handleCropMouseUp}
   >
     <div
       dir="rtl"
       className="w-full max-w-md bg-white rounded-3xl border border-yellow-200 shadow-xl p-5"
       onClick={(e) => e.stopPropagation()}
     >
-      <h2 className="text-lg font-bold text-yellow-700 mb-3">
+      <h2 className="text-lg font-bold text-yellow-700 mb-2">
         تنظیم عکس پروفایل
       </h2>
 
       <p className="text-xs text-gray-500 mb-4">
-        با زوم و جابه‌جایی، مشخص کن کدام بخش عکس داخل پروفایل دیده شود.
+        عکس را با انگشت یا موس جابه‌جا کن. برای زوم در موبایل دو انگشت و در دسکتاپ اسکرول موس را استفاده کن.
       </p>
 
-      <div className="mx-auto w-64 h-64 rounded-full overflow-hidden border-4 border-yellow-300 bg-yellow-50 shadow-inner">
+      <div
+        ref={cropBoxRef}
+        className="relative mx-auto w-72 h-72 rounded-full overflow-hidden border-4 border-yellow-300 bg-yellow-50 shadow-inner cursor-grab active:cursor-grabbing select-none"
+style={{ touchAction: "none" }}
+        onWheel={handleCropWheel}
+        onMouseDown={handleCropMouseDown}
+        onTouchStart={handleCropTouchStart}
+        onTouchMove={handleCropTouchMove}
+        onTouchEnd={stopCropDrag}
+        onTouchCancel={stopCropDrag}
+      >
         <img
-  ref={avatarCropImgRef}
-  src={avatarCropPreview}
-  alt="تنظیم عکس پروفایل"
-  className="w-full h-full object-cover"
-  onLoad={() => {
-    console.log("✅ avatar image loaded");
-  }}
-  onError={() => {
-    alert("این عکس در مرورگر قابل نمایش نیست. لطفاً JPG، PNG یا WEBP انتخاب کن.");
-    if (avatarCropPreview) URL.revokeObjectURL(avatarCropPreview);
-    setAvatarCropFile(null);
-    setAvatarCropPreview("");
-  }}
-  style={{
-    transform: `scale(${avatarZoom})`,
-    transformOrigin: `${avatarPosition.x}% ${avatarPosition.y}%`,
-  }}
-/>
+          ref={avatarCropImgRef}
+          src={avatarCropPreview}
+          alt="تنظیم عکس پروفایل"
+          draggable={false}
+          className="w-full h-full object-cover pointer-events-none select-none"
+          onLoad={() => {
+            console.log("✅ avatar image loaded");
+          }}
+          onError={() => {
+            alert("این عکس در مرورگر قابل نمایش نیست. لطفاً JPG، PNG یا WEBP انتخاب کن.");
+            if (avatarCropPreview) URL.revokeObjectURL(avatarCropPreview);
+            setAvatarCropFile(null);
+            setAvatarCropPreview("");
+          }}
+          style={{
+            transform: `scale(${avatarZoom})`,
+            transformOrigin: `${avatarPosition.x}% ${avatarPosition.y}%`,
+          }}
+        />
+
+        <div className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-white/80 ring-inset" />
       </div>
 
-      <div className="mt-5 space-y-4">
-        <label className="block">
-          <span className="text-xs text-gray-600">بزرگ‌نمایی</span>
-          <input
-            type="range"
-            min="1"
-            max="2.5"
-            step="0.05"
-            value={avatarZoom}
-            onChange={(e) => setAvatarZoom(Number(e.target.value))}
-            className="w-full mt-2"
-          />
-        </label>
-
-        <label className="block">
-          <span className="text-xs text-gray-600">جابه‌جایی افقی</span>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value={avatarPosition.x}
-            onChange={(e) =>
-              setAvatarPosition((prev) => ({
-                ...prev,
-                x: Number(e.target.value),
-              }))
-            }
-            className="w-full mt-2"
-          />
-        </label>
-
-        <label className="block">
-          <span className="text-xs text-gray-600">جابه‌جایی عمودی</span>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value={avatarPosition.y}
-            onChange={(e) =>
-              setAvatarPosition((prev) => ({
-                ...prev,
-                y: Number(e.target.value),
-              }))
-            }
-            className="w-full mt-2"
-          />
-        </label>
-      </div>
+      <p className="mt-3 text-[11px] text-center text-gray-500">
+        راهنما: جابه‌جایی با کشیدن عکس، زوم با دو انگشت یا اسکرول موس
+      </p>
 
       <div className="flex gap-3 mt-6">
         <button

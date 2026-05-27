@@ -1,4 +1,5 @@
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import LifeStageSwitcher from "@components/Dashboard/LifeStageSwitcher";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -27,27 +28,30 @@ try {
 
   const cards = [
     {
-      title: "رشد هفته‌به‌هفته جنین",
-      desc: "مشاهده تغییرات جنین و بدن در هر هفته بارداری",
-      icon: <Baby size={26} className="text-yellow-600" />,
-      highlight: true,
-    },
+  title: "رشد ماه‌به‌ماه جنین",
+  desc: "آشنایی ساده با تغییرات جنین، بدن مادر و حس‌وحال هر مرحله",
+  icon: <Baby size={26} className="text-yellow-600" />,
+  highlight: true,
+  link: "/pregnancy-weekly-growth",
+},
     {
-      title: "سلامت مادر",
-      desc: "پیگیری وضعیت جسمی، تغذیه و خواب مادر در دوران بارداری",
-      icon: <Heart size={26} className="text-yellow-600" />,
-    },
+  title: "سلامت مادر",
+  desc: "مراقبت از بدن، خواب، انرژی و احساسات مادر در دوران بارداری",
+  icon: <Heart size={26} className="text-yellow-600" />,
+  link: "/mother-health",
+},
     {
-      title: "تغذیه دوران بارداری",
-      desc: "خوراکی‌های مفید و برنامه‌ی تغذیه‌ی مناسب هر ماه",
-      icon: <Apple size={26} className="text-yellow-600" />,
-      link: "/calorie-tracker",
-    },
+  title: "تغذیه دوران بارداری",
+  desc: "مواد مغذی، خوراکی‌های مفید و عادت‌های غذایی مهم برای مادر و جنین",
+  icon: <Apple size={26} className="text-yellow-600" />,
+  link: "/pregnancy-nutrition",
+},
     {
-      title: "تمرین‌های آرامش و تنفس",
-      desc: "مدیتیشن و تمرین‌های ملایم مخصوص مادران باردار",
-      icon: <Leaf size={26} className="text-yellow-600" />,
-    },
+  title: "تمرین‌های آرامش و تنفس",
+  desc: "تمرین‌های ساده برای کاهش تنش، آرام‌تر شدن ذهن و نفس‌های عمیق‌تر",
+  icon: <Leaf size={26} className="text-yellow-600" />,
+  link: "/pregnancy-breathing",
+},
     {
       title: "پزشک من",
       desc: "مدیریت پرونده‌ها، نسخه‌ها و سونوگرافی‌های دوران بارداری",
@@ -55,21 +59,29 @@ try {
       link: "/my-doctor",
     },
     {
-      title: "آمادگی برای زایمان",
-      desc: "آموزش و برنامه‌ریزی ذهنی و فیزیکی برای روز بزرگ",
-      icon: <CalendarDays size={26} className="text-yellow-600" />,
-    },
+  title: "آمادگی برای زایمان",
+  desc: "آشنایی آرام و واقعی با روزهای نزدیک تولد نوزاد",
+  icon: <CalendarDays size={26} className="text-yellow-600" />,
+  link: "/birth-preparation",
+},
     {
-      title: "یادداشت‌های بارداری من",
-      desc: "ثبت احساسات، لحظه‌ها و عکس‌های خاص دوران بارداری",
-      icon: <BookOpen size={26} className="text-yellow-600" />,
-      link: "/memory-album",
-    },
+  title: "همراهی پدر در بارداری",
+  desc: "نقش حمایت، آرامش و حضور مرد در مسیر بارداری و تولد",
+  icon: <HandHeart size={26} className="text-yellow-600" />,
+  link: "/father-support",
+},
     {
-      title: "پیوند عاطفی با جنین",
-      desc: "موسیقی، گفت‌وگو و لمس‌های محبت‌آمیز برای ارتباط با نوزاد",
-      icon: <HandHeart size={26} className="text-yellow-600" />,
-    },
+  title: "پیوند عاطفی با جنین",
+  desc: "ارتباط آرام و احساسی با نوزاد از قبل تولد",
+  icon: <HandHeart size={26} className="text-yellow-600" />,
+  link: "/bond-with-baby",
+},
+{
+  title: "اعتماد به مسیر زندگی",
+  desc: "کم کردن نگرانی‌ها و آرام‌تر عبور کردن از مسیر بارداری و آینده",
+  icon: <Sparkles size={26} className="text-yellow-600" />,
+  link: "/pregnancy-trust",
+},
     {
   title: "علایق من",
   desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
@@ -96,6 +108,9 @@ try {
         <p className="text-gray-600 text-sm">
          دوران بارداری، سفری آکنده از عشق و انتظار است؛ هر روز آن هدیه‌ای ارزشمند در مسیر آفرینش زندگی.
         </p>
+        <div className="mt-5 flex justify-center">
+          <LifeStageSwitcher currentStage="prebirth" />
+        </div>
       </motion.div>
 
       {/* 🌸 کارت‌ها */}

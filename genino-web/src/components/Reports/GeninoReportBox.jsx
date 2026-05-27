@@ -2,7 +2,6 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Share2, Calendar, Download } from "lucide-react";
-import html2canvas from "html2canvas";
 
 /**
  * GeninoReportBox
@@ -46,6 +45,7 @@ export default function GeninoReportBox({
         const rect = boxRef.current.getBoundingClientRect();
         const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
 
+        const { default: html2canvas } = await import("html2canvas");
         const canvas = await html2canvas(boxRef.current, {
           backgroundColor: "#ffffff",
           scale,

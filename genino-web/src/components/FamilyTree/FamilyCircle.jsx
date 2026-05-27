@@ -8,7 +8,10 @@ export default function FamilyCircle({
   onClick,
   onDelete,
 }) {
-  const clickable = nodeStatus === "EMPTY" || nodeStatus === "PENDING";
+  const clickable =
+  nodeStatus === "EMPTY" ||
+  nodeStatus === "PENDING" ||
+  nodeStatus === "CONNECTED";
 
   return (
     <div className="flex flex-col items-center">
@@ -35,7 +38,7 @@ export default function FamilyCircle({
                 onDelete();
               }}
               className="absolute bottom-1 right-1 bg-white/90 border border-gray-300
-                         rounded-full p-[3px] opacity-0 group-hover:opacity-100 transition"
+                         rounded-full p-[3px] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition"
               title="حذف"
               type="button"
             >
@@ -80,7 +83,7 @@ export default function FamilyCircle({
             className="absolute inset-0 rounded-full
                bg-black/70 text-white text-[10px]
                flex items-center justify-center text-center px-2
-               opacity-0 group-hover:opacity-100 transition
+               opacity-0 md:group-hover:opacity-100 transition
                pointer-events-none z-[9999]"
           >
             برای ارسال دعوت کلیک کنید
@@ -92,24 +95,14 @@ export default function FamilyCircle({
             className="absolute inset-0 rounded-full
                bg-black/70 text-white text-[10px]
                flex items-center justify-center text-center px-2
-               opacity-0 group-hover:opacity-100 transition
+               opacity-0 md:group-hover:opacity-100 transition
                pointer-events-none z-[9999]"
           >
-            دعوت ارسال شده – برای دیدن لینک کلیک کنید
+            برای لغو دعوت کلیک کنید
           </div>
         )}
 
-        {nodeStatus === "CONNECTED" && (
-          <div
-            className="absolute inset-0 rounded-full
-               bg-black/70 text-white text-[10px]
-               flex items-center justify-center text-center px-2
-               opacity-0 group-hover:opacity-100 transition
-               pointer-events-none z-[9999]"
-          >
-            ✅ متصل شده
-          </div>
-        )}
+        
       </div>
 
       {nodeStatus === "CONNECTED" && fullName && (

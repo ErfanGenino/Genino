@@ -34,6 +34,7 @@ import {
   removeFavoriteChatRoom,
 } from "../../services/api";
 import { io } from "socket.io-client";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function SocialAvatar({ person, size = "w-10 h-10", active = false, color = "yellow" }) {
   const fallback = "/avatars/101.png";
@@ -72,6 +73,8 @@ function SocialAvatar({ person, size = "w-10 h-10", active = false, color = "yel
 }
 
 export default function Feed() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeRoom, setActiveRoom] = useState(null);
   const [activePrivateUser, setActivePrivateUser] = useState(null);
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
@@ -732,6 +735,24 @@ const closeFavoriteModal = () => {
       unreadCount: 0,
     }));
   };
+
+  useEffect(() => {
+  const person = location.state?.openPrivateChatUser;
+
+  if (!person?.id) return;
+
+  handleOpenPrivateChat({
+    id: Number(person.id),
+    name: person.name || "کاربر ژنینو",
+    username: person.username || "",
+    online: false,
+    avatarUrl: person.avatarUrl || null,
+    subtitle: "گفت‌وگوی خصوصی",
+    unreadCount: 0,
+  });
+
+  navigate(location.pathname, { replace: true, state: null });
+}, [location.state, location.pathname, navigate]);
 
   const handleDeleteConversation = (personId) => {
     setConversations((prev) => prev.filter((item) => item.id !== personId));

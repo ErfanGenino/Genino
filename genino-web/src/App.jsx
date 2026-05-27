@@ -12,141 +12,12 @@ import SignupStart from "./SignupStart.jsx";
 import SignupUser from "./SignupUser.jsx";
 import SignupVendor from "./SignupVendor.jsx";
 import Cart from "./pages/Cart.jsx";
-import Feed from "./pages/social/Feed.jsx";
-import Profile from "./pages/social/Profile.jsx";
-import CreatePost from "./pages/social/CreatePost.jsx";
-import ChatRoom from "./pages/social/ChatRoom.jsx";
-import FreePlayArticle from "./pages/articles/FreePlayArticle";
 import ChildHealthCheck from "./pages/ChildHealthCheck/ChildHealthCheck";
-import MenGenitalSelfCheckArticle from "./pages/articles/MenGenitalSelfCheckArticle.jsx";
-import LaserFocusArticle from "./pages/articles/LaserFocusArticle";
-import GoldenGenesChildArticle from "./pages/articles/GoldenGenesChildArticle";
-import BehavioralEpigeneticsArticle from "./pages/articles/BehavioralEpigeneticsArticle";
-import ChildIntelligenceGenesArticle from "./pages/articles/ChildIntelligenceGenesArticle.jsx";
-import UnconditionalLoveChildArticle from "./pages/articles/UnconditionalLoveChildArticle.jsx";
-import ParentingBehaviorAtHomeArticle from "@pages/articles/ParentingBehaviorAtHomeArticle";
-import ChildAnxietyAndFearManagementArticle from "@pages/articles/ChildAnxietyAndFearManagementArticle";
-import SmartEncouragementArticle from "@pages/articles/SmartEncouragementArticle";
-import MutualRespectArticle from "@pages/articles/MutualRespectArticle";
-import FatherEmotionalRoleArticle from "@pages/articles/FatherEmotionalRoleArticle";
-import ParentAngerManagementArticle from "@pages/articles/ParentAngerManagementArticle";
-import ChildTrustArticle from "@pages/articles/ChildTrustArticle";
-import QualityTimeArticle from "@pages/articles/QualityTimeArticle";
-import PrePregnancyCheckupsArticle from "@pages/articles/pre-pregnancy/PrePregnancyCheckupsArticle";
-import PrePregnancyVitaminsArticle from "@pages/articles/pre-pregnancy/PrePregnancyVitaminsArticle";
-import EggSpermQualityArticle from "@pages/articles/pre-pregnancy/EggSpermQualityArticle";
-import PrePregnancyEpigeneticsArticle from "@pages/articles/pre-pregnancy/PrePregnancyEpigeneticsArticle";
-import PrePregnancyStressManagementArticle from "@pages/articles/pre-pregnancy/PrePregnancyStressManagementArticle";
-import PrePregnancyBodyWeightArticle from "@pages/articles/pre-pregnancy/PrePregnancyBodyWeightArticle";
-import PrePregnancyToxinsArticle from "@pages/articles/pre-pregnancy/PrePregnancyToxinsArticle";
-import PrePregnancyParentalAgeArticle from "@pages/articles/pre-pregnancy/PrePregnancyParentalAgeArticle";
-import PrePregnancyOvulationCycleArticle from "@pages/articles/pre-pregnancy/PrePregnancyOvulationCycleArticle";
-import PrePregnancyMaleSexualHealthArticle from "@pages/articles/pre-pregnancy/PrePregnancyMaleSexualHealthArticle";
-import PrePregnancySleepAndFertilityArticle from "@pages/articles/pre-pregnancy/PrePregnancySleepAndFertilityArticle";
-import PrePregnancyMedicationsArticle from "@pages/articles/pre-pregnancy/PrePregnancyMedicationsArticle";
-import PositiveGenesArticle from "@pages/articles/genetic-secrets/PositiveGenesArticle";
-import GeneEditingFutureArticle from "@pages/articles/genetic-secrets/GeneEditingFutureArticle";
-import InheritanceAndGoodnessArticle from "@pages/articles/genetic-secrets/InheritanceAndGoodnessArticle";
-import HumanDiversitySecretsArticle from "@pages/articles/genetic-secrets/HumanDiversitySecretsArticle";
-import DNAToEmotionArticle from "@pages/articles/genetic-secrets/DNAToEmotionArticle";
-import GenesAndBeautyArticle from "@pages/articles/genetic-secrets/GenesAndBeautyArticle";
-import GeneticMedicineFutureArticle from "@pages/articles/genetic-secrets/GeneticMedicineFutureArticle";
-import DoGenesDefineDestinyArticle from "@pages/articles/genetic-secrets/DoGenesDefineDestinyArticle";
-import EmotionalInheritanceArticle from "@pages/articles/genetic-secrets/EmotionalInheritanceArticle";
-import ChildNutrition0to2Article from "@pages/articles/child-nutrition/ChildNutrition0to2Article";
-import BrainBoostingFoodsArticle from "@pages/articles/child-nutrition/BrainBoostingFoodsArticle";
-import ForbiddenFoodsUnder5Article from "@pages/articles/child-nutrition/ForbiddenFoodsUnder5Article";
-import EssentialNutrientsForFocusArticle from "@pages/articles/child-nutrition/EssentialNutrientsForFocusArticle";
-import ChildImmunityNutritionArticle from "@pages/articles/child-nutrition/ChildImmunityNutritionArticle";
-import HealthyPlateForKidsArticle from "@pages/articles/child-nutrition/HealthyPlateForKidsArticle";
-import EssentialVitaminsForKidsArticle from "@pages/articles/child-nutrition/EssentialVitaminsForKidsArticle";
-import ChildObesityPreventionArticle from "@pages/articles/child-nutrition/ChildObesityPreventionArticle";
-import ChildPickyEatingArticle from "@pages/articles/child-nutrition/ChildPickyEatingArticle";
-import SleepAndNutritionImpactArticle from "@pages/articles/child-nutrition/SleepAndNutritionImpactArticle";
-import ProteinRoleInChildGrowthArticle from "@pages/articles/child-nutrition/ProteinRoleInChildGrowthArticle";
-import FiveGoldenRulesNutritionArticle from "@pages/articles/child-nutrition/FiveGoldenRulesNutritionArticle";
-import MutualRespectInMarriageArticle from "@pages/articles/family-relations/MutualRespectInMarriageArticle";
-import HealthyFamilyCommunicationArticle from "@pages/articles/family-relations/HealthyFamilyCommunicationArticle";
-import EmotionalNeedsUnderstandingArticle from "@pages/articles/family-relations/EmotionalNeedsUnderstandingArticle";
-import ResolvingMinorConflictsArticle from "@pages/articles/family-relations/ResolvingMinorConflictsArticle";
-import RoleOfTrustInEmotionalSecurityArticle from "@pages/articles/family-relations/RoleOfTrustInEmotionalSecurityArticle";
-import DailyAffectionAsRelationshipFuelArticle from "@pages/articles/family-relations/DailyAffectionAsRelationshipFuelArticle";
-import RolesAndResponsibilitiesInModernFamilyArticle from "@pages/articles/family-relations/RolesAndResponsibilitiesInModernFamilyArticle";
-import HowToProvideEmotionalSupportArticle from "@pages/articles/family-relations/HowToProvideEmotionalSupportArticle";
-import BehavioralRedFlagsArticle from "@pages/articles/family-relations/BehavioralRedFlagsArticle";
-import AngerManagementInRelationshipsArticle from "@pages/articles/family-relations/AngerManagementInRelationshipsArticle";
-import HowParentalRelationshipAffectsChildDevelopmentArticle from "@pages/articles/family-relations/HowParentalRelationshipAffectsChildDevelopmentArticle";
-import CommonRelationshipMistakesCouplesShouldAvoidArticle from "@pages/articles/family-relations/CommonRelationshipMistakesCouplesShouldAvoidArticle";
-import EssentialCareForChildren0To3Article from "@pages/articles/child-care/EssentialCareForChildren0To3Article";
-import CognitiveDevelopmentFromBirthToEarlyYearsArticle from "@pages/articles/child-care/CognitiveDevelopmentFromBirthToEarlyYearsArticle";
-import PlayTherapyAndChildBrainDevelopmentArticle from "@pages/articles/child-care/PlayTherapyAndChildBrainDevelopmentArticle";
-import HealthyIndependenceInChildrenArticle from "@pages/articles/child-care/HealthyIndependenceInChildrenArticle";
-import FactorsAffectingChildSenseOfSecurityArticle from "@pages/articles/child-care/FactorsAffectingChildSenseOfSecurityArticle";
-import HowToHandleChildCryingArticle from "@pages/articles/child-care/HowToHandleChildCryingArticle";
-import RoleOfRuleSettingInHealthyChildDevelopmentArticle from "@pages/articles/child-care/RoleOfRuleSettingInHealthyChildDevelopmentArticle";
-import BestGamesForBrainAndCreativityDevelopmentArticle from "@pages/articles/child-care/BestGamesForBrainAndCreativityDevelopmentArticle";
-import EyeContactAndEmotionalDevelopmentArticle from "@pages/articles/child-care/EyeContactAndEmotionalDevelopmentArticle";
-import SignsOfDevelopmentalDelayInChildrenArticle from "@pages/articles/child-care/SignsOfDevelopmentalDelayInChildrenArticle";
-import InfantReflexesAreTheyNormalArticle from "@pages/articles/child-care/InfantReflexesAreTheyNormalArticle";
-import EffectiveAndIneffectivePraiseInChildrenArticle from "@pages/articles/child-care/EffectiveAndIneffectivePraiseInChildrenArticle";
 import ProtectedRoute from "./components/ProtectedRoute";
-import WhatIsMeditationArticle from "./pages/articles/mind-calm/WhatIsMeditationArticle";
-import BreathingExercisesForDailyStressArticle from "./pages/articles/mind-calm/BreathingExercisesForDailyStressArticle";
-import MeditationForBusyParentsArticle from "./pages/articles/mind-calm/MeditationForBusyParentsArticle";
-import CalmingMindBeforeSleepArticle from "./pages/articles/mind-calm/CalmingMindBeforeSleepArticle";
-import ParentalMentalCalmImpactOnChildGrowthArticle from "./pages/articles/mind-calm/ParentalMentalCalmImpactOnChildGrowthArticle";
-import FiveMinuteHomeMeditationArticle from "./pages/articles/mind-calm/FiveMinuteHomeMeditationArticle";
-import MindfulnessInDailyLifeArticle from "./pages/articles/mind-calm/MindfulnessInDailyLifeArticle";
-import ReducingAnxietyWithSimpleMentalExercisesArticle from "./pages/articles/mind-calm/ReducingAnxietyWithSimpleMentalExercisesArticle";
-import MentalCalmInCrisisArticle from "./pages/articles/mind-calm/MentalCalmInCrisisArticle";
-import MeditationImpactOnFocusAndDecisionMakingArticle from "./pages/articles/mind-calm/MeditationImpactOnFocusAndDecisionMakingArticle";
-import ManagingNegativeThoughtsWithMentalTrainingArticle from "./pages/articles/mind-calm/ManagingNegativeThoughtsWithMentalTrainingArticle";
-import FiveSimpleExercisesForInstantCalmArticle from "./pages/articles/mind-calm/FiveSimpleExercisesForInstantCalmArticle";
-import HomeWorkoutWithoutEquipmentArticle from "./pages/articles/home-workout/HomeWorkoutWithoutEquipmentArticle";
-import DailySimpleWorkoutsForBusyParentsArticle from "./pages/articles/home-workout/DailySimpleWorkoutsForBusyParentsArticle";
-import WorkoutsForRestartingArticle from "./pages/articles/home-workout/WorkoutsForRestartingArticle";
-import ExercisesForLowerBackPainArticle from "./pages/articles/home-workout/ExercisesForLowerBackPainArticle";
-import StretchingExercisesForMusclePainReliefArticle from "./pages/articles/home-workout/StretchingExercisesForMusclePainReliefArticle";
-import FatBurningHomeWorkoutArticle from "./pages/articles/home-workout/FatBurningHomeWorkoutArticle";
-import Notifications from "./pages/Notifications";
 import AcceptInvite from "./pages/AcceptInvite";
-import BalancedDietArticle from "./pages/articles/diets/BalancedDietArticle";
-import MediterraneanDietArticle from "./pages/articles/diets/MediterraneanDietArticle";
-import DashDietArticle from "./pages/articles/diets/DashDietArticle";
-import VegetarianDietArticle from "./pages/articles/diets/VegetarianDietArticle";
-import VeganDietArticle from "./pages/articles/diets/VeganDietArticle";
-import IntermittentFastingArticle from "./pages/articles/diets/IntermittentFastingArticle";
-import WeightLossDietArticle from "./pages/articles/diets/WeightLossDietArticle";
-import WeightGainDietArticle from "./pages/articles/diets/WeightGainDietArticle";
-import FatLossDietArticle from "./pages/articles/diets/FatLossDietArticle";
-import MuscleGainDietArticle from "./pages/articles/diets/MuscleGainDietArticle";
-import WeightMaintenanceDietArticle from "./pages/articles/diets/WeightMaintenanceDietArticle";
-import EnergyFocusNutritionArticle from "./pages/articles/diets/EnergyFocusNutritionArticle";
-import DiabetesDietArticle from "./pages/articles/diets/DiabetesDietArticle";
-import HypertensionDietArticle from "./pages/articles/diets/HypertensionDietArticle";
-import FattyLiverDietArticle from "./pages/articles/diets/FattyLiverDietArticle";
-import LowSaltDietArticle from "./pages/articles/diets/LowSaltDietArticle";
-import GlutenFreeDietArticle from "./pages/articles/diets/GlutenFreeDietArticle";
-import DigestiveHealthDietArticle from "./pages/articles/diets/DigestiveHealthDietArticle";
-import ChildrenDietArticle from "./pages/articles/diets/ChildrenDietArticle";
-import TeenagersDietArticle from "./pages/articles/diets/TeenagersDietArticle";
-import BreastfeedingDietArticle from "./pages/articles/diets/BreastfeedingDietArticle";
-import OlderAdultsDietArticle from "./pages/articles/diets/OlderAdultsDietArticle";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import MusicPositiveEnergyHub from "./pages/single-world/MusicPositiveEnergyHub";
 import MusicCategoryPage from "./pages/single-world/MusicCategoryPage";
-import FromZeroToFirstSuccessArticle from "./pages/articles/entrepreneurs/FromZeroToFirstSuccessArticle";
-import EntrepreneurMindsetArticle from "./pages/articles/entrepreneurs/EntrepreneurMindsetArticle";
-import FailureOrBeginningArticle from "./pages/articles/entrepreneurs/FailureOrBeginningArticle";
-import RiskManagementArticle from "./pages/articles/entrepreneurs/RiskManagementArticle";
-import DecisionMakingArticle from "./pages/articles/entrepreneurs/DecisionMakingArticle";
-import IdeaVsExecutionArticle from "./pages/articles/entrepreneurs/IdeaVsExecutionArticle";
-import PersonalDisciplineArticle from "./pages/articles/entrepreneurs/PersonalDisciplineArticle";
-import LateStartersArticle from "./pages/articles/entrepreneurs/LateStartersArticle";
-import EmployeeToEntrepreneurArticle from "./pages/articles/entrepreneurs/EmployeeToEntrepreneurArticle";
-import WorkLifeBalanceArticle from "./pages/articles/entrepreneurs/WorkLifeBalanceArticle";
-import CommonMistakesArticle from "./pages/articles/entrepreneurs/CommonMistakesArticle";
-import FiveGoldenPrinciplesArticle from "./pages/articles/entrepreneurs/FiveGoldenPrinciplesArticle";
 import ScrollToTop from "./components/Core/ScrollToTop.jsx";
 
 
@@ -161,8 +32,11 @@ const FamilyFinance = lazy(() => import("./pages/FamilyFinance"));
 const MyCycle = lazy(() => import("./pages/MyCycle"));
 const MyChild = lazy(() => import("./pages/MyChild.jsx"));
 const CalorieTracker = lazy(() => import("./pages/CalorieTracker.jsx"));
+const GeninoChildren = lazy(() => import("./pages/GeninoChildren.jsx"));
 const Inspiration = lazy(() => import("./pages/Inspiration.jsx"));
 const MemoryAlbum = lazy(() => import("./pages/MemoryAlbum"));
+const AwarenessCenter = lazy(() => import("./pages/AwarenessCenter"));
+const EmotionalIntelligence = lazy(() => import("./pages/EmotionalIntelligence"));
 const DashboardSingle = lazy(() => import("./pages/dashboard/DashboardSingle"));
 const DashboardCouple = lazy(() => import("./pages/dashboard/DashboardCouple"));
 const DashboardPregnancy = lazy(() => import("./pages/dashboard/DashboardPregnancy"));
@@ -171,6 +45,9 @@ const MyWomenHealthTest = lazy(() => import("./pages/MyWomenHealthTest"));
 const DashboardUser = lazy(() => import("./pages/dashboard/DashboardUser"));
 const SingleWorld = lazy(() => import("./pages/SingleWorld"));
 const CoffeeBreakArticle = lazy(() => import("./pages/articles/CoffeeBreakArticle"));
+const TravelExperience = lazy(() => import("./pages/TravelExperience"));
+const BooksPositiveEnergy = lazy(() => import("./pages/BooksPositiveEnergy"));
+const PersonalGrowth = lazy(() => import("./pages/PersonalGrowth"));
 const BooksThatChangeLifeArticle = lazy(() => import("./pages/articles/BooksThatChangeLifeArticle"));
 const PersonalGrowthMasteryArticle = lazy(() => import("./pages/articles/PersonalGrowthMasteryArticle"));
 const ChildProfile = lazy(() => import("./pages/ChildProfile"));
@@ -210,6 +87,156 @@ const MenHealthReports = lazy(() => import("./pages/Reports/MenHealthReports"));
 const WomenHealthReports = lazy(() => import("./pages/Reports/WomenHealthReports"));
 const DailyInspirationArticle = lazy(() => import("./pages/articles/DailyInspirationArticle"));
 const FitnessForSingleWorldArticle = lazy(() => import("./pages/articles/FitnessForSingleWorldArticle"));
+const MusicAndMind = lazy(() => import("./pages/MusicAndMind"));
+const LoveRelationship = lazy(() => import("./pages/LoveRelationship"));
+const CoupleDates = lazy(() => import("./pages/CoupleDates"));
+const HealthyConversation = lazy(() => import("./pages/HealthyConversation"));
+const MindPeace = lazy(() => import("./pages/dashboardcards/MindPeace"));
+const CoupleNutrition = lazy(() => import("./pages/dashboardcards/CoupleNutrition"));
+const FutureParenting = lazy(() => import("./pages/dashboardcards/FutureParenting"));
+const CoupleHome = lazy(() => import("./pages/dashboardcards/CoupleHome"));
+const SuccessfulCouples = lazy(() => import("./pages/dashboardcards/SuccessfulCouples"));
+const PeacefulMarriage = lazy(() => import("./pages/dashboardcards/PeacefulMarriage"));
+const AcceptanceAndTrust = lazy(() => import("./pages/dashboardcards/AcceptanceAndTrust"));
+const PregnancyWeeklyGrowth = lazy(() => import("./pages/dashboardcards/PregnancyWeeklyGrowth"));
+const MotherHealth = lazy(() => import("./pages/dashboardcards/MotherHealth"));
+const PregnancyNutrition = lazy(() => import("./pages/dashboardcards/PregnancyNutrition"));
+const PregnancyBreathing = lazy(() => import("./pages/dashboardcards/PregnancyBreathing"));
+const BirthPreparation = lazy(() => import("./pages/dashboardcards/BirthPreparation"));
+const FatherSupport = lazy(() => import("./pages/dashboardcards/FatherSupport"));
+const BondWithBaby = lazy(() => import("./pages/dashboardcards/BondWithBaby"));
+const LetGoAndGrow = lazy(() => import("./pages/dashboardcards/LetGoAndGrow"));
+const MoneyAndFuture = lazy(() => import("./pages/dashboardcards/MoneyAndFuture"));
+const PregnancyTrust = lazy(() => import("./pages/dashboardcards/PregnancyTrust"));
+const FreePlayArticle = lazy(() => import("./pages/articles/FreePlayArticle"));
+const BalancedDietArticle = lazy(() => import("./pages/articles/diets/BalancedDietArticle"));
+const MediterraneanDietArticle = lazy(() => import("./pages/articles/diets/MediterraneanDietArticle"));
+const DashDietArticle = lazy(() => import("./pages/articles/diets/DashDietArticle"));
+const VegetarianDietArticle = lazy(() => import("./pages/articles/diets/VegetarianDietArticle"));
+const VeganDietArticle = lazy(() => import("./pages/articles/diets/VeganDietArticle"));
+const IntermittentFastingArticle = lazy(() => import("./pages/articles/diets/IntermittentFastingArticle"));
+const WeightLossDietArticle = lazy(() => import("./pages/articles/diets/WeightLossDietArticle"));
+const WeightGainDietArticle = lazy(() => import("./pages/articles/diets/WeightGainDietArticle"));
+const FatLossDietArticle = lazy(() => import("./pages/articles/diets/FatLossDietArticle"));
+const MuscleGainDietArticle = lazy(() => import("./pages/articles/diets/MuscleGainDietArticle"));
+const WeightMaintenanceDietArticle = lazy(() => import("./pages/articles/diets/WeightMaintenanceDietArticle"));
+const EnergyFocusNutritionArticle = lazy(() => import("./pages/articles/diets/EnergyFocusNutritionArticle"));
+const DiabetesDietArticle = lazy(() => import("./pages/articles/diets/DiabetesDietArticle"));
+const HypertensionDietArticle = lazy(() => import("./pages/articles/diets/HypertensionDietArticle"));
+const FattyLiverDietArticle = lazy(() => import("./pages/articles/diets/FattyLiverDietArticle"));
+const LowSaltDietArticle = lazy(() => import("./pages/articles/diets/LowSaltDietArticle"));
+const GlutenFreeDietArticle = lazy(() => import("./pages/articles/diets/GlutenFreeDietArticle"));
+const DigestiveHealthDietArticle = lazy(() => import("./pages/articles/diets/DigestiveHealthDietArticle"));
+const ChildrenDietArticle = lazy(() => import("./pages/articles/diets/ChildrenDietArticle"));
+const TeenagersDietArticle = lazy(() => import("./pages/articles/diets/TeenagersDietArticle"));
+const BreastfeedingDietArticle = lazy(() => import("./pages/articles/diets/BreastfeedingDietArticle"));
+const OlderAdultsDietArticle = lazy(() => import("./pages/articles/diets/OlderAdultsDietArticle"));
+const MenGenitalSelfCheckArticle = lazy(() => import("./pages/articles/MenGenitalSelfCheckArticle.jsx"));
+const LaserFocusArticle = lazy(() => import("./pages/articles/LaserFocusArticle"));
+const GoldenGenesChildArticle = lazy(() => import("./pages/articles/GoldenGenesChildArticle"));
+const BehavioralEpigeneticsArticle = lazy(() => import("./pages/articles/BehavioralEpigeneticsArticle"));
+const ChildIntelligenceGenesArticle = lazy(() => import("./pages/articles/ChildIntelligenceGenesArticle.jsx"));
+const UnconditionalLoveChildArticle = lazy(() => import("./pages/articles/UnconditionalLoveChildArticle.jsx"));
+const ParentingBehaviorAtHomeArticle = lazy(() => import("@pages/articles/ParentingBehaviorAtHomeArticle"));
+const ChildAnxietyAndFearManagementArticle = lazy(() => import("@pages/articles/ChildAnxietyAndFearManagementArticle"));
+const SmartEncouragementArticle = lazy(() => import("@pages/articles/SmartEncouragementArticle"));
+const MutualRespectArticle = lazy(() => import("@pages/articles/MutualRespectArticle"));
+const FatherEmotionalRoleArticle = lazy(() => import("@pages/articles/FatherEmotionalRoleArticle"));
+const ParentAngerManagementArticle = lazy(() => import("@pages/articles/ParentAngerManagementArticle"));
+const ChildTrustArticle = lazy(() => import("@pages/articles/ChildTrustArticle"));
+const QualityTimeArticle = lazy(() => import("@pages/articles/QualityTimeArticle"));
+const PrePregnancyCheckupsArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyCheckupsArticle"));
+const PrePregnancyVitaminsArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyVitaminsArticle"));
+const EggSpermQualityArticle = lazy(() => import("@pages/articles/pre-pregnancy/EggSpermQualityArticle"));
+const PrePregnancyEpigeneticsArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyEpigeneticsArticle"));
+const PrePregnancyStressManagementArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyStressManagementArticle"));
+const PrePregnancyBodyWeightArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyBodyWeightArticle"));
+const PrePregnancyToxinsArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyToxinsArticle"));
+const PrePregnancyParentalAgeArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyParentalAgeArticle"));
+const PrePregnancyOvulationCycleArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyOvulationCycleArticle"));
+const PrePregnancyMaleSexualHealthArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyMaleSexualHealthArticle"));
+const PrePregnancySleepAndFertilityArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancySleepAndFertilityArticle"));
+const PrePregnancyMedicationsArticle = lazy(() => import("@pages/articles/pre-pregnancy/PrePregnancyMedicationsArticle"));
+const PositiveGenesArticle = lazy(() => import("@pages/articles/genetic-secrets/PositiveGenesArticle"));
+const GeneEditingFutureArticle = lazy(() => import("@pages/articles/genetic-secrets/GeneEditingFutureArticle"));
+const InheritanceAndGoodnessArticle = lazy(() => import("@pages/articles/genetic-secrets/InheritanceAndGoodnessArticle"));
+const HumanDiversitySecretsArticle = lazy(() => import("@pages/articles/genetic-secrets/HumanDiversitySecretsArticle"));
+const DNAToEmotionArticle = lazy(() => import("@pages/articles/genetic-secrets/DNAToEmotionArticle"));
+const GenesAndBeautyArticle = lazy(() => import("@pages/articles/genetic-secrets/GenesAndBeautyArticle"));
+const GeneticMedicineFutureArticle = lazy(() => import("@pages/articles/genetic-secrets/GeneticMedicineFutureArticle"));
+const DoGenesDefineDestinyArticle = lazy(() => import("@pages/articles/genetic-secrets/DoGenesDefineDestinyArticle"));
+const EmotionalInheritanceArticle = lazy(() => import("@pages/articles/genetic-secrets/EmotionalInheritanceArticle"));
+const ChildNutrition0to2Article = lazy(() => import("@pages/articles/child-nutrition/ChildNutrition0to2Article"));
+const BrainBoostingFoodsArticle = lazy(() => import("@pages/articles/child-nutrition/BrainBoostingFoodsArticle"));
+const ForbiddenFoodsUnder5Article = lazy(() => import("@pages/articles/child-nutrition/ForbiddenFoodsUnder5Article"));
+const EssentialNutrientsForFocusArticle = lazy(() => import("@pages/articles/child-nutrition/EssentialNutrientsForFocusArticle"));
+const ChildImmunityNutritionArticle = lazy(() => import("@pages/articles/child-nutrition/ChildImmunityNutritionArticle"));
+const HealthyPlateForKidsArticle = lazy(() => import("@pages/articles/child-nutrition/HealthyPlateForKidsArticle"));
+const EssentialVitaminsForKidsArticle = lazy(() => import("@pages/articles/child-nutrition/EssentialVitaminsForKidsArticle"));
+const ChildObesityPreventionArticle = lazy(() => import("@pages/articles/child-nutrition/ChildObesityPreventionArticle"));
+const ChildPickyEatingArticle = lazy(() => import("@pages/articles/child-nutrition/ChildPickyEatingArticle"));
+const SleepAndNutritionImpactArticle = lazy(() => import("@pages/articles/child-nutrition/SleepAndNutritionImpactArticle"));
+const ProteinRoleInChildGrowthArticle = lazy(() => import("@pages/articles/child-nutrition/ProteinRoleInChildGrowthArticle"));
+const FiveGoldenRulesNutritionArticle = lazy(() => import("@pages/articles/child-nutrition/FiveGoldenRulesNutritionArticle"));
+const MutualRespectInMarriageArticle = lazy(() => import("@pages/articles/family-relations/MutualRespectInMarriageArticle"));
+const HealthyFamilyCommunicationArticle = lazy(() => import("@pages/articles/family-relations/HealthyFamilyCommunicationArticle"));
+const EmotionalNeedsUnderstandingArticle = lazy(() => import("@pages/articles/family-relations/EmotionalNeedsUnderstandingArticle"));
+const ResolvingMinorConflictsArticle = lazy(() => import("@pages/articles/family-relations/ResolvingMinorConflictsArticle"));
+const RoleOfTrustInEmotionalSecurityArticle = lazy(() => import("@pages/articles/family-relations/RoleOfTrustInEmotionalSecurityArticle"));
+const DailyAffectionAsRelationshipFuelArticle = lazy(() => import("@pages/articles/family-relations/DailyAffectionAsRelationshipFuelArticle"));
+const RolesAndResponsibilitiesInModernFamilyArticle = lazy(() => import("@pages/articles/family-relations/RolesAndResponsibilitiesInModernFamilyArticle"));
+const HowToProvideEmotionalSupportArticle = lazy(() => import("@pages/articles/family-relations/HowToProvideEmotionalSupportArticle"));
+const BehavioralRedFlagsArticle = lazy(() => import("@pages/articles/family-relations/BehavioralRedFlagsArticle"));
+const AngerManagementInRelationshipsArticle = lazy(() => import("@pages/articles/family-relations/AngerManagementInRelationshipsArticle"));
+const HowParentalRelationshipAffectsChildDevelopmentArticle = lazy(() => import("@pages/articles/family-relations/HowParentalRelationshipAffectsChildDevelopmentArticle"));
+const CommonRelationshipMistakesCouplesShouldAvoidArticle = lazy(() => import("@pages/articles/family-relations/CommonRelationshipMistakesCouplesShouldAvoidArticle"));
+const EssentialCareForChildren0To3Article = lazy(() => import("@pages/articles/child-care/EssentialCareForChildren0To3Article"));
+const CognitiveDevelopmentFromBirthToEarlyYearsArticle = lazy(() => import("@pages/articles/child-care/CognitiveDevelopmentFromBirthToEarlyYearsArticle"));
+const PlayTherapyAndChildBrainDevelopmentArticle = lazy(() => import("@pages/articles/child-care/PlayTherapyAndChildBrainDevelopmentArticle"));
+const HealthyIndependenceInChildrenArticle = lazy(() => import("@pages/articles/child-care/HealthyIndependenceInChildrenArticle"));
+const FactorsAffectingChildSenseOfSecurityArticle = lazy(() => import("@pages/articles/child-care/FactorsAffectingChildSenseOfSecurityArticle"));
+const HowToHandleChildCryingArticle = lazy(() => import("@pages/articles/child-care/HowToHandleChildCryingArticle"));
+const RoleOfRuleSettingInHealthyChildDevelopmentArticle = lazy(() => import("@pages/articles/child-care/RoleOfRuleSettingInHealthyChildDevelopmentArticle"));
+const BestGamesForBrainAndCreativityDevelopmentArticle = lazy(() => import("@pages/articles/child-care/BestGamesForBrainAndCreativityDevelopmentArticle"));
+const EyeContactAndEmotionalDevelopmentArticle = lazy(() => import("@pages/articles/child-care/EyeContactAndEmotionalDevelopmentArticle"));
+const SignsOfDevelopmentalDelayInChildrenArticle = lazy(() => import("@pages/articles/child-care/SignsOfDevelopmentalDelayInChildrenArticle"));
+const InfantReflexesAreTheyNormalArticle = lazy(() => import("@pages/articles/child-care/InfantReflexesAreTheyNormalArticle"));
+const EffectiveAndIneffectivePraiseInChildrenArticle = lazy(() => import("@pages/articles/child-care/EffectiveAndIneffectivePraiseInChildrenArticle"));
+const WhatIsMeditationArticle = lazy(() => import("./pages/articles/mind-calm/WhatIsMeditationArticle"));
+const BreathingExercisesForDailyStressArticle = lazy(() => import("./pages/articles/mind-calm/BreathingExercisesForDailyStressArticle"));
+const MeditationForBusyParentsArticle = lazy(() => import("./pages/articles/mind-calm/MeditationForBusyParentsArticle"));
+const CalmingMindBeforeSleepArticle = lazy(() => import("./pages/articles/mind-calm/CalmingMindBeforeSleepArticle"));
+const ParentalMentalCalmImpactOnChildGrowthArticle = lazy(() => import("./pages/articles/mind-calm/ParentalMentalCalmImpactOnChildGrowthArticle"));
+const FiveMinuteHomeMeditationArticle = lazy(() => import("./pages/articles/mind-calm/FiveMinuteHomeMeditationArticle"));
+const MindfulnessInDailyLifeArticle = lazy(() => import("./pages/articles/mind-calm/MindfulnessInDailyLifeArticle"));
+const ReducingAnxietyWithSimpleMentalExercisesArticle = lazy(() => import("./pages/articles/mind-calm/ReducingAnxietyWithSimpleMentalExercisesArticle"));
+const MentalCalmInCrisisArticle = lazy(() => import("./pages/articles/mind-calm/MentalCalmInCrisisArticle"));
+const MeditationImpactOnFocusAndDecisionMakingArticle = lazy(() => import("./pages/articles/mind-calm/MeditationImpactOnFocusAndDecisionMakingArticle"));
+const ManagingNegativeThoughtsWithMentalTrainingArticle = lazy(() => import("./pages/articles/mind-calm/ManagingNegativeThoughtsWithMentalTrainingArticle"));
+const FiveSimpleExercisesForInstantCalmArticle = lazy(() => import("./pages/articles/mind-calm/FiveSimpleExercisesForInstantCalmArticle"));
+const HomeWorkoutWithoutEquipmentArticle = lazy(() => import("./pages/articles/home-workout/HomeWorkoutWithoutEquipmentArticle"));
+const DailySimpleWorkoutsForBusyParentsArticle = lazy(() => import("./pages/articles/home-workout/DailySimpleWorkoutsForBusyParentsArticle"));
+const WorkoutsForRestartingArticle = lazy(() => import("./pages/articles/home-workout/WorkoutsForRestartingArticle"));
+const ExercisesForLowerBackPainArticle = lazy(() => import("./pages/articles/home-workout/ExercisesForLowerBackPainArticle"));
+const StretchingExercisesForMusclePainReliefArticle = lazy(() => import("./pages/articles/home-workout/StretchingExercisesForMusclePainReliefArticle"));
+const FatBurningHomeWorkoutArticle = lazy(() => import("./pages/articles/home-workout/FatBurningHomeWorkoutArticle"));
+const FromZeroToFirstSuccessArticle = lazy(() => import("./pages/articles/entrepreneurs/FromZeroToFirstSuccessArticle"));
+const EntrepreneurMindsetArticle = lazy(() => import("./pages/articles/entrepreneurs/EntrepreneurMindsetArticle"));
+const FailureOrBeginningArticle = lazy(() => import("./pages/articles/entrepreneurs/FailureOrBeginningArticle"));
+const RiskManagementArticle = lazy(() => import("./pages/articles/entrepreneurs/RiskManagementArticle"));
+const DecisionMakingArticle = lazy(() => import("./pages/articles/entrepreneurs/DecisionMakingArticle"));
+const IdeaVsExecutionArticle = lazy(() => import("./pages/articles/entrepreneurs/IdeaVsExecutionArticle"));
+const PersonalDisciplineArticle = lazy(() => import("./pages/articles/entrepreneurs/PersonalDisciplineArticle"));
+const LateStartersArticle = lazy(() => import("./pages/articles/entrepreneurs/LateStartersArticle"));
+const EmployeeToEntrepreneurArticle = lazy(() => import("./pages/articles/entrepreneurs/EmployeeToEntrepreneurArticle"));
+const WorkLifeBalanceArticle = lazy(() => import("./pages/articles/entrepreneurs/WorkLifeBalanceArticle"));
+const CommonMistakesArticle = lazy(() => import("./pages/articles/entrepreneurs/CommonMistakesArticle"));
+const FiveGoldenPrinciplesArticle = lazy(() => import("./pages/articles/entrepreneurs/FiveGoldenPrinciplesArticle"));
+const Feed = lazy(() => import("./pages/social/Feed.jsx"));
+const Profile = lazy(() => import("./pages/social/Profile.jsx"));
+const CreatePost = lazy(() => import("./pages/social/CreatePost.jsx"));
+const ChatRoom = lazy(() => import("./pages/social/ChatRoom.jsx"));
+const Notifications = lazy(() => import("./pages/Notifications"));
 
 
 
@@ -245,6 +272,7 @@ console.log("APP ROUTES LOADED");
         <Route path="/world-knowledge" element={<WorldKnowledge />} />
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
         <Route path="/mychild" element={<ProtectedRoute> <MyChild /> </ProtectedRoute>} />
+        <Route path="/genino-children" element={<GeninoChildren />} />
         <Route path="/social" element={<Feed />} />
         <Route path="/social/profile" element={<Profile />} />
         <Route path="/social/create" element={<CreatePost />} />
@@ -259,6 +287,10 @@ console.log("APP ROUTES LOADED");
         <Route path="/dashboard-parent" element={<ProtectedRoute> <DashboardParent /> </ProtectedRoute>} />
         <Route path="/my-doctor" element={<MyDoctor />} />
         <Route path="/single-world" element={<SingleWorld />} />
+        <Route path="/personal-growth" element={<ProtectedRoute><PersonalGrowth /></ProtectedRoute>} />
+        <Route path="/books-positive-energy" element={<ProtectedRoute><BooksPositiveEnergy /></ProtectedRoute>} />
+        <Route path="/travel-experience" element={<ProtectedRoute><TravelExperience /></ProtectedRoute>} />
+        <Route path="/emotional-intelligence" element={<ProtectedRoute><EmotionalIntelligence /></ProtectedRoute>} />
         <Route path="/articles/coffee-break" element={<CoffeeBreakArticle />} />
         <Route path="/articles/books-that-change-life" element={<BooksThatChangeLifeArticle />} />
         <Route path="/articles/personal-growth-mastery" element={<PersonalGrowthMasteryArticle />} />
@@ -393,6 +425,7 @@ console.log("APP ROUTES LOADED");
         <Route path="/notifications" element={ <ProtectedRoute>  <Notifications /> </ProtectedRoute>} />
         <Route path="/invite/:token" element={<AcceptInvite />} />
         <Route path="/inspiration" element={<ProtectedRoute><Inspiration /></ProtectedRoute>} />
+        <Route path="/awareness-center" element={<ProtectedRoute><AwarenessCenter /></ProtectedRoute>} />
         <Route path="/diets/balanced-diet" element={<BalancedDietArticle />} />
         <Route path="/diets/mediterranean-diet" element={<MediterraneanDietArticle />} />
         <Route path="/diets/dash-diet" element={<DashDietArticle />} />
@@ -433,6 +466,28 @@ console.log("APP ROUTES LOADED");
         <Route path="/articles/entrepreneurs/work-life-balance" element={<WorkLifeBalanceArticle />} />
         <Route path="/articles/entrepreneurs/common-mistakes" element={<CommonMistakesArticle />} />
         <Route path="/articles/entrepreneurs/five-golden-principles" element={<FiveGoldenPrinciplesArticle />} />
+        <Route path="/music-and-mind" element={<ProtectedRoute><MusicAndMind /></ProtectedRoute>} />
+        <Route path="/love-relationship" element={<ProtectedRoute><LoveRelationship /></ProtectedRoute>} />
+        <Route path="/couple-dates" element={<ProtectedRoute><CoupleDates /></ProtectedRoute>} />
+        <Route path="/healthy-conversation" element={<ProtectedRoute><HealthyConversation /></ProtectedRoute>} />
+        <Route path="/mind-peace" element={<ProtectedRoute><MindPeace /></ProtectedRoute>} />
+        <Route path="/couple-nutrition" element={<ProtectedRoute><CoupleNutrition /></ProtectedRoute>} />
+        <Route path="/future-parenting" element={<ProtectedRoute><FutureParenting /></ProtectedRoute>} />
+        <Route path="/couple-home" element={<ProtectedRoute><CoupleHome /></ProtectedRoute>} />
+        <Route path="/successful-couples" element={<ProtectedRoute><SuccessfulCouples /></ProtectedRoute>} />
+        <Route path="/peaceful-marriage" element={<ProtectedRoute><PeacefulMarriage /></ProtectedRoute>} />
+        <Route path="/acceptance-and-trust" element={<ProtectedRoute><AcceptanceAndTrust /></ProtectedRoute>} />
+        <Route path="/pregnancy-weekly-growth" element={<ProtectedRoute><PregnancyWeeklyGrowth /></ProtectedRoute>} />
+        <Route path="/mother-health" element={<ProtectedRoute><MotherHealth /></ProtectedRoute>} />
+        <Route path="/pregnancy-nutrition" element={<ProtectedRoute><PregnancyNutrition /></ProtectedRoute>} />
+        <Route path="/pregnancy-breathing" element={<ProtectedRoute><PregnancyBreathing /></ProtectedRoute>} />
+        <Route path="/birth-preparation" element={<ProtectedRoute><BirthPreparation /></ProtectedRoute>} />
+        <Route path="/father-support" element={<ProtectedRoute><FatherSupport /></ProtectedRoute>} />
+        <Route path="/bond-with-baby" element={<ProtectedRoute><BondWithBaby /></ProtectedRoute>} />
+        <Route path="/let-go-and-grow" element={<ProtectedRoute><LetGoAndGrow /></ProtectedRoute>} />
+        <Route path="/money-and-future" element={<ProtectedRoute><MoneyAndFuture /></ProtectedRoute>} />
+        <Route path="/pregnancy-trust" element={<ProtectedRoute><PregnancyTrust /></ProtectedRoute>} />
+
 
 
         </Routes>
