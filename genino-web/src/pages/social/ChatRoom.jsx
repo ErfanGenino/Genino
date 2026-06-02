@@ -55,6 +55,8 @@ export default function ChatRoom({ room }) {
   const [audioDuration, setAudioDuration] = useState(null);
   const [remainingSeconds, setRemainingSeconds] = useState(30);
   const [audioPreviewUrl, setAudioPreviewUrl] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isPreparingImagePreview, setIsPreparingImagePreview] = useState(false);
 
   const emojiRef = useRef(null);
   const inputRef = useRef(null);
@@ -585,6 +587,7 @@ const handleInputChange = (e) => {
   e.target.value = "";
 
   if (!file) return;
+  setIsPreparingImagePreview(true);
 
   if (filePreview?.url?.startsWith("blob:")) {
     URL.revokeObjectURL(filePreview.url);
@@ -592,15 +595,21 @@ const handleInputChange = (e) => {
 
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-  if (!allowedTypes.includes(file.type)) {
-    alert("فعلاً فقط فرمت‌های JPG، PNG و WEBP پشتیبانی می‌شوند. لطفاً اگر عکس HEIC است، آن را از تنظیمات گوشی به JPG تغییر بده.");
-    return;
-  }
+ if (!allowedTypes.includes(file.type)) {
+  setIsPreparingImagePreview(false);
 
-  if (file.size > 15 * 1024 * 1024) {
-    alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
-    return;
-  }
+  alert(
+    "فعلاً فقط فرمت‌های JPG، PNG و WEBP پشتیبانی می‌شوند. لطفاً اگر عکس HEIC است، آن را از تنظیمات گوشی به JPG تغییر بده."
+  );
+  return;
+}
+
+if (file.size > 15 * 1024 * 1024) {
+  setIsPreparingImagePreview(false);
+
+  alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
+  return;
+}
 
   const img = new Image();
   const previewUrl = URL.createObjectURL(file);
@@ -624,12 +633,14 @@ const handleInputChange = (e) => {
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          alert("آماده‌سازی تصویر انجام نشد.");
-          return;
-        }
+  setIsPreparingImagePreview(false);
+
+  alert("آماده‌سازی تصویر انجام نشد.");
+  return;
+}
 
         const url = URL.createObjectURL(blob);
-
+        setIsPreparingImagePreview(false);
         setFilePreview({
           url,
           type: "image",
@@ -645,6 +656,7 @@ const handleInputChange = (e) => {
   };
 
   img.onerror = () => {
+    setIsPreparingImagePreview(false);
     URL.revokeObjectURL(previewUrl);
     alert("این عکس در مرورگر قابل نمایش نیست. لطفاً JPG، PNG یا WEBP انتخاب کن.");
   };
@@ -707,6 +719,7 @@ const handleToggleMuteUser = async (user) => {
   let audioFile = null;
 
   if (filePreview?.blob) {
+    setIsUploadingImage(true);
     const presignRes = await presignChatImageUpload({
       ext: filePreview.ext,
       contentType: filePreview.contentType,
@@ -716,6 +729,7 @@ const handleToggleMuteUser = async (user) => {
     if (!presignRes?.ok || !presignRes.uploadUrl || !presignRes.publicUrl) {
       alert(presignRes?.message || "آماده‌سازی آپلود تصویر انجام نشد.");
       setIsTyping(false);
+      setIsUploadingImage(false);
       return;
     }
   
@@ -731,10 +745,12 @@ const handleToggleMuteUser = async (user) => {
     if (!uploadRes?.ok) {
       alert(uploadRes?.message || "آپلود تصویر انجام نشد.");
       setIsTyping(false);
+      setIsUploadingImage(false);
       return;
     }
 
     messageFile = presignRes.publicUrl;
+    setIsUploadingImage(false);
   }
 
   // 🎤 آپلود ویس
@@ -1371,37 +1387,6 @@ if (typingUsersList.length === 1) {
 
         <div ref={messagesEndRef} />
 
-        {/* preview فایل */}
-        {filePreview && (
-  <div className="fixed bottom-4 left-3 z-[60] bg-white border border-yellow-200 rounded-xl p-1.5 shadow max-w-[120px]">
-    <button
-      type="button"
-      onClick={() => {
-  if (filePreview?.url?.startsWith("blob:")) {
-    URL.revokeObjectURL(filePreview.url);
-  }
-  setFilePreview(null);
-}}
-      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow hover:bg-red-600"
-      title="حذف تصویر"
-    >
-      <X size={12} />
-    </button>
-
-    {filePreview.type === "image" ? (
-      <img
-        src={filePreview.url}
-        alt="preview"
-        className="h-20 rounded-lg"
-      />
-    ) : (
-      <video
-        src={filePreview.url}
-        className="h-20 rounded-lg"
-      />
-    )}
-  </div>
-)}
 
 {/* preview صدا */}
 {audioBlob && audioPreviewUrl && (
@@ -1453,6 +1438,59 @@ if (typingUsersList.length === 1) {
           </div>
         )}
       </div>
+
+      {isPreparingImagePreview && (
+  <div className="border-t border-yellow-100 bg-yellow-50 px-3 py-2 text-center">
+    <p className="text-xs font-bold text-yellow-800">
+      ⏳ در حال آماده‌سازی پیش‌نمایش عکس...
+    </p>
+    <p className="mt-1 text-[11px] text-gray-500">
+      لطفاً چند لحظه صبر کنید
+    </p>
+  </div>
+)}
+
+      {isUploadingImage && (
+  <div className="border-t border-yellow-100 bg-yellow-50 px-3 py-2 text-center">
+    <p className="text-xs font-bold text-yellow-800">
+      ⏳ در حال آماده‌سازی و ارسال عکس...
+    </p>
+    <p className="mt-1 text-[11px] text-gray-500">
+      لطفاً چند لحظه صبر کنید
+    </p>
+  </div>
+)}
+
+
+{filePreview && (
+  <div className="border-t border-yellow-100 bg-white px-3 py-2">
+    <div className="relative inline-block">
+      <button
+        type="button"
+        onClick={() => {
+          if (filePreview?.url?.startsWith("blob:")) {
+            URL.revokeObjectURL(filePreview.url);
+          }
+          setFilePreview(null);
+        }}
+        className="absolute top-1 right-1 z-10 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow hover:bg-red-600"
+        title="حذف تصویر"
+      >
+        <X size={12} />
+      </button>
+
+      <img
+        src={filePreview.url}
+        alt="preview"
+        className="h-24 rounded-xl border border-yellow-200"
+      />
+    </div>
+
+    <p className="mt-1 text-[11px] text-gray-500">
+      تصویر آماده ارسال است
+    </p>
+  </div>
+)}
 
       {/* ورودی */}
       <form

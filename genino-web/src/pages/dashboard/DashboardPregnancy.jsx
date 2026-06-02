@@ -14,6 +14,7 @@ import {
   HandHeart,
   CloudSun,
 } from "lucide-react";
+import LifeCompanionButton from "@components/Dashboard/LifeCompanionButton";
 
 export default function DashboardPregnancy() {
 let user = null;
@@ -27,6 +28,12 @@ try {
 
 
   const cards = [
+    {
+  title: "علایق من",
+  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+  icon: <Heart size={26} className="text-yellow-600" />,
+  link: "/favorites",
+},
     {
   title: "رشد ماه‌به‌ماه جنین",
   desc: "آشنایی ساده با تغییرات جنین، بدن مادر و حس‌وحال هر مرحله",
@@ -82,12 +89,7 @@ try {
   icon: <Sparkles size={26} className="text-yellow-600" />,
   link: "/pregnancy-trust",
 },
-    {
-  title: "علایق من",
-  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
-  icon: <Heart size={26} className="text-yellow-600" />,
-  link: "/favorites",
-},
+    
   ];
 
   return (
@@ -111,6 +113,7 @@ try {
         <div className="mt-5 flex justify-center">
           <LifeStageSwitcher currentStage="prebirth" />
         </div>
+        <LifeCompanionButton />
       </motion.div>
 
       {/* 🌸 کارت‌ها */}

@@ -144,6 +144,22 @@ const deleteOneNotification = async (id) => {
   }
 };
 
+const handleNotificationClick = async (notification) => {
+  try {
+    if (!notification.read) {
+      await markOneRead(notification.id);
+    }
+
+    const targetPath = notification?.data?.targetPath;
+
+    if (targetPath) {
+      navigate(targetPath);
+    }
+  } catch (err) {
+    console.error("Notification navigation error:", err);
+  }
+};
+
 const handleAcceptInvitation = async (notification) => {
   const token = notification?.data?.token;
 
@@ -216,6 +232,88 @@ const handleRejectInvitation = async (notification) => {
   }
 };
 
+const handleAcceptLifeCompanionInvite = async (notification) => {
+  try {
+    const inviteId = notification?.data?.inviteId;
+
+    if (!inviteId) {
+      alert("اطلاعات دعوت ناقص است");
+      return;
+    }
+
+    const res = await authFetch(
+      `/life-companion/invites/${inviteId}/accept`,
+      {
+        method: "POST",
+      }
+    );
+
+    if (res?.success) {
+      await markOneRead(notification.id);
+      await load();
+
+      alert("همراه زندگی با موفقیت اضافه شد ✨");
+
+      navigate("/life-companion");
+    } else {
+      alert(res?.message || "پذیرش دعوت انجام نشد");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("پذیرش دعوت انجام نشد");
+  }
+};
+
+const handleRejectLifeCompanionInvite = async (notification) => {
+  try {
+    const inviteId = notification?.data?.inviteId;
+
+    if (!inviteId) {
+      alert("اطلاعات دعوت ناقص است");
+      return;
+    }
+
+    const res = await authFetch(
+      `/life-companion/invites/${inviteId}/reject`,
+      {
+        method: "POST",
+      }
+    );
+
+    if (res?.success) {
+      await markOneRead(notification.id);
+      await load();
+
+      alert("دعوت رد شد");
+    } else {
+      alert(res?.message || "رد دعوت انجام نشد");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("رد دعوت انجام نشد");
+  }
+};
+
+
+const showFollowRequestResult = (res) => {
+  if (res?.code === "ALREADY_DECIDED") {
+    alert(res.message || "این درخواست قبلاً توسط یکی از والدین بررسی شده است.");
+    return true;
+  }
+
+  if (res?.status === "APPROVED") {
+    alert("این درخواست قبلاً توسط یکی از والدین پذیرفته شده است.");
+    return true;
+  }
+
+  if (res?.status === "REJECTED") {
+    alert("این درخواست قبلاً توسط یکی از والدین رد شده است.");
+    return true;
+  }
+
+  return false;
+};
+
 
 const handleAcceptFollowRequest = async (notification) => {
   try {
@@ -231,7 +329,13 @@ const handleAcceptFollowRequest = async (notification) => {
       }
     );
 
-    if (res?.ok) {
+    if (showFollowRequestResult(res)) {
+  await markOneRead(notification.id);
+  await load();
+  return;
+}
+
+if (res?.ok) {
       await markOneRead(notification.id);
       await load();
 
@@ -259,7 +363,13 @@ const handleRejectFollowRequest = async (notification) => {
       }
     );
 
-    if (res?.ok) {
+    if (showFollowRequestResult(res)) {
+  await markOneRead(notification.id);
+  await load();
+  return;
+}
+
+if (res?.ok) {
       await markOneRead(notification.id);
       await load();
 
@@ -298,7 +408,13 @@ const submitChangedFollowRole = async () => {
       }
     );
 
-    if (res?.ok) {
+    if (showFollowRequestResult(res)) {
+  await markOneRead(roleChangeNotification.id);
+  await load();
+  return;
+}
+
+if (res?.ok) {
       await markOneRead(roleChangeNotification.id);
       await load();
 
@@ -445,14 +561,18 @@ const handleRejectChangedRole = async (notification) => {
             ) : (
               <div className="space-y-3">
                 {list
-                  .slice()
-                  .reverse()
-                  .map((n) => (
+                .map((n) => (
                     <motion.div
-                      key={n.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
+  key={n.id}
+  initial={{ opacity: 0, y: 8 }}
+  animate={{ opacity: 1, y: 0 }}
+  onClick={() =>
+    n?.data?.targetPath
+      ? handleNotificationClick(n)
+      : null
+  }
                       className={`bg-white/90 border rounded-2xl p-4 shadow-sm transition
+${n?.data?.targetPath ? "cursor-pointer hover:shadow-md" : ""}
                         ${n.read ? "border-gray-200" : "border-yellow-300"}`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -465,11 +585,18 @@ const handleRejectChangedRole = async (notification) => {
                               {n.body}
                             </div>
                           )}
-                          {n.time && (
-                            <div className="text-[11px] text-gray-400 mt-2">
-                              {n.time}
-                            </div>
-                          )}
+                          {(n.time || n.createdAt) && (
+  <div className="text-[11px] text-gray-400 mt-2">
+    {n.time ||
+      new Date(n.createdAt).toLocaleString("fa-IR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })}
+  </div>
+)}
 
                           {n.type === "child_invitation" && !n.read && (
   <div className="flex items-center gap-2 mt-4">
@@ -486,6 +613,30 @@ const handleRejectChangedRole = async (notification) => {
     >
       رد دعوت
     </button>
+  </div>
+)}
+
+{n.type === "life_companion_invite" && !n.read && (
+  <div className="mt-4 rounded-2xl border border-rose-200 bg-gradient-to-l from-rose-50 to-amber-50 p-4">
+    <div className="mb-3 text-sm font-bold text-rose-700">
+      {n?.data?.senderName || "کاربر ژنینو"} شما را به همراه زندگی من دعوت کرده است ✨
+    </div>
+
+    <div className="flex flex-wrap items-center gap-2">
+      <button
+        onClick={() => handleAcceptLifeCompanionInvite(n)}
+        className="text-xs px-4 py-2 rounded-xl bg-gradient-to-l from-rose-500 to-amber-400 text-white hover:opacity-90 transition"
+      >
+        قبول دعوت
+      </button>
+
+      <button
+        onClick={() => handleRejectLifeCompanionInvite(n)}
+        className="text-xs px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 hover:bg-red-50 transition"
+      >
+        رد دعوت
+      </button>
+    </div>
   </div>
 )}
 
@@ -535,7 +686,9 @@ const handleRejectChangedRole = async (notification) => {
                         </div>
 
                         <div className="flex flex-col gap-2">
-  {!n.read && n.type !== "child_invitation" && (
+  {!n.read &&
+  n.type !== "child_invitation" &&
+  n.type !== "life_companion_invite" && (
     <button
       onClick={() => markOneRead(n.id)}
       className="text-xs px-3 py-2 rounded-xl bg-yellow-500 text-white hover:bg-yellow-600 transition"

@@ -16,6 +16,7 @@ import {
   Apple,
   DollarSign,
 } from "lucide-react";
+import LifeCompanionButton from "@components/Dashboard/LifeCompanionButton";
 
 
 export default function DashboardParent() {
@@ -32,6 +33,12 @@ try {
 
   // 🌿 کارت‌ها
   const cards = [
+    {
+      title: "علایق من",
+      desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+      icon: <Heart size={26} className="text-yellow-600" />,
+      link: "/favorites",
+    },
     {
       title: "ورود به دنیای کودک من",
       desc: "مشاهده و مدیریت رشد کودک",
@@ -91,12 +98,7 @@ try {
       icon: <Rocket size={26} className="text-yellow-600" />,
       link: "/knowledge/successful-entrepreneurs",
     },
-    {
-      title: "علایق من",
-      desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
-      icon: <Heart size={26} className="text-yellow-600" />,
-      link: "/favorites",
-    },
+    
   ];
   
 
@@ -122,6 +124,7 @@ try {
         <div className="mt-5 flex justify-center">
         <LifeStageSwitcher currentStage="parent" />
         </div>
+        <LifeCompanionButton />
       </motion.div>
 
       {/* 🟡 کارت‌ها */}

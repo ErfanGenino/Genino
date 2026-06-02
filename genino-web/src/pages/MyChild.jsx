@@ -549,6 +549,45 @@ console.log("FATHER:", father);
 console.log("MOTHER:", mother);
 
 
+const getCurrentUserSpiritualSenderText = () => {
+  const currentUserId = String(currentUser?.id || "");
+
+  if (String(father?.userId) === currentUserId) {
+    return `پدر - ${father?.fullName || currentUser?.fullName || "کاربر ژنینو"}`;
+  }
+
+  if (String(mother?.userId) === currentUserId) {
+    return `مادر - ${mother?.fullName || currentUser?.fullName || "کاربر ژنینو"}`;
+  }
+
+  const roleMap = {
+    friend: "دوست",
+    relative: "قوم",
+    sister: "خواهر",
+    brother: "برادر",
+    amme: "عمه",
+    ammo: "عمو",
+    khale: "خاله",
+    dayi: "دایی",
+    grandfather_paternal: "پدربزرگ پدری",
+    grandmother_paternal: "مادربزرگ پدری",
+    grandfather_maternal: "پدربزرگ مادری",
+    grandmother_maternal: "مادربزرگ مادری",
+  };
+
+  const role =
+    activeChild?.myRelationType ||
+    activeChild?.relationType ||
+    activeChild?.role ||
+    "friend";
+
+  const roleLabel = roleMap[role] || "عضو درختواره";
+  const name = currentUser?.fullName || currentUser?.name || "کاربر ژنینو";
+
+  return `${roleLabel} - ${name}`;
+};
+
+
   return (
     <main
        dir="rtl"
@@ -1032,7 +1071,7 @@ console.log("MOTHER:", mother);
   </div>
 </div>
 
-{canManageChild && (
+{activeChild && (
   <div className="relative z-10 mt-5 space-y-3">
 
     <button
@@ -1050,7 +1089,8 @@ console.log("MOTHER:", mother);
       ✨ اهدای دستاورد معنوی به {activeChild?.fullName || "فرزندم"}
     </button>
 
-    <div className="flex gap-3">
+    {canManageChild && (
+  <div className="flex gap-3">
       <Link
         to={`/child-profile?mode=edit&id=${activeChild.id}`}
         className="
@@ -1097,7 +1137,8 @@ console.log("MOTHER:", mother);
           حذف قطعی؟
         </button>
       )}
-    </div>
+      </div>
+)}
   </div>
 )}
 
@@ -1225,25 +1266,40 @@ console.log("MOTHER:", mother);
 </motion.div>
 
 
-{/* 🌕 دکمه سکه‌ای پایش سلامت کودک */}
+{/* 🌕 دکمه‌های سکه‌ای سلامت کودک */}
 {isMineTab && (
-<motion.div
-  className="relative z-[10] mt-0 mb-12 flex justify-center px-4"
-  initial={{ opacity: 0, y: 30 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
+  <motion.div
+    className="relative z-[10] mt-0 mb-12 flex justify-center px-4"
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+  >
+    <div className="flex flex-row items-center justify-center gap-4 sm:gap-8">
+      <Link
+  to={`/child-medical-archive?childId=${activeChild?.id}&childName=${encodeURIComponent(activeChild?.fullName || "")}`}
+  className={`block ${!activeChild ? "pointer-events-none opacity-50" : ""}`}
 >
-  <Link
+        <GeninoHealthButton
+          title="پرونده پزشکی"
+          icon={HeartPulse}
+          color="medical"
+          delay={0.4}
+        />
+      </Link>
+
+      <Link
   to={`/child-health-check?childId=${activeChild?.id}`}
   className={`block ${!activeChild ? "pointer-events-none opacity-50" : ""}`}
 >
-  <GeninoHealthButton
-    title="پایش سلامت کودک"
-    icon={HeartPulse}
-  />
-</Link>
-
-</motion.div>
+        <GeninoHealthButton
+          title="پایش سلامت کودک"
+          icon={HeartPulse}
+          color="gold"
+          delay={0}
+        />
+      </Link>
+    </div>
+  </motion.div>
 )}
 
 {showInviteModal && (
@@ -1489,7 +1545,7 @@ console.log("MOTHER:", mother);
         <div className="rounded-2xl border border-yellow-100 bg-white/80 p-4 text-xs leading-7 text-gray-600">
           <p>
             <span className="font-extrabold text-yellow-800">صادرکننده:</span>{" "}
-            عضو خانواده / درختواره {activeChild?.fullName || "کودک"}
+              {getCurrentUserSpiritualSenderText()} 
           </p>
 
           <p>

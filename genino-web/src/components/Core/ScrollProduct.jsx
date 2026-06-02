@@ -1,7 +1,6 @@
 // 📄 src/components/Core/ScrollProduct.jsx
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef, useEffect } from "react";
+import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
+import { useRef, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 /**
@@ -22,19 +21,63 @@ export default function ScrollProduct({
   interval = 6000,
   color = "yellow",
 }) {
-  const scrollRef = useRef(null);
+  
   const navigate = useNavigate();
 
-  // 🎞️ اسکرول خودکار هر چند ثانیه
-  useEffect(() => {
-    if (!autoScroll) return;
-    const timer = setInterval(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
-      }
-    }, interval);
-    return () => clearInterval(timer);
-  }, [autoScroll, interval]);
+  const trackRef = useRef(null);
+const oneSetWidthRef = useRef(0);
+const hasDraggedRef = useRef(false);
+
+const x = useMotionValue(0);
+const [isDragging, setIsDragging] = useState(false);
+
+const loopItems = useMemo(() => {
+  if (!items.length) return [];
+  return [...items, ...items, ...items];
+}, [items]);
+
+const normalizeX = () => {
+  const oneSetWidth = oneSetWidthRef.current;
+  if (!oneSetWidth) return;
+
+  const currentX = x.get();
+
+  if (currentX >= 0) {
+    x.set(currentX - oneSetWidth);
+  }
+
+  if (currentX <= -oneSetWidth * 2) {
+    x.set(currentX + oneSetWidth);
+  }
+};
+
+useEffect(() => {
+  const calculateWidth = () => {
+    if (!trackRef.current) return;
+
+    const oneSetWidth = trackRef.current.scrollWidth / 3;
+    oneSetWidthRef.current = oneSetWidth;
+    x.set(-oneSetWidth);
+  };
+
+  const timer = setTimeout(calculateWidth, 100);
+  window.addEventListener("resize", calculateWidth);
+
+  return () => {
+    clearTimeout(timer);
+    window.removeEventListener("resize", calculateWidth);
+  };
+}, [items.length, x]);
+
+useAnimationFrame((_, delta) => {
+  if (isDragging) return;
+
+  const speed = 22;
+  x.set(x.get() + speed * (delta / 1000));
+  normalizeX();
+});
+
+  
 
   // 🎨 رنگ‌ها
   const colorClasses =
@@ -48,14 +91,7 @@ export default function ScrollProduct({
     <section className="relative z-10 w-full max-w-5xl mx-auto text-center mt-10 mb-14">
       {/* 🏷️ تیتر و فلش‌ها */}
       <div className="relative flex items-center justify-center mb-6">
-        <button
-          onClick={() =>
-            scrollRef.current.scrollBy({ left: -300, behavior: "smooth" })
-          }
-          className={`absolute right-0 sm:right-8 p-2 rounded-full bg-white border ${colorClasses} hover:bg-yellow-50 transition shadow-sm`}
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
+      
 
         <h2
   className={`text-lg sm:text-xl font-bold ${
@@ -66,41 +102,60 @@ export default function ScrollProduct({
 </h2>
 
 
-        <button
-          onClick={() =>
-            scrollRef.current.scrollBy({ left: 300, behavior: "smooth" })
-          }
-          className={`absolute left-0 sm:left-8 p-2 rounded-full bg-white border ${colorClasses} hover:bg-yellow-50 transition shadow-sm`}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+      
       </div>
 
       {/* 🔄 لیست محصولات */}
       <div
-        ref={scrollRef}
-        className="overflow-x-auto snap-x snap-mandatory no-scrollbar"
-        style={{ touchAction: "pan-y pan-x" }}
-      >
-        <div className="grid grid-flow-col 
-                auto-cols-[60%] 
-                sm:auto-cols-[40%] 
-                md:auto-cols-[28%] 
-                lg:auto-cols-[22%] 
-                gap-4 px-2">
-          {items.map((item) => (
+  dir="ltr"
+  className="relative w-full overflow-hidden py-2 touch-pan-y"
+>
+  <motion.div
+    ref={trackRef}
+    className="
+      flex items-stretch gap-4 px-2
+      w-max cursor-grab active:cursor-grabbing
+    "
+    style={{ x }}
+    drag="x"
+    dragMomentum={false}
+    dragElastic={0}
+    onDragStart={() => {
+      hasDraggedRef.current = true;
+      setIsDragging(true);
+    }}
+    onDrag={() => {
+      normalizeX();
+    }}
+    onDragEnd={() => {
+      normalizeX();
+      setIsDragging(false);
+
+      setTimeout(() => {
+        hasDraggedRef.current = false;
+      }, 80);
+    }}
+  >
+    {loopItems.map((item, index) => (
             <motion.div
-              key={item.id}
-              whileHover={{
-                y: -4,
-                boxShadow: "0 10px 25px rgba(212,175,55,0.15)",
-              }}
-              transition={{ duration: 0.3 }}
-              onClick={() => navigate(`/product/${item.id}`)}
-              className="group bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm 
-           overflow-hidden hover:shadow-md transition-all 
-           border border-yellow-100 cursor-pointer snap-start"
-            >
+  key={`${item.id}-${index}`}
+  whileHover={{
+    y: -4,
+    boxShadow: "0 10px 25px rgba(212,175,55,0.15)",
+  }}
+  transition={{ duration: 0.3 }}
+  onClick={() => {
+    if (hasDraggedRef.current) return;
+    navigate(`/product/${item.id}`);
+  }}
+  className="
+    group shrink-0
+    w-[62vw] sm:w-[240px] md:w-[220px] lg:w-[210px]
+    bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm
+    overflow-hidden hover:shadow-md transition-all
+    border border-yellow-100 cursor-pointer select-none
+  "
+>
               <img
   src={item.image}
   alt={item.name}
@@ -123,7 +178,7 @@ export default function ScrollProduct({
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1001,7 +1001,7 @@ specialty:
 
               <td className="border-b border-rose-100 px-2 py-2">
                 <div
-  onClick={() => setSelectedChild(item.child)}
+  onClick={() => setSelectedChild(getFullChildForModal(item.child))}
   style={{ width: "82px", height: "96px" }}
   className="mx-auto flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-yellow-200 bg-white p-1.5 shadow-sm transition hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-[0_10px_25px_rgba(180,130,30,0.18)]"
 >
@@ -1586,7 +1586,17 @@ selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE"
               className="rounded-2xl border-2 border-[#d4af37] bg-[#fffaf0] p-3 text-center shadow-sm hover:shadow-[0_0_14px_rgba(212,175,55,0.28)] transition"
             >
               <div className="mb-2 flex h-20 items-center justify-center overflow-hidden rounded-xl bg-white">
-                <img src={logo} alt={ach.type} className="h-full w-full object-contain p-3" />
+                {ach.issuerUser?.avatarUrl ? (
+                  <img
+                    src={ach.issuerUser.avatarUrl}
+                    alt={ach.issuerUser.fullName || "صادرکننده ژنینویی"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sky-50 to-yellow-50">
+                    <Trophy className="h-10 w-10 text-yellow-500" />
+                  </div>
+                )}
               </div>
 
               <p className="text-xs font-extrabold text-yellow-800">
@@ -1637,8 +1647,21 @@ selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex h-40 items-center justify-center overflow-hidden rounded-2xl border-2 border-[#d4af37] bg-white">
-          <img src={logo} alt={selectedAchievementDetail.title || achievementListModal?.type} className="h-full w-full object-contain p-6" />
-        </div>
+  {selectedAchievementDetail?.issuerUser?.avatarUrl ? (
+    <img
+      src={selectedAchievementDetail.issuerUser.avatarUrl}
+      alt={
+        selectedAchievementDetail.issuerUser.fullName ||
+        "صادرکننده ژنینویی"
+      }
+      className="h-full w-full object-contain p-2"
+    />
+  ) : (
+    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sky-50 to-yellow-50">
+      <Trophy className="h-16 w-16 text-yellow-500" />
+    </div>
+  )}
+</div>
 
         <h2 className="text-xl font-extrabold text-yellow-800">
   {selectedAchievementDetail.title || achievementListModal?.type}

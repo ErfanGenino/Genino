@@ -5,7 +5,7 @@ import Footer from "./Footer.jsx";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { TbXboxY } from "react-icons/tb";
-import { Smile, Flower2, UsersRound, Puzzle, Sparkles } from "lucide-react";
+import { Smile, Flower2, UsersRound, Puzzle, Sparkles, HeartHandshake, Mail, Phone, UserRound, X, Send } from "lucide-react";
 import PromoSlider from "@components/Social/PromoSlider";
 import ScrollProduct from "./components/Core/ScrollProduct";
 import TodayCalendarBox from "./components/Dashboard/TodayCalendarBox";
@@ -46,6 +46,11 @@ export default function AuthStart() {
   const navigate = useNavigate();
   const [showChildChoiceModal, setShowChildChoiceModal] = useState(false);
   const [showAppModal, setShowAppModal] = useState(false);
+  const [showLifeCompanionModal, setShowLifeCompanionModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [invitePhone, setInvitePhone] = useState("");
+  const [inviteUsername, setInviteUsername] = useState("");
+  const [isSendingLifeInvite, setIsSendingLifeInvite] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -56,6 +61,9 @@ export default function AuthStart() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:80/api";
 
   const features = [
   {
@@ -292,6 +300,87 @@ const CrystalDust = () => {
   );
 };
 
+const handleOpenLifeCompanion = async () => {
+  try {
+    const token = localStorage.getItem("genino_token");
+
+    const res = await fetch(`${API_BASE_URL}/life-companion/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (data?.hasCompanion) {
+      navigate("/life-companion");
+      return;
+    }
+
+    setShowLifeCompanionModal(true);
+  } catch (err) {
+    console.error(err);
+    setShowLifeCompanionModal(true);
+  }
+};
+
+
+const resetLifeInviteForm = () => {
+  setInviteEmail("");
+  setInvitePhone("");
+  setInviteUsername("");
+};
+
+const closeLifeCompanionModal = () => {
+  setShowLifeCompanionModal(false);
+  resetLifeInviteForm();
+};
+
+const handleSendInvite = async () => {
+  try {
+    const value =
+      inviteUsername.trim() ||
+      inviteEmail.trim() ||
+      invitePhone.trim();
+
+    if (!value) {
+      alert("نام کاربری، ایمیل یا شماره موبایل را وارد کنید");
+      return;
+    }
+
+    setIsSendingLifeInvite(true);
+
+    const token = localStorage.getItem("genino_token");
+
+    const res = await fetch(`${API_BASE_URL}/life-companion/invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ value }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "ارسال دعوت انجام نشد");
+      return;
+    }
+
+    alert("دعوت همراه زندگی ارسال شد");
+
+    closeLifeCompanionModal();
+    navigate("/life-companion");
+  } catch (err) {
+    console.error(err);
+    alert("خطا در ارتباط با سرور");
+  } finally {
+    setIsSendingLifeInvite(false);
+  }
+};
+
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-3 sm:pt-6 lg:pt-8 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
@@ -377,16 +466,16 @@ transition-all
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.7, ease: "easeOut" }}
 >
-  <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+  <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-xl">
   <motion.button
     type="button"
     onClick={() => navigate("/mychild")}
     whileHover={{ scale: 1.04 }}
     whileTap={{ scale: 0.97 }}
-    className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-6 py-4 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
+    className="group relative overflow-hidden rounded-3xl whitespace-nowrap whitespace-nowrap bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-5 py-3 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
   >
     <CrystalDust />
-    <span className="relative flex items-center justify-center gap-2 text-xs sm:text-base">
+    <span className="relative flex items-center justify-center gap-2 text-[11px] sm:text-sm">
       <Baby className="w-4 h-4 sm:w-5 sm:h-5" />
       کودک من
     </span>
@@ -397,14 +486,30 @@ transition-all
     onClick={() => navigate("/genino-children")}
     whileHover={{ scale: 1.04 }}
     whileTap={{ scale: 0.97 }}
-    className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-6 py-4 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
+    className="group relative overflow-hidden rounded-3xl whitespace-nowrap whitespace-nowrap bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-5 py-3 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
   >
     <CrystalDust /> 
-    <span className="relative flex items-center justify-center gap-2 text-xs sm:text-base">
+    <span className="relative flex items-center justify-center gap-2 text-[11px] sm:text-sm">
       <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
       کودکان ژنینویی
     </span>
   </motion.button>
+
+  <motion.button
+  type="button"
+  onClick={handleOpenLifeCompanion}
+  whileHover={{ scale: 1.04 }}
+  whileTap={{ scale: 0.97 }}
+  className="group relative overflow-hidden rounded-3xl whitespace-nowrap bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-5 py-3 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
+>
+  <CrystalDust />
+
+  <span className="relative flex items-center justify-center gap-2 text-[11px] sm:text-sm">
+    <HeartHandshake className="w-4 h-4 sm:w-5 sm:h-5" />
+    همراه زندگی
+  </span>
+</motion.button>
+
 </div>
 </motion.div>
 
@@ -723,6 +828,134 @@ transition-all
     </motion.div>
   )}
 </AnimatePresence>
+
+
+<AnimatePresence>
+  {showLifeCompanionModal && (
+    <motion.div
+      className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/45 px-4 backdrop-blur-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={closeLifeCompanionModal}
+    >
+      <motion.div
+        className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-rose-200 bg-gradient-to-b from-white via-rose-50/70 to-amber-50 p-5 shadow-2xl"
+        initial={{ opacity: 0, y: 26, scale: 0.92 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 26, scale: 0.92 }}
+        transition={{ type: "spring", stiffness: 220, damping: 24 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-rose-300/35 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-amber-300/35 blur-3xl" />
+
+        <button
+          type="button"
+          onClick={closeLifeCompanionModal}
+          className="absolute left-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-500 shadow-sm transition hover:bg-white hover:text-rose-600"
+        >
+          <X size={18} />
+        </button>
+
+        <div className="relative z-10 text-center">
+          <motion.div
+            className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-rose-400 via-pink-400 to-amber-300 text-white shadow-[0_14px_40px_rgba(244,114,182,0.35)]"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <HeartHandshake size={38} />
+          </motion.div>
+
+          <h2 className="text-xl font-black text-rose-800">
+            همراه زندگی من
+          </h2>
+
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-8 text-gray-600">
+            اینجا فضای دونفره و شخصی شماست؛ جایی برای برنامه‌های مشترک،
+            قرارها، لیست‌ها، مراقبت از همدیگر و لحظه‌های مهم زندگی.
+          </p>
+
+          <div className="mt-4 rounded-3xl border border-rose-100 bg-white/75 p-4 text-sm font-bold leading-7 text-rose-700 shadow-sm">
+            همسر یا شریک زندگی خود را به این صفحه دو نفره شخصی دعوت کنید.
+          </div>
+        </div>
+
+        <div className="relative z-10 mt-6 space-y-4 text-right">
+          <div>
+            <label className="mb-1.5 flex items-center gap-2 text-xs font-extrabold text-rose-700">
+              <Mail size={15} />
+              ایمیل
+            </label>
+            <input
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              type="email"
+              placeholder="مثلاً name@gmail.com"
+              className="w-full rounded-2xl border border-rose-100 bg-white/85 px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 flex items-center gap-2 text-xs font-extrabold text-rose-700">
+              <Phone size={15} />
+              یا شماره موبایل
+            </label>
+            <input
+              value={invitePhone}
+              onChange={(e) => setInvitePhone(e.target.value)}
+              type="text"
+              placeholder="مثلاً 0912..."
+              className="w-full rounded-2xl border border-rose-100 bg-white/85 px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 flex items-center gap-2 text-xs font-extrabold text-rose-700">
+              <UserRound size={15} />
+              یا نام کاربری
+            </label>
+            <input
+              value={inviteUsername}
+              onChange={(e) => setInviteUsername(e.target.value)}
+              type="text"
+              placeholder="مثلاً user-genino"
+              className="w-full rounded-2xl border border-rose-100 bg-white/85 px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
+            />
+          </div>
+        </div>
+
+        <div className="relative z-10 mt-6 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={handleSendInvite}
+            disabled={isSendingLifeInvite}
+            className={`flex-1 rounded-2xl px-5 py-3 text-sm font-extrabold text-white shadow-lg transition-all ${
+              isSendingLifeInvite
+                ? "bg-gray-300"
+                : "bg-gradient-to-l from-rose-500 via-pink-500 to-amber-400 hover:scale-[1.02] active:scale-[0.98]"
+            }`}
+          >
+            <span className="inline-flex items-center justify-center gap-2">
+              <Send size={17} />
+              {isSendingLifeInvite ? "در حال ارسال..." : "ارسال دعوت"}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={closeLifeCompanionModal}
+            className="rounded-2xl border border-rose-200 bg-white/80 px-5 py-3 text-sm font-extrabold text-rose-700 transition hover:bg-rose-50 sm:w-32"
+          >
+            بستن
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
 
 <AnimatePresence>
   {showAppModal && (

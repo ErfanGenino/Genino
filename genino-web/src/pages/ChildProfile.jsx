@@ -46,22 +46,39 @@ export default function ChildProfile() {
 
 // برای کارکردن دکمه ویرایش کودک
   useEffect(() => {
-  if (mode === "edit" && editId) {
-    const stored = localStorage.getItem("children");
-    const children = stored ? JSON.parse(stored) : [];
+  async function loadChildForEdit() {
+    if (mode !== "edit" || !editId) return;
 
-    const child = children.find(
-      (c) => String(c.id) === String(editId)
-    );
+    try {
+      const listRes = await authFetch("/children");
 
-    if (child) {
-      setChildName(child.fullName);
-      setBirthDate(child.birthDate);
-      setGender(child.gender);
+      const children = Array.isArray(listRes)
+        ? listRes
+        : Array.isArray(listRes?.children)
+        ? listRes.children
+        : [];
+
+      const child = children.find(
+        (c) => String(c.id) === String(editId)
+      );
+
+      if (!child) {
+        alert("اطلاعات کودک برای ویرایش پیدا نشد");
+        return;
+      }
+
+      setChildName(child.fullName || "");
+      setBirthDate(child.birthDate || "");
+      setGender(child.gender || "girl");
       setInterests(child.interests || "");
       setChildPhoto(child.photo || "");
+    } catch (err) {
+      console.error("LOAD CHILD FOR EDIT ERROR:", err);
+      alert("دریافت اطلاعات کودک انجام نشد");
     }
   }
+
+  loadChildForEdit();
 }, [mode, editId]);
 
 

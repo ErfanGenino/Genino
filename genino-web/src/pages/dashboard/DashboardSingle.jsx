@@ -15,6 +15,7 @@ import {
   Globe,
   Stethoscope,
 } from "lucide-react";
+import LifeCompanionButton from "@components/Dashboard/LifeCompanionButton";
 
 export default function DashboardSingle() {
     let user = null;
@@ -29,6 +30,12 @@ try {
 
 
   const cards = [
+    {
+  title: "علایق من",
+  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+  icon: <Heart size={26} className="text-yellow-600" />,
+  link: "/favorites",
+},
     {
   title: "نسخه بهتر من",
   desc: "اعتمادبه‌نفس، عادت‌های خوب و ساختن آینده‌ای که دوست داری",
@@ -96,12 +103,7 @@ try {
   icon: <Sparkles size={26} className="text-sky-600" />,
   link: "/let-go-and-grow",
 },
-    {
-  title: "علایق من",
-  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
-  icon: <Heart size={26} className="text-yellow-600" />,
-  link: "/favorites",
-},
+    
   ];
 
   return (
@@ -125,6 +127,7 @@ try {
         <div className="mt-5 flex justify-center">
           <LifeStageSwitcher currentStage="single" />
         </div>
+        <LifeCompanionButton />
       </motion.div>
 
       {/* 🌊 کارت‌ها */}

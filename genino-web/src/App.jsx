@@ -237,6 +237,15 @@ const Profile = lazy(() => import("./pages/social/Profile.jsx"));
 const CreatePost = lazy(() => import("./pages/social/CreatePost.jsx"));
 const ChatRoom = lazy(() => import("./pages/social/ChatRoom.jsx"));
 const Notifications = lazy(() => import("./pages/Notifications"));
+const FavoritesPage = lazy(() => import("./pages/favorites/FavoritesPage.jsx"));
+const FavoriteArticlesPage = lazy(() => import("./pages/favorites/FavoriteArticlesPage.jsx"));
+const FavoriteProductsPage = lazy(() => import("./pages/favorites/FavoriteProductsPage.jsx"));
+const FavoriteServicesPage = lazy(() => import("./pages/favorites/FavoriteServicesPage.jsx"));
+const LifeCompanion = lazy(() => import("./pages/LifeCompanion"));
+const RelationshipCare = lazy(() => import("./pages/RelationshipCare"));
+const ShoppingLists = lazy(() => import("./pages/ShoppingLists"));
+const LifeEvents = lazy(() => import("./pages/LifeEvents"));
+const ChildMedicalArchive = lazy(() => import("./pages/ChildMedicalArchive"));
 
 
 
@@ -487,6 +496,15 @@ console.log("APP ROUTES LOADED");
         <Route path="/let-go-and-grow" element={<ProtectedRoute><LetGoAndGrow /></ProtectedRoute>} />
         <Route path="/money-and-future" element={<ProtectedRoute><MoneyAndFuture /></ProtectedRoute>} />
         <Route path="/pregnancy-trust" element={<ProtectedRoute><PregnancyTrust /></ProtectedRoute>} />
+        <Route path="/favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+        <Route path="/favorites/articles" element={<ProtectedRoute><FavoriteArticlesPage /></ProtectedRoute>}/>
+        <Route path="/favorites/products" element={<ProtectedRoute><FavoriteProductsPage /></ProtectedRoute>}/>
+        <Route path="/favorites/services" element={<ProtectedRoute><FavoriteServicesPage /></ProtectedRoute>}/>
+        <Route path="/life-companion" element={<ProtectedRoute><LifeCompanion /></ProtectedRoute>}/>
+        <Route path="/life-companion/relationship-care" element={<ProtectedRoute><RelationshipCare /></ProtectedRoute>}/>
+        <Route path="/life-companion/shopping-lists" element={<ProtectedRoute><ShoppingLists /></ProtectedRoute>}/>
+        <Route path="/life-companion/events" element={<ProtectedRoute><LifeEvents /></ProtectedRoute>}/>
+        <Route path="/child-medical-archive" element={<ProtectedRoute><ChildMedicalArchive /></ProtectedRoute>}/>
 
 
 

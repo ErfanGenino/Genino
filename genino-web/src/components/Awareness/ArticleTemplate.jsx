@@ -3,6 +3,13 @@ import { motion } from "framer-motion";
 import GoldenDivider from "@components/Core/GoldenDivider";
 import HorizontalScrollGallery from "@components/Social/HorizontalScrollGallery";
 import { useLocation, Link } from "react-router-dom";
+import { Heart } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  getFavoriteArticles,
+  saveFavoriteArticle,
+  removeFavoriteArticle,
+} from "../../services/api";
 // import ReactMarkdown from "react-markdown"; // فعلاً خاموش
 
 export default function ArticleTemplate({
@@ -17,6 +24,78 @@ export default function ArticleTemplate({
 }) {
   // ✅ هوک‌ها باید داخل تابع باشند
   const location = useLocation();
+  const [saved, setSaved] = useState(false);
+
+const extractText = (node) => {
+  if (typeof node === "string") return node;
+
+  if (Array.isArray(node)) {
+    return node.map(extractText).join(" ");
+  }
+
+  if (React.isValidElement(node)) {
+    return extractText(node.props.children);
+  }
+
+  return "";
+};
+
+const articleData = {
+  title: extractText(title),
+  image,
+  link: location.pathname,
+  type: "article",
+};
+
+useEffect(() => {
+  const checkSaved = async () => {
+    const res = await getFavoriteArticles();
+
+    if (!res?.ok) return;
+
+    const exists = res.articles?.some(
+      (item) => item.link === articleData.link
+    );
+
+    setSaved(exists);
+  };
+
+  checkSaved();
+}, [location.pathname]);
+
+const toggleFavorite = async () => {
+  if (saved) {
+    setSaved(false);
+
+    const slug =
+      articleData.link.split("/").filter(Boolean).pop();
+
+    const res = await removeFavoriteArticle(slug);
+
+    if (!res?.ok) {
+      setSaved(true);
+    }
+
+    return;
+  }
+
+  setSaved(true);
+
+  const slug =
+    articleData.link.split("/").filter(Boolean).pop();
+
+  const res = await saveFavoriteArticle({
+    title: articleData.title,
+    slug,
+    image: articleData.image,
+    link: articleData.link,
+    category: "world-knowledge",
+  });
+
+  if (!res?.ok) {
+    setSaved(false);
+  }
+};
 
   // تشخیص مسیر و تعیین متن/مسیر دکمه بازگشت
   let backText = "← بازگشت به خانه";
@@ -50,6 +129,24 @@ export default function ArticleTemplate({
       >
         {title}
       </motion.h1>
+      <motion.button
+  whileTap={{ scale: 0.9 }}
+  onClick={toggleFavorite}
+  className={`mb-6 flex items-center gap-2 rounded-2xl px-5 py-3 shadow-sm transition-all ${
+    saved
+      ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white"
+      : "bg-white border border-pink-200 text-pink-600"
+  }`}
+>
+  <Heart
+    size={20}
+    className={saved ? "fill-white" : ""}
+  />
+
+  <span className="text-sm font-semibold">
+    {saved ? "ذخیره شده در علاقه‌مندی‌ها" : "ذخیره در علاقه‌مندی‌ها"}
+  </span>
+</motion.button>
 
       {/* 🟡 متن سفارشی قبل از عکس (اختیاری) */}
 {preImageNote && (

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import logo from "./assets/logo-genino.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell } from "lucide-react";
-import { authFetch, getUserProfile } from "./services/api";
+import { authFetch, getUserProfile, logoutUser } from "./services/api";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -71,9 +71,8 @@ function shuffleArray(array) {
 
 
   // ⭐ خروج کاربر
-  function handleLogoutConfirm() {
-  localStorage.removeItem("genino_user");
-  localStorage.removeItem("genino_token");
+  async function handleLogoutConfirm() {
+  await logoutUser();
 
   // ✅ اضافه کن
   window.dispatchEvent(new Event("genino_user_changed"));
@@ -95,7 +94,7 @@ function shuffleArray(array) {
 
   const links = [
   { to: "/", label: "خانه" },
-  { to: "/mychild", label: "کودک من و کودکان ژنینویی" },
+  { to: "/mychild", label: "کودک من" },
   { to: "/shop", label: "فروشگاه تخصصی" },
   { to: "/my-cycle", label: "سلامت بانوان" },
   { to: "/my-men-health", label: "سلامت آقایان" },
@@ -107,7 +106,6 @@ function shuffleArray(array) {
   { to: "/events", label: "رویدادها و جشن‌ها" },
   { to: "/single-world", label: "جهان مجردها" },
   { to: "/family-finance", label: "اقتصاد و حسابداری خانواده" },
-  { to: "/social/profile", label: "پروفایل" },
 ];
 
   const inDashboard = window.location.pathname.startsWith("/dashboard");
@@ -466,27 +464,7 @@ async function toggleMusic() {
           </button>
         </div>
 
-        {links.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) =>
-              [
-                "rounded-2xl px-4 py-3 text-sm font-bold transition-all",
-                isActive
-                  ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                  : "text-gray-700 hover:bg-yellow-50 hover:text-yellow-700",
-              ].join(" ")
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
-
-        <div className="my-2 h-px bg-gradient-to-l from-transparent via-yellow-200 to-transparent" />
-
-        {user ? (
+{user ? (
           <>
             <button
               onClick={() => {
@@ -499,13 +477,30 @@ async function toggleMusic() {
                 <Bell size={18} />
                 اعلان‌ها
               </span>
-
-              {unreadCount > 0 && (
-                <span className="min-w-[22px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] flex items-center justify-center font-bold">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              )}
+              {unreadCount > 0 ? (
+  <span className="min-w-[22px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] flex items-center justify-center font-bold">
+    {unreadCount > 99 ? "99+" : unreadCount}
+  </span>
+) : (
+  <span className="text-xs text-yellow-600">مشاهده</span>
+)}
             </button>
+
+            <NavLink
+  to="/social/profile"
+  onClick={() => setMenuOpen(false)}
+  className={({ isActive }) =>
+    [
+      "flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-bold transition-all",
+      isActive
+        ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+        : "border border-yellow-200 bg-yellow-50/70 text-yellow-800 hover:bg-yellow-100",
+    ].join(" ")
+  }
+>
+  <span>پروفایل</span>
+  <span className="text-xs text-yellow-600">مشاهده</span>
+</NavLink>
 
             <button
               onClick={() => {
@@ -517,6 +512,7 @@ async function toggleMusic() {
               <span>خروج</span>
               <LogOut size={14} strokeWidth={2.3} />
             </button>
+            
           </>
         ) : (
           <>
@@ -539,6 +535,31 @@ async function toggleMusic() {
             </Link>
           </>
         )}
+
+
+        <div className="my-2 h-px bg-gradient-to-l from-transparent via-yellow-200 to-transparent" />
+
+        {links.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) =>
+              [
+                "rounded-2xl px-4 py-3 text-sm font-bold transition-all",
+                isActive
+                  ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                  : "text-gray-700 hover:bg-yellow-50 hover:text-yellow-700",
+              ].join(" ")
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
+
+        <div className="my-2 h-px bg-gradient-to-l from-transparent via-yellow-200 to-transparent" />
+
+        
       </motion.div>
     </motion.div>
   )}

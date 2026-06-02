@@ -43,15 +43,31 @@ const getIssuerRoleText = (role) => {
   const roles = {
     father: "پدر",
     mother: "مادر",
+
     aunt: "عمه",
+    amme: "عمه",
+
     uncle: "عمو",
+    ammo: "عمو",
+
     khaleh: "خاله",
+    khale: "خاله",
+
     dayi: "دایی",
+
     sister: "خواهر",
     brother: "برادر",
+
+    friend: "دوست",
+    relative: "قوم",
+
+    grandfather_paternal: "پدربزرگ پدری",
+    grandmother_paternal: "مادربزرگ پدری",
+    grandfather_maternal: "پدربزرگ مادری",
+    grandmother_maternal: "مادربزرگ مادری",
   };
 
-  return roles[role] || role || "عضو ژنینو";
+  return roles[role] || "عضو ژنینو";
 };
 
 const isFamilyIssuer = (issuer) => {
@@ -173,10 +189,13 @@ const isFamilyIssuer = (issuer) => {
 
       date: new Date(a.issuedAt).toLocaleDateString("fa-IR"),
 
-      issuer:
-  getIssuerRoleText(a.issuerRole) ||
-  a.issuerUser?.fullName ||
-  "عضو ژنینو",
+     issuer: `${
+  getIssuerRoleText(a.issuerRole) || "عضو ژنینو"
+}${
+  a.issuerUser?.fullName
+    ? ` - ${a.issuerUser.fullName}`
+    : ""
+}`,
 
       desc:
         a.description ||

@@ -44,6 +44,7 @@ export default function MemoryAlbum() {
   const [loading, setLoading] = useState(false);
   const [canManageAlbums, setCanManageAlbums] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [uploadingPhotoAlbumId, setUploadingPhotoAlbumId] = useState(null);
 
   useEffect(() => {
   if (childId) {
@@ -127,6 +128,8 @@ const handleDeleteComment = async (commentId) => {
   const handleAddPhoto = async (albumId, file) => {
   if (!file) return;
 
+  setUploadingPhotoAlbumId(albumId);
+
   let preparedFile;
 
 try {
@@ -189,7 +192,9 @@ fileSize: preparedFile.size,
   } catch (err) {
     console.error("ADD PHOTO ERROR:", err);
     alert("خطا در افزودن عکس");
-  }
+  } finally {
+  setUploadingPhotoAlbumId(null);
+}
 };
 
   const handleDeletePhoto = async () => {
@@ -228,9 +233,9 @@ const handleDeleteAlbum = async (albumId) => {
   return (
     <GeninoDNABackground>
       <main
-        dir="rtl"
-        className="relative min-h-screen overflow-hidden pt-28 pb-24 text-gray-800"
-      >
+  dir="rtl"
+  className="relative min-h-screen overflow-hidden pt-4 md:pt-24 pb-24 text-gray-800"
+>
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,236,170,0.45),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,250,235,0.78),rgba(255,255,255,0.96))]" />
 
         <section className="relative z-10 mx-auto w-full max-w-6xl px-5">
@@ -238,18 +243,11 @@ const handleDeleteAlbum = async (albumId) => {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="mb-10 rounded-[2rem] border border-yellow-200/70 bg-white/65 px-6 py-8 text-center shadow-[0_25px_80px_rgba(180,130,30,0.16)] backdrop-blur-xl"
+            className="mb-4 rounded-3xl border border-yellow-200/70 bg-white/65 px-4 py-3 text-center backdrop-blur-xl"
           >
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-600 text-white shadow-lg shadow-yellow-400/30">
-              <Camera className="h-8 w-8" />
-            </div>
+            
 
-            <div className="mb-3 flex items-center justify-center gap-2 text-sm font-bold text-yellow-700">
-              <Sparkles className="h-4 w-4" />
-              خاطرات طلایی خانواده در ژنینو
-            </div>
-
-            <h1 className="bg-gradient-to-l from-yellow-900 via-yellow-700 to-amber-500 bg-clip-text text-4xl font-black text-transparent drop-shadow-sm md:text-5xl">
+            <h1 className="bg-gradient-to-l from-yellow-900 via-yellow-700 to-amber-500 bg-clip-text text-xl md:text-3xl font-black text-transparent drop-shadow-sm md:text-5xl">
               آلبوم خاطرات ژنینو
             </h1>
 
@@ -385,6 +383,19 @@ const handleDeleteAlbum = async (albumId) => {
 </div>
 
                   <div className="flex gap-4 overflow-x-auto rounded-3xl border border-yellow-100 bg-gradient-to-l from-yellow-50/80 to-white/70 p-4">
+                  {uploadingPhotoAlbumId === album.id && (
+  <div className="mb-4 flex w-full flex-col items-center justify-center rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-5 text-center">
+    <div className="mb-2 text-lg">⏳</div>
+
+    <p className="font-bold text-yellow-800">
+      در حال آماده‌سازی و ارسال عکس...
+    </p>
+
+    <p className="mt-1 text-xs text-gray-500">
+      لطفاً چند لحظه صبر کنید
+    </p>
+  </div>
+)}
                     {album.photos?.length > 0 ? (
                       album.photos.map((photo, i) => (
                         <motion.div

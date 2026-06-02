@@ -6,6 +6,26 @@ function getAuthToken() {
   return localStorage.getItem("genino_token");
 }
 
+function getRefreshToken() {
+  return localStorage.getItem("genino_refresh_token");
+}
+
+function saveTokens(token, refreshToken) {
+  if (token) {
+    localStorage.setItem("genino_token", token);
+  }
+
+  if (refreshToken) {
+    localStorage.setItem("genino_refresh_token", refreshToken);
+  }
+}
+
+function clearTokens() {
+  localStorage.removeItem("genino_token");
+  localStorage.removeItem("genino_refresh_token");
+  localStorage.removeItem("genino_user");
+}
+
 export async function authFetch(url, options = {}) {
   const token = getAuthToken();
 
@@ -37,13 +57,65 @@ export async function authFetch(url, options = {}) {
 
 res = await doRequest();
 
-// ✅ تلاش دوباره برای خطاهای موقت احراز هویت بعد از deploy/restart
+// ✅ اگر access token منقضی شد، با refresh token توکن جدید می‌گیریم
 if ((res.status === 401 || res.status === 403) && token) {
-  console.warn("AUTH TEMP ERROR - RETRYING ONCE:", res.status);
+  console.warn("ACCESS TOKEN EXPIRED - TRYING REFRESH TOKEN");
 
-  await new Promise((resolve) => setTimeout(resolve, 700));
+  const refreshToken = getRefreshToken();
 
-  res = await doRequest();
+  if (!refreshToken) {
+    clearTokens();
+    window.location.href = "/";
+    return {
+      ok: false,
+      status: 401,
+      message: "نشست شما به پایان رسیده است.",
+    };
+  }
+
+  try {
+    const refreshRes = await fetch(`${BASE_URL}/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    const refreshData = await refreshRes.json();
+
+    if (refreshRes.ok && refreshData?.token) {
+      saveTokens(refreshData.token, refreshData.refreshToken);
+
+      headers["Authorization"] = `Bearer ${refreshData.token}`;
+
+      res = await doRequest();
+    } else {
+      clearTokens();
+
+      window.location.href = "/";
+
+      return {
+        ok: false,
+        status: 401,
+        message:
+          refreshData?.message ||
+          "نشست شما منقضی شده است. لطفاً دوباره وارد شوید.",
+      };
+    }
+  } catch (err) {
+    console.error("REFRESH TOKEN ERROR:", err);
+
+    clearTokens();
+
+    window.location.href = "/";
+
+    return {
+      ok: false,
+      status: 401,
+      message: "خطا در بازیابی نشست کاربری.",
+    };
+  }
 }
 
   } catch (err) {
@@ -121,18 +193,30 @@ if ((res.status === 401 || res.status === 403) && token) {
 
 // --- ثبت نام ---
 export async function registerUser(formData) {
-  return authFetch("/auth/register", {
+  const res = await authFetch("/auth/register", {
     method: "POST",
     body: JSON.stringify(formData),
   });
+
+  if (res?.ok && res?.token) {
+    saveTokens(res.token, res.refreshToken);
+  }
+
+  return res;
 }
 
 // --- ورود ---
 export async function loginUser(credentials) {
-  return authFetch("/auth/login", {
+  const res = await authFetch("/auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),
   });
+
+  if (res?.ok && res?.token) {
+    saveTokens(res.token, res.refreshToken);
+  }
+
+  return res;
 }
 
 // --- پروفایل ---
@@ -278,8 +362,14 @@ export async function deleteMenHealthReport(id) {
 
 // --- Medical Records (پرونده‌های پزشکی) ---
 
-export async function listMedicalRecords() {
-  return authFetch("/medical-records", { method: "GET" });
+export async function listMedicalRecords(childId = null) {
+  const url = childId
+    ? `/medical-records?childId=${childId}`
+    : "/medical-records";
+
+  return authFetch(url, {
+    method: "GET",
+  });
 }
 
 export async function createMedicalRecord(payload) {
@@ -626,5 +716,58 @@ export async function createSpiritualChildAchievement({ childId, title, descript
       title,
       description,
     }),
+  });
+}
+
+export async function logoutUser() {
+  const refreshToken = getRefreshToken();
+
+  try {
+    if (refreshToken) {
+      await authFetch("/auth/logout", {
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
+      });
+    }
+  } catch (err) {
+    console.error("LOGOUT ERROR:", err);
+  }
+
+  clearTokens();
+}
+
+// --- Favorite Articles ---
+
+export async function getFavoriteArticles() {
+  return authFetch("/articles/favorites", {
+    method: "GET",
+  });
+}
+
+export async function saveFavoriteArticle(payload) {
+  return authFetch("/articles/favorites", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function removeFavoriteArticle(slug) {
+  return authFetch(`/articles/favorites/${slug}`, {
+    method: "DELETE",
+  });
+}
+
+// --- Relationship Assessments ---
+
+export async function getRelationshipAssessments() {
+  return authFetch("/relationship-assessments", {
+    method: "GET",
+  });
+}
+
+export async function createRelationshipAssessment(payload) {
+  return authFetch("/relationship-assessments", {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }

@@ -15,6 +15,7 @@ import {
   Sparkles,
   Home,
 } from "lucide-react";
+import LifeCompanionButton from "@components/Dashboard/LifeCompanionButton";
 
 export default function DashboardCouple() {
   let user = null;
@@ -28,6 +29,12 @@ try {
 
 
   const cards = [
+    {
+      title: "علایق من",
+      desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+      icon: <Heart size={26} className="text-yellow-600" />,
+      link: "/favorites",
+    },
     {
   title: "رابطه‌ی عاشقانه",
   desc: "راهکارهایی برای افزایش صمیمیت، عشق و آرامش در رابطه‌تون",
@@ -95,12 +102,7 @@ try {
   icon: <Sparkles size={26} className="text-pink-500" />,
   link: "/acceptance-and-trust",
 },
-    {
-      title: "علایق من",
-      desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
-      icon: <Heart size={26} className="text-yellow-600" />,
-      link: "/favorites",
-    },
+    
   ];
 
   return (
@@ -124,6 +126,7 @@ try {
         <div className="mt-5 flex justify-center">
         <LifeStageSwitcher currentStage="married" />
         </div>
+        <LifeCompanionButton />
       </motion.div>
 
       {/* 💗 کارت‌ها */}

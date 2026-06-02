@@ -13,6 +13,7 @@ import {
   User,
   Apple,
 } from "lucide-react";
+import LifeCompanionButton from "@components/Dashboard/LifeCompanionButton";
 
 export default function DashboardUser() {
   let user = null;
@@ -27,6 +28,12 @@ try {
 
 
   const cards = [
+    {
+  title: "علایق من",
+  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
+  icon: <Heart size={26} className="text-yellow-600" />,
+  link: "/favorites",
+},
     {
       title: "دانشنامه ژنینو",
       desc: "صدها مقاله علمی و ژنینویی برای رشد و آگاهی",
@@ -76,12 +83,7 @@ try {
       icon: <User size={26} className="text-yellow-600" />,
       link: "/social/profile",
     },
-    {
-  title: "علایق من",
-  desc: "ذخیره مقالات، محصولات و چیزهایی که دوست داری",
-  icon: <Heart size={26} className="text-yellow-600" />,
-  link: "/favorites",
-},
+    
   ];
 
   return (
@@ -105,6 +107,7 @@ try {
         <div className="mt-5 flex justify-center">
         <LifeStageSwitcher currentStage="normal" />
         </div>
+        <LifeCompanionButton />
       </motion.div>
 
       {/* 🟡 کارت‌ها */}
