@@ -11,6 +11,7 @@ import {
   removeFavoriteArticle,
 } from "../../services/api";
 // import ReactMarkdown from "react-markdown"; // فعلاً خاموش
+import GoldenModal from "@components/Core/GoldenModal";
 
 export default function ArticleTemplate({
   title,
@@ -25,6 +26,7 @@ export default function ArticleTemplate({
   // ✅ هوک‌ها باید داخل تابع باشند
   const location = useLocation();
   const [saved, setSaved] = useState(false);
+  const [showLoginNotice, setShowLoginNotice] = useState(false);
 
 const extractText = (node) => {
   if (typeof node === "string") return node;
@@ -64,6 +66,13 @@ useEffect(() => {
 }, [location.pathname]);
 
 const toggleFavorite = async () => {
+  const token = localStorage.getItem("genino_token");
+
+  if (!token) {
+    setShowLoginNotice(true);
+    return;
+  }
+
   if (saved) {
     setSaved(false);
 
@@ -240,6 +249,25 @@ const toggleFavorite = async () => {
           </p>
         </motion.div>
       )}
+
+
+      <GoldenModal
+  show={showLoginNotice}
+  title="ورود به حساب کاربری"
+  description="برای ذخیره این مقاله در علاقه‌مندی‌ها، ابتدا وارد حساب کاربری خود شوید."
+  confirmLabel="ورود به حساب کاربری"
+  cancelLabel="بعداً"
+  onConfirm={() => {
+    setShowLoginNotice(false);
+    window.location.href = "/login";
+  }}
+  onCancel={() => setShowLoginNotice(false)}
+>
+  <div className="text-right text-sm leading-7 text-gray-600">
+    بعد از ورود، می‌توانید مقاله‌های دلخواه خود را ذخیره و از بخش علاقه‌مندی‌ها دوباره مشاهده کنید.
+  </div>
+</GoldenModal>
+
 
       {/* 🔙 دکمه بازگشت داینامیک */}
       <motion.div

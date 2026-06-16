@@ -365,11 +365,16 @@ setShowLifeStage(true);
   locale={persian_fa}
   onChange={(date) => {
     const formatted = date?.format?.("YYYY/MM/DD") || "";
-    setFormData({ ...formData, birthDate: formatted });
-    const msg = validateField("birthDate", formatted, { ...formData, birthDate: formatted });
+    const next = { ...formData, birthDate: formatted };
+
+    setFormData(next);
+
+    const msg = validateField("birthDate", formatted, next);
     setErrors((prev) => ({ ...prev, birthDate: msg }));
     setTouched((prev) => ({ ...prev, birthDate: true }));
   }}
+  portal
+  containerStyle={{ zIndex: 2000 }}
   inputClass="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 text-right"
 />
         </label>

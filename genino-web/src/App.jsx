@@ -246,8 +246,28 @@ const RelationshipCare = lazy(() => import("./pages/RelationshipCare"));
 const ShoppingLists = lazy(() => import("./pages/ShoppingLists"));
 const LifeEvents = lazy(() => import("./pages/LifeEvents"));
 const ChildMedicalArchive = lazy(() => import("./pages/ChildMedicalArchive"));
-
-
+const Fashion = lazy(() => import("./pages/ShopCategory/Fashion"));
+const Sismooni = lazy(() => import("./pages/ShopCategory/sismooni"));
+const Kids = lazy(() => import("./pages/ShopCategory/kids"));
+const Sport = lazy(() => import("./pages/ShopCategory/sport"));
+const Medical = lazy(() => import("./pages/ShopCategory/medical"));
+const Handmade = lazy(() => import("./pages/ShopCategory/handmade"));
+const BedBath = lazy(() => import("./pages/ShopCategory/bedBath"));
+const Beauty = lazy(() => import("./pages/ShopCategory/beauty"));
+const Perfume = lazy(() => import("./pages/ShopCategory/perfume"));
+const WatchJewelry = lazy(() => import("./pages/ShopCategory/watchJewelry"));
+const Schools = lazy(() => import("./pages/ShopServices/schools"));
+const Kindergartens = lazy(() => import("./pages/ShopServices/kindergartens"));
+const Playhouses = lazy(() => import("./pages/ShopServices/playhouses"));
+const EducationClasses = lazy(() => import("./pages/ShopServices/educationClasses"));
+const ArtClasses = lazy(() => import("./pages/ShopServices/artClasses"));
+const SportClasses = lazy(() => import("./pages/ShopServices/sportClasses"));
+const PrivateTeachers = lazy(() => import("./pages/ShopServices/privateTeachers"));
+const GeninoAmbassadors = lazy(() => import("./pages/ambassador/GeninoAmbassadors.jsx"));
+const GeninoAmbassadorIncome = lazy(() => import("./pages/ambassador/GeninoAmbassadorIncome.jsx"));
+const GeninoAmbassadorRules = lazy(() => import("./pages/ambassador/GeninoAmbassadorRules.jsx"));
+const GeninoAmbassadorRegister = lazy(() => import("./pages/ambassador/GeninoAmbassadorRegister.jsx"));
+const DashboardAmbassador = lazy(() => import("./pages/dashboard/DashboardAmbassador"));
 
 // ✅ اگر هنوز داشبوردها را نساختی، موقتاً می‌تونی از سایدبارها استفاده کنی:
 // import SidebarUser from "./components/SidebarUser.jsx";
@@ -280,7 +300,7 @@ console.log("APP ROUTES LOADED");
         <Route path="/calorie-tracker" element={<CalorieTracker />} />
         <Route path="/world-knowledge" element={<WorldKnowledge />} />
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
-        <Route path="/mychild" element={<ProtectedRoute> <MyChild /> </ProtectedRoute>} />
+        <Route path="/mychild" element={<MyChild />}/>
         <Route path="/genino-children" element={<GeninoChildren />} />
         <Route path="/social" element={<Feed />} />
         <Route path="/social/profile" element={<Profile />} />
@@ -304,7 +324,7 @@ console.log("APP ROUTES LOADED");
         <Route path="/articles/books-that-change-life" element={<BooksThatChangeLifeArticle />} />
         <Route path="/articles/personal-growth-mastery" element={<PersonalGrowthMasteryArticle />} />
         <Route path="/articles/daily-inspiration" element={<DailyInspirationArticle />} />
-        <Route path="/my-cycle" element={<ProtectedRoute><MyCycle /></ProtectedRoute>} />
+        <Route path="/my-cycle" element={<MyCycle />} />
         <Route path="/my-men-health" element={<MyMenHealth />} />
         <Route path="/my-women-health-test" element={<MyWomenHealthTest />} />
         <Route path="/social/room/:id" element={<ChatRoom />} />
@@ -505,6 +525,28 @@ console.log("APP ROUTES LOADED");
         <Route path="/life-companion/shopping-lists" element={<ProtectedRoute><ShoppingLists /></ProtectedRoute>}/>
         <Route path="/life-companion/events" element={<ProtectedRoute><LifeEvents /></ProtectedRoute>}/>
         <Route path="/child-medical-archive" element={<ProtectedRoute><ChildMedicalArchive /></ProtectedRoute>}/>
+        <Route path="/shop/fashion" element={<Fashion />} />
+        <Route path="/shop/sismooni" element={<Sismooni />} />
+        <Route path="/shop/kids" element={<Kids />} />
+        <Route path="/shop/sport" element={<Sport />} />
+        <Route path="/shop/medical" element={<Medical />} />
+        <Route path="/shop/handmade" element={<Handmade />} />
+        <Route path="/shop/bed-bath" element={<BedBath />} />
+        <Route path="/shop/watch-jewelry" element={<WatchJewelry />} />
+        <Route path="/shop/beauty" element={<Beauty />} />
+        <Route path="/shop/perfume" element={<Perfume />} />
+        <Route path="/shop/services/schools" element={<Schools />} />
+        <Route path="/shop/services/kindergartens" element={<Kindergartens />} />
+        <Route path="/shop/services/playhouses" element={<Playhouses />} />
+        <Route path="/shop/services/education-classes" element={<EducationClasses />} />
+        <Route path="/shop/services/art-classes" element={<ArtClasses />} />
+        <Route path="/shop/services/sport-classes" element={<SportClasses />} />
+        <Route path="/shop/services/private-teachers" element={<PrivateTeachers />} />
+        <Route path="/genino-ambassadors" element={<GeninoAmbassadors />} />
+        <Route path="/genino-ambassadors/income" element={<GeninoAmbassadorIncome />}/>
+        <Route path="/genino-ambassadors/rules" element={<GeninoAmbassadorRules />}/>
+        <Route path="/genino-ambassadors/register" element={<ProtectedRoute><GeninoAmbassadorRegister /></ProtectedRoute>}/>
+        <Route path="/dashboard-ambassador" element={<ProtectedRoute><DashboardAmbassador /></ProtectedRoute>}/>
 
 
 

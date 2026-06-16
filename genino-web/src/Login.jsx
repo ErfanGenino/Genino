@@ -23,7 +23,6 @@ export default function Login() {
     try {
       setMessage("⏳ در حال ورود...");
 
-      // مرحله ۱: ارسال اطلاعات ورود
       const data = await loginUser({ identifier, password });
 
       if (!data.ok) {
@@ -31,11 +30,9 @@ export default function Login() {
         return;
       }
 
-      // مرحله ۲: ذخیره دائم اطلاعات (بدون Remember Me)
       localStorage.setItem("genino_token", data.token);
-      window.dispatchEvent(new Event("genino_token_changed")); // ✅ مهم
+      window.dispatchEvent(new Event("genino_token_changed"));
 
-      // مرحله ۳: دریافت پروفایل
       const profile = await getUserProfile();
 
       if (profile.ok) {
@@ -50,19 +47,16 @@ export default function Login() {
 
       setMessage("🌿 ورود موفقیت‌آمیز بود! خوش آمدی به ژنینو");
 
-      // مرحله ۴: هدایت به داشبورد
       setTimeout(() => {
-      // ✅ اگر از لینک دعوت آمده، اولویت با next است
         const params = new URLSearchParams(location.search);
         const next = params.get("next");
 
         if (next) {
-        navigate(next, { replace: true });
-        return;
-      }
+          navigate(next, { replace: true });
+          return;
+        }
 
-      // ✅ در غیر اینصورت مثل قبل برو داشبورد
-      const lifeStage = localStorage.getItem("lifeStage");
+        const lifeStage = localStorage.getItem("lifeStage");
 
         if (lifeStage === "single") navigate("/dashboard-single");
         else if (lifeStage === "couple") navigate("/dashboard-couple");
@@ -71,7 +65,6 @@ export default function Login() {
         else if (lifeStage === "user") navigate("/dashboard-user");
         else navigate("/signup-user");
       }, 1200);
-
     } catch (err) {
       console.error("Login error:", err);
       setMessage("❌ خطای سرور یا اینترنت. لطفاً دوباره تلاش کنید.");
@@ -79,98 +72,122 @@ export default function Login() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-[#f7f2eb] text-gray-800 px-4">
-      {/* لوگو */}
-      <div className="flex flex-col items-center mb-8">
-        <img
-          src={logo}
-          alt="Genino Logo"
-          className="w-24 h-24 mb-4 drop-shadow-lg"
-        />
-        <h1 className="text-3xl font-bold text-yellow-600 tracking-tight">
-          ورود به ژنینو
-        </h1>
-        <p className="text-gray-500 mt-2">دستیار هوشمند والدین 🌱</p>
-      </div>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f2eb] px-4 py-10 text-gray-800">
+      <div className="absolute -right-24 top-10 h-72 w-72 rounded-full bg-yellow-200/40 blur-3xl" />
+      <div className="absolute -left-24 bottom-10 h-72 w-72 rounded-full bg-[#d4af37]/25 blur-3xl" />
 
-      {/* فرم ورود */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-2xl shadow-md w-full max-w-sm border border-yellow-100"
-      >
-        <label className="block mb-4 text-right">
-          <span className="text-sm text-gray-600">
-            ایمیل، شماره موبایل یا نام کاربری
-          </span>
-          <input
-            type="text"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="ایمیل، موبایل یا نام کاربری"
-            className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 text-right"
-          />
-        </label>
-
-        <label className="block mb-5 text-right">
-          <span className="text-sm text-gray-600">رمز عبور</span>
-
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="******"
-              className="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:border-yellow-500 text-right pl-10"
-            />
-
-            {/* نمایش / مخفی */}
-            <span
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute left-3 top-3 cursor-pointer text-gray-500 text-xl select-none"
-              title={showPassword ? "مخفی کردن رمز" : "نمایش رمز"}
-            >
-              {showPassword ? "●" : "○"}
-            </span>
-          </div>
-        </label>
-
-        <button
-          type="submit"
-          className="w-full bg-yellow-500 text-white py-2 rounded-xl hover:bg-yellow-600 transition-all shadow-sm"
-        >
-          ورود
-        </button>
-
-        <p className="text-center text-sm text-gray-500 mt-4">
-          حساب کاربری ندارید؟{" "}
-          <Link to="/signup-user" className="text-yellow-600 hover:underline">
-            ثبت‌نام کنید
-          </Link>
-        </p>
-      </form>
-
-      {message && (
-        <p
-          className={`mt-6 text-center text-sm font-medium ${
-            message.includes("موفق")
-              ? "text-green-600 bg-green-50 border border-green-200 py-2 px-4 rounded-xl"
-              : "text-red-500 bg-red-50 border border-red-200 py-2 px-4 rounded-xl"
-          }`}
-        >
-          {message}
-        </p>
-      )}
-      <div className="text-left mt-2">
-  <button
-    type="button"
-    disabled
-    className="text-xs text-gray-400 cursor-not-allowed"
-    title="این قابلیت به‌زودی فعال می‌شود"
-  >
-    رمز عبور را فراموش کرده‌اید؟
-  </button>
+      <section className="relative w-full max-w-md">
+        <div className="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-2xl shadow-yellow-900/10 backdrop-blur-xl sm:p-8">
+          <div className="mb-7 flex flex-col items-center text-center">
+            <div className="mb-5 rounded-[1.5rem] bg-gradient-to-br from-[#f5d86f] via-[#d4af37] to-[#b98522] p-[2px] shadow-xl shadow-yellow-900/20">
+  <div className="rounded-[1.4rem] bg-white p-4">
+    <img
+      src={logo}
+      alt="Genino Logo"
+      className="h-24 w-24 object-contain"
+    />
+  </div>
 </div>
 
+            <h1 className="text-3xl font-black tracking-tight text-[#7a5217]">
+              ورود به ژنینو
+            </h1>
+
+            <p className="mt-2 text-sm font-medium text-stone-500">
+              خوش آمدی به دنیای هوشمند کودک و خانواده 🌱
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <label className="block text-right">
+              <span className="mb-2 block text-sm font-bold text-stone-600">
+                ایمیل، شماره موبایل یا نام کاربری
+              </span>
+
+              <input
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="مثلاً 0912... یا user"
+                className="w-full rounded-2xl border border-yellow-200 bg-yellow-50/40 px-4 py-3 text-right text-sm outline-none transition-all placeholder:text-stone-400 focus:border-[#d4af37] focus:bg-white focus:ring-4 focus:ring-yellow-200/50"
+              />
+            </label>
+
+            <label className="block text-right">
+              <span className="mb-2 block text-sm font-bold text-stone-600">
+                رمز عبور
+              </span>
+
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="رمز عبور خود را وارد کنید"
+                  className="w-full rounded-2xl border border-yellow-200 bg-yellow-50/40 px-4 py-3 pl-12 text-right text-sm outline-none transition-all placeholder:text-stone-400 focus:border-[#d4af37] focus:bg-white focus:ring-4 focus:ring-yellow-200/50"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-sm font-bold text-[#7a5217] shadow-sm transition hover:bg-yellow-100"
+                  title={showPassword ? "مخفی کردن رمز" : "نمایش رمز"}
+                >
+                  {showPassword ? "●" : "○"}
+                </button>
+              </div>
+            </label>
+
+            <button
+              type="submit"
+              className="w-full rounded-2xl bg-gradient-to-l from-[#d4af37] to-[#b98522] px-6 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-yellow-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
+            >
+              ورود به حساب کاربری
+            </button>
+          </form>
+
+          <div className="mt-5 flex items-center justify-between gap-3 text-xs">
+            <button
+              type="button"
+              disabled
+              className="cursor-not-allowed text-stone-400"
+              title="این قابلیت به‌زودی فعال می‌شود"
+            >
+              رمز عبور را فراموش کرده‌اید؟
+            </button>
+
+            <p className="text-stone-500">
+              حساب ندارید؟{" "}
+              <Link
+                to="/signup"
+                className="font-extrabold text-[#b98522] transition hover:text-[#7a5217]"
+              >
+                ثبت‌نام کنید
+              </Link>
+            </p>
+            </div>
+
+
+          </div>
+          <div className="mt-4 flex items-center justify-between gap-2">
+ 
+</div>
+        
+
+        {message && (
+          <p
+            className={`mt-5 rounded-2xl border px-4 py-3 text-center text-sm font-bold shadow-sm ${
+              message.includes("موفق")
+                ? "border-green-200 bg-green-50 text-green-700"
+                : message.includes("در حال ورود")
+                ? "border-yellow-200 bg-yellow-50 text-[#7a5217]"
+                : "border-red-200 bg-red-50 text-red-600"
+            }`}
+          >
+            {message}
+          </p>
+        )}
+      </section>
     </main>
   );
 }

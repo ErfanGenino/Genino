@@ -648,6 +648,13 @@ export async function presignMemoryAlbumPhotoUpload(payload) {
   });
 }
 
+export async function presignAmbassadorDocumentUpload(payload) {
+  return authFetch("/uploads/presign/ambassador-document", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function addMemoryAlbumPhoto(albumId, payload) {
   // payload: { url, fileName, mimeType, fileSize, caption? }
   return authFetch(`/memory-albums/${albumId}/photos`, {
@@ -769,5 +776,20 @@ export async function createRelationshipAssessment(payload) {
   return authFetch("/relationship-assessments", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+// --- Ambassadors ---
+
+export async function registerAmbassador(payload) {
+  return authFetch("/ambassadors/register", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getMyAmbassador() {
+  return authFetch("/ambassadors/me", {
+    method: "GET",
   });
 }

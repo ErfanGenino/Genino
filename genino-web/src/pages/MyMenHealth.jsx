@@ -31,6 +31,8 @@ export default function MyMenHealth() {
   const [resultsLoading, setResultsLoading] = useState(false);
   const [resultsError, setResultsError] = useState("");
   const [form, setForm] = useState({ height: "", weight: "" });
+  const isLoggedIn = () => {return !!localStorage.getItem("genino_token");};
+  const [guestNotice, setGuestNotice] = useState(false);
 
   // 🫀 پاسخ‌های تست سلامت قلب
   const [heartAnswers, setHeartAnswers] = useState({
@@ -134,13 +136,17 @@ export default function MyMenHealth() {
   },
 };
 
-const res = await createMenHealthReport(payload);
-
-if (res?.ok && res.report) {
-  setResults((prev) => [res.report, ...prev]);
+if (!isLoggedIn()) {
+  addGuestResult(payload);
 } else {
-  alert(res?.message || "خطا در ذخیره نتیجه تست.");
-  return;
+  const res = await createMenHealthReport(payload);
+
+  if (res?.ok && res.report) {
+    setResults((prev) => [res.report, ...prev]);
+  } else {
+    alert(res?.message || "خطا در ذخیره نتیجه تست.");
+    return;
+  }
 }
     setSelectedTest(null);
     setForm({ height: "", weight: "" });
@@ -212,10 +218,25 @@ if (res?.ok && res.report) {
   return new Date(date).toLocaleDateString("fa-IR");
 }
 
+const addGuestResult = (payload) => {
+  setResults((prev) => [
+    {
+      id: `guest-${Date.now()}`,
+      ...payload,
+      isGuest: true,
+    },
+    ...prev,
+  ]);
+
+  setGuestNotice(true);
+};
+
+
+
   return (
     <main
       dir="rtl"
-      className="min-h-screen pb-72 flex flex-col items-center px-6 py-10 text-gray-800 bg-[#4b0614]
+      className="min-h-screen pb-10 flex flex-col items-center px-6 py-10 text-gray-800 bg-[#4b0614]
 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.10),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(255,215,160,0.10),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.05)_0%,transparent_35%,rgba(0,0,0,0.25)_100%),repeating-linear-gradient(90deg,rgba(255,255,255,0.035)_0px,rgba(255,255,255,0.035)_1px,transparent_1px,transparent_7px),repeating-linear-gradient(0deg,rgba(0,0,0,0.08)_0px,rgba(0,0,0,0.08)_1px,transparent_1px,transparent_6px)]"
     >
       {/* 🔹 عنوان صفحه */}
@@ -265,1384 +286,1167 @@ bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.10),transparent_28%),ra
         ))}
       </div>
 
-      {/* ⚖️ تست BMI */}
-      <GoldenModal
-        show={selectedTest === "bmi"}
-        title=" محاسبه BMI و ترکیب بدن"
-        description="وزن و قد خود را وارد کنید تا شاخص توده بدنی شما محاسبه شود."
-        confirmLabel="محاسبه"
-        onConfirm={handleBmiCalculate}
-        onCancel={() => {
-          setSelectedTest(null);
-          setForm({ height: "", weight: "" });
-        }}
-      >
-        <div className="space-y-3">
+      
+      {/* تست BMI - نسخه لوکس */}
+{selectedTest === "bmi" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
+    <div className="w-full max-w-xl rounded-[28px] bg-white shadow-2xl border border-yellow-100 overflow-hidden">
+      <div className="bg-gradient-to-l from-[#4b0614] to-[#6b1022] px-5 py-5 text-center">
+        <p className="text-[11px] tracking-[0.25em] text-yellow-200/75">
+          GENINO HEALTH
+        </p>
+        <h3 className="mt-2 text-xl font-bold text-yellow-100">
+          شاخص تناسب بدن
+        </h3>
+        <p className="mt-2 text-xs leading-6 text-white/70">
+          قد و وزن خود را وارد کنید.
+        </p>
+      </div>
+
+      <div className="p-5 space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm mb-1 text-gray-700">
-              قد (سانتی‌متر):
+            <label className="mb-2 block text-sm font-semibold text-stone-700">
+              قد
             </label>
-            <input
-              type="number"
-              value={form.height}
-              onChange={(e) => setForm({ ...form, height: e.target.value })}
-              className="border border-yellow-200 rounded-xl w-full p-2 focus:ring-2 focus:ring-yellow-300 outline-none text-right"
-              placeholder="مثلاً ۱۸۰"
-            />
+            <div className="flex items-center rounded-2xl bg-stone-50 border border-yellow-100 px-4 py-3">
+              <input
+                type="number"
+                value={form.height}
+                onChange={(e) => setForm({ ...form, height: e.target.value })}
+                className="w-full bg-transparent text-right text-lg font-semibold text-stone-800 placeholder:text-stone-300 outline-none"
+                placeholder="مثلاً ۱۸۰"
+              />
+              <span className="mr-3 text-xs text-stone-400">سانتی‌متر</span>
+            </div>
           </div>
+
           <div>
-            <label className="block text-sm mb-1 text-gray-700">
-              وزن (کیلوگرم):
+            <label className="mb-2 block text-sm font-semibold text-stone-700">
+              وزن
             </label>
-            <input
-              type="number"
-              value={form.weight}
-              onChange={(e) => setForm({ ...form, weight: e.target.value })}
-              className="border border-yellow-200 rounded-xl w-full p-2 focus:ring-2 focus:ring-yellow-300 outline-none text-right"
-              placeholder="مثلاً ۸۵"
-            />
-          </div>
-
-          {/* 🧾 جدول آموزشی BMI */}
-          <div className="mt-6">
-            <h4 className="text-yellow-700 font-semibold text-sm mb-2">
-              جدول محدوده شاخص توده بدنی (BMI)
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs sm:text-sm text-gray-700 border border-yellow-200 rounded-xl overflow-hidden">
-                <thead className="bg-yellow-50 text-yellow-800">
-                  <tr>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">
-                      محدوده BMI
-                    </th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">
-                      وضعیت بدن
-                    </th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">
-                      توضیح
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">کمتر از ۱۸.۵</td>
-                    <td className="py-1.5 px-3 text-blue-700 font-medium">کم‌وزن</td>
-                    <td className="py-1.5 px-3">
-                      نیاز به تغذیه بهتر و افزایش توده عضلانی.
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۱۸.۵ تا ۲۴.۹</td>
-                    <td className="py-1.5 px-3 text-green-700 font-medium">نرمال ✅</td>
-                    <td className="py-1.5 px-3">
-                      وزن متعادل و سبک زندگی سالم.
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۲۵ تا ۲۹.۹</td>
-                    <td className="py-1.5 px-3 text-orange-600 font-medium">اضافه‌وزن ⚠️</td>
-                    <td className="py-1.5 px-3">
-                      نیاز به کنترل رژیم غذایی و فعالیت بدنی بیشتر.
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۳۰ به بالا</td>
-                    <td className="py-1.5 px-3 text-red-600 font-medium">چاقی ❗</td>
-                    <td className="py-1.5 px-3">
-                      توصیه به مشاوره پزشکی و برنامه کاهش وزن.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex items-center rounded-2xl bg-stone-50 border border-yellow-100 px-4 py-3">
+              <input
+                type="number"
+                value={form.weight}
+                onChange={(e) => setForm({ ...form, weight: e.target.value })}
+                className="w-full bg-transparent text-right text-lg font-semibold text-stone-800 placeholder:text-stone-300 outline-none"
+                placeholder="مثلاً ۸۵"
+              />
+              <span className="mr-3 text-xs text-stone-400">کیلوگرم</span>
             </div>
           </div>
         </div>
-      </GoldenModal>
 
-      {/* ❤️ تست سلامت قلب */}
+        <div className="rounded-3xl border border-yellow-100 bg-[#fbf7ef] p-4">
+          <p className="mb-3 text-sm font-semibold text-stone-800">
+            راهنمای سریع BMI
+          </p>
+          <div className="space-y-2 text-xs sm:text-sm">
+            <div className="flex justify-between rounded-2xl bg-white px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">کمتر از ۱۸.۵</span>
+              <span className="font-medium text-stone-700">کم‌وزن</span>
+            </div>
+            <div className="flex justify-between rounded-2xl bg-white px-4 py-2.5 border border-yellow-100">
+              <span className="text-stone-400">۱۸.۵ تا ۲۴.۹</span>
+              <span className="font-medium text-yellow-700">متعادل</span>
+            </div>
+            <div className="flex justify-between rounded-2xl bg-white px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۲۵ تا ۲۹.۹</span>
+              <span className="font-medium text-stone-700">اضافه‌وزن</span>
+            </div>
+            <div className="flex justify-between rounded-2xl bg-white px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۳۰ به بالا</span>
+              <span className="font-medium text-stone-700">نیازمند توجه</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={() => {
+              setSelectedTest(null);
+              setForm({ height: "", weight: "" });
+            }}
+            className="flex-1 rounded-2xl border border-stone-200 py-3 text-sm text-stone-600 hover:bg-stone-50"
+          >
+            انصراف
+          </button>
+
+          <button
+            onClick={handleBmiCalculate}
+            className="flex-1 rounded-2xl bg-gradient-to-l from-yellow-500 to-yellow-600 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg"
+          >
+            محاسبه
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
       <GoldenModal
-        show={selectedTest === "heart"}
-        title=" تست سلامت قلب و استرس روزانه"
-        description="به چند سؤال ساده پاسخ بده تا سطح سلامت قلبت تخمین زده بشه."
-        confirmLabel="محاسبه سلامت قلب ❤️"
-        onConfirm={async () => {
-          let score = 0;
-          heartAnswers.activity === "good" && (score += 2);
-          heartAnswers.activity === "medium" && (score += 1);
+  show={guestNotice}
+  title="نتیجه تست آماده شد 💛"
+  description="نتیجه شما در بخش «نتایج تست‌های من» قابل مشاهده است."
+  confirmLabel="متوجه شدم"
+  onConfirm={() => setGuestNotice(false)}
+  onCancel={() => setGuestNotice(false)}
+>
+  <div className="rounded-2xl border border-yellow-100 bg-yellow-50/70 p-4 text-center text-sm leading-7 text-gray-700">
+    برای ذخیره نتیجه در بایگانی سلامت ژنینو و مشاهده سوابق در آینده، لطفاً وارد حساب کاربری خود شوید.
+  </div>
+</GoldenModal>
 
-          heartAnswers.stress === "low" && (score += 2);
-          heartAnswers.stress === "medium" && (score += 1);
 
-          heartAnswers.sleep === "good" && (score += 2);
-          heartAnswers.sleep === "medium" && (score += 1);
 
-          heartAnswers.habit === "good" && (score += 2);
-          heartAnswers.habit === "medium" && (score += 1);
+      {/* تست سلامت قلب - نسخه لوکس */}
+{selectedTest === "heart" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
+    <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[28px] bg-white shadow-2xl border border-yellow-100">
+      <div className="bg-gradient-to-l from-[#4b0614] to-[#6b1022] px-5 py-5 text-center">
+        <p className="text-[11px] tracking-[0.25em] text-yellow-200/75">
+          GENINO HEALTH
+        </p>
+        <h3 className="mt-2 text-xl font-bold text-yellow-100">
+          سلامت قلب
+        </h3>
+        <p className="mt-2 text-xs leading-6 text-white/70">
+          به چهار سؤال کوتاه پاسخ دهید.
+        </p>
+      </div>
 
-          let status = "";
-          let tip = "";
+      <div className="p-5 space-y-4">
+        {[
+          {
+            title: "میزان فعالیت بدنی شما چقدر است؟",
+            keyName: "activity",
+            options: [
+              { label: "منظم", hint: "سه روز یا بیشتر در هفته", value: "good" },
+              { label: "گاهی", hint: "یک تا دو روز در هفته", value: "medium" },
+              { label: "کم", hint: "خیلی کم یا تقریباً هیچ‌وقت", value: "low" },
+            ],
+          },
+          {
+            title: "در طول روز چقدر استرس دارید؟",
+            keyName: "stress",
+            options: [
+              { label: "کم", hint: "اغلب آرام و کنترل‌شده", value: "low" },
+              { label: "متوسط", hint: "گاهی تحت فشار", value: "medium" },
+              { label: "زیاد", hint: "استرس مداوم یا شدید", value: "high" },
+            ],
+          },
+          {
+            title: "میانگین خواب شبانه شما چقدر است؟",
+            keyName: "sleep",
+            options: [
+              { label: "مناسب", hint: "بیش از ۷ ساعت", value: "good" },
+              { label: "متوسط", hint: "بین ۵ تا ۷ ساعت", value: "medium" },
+              { label: "کم", hint: "کمتر از ۵ ساعت", value: "low" },
+            ],
+          },
+          {
+            title: "مصرف سیگار، قهوه زیاد یا نوشیدنی انرژی‌زا دارید؟",
+            keyName: "habit",
+            options: [
+              { label: "خیر", hint: "مصرف ندارم یا بسیار کم است", value: "good" },
+              { label: "گاهی", hint: "مصرف محدود و گهگاه", value: "medium" },
+              { label: "بله", hint: "مصرف زیاد یا روزانه", value: "bad" },
+            ],
+          },
+        ].map((question, index) => (
+          <div
+            key={question.keyName}
+            className="rounded-3xl border border-yellow-100 bg-[#fbf7ef] p-4"
+          >
+            <p className="mb-3 text-sm font-semibold text-stone-800">
+              {index + 1}. {question.title}
+            </p>
 
-          if (score >= 8) {
-            status = "عالی 💚";
-            tip = "قلبت در وضعیت بسیار خوبی قرار داره! سبک زندگی سالمت رو ادامه بده.";
-          } else if (score >= 5) {
-            status = "متوسط 💛";
-            tip = "قلبت در وضعیت متوسطه؛ بهتره خواب، استرس و فعالیتت رو تنظیم کنی.";
-          } else {
-            status = "نیاز به توجه ❤️‍";
-            tip = "علائم استرس یا خستگی زیاد داری. به تغذیه، استراحت و ورزش اهمیت بده.";
-          }
-
-          const payload = {
-  date: new Date().toISOString(),
-  type: "تست سلامت قلب ",
-  score: `${score}/10`,
-  status,
-  tip,
-  answers: heartAnswers,
-};
-
-const res = await createMenHealthReport(payload);
-
-if (res?.ok && res.report) {
-  setResults((prev) => [res.report, ...prev]);
-} else {
-  alert(res?.message || "خطا در ذخیره نتیجه تست.");
-  return;
-}
-          setSelectedTest(null);
-          setHeartAnswers({
-            activity: "",
-            stress: "",
-            sleep: "",
-            habit: "",
-          });
-        }}
-        onCancel={() => {
-          setSelectedTest(null);
-          setHeartAnswers({
-            activity: "",
-            stress: "",
-            sleep: "",
-            habit: "",
-          });
-        }}
-      >
-        <div className="space-y-4 text-sm">
-          {/* 🏃‍♂️ فعالیت بدنی */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۱. میزان فعالیت بدنی شما چقدره؟</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, activity: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.activity === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                منظم (۳ روز یا بیشتر در هفته)
-              </button>
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, activity: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.activity === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                گاهی (۱ تا ۲ روز)
-              </button>
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, activity: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.activity === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                خیلی کم یا هیچ‌وقت
-              </button>
+              {question.options.map((option) => {
+                const isSelected =
+                  heartAnswers[question.keyName] === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      setHeartAnswers({
+                        ...heartAnswers,
+                        [question.keyName]: option.value,
+                      })
+                    }
+                    className={`rounded-2xl border px-3 py-3 text-right transition ${
+                      isSelected
+                        ? "border-yellow-400 bg-white shadow-md"
+                        : "border-stone-100 bg-white/70 hover:bg-white"
+                    }`}
+                  >
+                    <span
+                      className={`block text-sm font-semibold ${
+                        isSelected ? "text-yellow-700" : "text-stone-700"
+                      }`}
+                    >
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-5 text-stone-400">
+                      {option.hint}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
+        ))}
 
-          {/* 😣 استرس */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۲. چقدر در طول روز احساس استرس داری؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, stress: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.stress === "low"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                کم
-              </button>
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, stress: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.stress === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                گاهی
-              </button>
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, stress: "high" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.stress === "high"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                زیاد
-              </button>
+        <div className="rounded-3xl border border-yellow-100 bg-white p-4">
+          <p className="mb-3 text-sm font-semibold text-stone-800">
+            راهنمای سریع نتیجه
+          </p>
+
+          <div className="space-y-2 text-xs sm:text-sm">
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۸ تا ۱۰</span>
+              <span className="font-medium text-stone-700">وضعیت مطلوب</span>
             </div>
-          </div>
 
-          {/* 💤 خواب */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۳. میانگین ساعت خواب شبانه شما؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, sleep: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.sleep === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                بیش از ۷ ساعت
-              </button>
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, sleep: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.sleep === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                بین ۵ تا ۷ ساعت
-              </button>
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, sleep: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.sleep === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                کمتر از ۵ ساعت
-              </button>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۵ تا ۷</span>
+              <span className="font-medium text-stone-700">نیازمند مراقبت بیشتر</span>
             </div>
-          </div>
 
-          {/* ☕ عادت‌ها */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۴. مصرف سیگار، قهوه زیاد یا نوشیدنی انرژی‌زا داری؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, habit: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.habit === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                خیر
-              </button>
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, habit: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.habit === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                گاهی
-              </button>
-              <button
-                onClick={() => setHeartAnswers({ ...heartAnswers, habit: "bad" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  heartAnswers.habit === "bad"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                بله
-              </button>
-            </div>
-          </div>
-
-          {/* 🩺 جدول محدوده نتایج */}
-          <div className="mt-6">
-            <h4 className="text-yellow-700 font-semibold text-sm mb-2">
-              جدول تفسیر امتیاز تست سلامت قلب
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs sm:text-sm text-gray-700 border border-yellow-200 rounded-xl overflow-hidden">
-                <thead className="bg-yellow-50 text-yellow-800">
-                  <tr>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">
-                      امتیاز کل
-                    </th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">
-                      وضعیت قلب
-                    </th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">
-                      توصیه
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۸ تا ۱۰</td>
-                    <td className="py-1.5 px-3 text-green-700 font-medium">💚 عالی</td>
-                    <td className="py-1.5 px-3">سبک زندگی سالم داری، ادامه بده.</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۵ تا ۷</td>
-                    <td className="py-1.5 px-3 text-yellow-600 font-medium">💛 متوسط</td>
-                    <td className="py-1.5 px-3">
-                      بهتره خواب، استرس و تحرکت رو تنظیم کنی.
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۰ تا ۴</td>
-                    <td className="py-1.5 px-3 text-red-600 font-medium">❤️‍ نیاز به توجه</td>
-                    <td className="py-1.5 px-3">
-                      به استراحت، تغذیه سالم و مشاوره پزشکی توجه کن.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۰ تا ۴</span>
+              <span className="font-medium text-stone-700">نیازمند توجه جدی‌تر</span>
             </div>
           </div>
         </div>
-      </GoldenModal>
 
-      {/*  تست متابولیسم */}
-      <GoldenModal
-        show={selectedTest === "metabolism"}
-        title=" تست متابولیسم (سوخت‌وساز بدن)"
-        description="به چند سؤال کوتاه پاسخ بده تا سطح سوخت‌وساز بدنت مشخص بشه."
-        confirmLabel="محاسبه متابولیسم "
-        onConfirm={async () => {
-          let score = 0;
-          metabolismAnswers.energy === "good" && (score += 2);
-          metabolismAnswers.energy === "medium" && (score += 1);
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTest(null);
+              setHeartAnswers({
+                activity: "",
+                stress: "",
+                sleep: "",
+                habit: "",
+              });
+            }}
+            className="flex-1 rounded-2xl border border-stone-200 py-3 text-sm text-stone-600 hover:bg-stone-50"
+          >
+            انصراف
+          </button>
 
-          metabolismAnswers.sleep === "good" && (score += 2);
-          metabolismAnswers.sleep === "medium" && (score += 1);
+          <button
+            type="button"
+            onClick={async () => {
+              let score = 0;
+              heartAnswers.activity === "good" && (score += 2);
+              heartAnswers.activity === "medium" && (score += 1);
 
-          metabolismAnswers.food === "good" && (score += 2);
-          metabolismAnswers.food === "medium" && (score += 1);
+              heartAnswers.stress === "low" && (score += 2);
+              heartAnswers.stress === "medium" && (score += 1);
 
-          metabolismAnswers.activity === "good" && (score += 2);
-          metabolismAnswers.activity === "medium" && (score += 1);
+              heartAnswers.sleep === "good" && (score += 2);
+              heartAnswers.sleep === "medium" && (score += 1);
 
-          let status = "";
-          let tip = "";
+              heartAnswers.habit === "good" && (score += 2);
+              heartAnswers.habit === "medium" && (score += 1);
 
-          if (score >= 8) {
-            status = " سریع";
-            tip = "بدنت سوخت‌وساز بالایی داره؛ مراقب باش کالری کافی دریافت کنی.";
-          } else if (score >= 5) {
-            status = "⚖️ نرمال";
-            tip = "سوخت‌وسازت متعادله، خواب و تغذیه رو همین‌طور ادامه بده.";
-          } else {
-            status = "🧊 کند";
-            tip = "احتمالاً متابولیسمت پایینه؛ تحرک، خواب کافی و پروتئین بیشتر لازمه.";
-          }
+              let status = "";
+              let tip = "";
 
-          const payload = {
-  date: new Date().toISOString(),
-  type: "تست متابولیسم ",
-  score: `${score}/10`,
-  status,
-  tip,
-  answers: metabolismAnswers,
-};
+              if (score >= 8) {
+                status = "وضعیت مطلوب";
+                tip = "سبک زندگی شما از نظر عوامل اولیه سلامت قلب در وضعیت خوبی قرار دارد.";
+              } else if (score >= 5) {
+                status = "نیازمند مراقبت بیشتر";
+                tip = "بهتر است خواب، استرس و فعالیت بدنی خود را منظم‌تر کنید.";
+              } else {
+                status = "نیازمند توجه جدی‌تر";
+                tip = "چند عامل مهم می‌تواند به سلامت قلب فشار وارد کند؛ بررسی سبک زندگی و مشورت پزشکی مفید است.";
+              }
 
-const res = await createMenHealthReport(payload);
+              const payload = {
+                date: new Date().toISOString(),
+                type: "تست سلامت قلب",
+                score: `${score}/10`,
+                status,
+                tip,
+                answers: heartAnswers,
+              };
 
-if (res?.ok && res.report) {
-  setResults((prev) => [res.report, ...prev]);
-} else {
-  alert(res?.message || "خطا در ذخیره نتیجه تست.");
-  return;
-}
-          setSelectedTest(null);
-          setMetabolismAnswers({
-            energy: "",
-            sleep: "",
-            food: "",
-            activity: "",
-          });
-        }}
-        onCancel={() => {
-          setSelectedTest(null);
-          setMetabolismAnswers({
-            energy: "",
-            sleep: "",
-            food: "",
-            activity: "",
-          });
-        }}
-      >
-        <div className="space-y-4 text-sm">
-          {/* ⚡ انرژی روزانه */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۱. احساس انرژی روزانه‌ات چطوره؟</p>
+              const res = await createMenHealthReport(payload);
+
+              if (res?.ok && res.report) {
+                setResults((prev) => [res.report, ...prev]);
+              } else {
+                alert(res?.message || "خطا در ذخیره نتیجه تست.");
+                return;
+              }
+
+              setSelectedTest(null);
+              setHeartAnswers({
+                activity: "",
+                stress: "",
+                sleep: "",
+                habit: "",
+              });
+            }}
+            className="flex-1 rounded-2xl bg-gradient-to-l from-yellow-500 to-yellow-600 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg"
+          >
+            محاسبه
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+      {/* تست متابولیسم - نسخه لوکس */}
+{selectedTest === "metabolism" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
+    <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[28px] bg-white shadow-2xl border border-yellow-100">
+      <div className="bg-gradient-to-l from-[#4b0614] to-[#6b1022] px-5 py-5 text-center">
+        <p className="text-[11px] tracking-[0.25em] text-yellow-200/75">
+          GENINO HEALTH
+        </p>
+        <h3 className="mt-2 text-xl font-bold text-yellow-100">
+          متابولیسم بدن
+        </h3>
+        <p className="mt-2 text-xs leading-6 text-white/70">
+          وضعیت انرژی، خواب، تغذیه و تحرک خود را مشخص کنید.
+        </p>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {[
+          {
+            title: "احساس انرژی روزانه شما چگونه است؟",
+            keyName: "energy",
+            options: [
+              { label: "بالا", hint: "اغلب پرانرژی و فعال هستم", value: "good" },
+              { label: "متوسط", hint: "انرژی معمولی دارم", value: "medium" },
+              { label: "پایین", hint: "زود خسته می‌شوم", value: "low" },
+            ],
+          },
+          {
+            title: "الگوی خواب شبانه شما چگونه است؟",
+            keyName: "sleep",
+            options: [
+              { label: "منظم", hint: "خواب کافی و نسبتاً ثابت", value: "good" },
+              { label: "نسبتاً منظم", hint: "گاهی بی‌نظمی دارم", value: "medium" },
+              { label: "نامنظم", hint: "خواب کوتاه یا بی‌برنامه", value: "low" },
+            ],
+          },
+          {
+            title: "وعده‌های غذایی شما چقدر منظم است؟",
+            keyName: "food",
+            options: [
+              { label: "منظم", hint: "وعده‌های متعادل و قابل پیش‌بینی", value: "good" },
+              { label: "گاهی نامنظم", hint: "گاهی وعده‌ها جابه‌جا می‌شود", value: "medium" },
+              { label: "نامنظم", hint: "وعده‌ها اغلب بی‌برنامه است", value: "low" },
+            ],
+          },
+          {
+            title: "تحرک یا ورزش شما چقدر است؟",
+            keyName: "activity",
+            options: [
+              { label: "خوب", hint: "حداقل سه بار در هفته", value: "good" },
+              { label: "متوسط", hint: "گاهی پیاده‌روی یا فعالیت سبک", value: "medium" },
+              { label: "کم", hint: "تحرک روزانه بسیار محدود", value: "low" },
+            ],
+          },
+        ].map((question, index) => (
+          <div
+            key={question.keyName}
+            className="rounded-3xl border border-yellow-100 bg-[#fbf7ef] p-4"
+          >
+            <p className="mb-3 text-sm font-semibold text-stone-800">
+              {index + 1}. {question.title}
+            </p>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, energy: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.energy === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                پرانرژی و فعال 😄
-              </button>
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, energy: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.energy === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                معمولی ⚖️
-              </button>
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, energy: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.energy === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                زود خسته می‌شم 😴
-              </button>
+              {question.options.map((option) => {
+                const isSelected =
+                  metabolismAnswers[question.keyName] === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      setMetabolismAnswers({
+                        ...metabolismAnswers,
+                        [question.keyName]: option.value,
+                      })
+                    }
+                    className={`rounded-2xl border px-3 py-3 text-right transition ${
+                      isSelected
+                        ? "border-yellow-400 bg-white shadow-md"
+                        : "border-stone-100 bg-white/70 hover:bg-white"
+                    }`}
+                  >
+                    <span
+                      className={`block text-sm font-semibold ${
+                        isSelected ? "text-yellow-700" : "text-stone-700"
+                      }`}
+                    >
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-5 text-stone-400">
+                      {option.hint}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
+        ))}
 
-          {/* 🌙 خواب شبانه */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۲. الگوی خواب شبانه‌ات چطوره؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, sleep: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.sleep === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                منظم (۷–۸ ساعت) 🌙
-              </button>
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, sleep: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.sleep === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                نسبتاً منظم 😌
-              </button>
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, sleep: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.sleep === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                بی‌نظم یا کوتاه ⏰
-              </button>
+        <div className="rounded-3xl border border-yellow-100 bg-white p-4">
+          <p className="mb-3 text-sm font-semibold text-stone-800">
+            راهنمای سریع نتیجه
+          </p>
+
+          <div className="space-y-2 text-xs sm:text-sm">
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۸ تا ۱۰</span>
+              <span className="font-medium text-stone-700">سوخت‌وساز فعال</span>
             </div>
-          </div>
 
-          {/* 🍽️ وعده‌های غذایی */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۳. وعده‌های غذایی‌ات چطوره؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, food: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.food === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                منظم و متعادل 🥗
-              </button>
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, food: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.food === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                گاهی بی‌نظم 🍞
-              </button>
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, food: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.food === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                خیلی نامنظم 🚫
-              </button>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۵ تا ۷</span>
+              <span className="font-medium text-stone-700">وضعیت متعادل</span>
             </div>
-          </div>
 
-          {/* 🏃‍♂️ فعالیت بدنی */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۴. ورزش یا تحرک بدنی چقدر داری؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, activity: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.activity === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                حداقل ۳ بار در هفته 🏃‍♂️
-              </button>
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, activity: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.activity === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                گاهی پیاده‌روی 🚶‍♂️
-              </button>
-              <button
-                onClick={() => setMetabolismAnswers({ ...metabolismAnswers, activity: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  metabolismAnswers.activity === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                تحرک خیلی کم 🪑
-              </button>
-            </div>
-          </div>
-
-          {/* 📊 جدول تفسیر */}
-          <div className="mt-6">
-            <h4 className="text-yellow-700 font-semibold text-sm mb-2">
-              جدول تفسیر سطح متابولیسم بدن
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs sm:text-sm text-gray-700 border border-yellow-200 rounded-xl overflow-hidden">
-                <thead className="bg-yellow-50 text-yellow-800">
-                  <tr>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">امتیاز کل</th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">وضعیت متابولیسم</th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">توصیه</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۸ تا ۱۰</td>
-                    <td className="py-1.5 px-3 text-orange-600 font-medium"> سریع</td>
-                    <td className="py-1.5 px-3">کالری کافی دریافت کن، مراقب تحلیل عضله باش.</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۵ تا ۷</td>
-                    <td className="py-1.5 px-3 text-yellow-600 font-medium">⚖️ نرمال</td>
-                    <td className="py-1.5 px-3">تعادل خوبی داری، ادامه بده.</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۰ تا ۴</td>
-                    <td className="py-1.5 px-3 text-blue-700 font-medium">🧊 کند</td>
-                    <td className="py-1.5 px-3">خواب و تحرک رو افزایش بده و وعده‌ها رو منظم کن.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۰ تا ۴</span>
+              <span className="font-medium text-stone-700">نیازمند بهبود سبک زندگی</span>
             </div>
           </div>
         </div>
-      </GoldenModal>
 
-      {/* 💊 تست تعادل هورمونی */}
-      <GoldenModal
-        show={selectedTest === "hormone"}
-        title="💊 تست تعادل هورمونی آقایان"
-        description="به چند سؤال کوتاه پاسخ بده تا وضعیت هورمون‌های حیاتی بدنت بررسی بشه."
-        confirmLabel="محاسبه تعادل هورمونی 💛"
-        onConfirm={async () => {
-          let score = 0;
-          hormoneAnswers.energy === "good" && (score += 2);
-          hormoneAnswers.energy === "medium" && (score += 1);
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTest(null);
+              setMetabolismAnswers({
+                energy: "",
+                sleep: "",
+                food: "",
+                activity: "",
+              });
+            }}
+            className="flex-1 rounded-2xl border border-stone-200 py-3 text-sm text-stone-600 hover:bg-stone-50"
+          >
+            انصراف
+          </button>
 
-          hormoneAnswers.focus === "good" && (score += 2);
-          hormoneAnswers.focus === "medium" && (score += 1);
+          <button
+            type="button"
+            onClick={async () => {
+              let score = 0;
+              metabolismAnswers.energy === "good" && (score += 2);
+              metabolismAnswers.energy === "medium" && (score += 1);
 
-          hormoneAnswers.sleep === "good" && (score += 2);
-          hormoneAnswers.sleep === "medium" && (score += 1);
+              metabolismAnswers.sleep === "good" && (score += 2);
+              metabolismAnswers.sleep === "medium" && (score += 1);
 
-          hormoneAnswers.mood === "good" && (score += 2);
-          hormoneAnswers.mood === "medium" && (score += 1);
+              metabolismAnswers.food === "good" && (score += 2);
+              metabolismAnswers.food === "medium" && (score += 1);
 
-          let status = "";
-          let tip = "";
+              metabolismAnswers.activity === "good" && (score += 2);
+              metabolismAnswers.activity === "medium" && (score += 1);
 
-          if (score >= 8) {
-            status = "💛 متعادل";
-            tip = "هورمون‌هات در سطح مطلوبی هستن. خواب، تغذیه و فعالیتت رو ادامه بده.";
-          } else if (score >= 5) {
-            status = "🟠 کمی نوسانی";
-            tip = "ممکنه استرس، کم‌خوابی یا رژیم غذایی باعث نوسان هورمونی شده باشه.";
-          } else {
-            status = "🔴 نیاز به بررسی";
-            tip = "نشانه‌های افت تستوسترون یا استرس مزمن دیده می‌شه؛ مشاوره پزشکی مفیده.";
-          }
+              let status = "";
+              let tip = "";
 
-          const payload = {
-  date: new Date().toISOString(),
-  type: "تست تعادل هورمونی 💊",
-  score: `${score}/10`,
-  status,
-  tip,
-  answers: hormoneAnswers,
-};
+              if (score >= 8) {
+                status = "سوخت‌وساز فعال";
+                tip = "بدن شما از نظر انرژی، خواب، تغذیه و تحرک در وضعیت مطلوبی قرار دارد.";
+              } else if (score >= 5) {
+                status = "وضعیت متعادل";
+                tip = "وضعیت کلی قابل قبول است؛ با نظم بیشتر در خواب، تغذیه و تحرک بهتر می‌شود.";
+              } else {
+                status = "نیازمند بهبود سبک زندگی";
+                tip = "کمبود خواب، تغذیه نامنظم یا تحرک پایین می‌تواند روی سوخت‌وساز بدن اثر بگذارد.";
+              }
 
-const res = await createMenHealthReport(payload);
+              const payload = {
+                date: new Date().toISOString(),
+                type: "تست متابولیسم",
+                score: `${score}/10`,
+                status,
+                tip,
+                answers: metabolismAnswers,
+              };
 
-if (res?.ok && res.report) {
-  setResults((prev) => [res.report, ...prev]);
-} else {
-  alert(res?.message || "خطا در ذخیره نتیجه تست.");
-  return;
-}
-          setSelectedTest(null);
-          setHormoneAnswers({
-            energy: "",
-            focus: "",
-            sleep: "",
-            mood: "",
-          });
-        }}
-        onCancel={() => {
-          setSelectedTest(null);
-          setHormoneAnswers({
-            energy: "",
-            focus: "",
-            sleep: "",
-            mood: "",
-          });
-        }}
-      >
-        <div className="space-y-4 text-sm">
-          {/* ⚡ انرژی روزانه */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۱. در طول روز چقدر احساس انرژی داری؟</p>
+              const res = await createMenHealthReport(payload);
+
+              if (res?.ok && res.report) {
+                setResults((prev) => [res.report, ...prev]);
+              } else {
+                alert(res?.message || "خطا در ذخیره نتیجه تست.");
+                return;
+              }
+
+              setSelectedTest(null);
+              setMetabolismAnswers({
+                energy: "",
+                sleep: "",
+                food: "",
+                activity: "",
+              });
+            }}
+            className="flex-1 rounded-2xl bg-gradient-to-l from-yellow-500 to-yellow-600 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg"
+          >
+            محاسبه
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+      {/* تست تعادل هورمونی - نسخه لوکس */}
+{selectedTest === "hormone" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
+    <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[28px] bg-white shadow-2xl border border-yellow-100">
+      <div className="bg-gradient-to-l from-[#4b0614] to-[#6b1022] px-5 py-5 text-center">
+        <p className="text-[11px] tracking-[0.25em] text-yellow-200/75">
+          GENINO HEALTH
+        </p>
+        <h3 className="mt-2 text-xl font-bold text-yellow-100">
+          تعادل هورمونی
+        </h3>
+        <p className="mt-2 text-xs leading-6 text-white/70">
+          وضعیت انرژی، تمرکز، خواب و خلق‌وخو را مشخص کنید.
+        </p>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {[
+          {
+            title: "سطح انرژی روزانه شما چگونه است؟",
+            keyName: "energy",
+            options: [
+              { label: "بالا", hint: "اغلب پرانرژی و فعال هستم", value: "good" },
+              { label: "متوسط", hint: "انرژی معمولی دارم", value: "medium" },
+              { label: "پایین", hint: "بیشتر روزها خسته‌ام", value: "low" },
+            ],
+          },
+          {
+            title: "تمرکز ذهنی شما در طول روز چگونه است؟",
+            keyName: "focus",
+            options: [
+              { label: "خوب", hint: "تمرکز پایدار و عملکرد ذهنی مناسب", value: "good" },
+              { label: "متوسط", hint: "گاهی افت تمرکز دارم", value: "medium" },
+              { label: "ضعیف", hint: "تمرکز برایم سخت است", value: "low" },
+            ],
+          },
+          {
+            title: "کیفیت خواب و بیداری صبح شما چگونه است؟",
+            keyName: "sleep",
+            options: [
+              { label: "خوب", hint: "خواب عمیق و بیداری با انرژی", value: "good" },
+              { label: "متوسط", hint: "خواب نسبتاً قابل قبول", value: "medium" },
+              { label: "ضعیف", hint: "خواب سبک یا بیداری خسته", value: "low" },
+            ],
+          },
+          {
+            title: "خلق‌وخو و انگیزه شما در روزهای اخیر چگونه بوده؟",
+            keyName: "mood",
+            options: [
+              { label: "مثبت", hint: "آرام، باانگیزه و متعادل", value: "good" },
+              { label: "متوسط", hint: "گاهی افت انگیزه یا نوسان خلق", value: "medium" },
+              { label: "پایین", hint: "بی‌حوصلگی، تحریک‌پذیری یا افت انگیزه", value: "low" },
+            ],
+          },
+        ].map((question, index) => (
+          <div
+            key={question.keyName}
+            className="rounded-3xl border border-yellow-100 bg-[#fbf7ef] p-4"
+          >
+            <p className="mb-3 text-sm font-semibold text-stone-800">
+              {index + 1}. {question.title}
+            </p>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, energy: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.energy === "good"
-                    ? "bg-blue-100 border-blue-400"
-                    : "border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                زیاد 💪
-              </button>
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, energy: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.energy === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                معمولی 🙂
-              </button>
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, energy: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.energy === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                خیلی کم 😴
-              </button>
+              {question.options.map((option) => {
+                const isSelected =
+                  hormoneAnswers[question.keyName] === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      setHormoneAnswers({
+                        ...hormoneAnswers,
+                        [question.keyName]: option.value,
+                      })
+                    }
+                    className={`rounded-2xl border px-3 py-3 text-right transition ${
+                      isSelected
+                        ? "border-yellow-400 bg-white shadow-md"
+                        : "border-stone-100 bg-white/70 hover:bg-white"
+                    }`}
+                  >
+                    <span
+                      className={`block text-sm font-semibold ${
+                        isSelected ? "text-yellow-700" : "text-stone-700"
+                      }`}
+                    >
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-5 text-stone-400">
+                      {option.hint}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
+        ))}
 
-          {/* 🎯 تمرکز ذهنی */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۲. تمرکز و عملکرد ذهنی‌ات در طول روز چطوره؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, focus: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.focus === "good"
-                    ? "bg-blue-100 border-blue-400"
-                    : "border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                بالا 🎯
-              </button>
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, focus: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.focus === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                متوسط ⚖️
-              </button>
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, focus: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.focus === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                پایین 😵
-              </button>
+        <div className="rounded-3xl border border-yellow-100 bg-white p-4">
+          <p className="mb-3 text-sm font-semibold text-stone-800">
+            راهنمای سریع نتیجه
+          </p>
+
+          <div className="space-y-2 text-xs sm:text-sm">
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۸ تا ۱۰</span>
+              <span className="font-medium text-stone-700">تعادل مطلوب</span>
             </div>
-          </div>
 
-          {/* 🌙 خواب شبانه */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۳. کیفیت خواب و بیداری صبح‌ات چطوره؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, sleep: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.sleep === "good"
-                    ? "bg-blue-100 border-blue-400"
-                    : "border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                عمیق و باانرژی 😌
-              </button>
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, sleep: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.sleep === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                نسبتاً خوب 😐
-              </button>
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, sleep: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.sleep === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                سبک یا بی‌کیفیت 😫
-              </button>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۵ تا ۷</span>
+              <span className="font-medium text-stone-700">نوسان خفیف</span>
             </div>
-          </div>
 
-          {/* 🙂 خلق و خو */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۴. خلق‌و‌خو و انگیزه‌ات در روزهای اخیر؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, mood: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.mood === "good"
-                    ? "bg-blue-100 border-blue-400"
-                    : "border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                مثبت و باانگیزه 😄
-              </button>
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, mood: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.mood === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                متعادل 🙂
-              </button>
-              <button
-                onClick={() => setHormoneAnswers({ ...hormoneAnswers, mood: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  hormoneAnswers.mood === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                بی‌حوصلگی یا عصبی 😠
-              </button>
-            </div>
-          </div>
-
-          {/* 🩺 جدول تفسیر */}
-          <div className="mt-6">
-            <h4 className="text-yellow-700 font-semibold text-sm mb-2">
-              جدول تفسیر سطح تعادل هورمونی
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs sm:text-sm text-gray-700 border border-yellow-200 rounded-xl overflow-hidden">
-                <thead className="bg-yellow-50 text-yellow-800">
-                  <tr>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">امتیاز کل</th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">وضعیت</th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">توصیه</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۸ تا ۱۰</td>
-                    <td className="py-1.5 px-3 text-green-600 font-medium">💛 متعادل</td>
-                    <td className="py-1.5 px-3">تعادل عالی، ادامه همین سبک زندگی.</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۵ تا ۷</td>
-                    <td className="py-1.5 px-3 text-yellow-600 font-medium">🟠 کمی نوسانی</td>
-                    <td className="py-1.5 px-3">بهبود خواب و کاهش استرس توصیه می‌شود.</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۰ تا ۴</td>
-                    <td className="py-1.5 px-3 text-red-600 font-medium">🔴 نیاز به بررسی</td>
-                    <td className="py-1.5 px-3">با پزشک یا متخصص تغذیه مشورت کن.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۰ تا ۴</span>
+              <span className="font-medium text-stone-700">نیازمند بررسی بیشتر</span>
             </div>
           </div>
         </div>
-      </GoldenModal>
 
-      {/* 😴 تست کیفیت خواب */}
-      <GoldenModal
-        show={selectedTest === "sleep"}
-        title="😴 تست کیفیت خواب شبانه"
-        description="به چند سؤال ساده پاسخ بده تا میزان کیفیت و عمق خواب شبانه‌ات مشخص بشه."
-        confirmLabel="محاسبه کیفیت خواب 🌙"
-        onConfirm={async () => {
-          let score = 0;
-          sleepAnswers.hours === "good" && (score += 2);
-          sleepAnswers.hours === "medium" && (score += 1);
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTest(null);
+              setHormoneAnswers({
+                energy: "",
+                focus: "",
+                sleep: "",
+                mood: "",
+              });
+            }}
+            className="flex-1 rounded-2xl border border-stone-200 py-3 text-sm text-stone-600 hover:bg-stone-50"
+          >
+            انصراف
+          </button>
 
-          sleepAnswers.wakeups === "good" && (score += 2);
-          sleepAnswers.wakeups === "medium" && (score += 1);
+          <button
+            type="button"
+            onClick={async () => {
+              let score = 0;
+              hormoneAnswers.energy === "good" && (score += 2);
+              hormoneAnswers.energy === "medium" && (score += 1);
 
-          sleepAnswers.energy === "good" && (score += 2);
-          sleepAnswers.energy === "medium" && (score += 1);
+              hormoneAnswers.focus === "good" && (score += 2);
+              hormoneAnswers.focus === "medium" && (score += 1);
 
-          sleepAnswers.screen === "good" && (score += 2);
-          sleepAnswers.screen === "medium" && (score += 1);
+              hormoneAnswers.sleep === "good" && (score += 2);
+              hormoneAnswers.sleep === "medium" && (score += 1);
 
-          let status = "";
-          let tip = "";
+              hormoneAnswers.mood === "good" && (score += 2);
+              hormoneAnswers.mood === "medium" && (score += 1);
 
-          if (score >= 8) {
-            status = "🌙 خواب عمیق و سالم";
-            tip = "خواب عالی داری، ریتم بدن و ذهنت هماهنگه.";
-          } else if (score >= 5) {
-            status = "😌 خواب متوسط";
-            tip = "کیفیت خوابت خوبه ولی جای بهبود داره — مثلاً کاهش موبایل قبل خواب.";
-          } else {
-            status = "😫 خواب بی‌کیفیت";
-            tip = "کم‌خوابی یا استرس مانع خواب عمیقته. سعی کن خواب و آرامش رو در اولویت بذاری.";
-          }
+              let status = "";
+              let tip = "";
 
-          const payload = {
-  date: new Date().toISOString(),
-  type: "تست کیفیت خواب 😴",
-  score: `${score}/10`,
-  status,
-  tip,
-  answers: sleepAnswers,
-};
+              if (score >= 8) {
+                status = "تعادل مطلوب";
+                tip = "پاسخ‌های شما نشان می‌دهد انرژی، تمرکز، خواب و خلق‌وخو در وضعیت مناسبی قرار دارند.";
+              } else if (score >= 5) {
+                status = "نوسان خفیف";
+                tip = "ممکن است خواب، استرس یا سبک زندگی روی تعادل بدن شما اثر گذاشته باشد.";
+              } else {
+                status = "نیازمند بررسی بیشتر";
+                tip = "افت انرژی، تمرکز یا خلق‌وخو می‌تواند دلایل مختلفی داشته باشد؛ بررسی تخصصی می‌تواند مفید باشد.";
+              }
 
-const res = await createMenHealthReport(payload);
+              const payload = {
+                date: new Date().toISOString(),
+                type: "تست تعادل هورمونی",
+                score: `${score}/10`,
+                status,
+                tip,
+                answers: hormoneAnswers,
+              };
 
-if (res?.ok && res.report) {
-  setResults((prev) => [res.report, ...prev]);
-} else {
-  alert(res?.message || "خطا در ذخیره نتیجه تست.");
-  return;
-}
-          setSelectedTest(null);
-          setSleepAnswers({
-            hours: "",
-            wakeups: "",
-            energy: "",
-            screen: "",
-          });
-        }}
-        onCancel={() => {
-          setSelectedTest(null);
-          setSleepAnswers({
-            hours: "",
-            wakeups: "",
-            energy: "",
-            screen: "",
-          });
-        }}
-      >
-        <div className="space-y-4 text-sm">
-          {/* 🕐 مدت خواب */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۱. به‌طور میانگین چند ساعت در شب می‌خوابی؟</p>
+              const res = await createMenHealthReport(payload);
+
+              if (res?.ok && res.report) {
+                setResults((prev) => [res.report, ...prev]);
+              } else {
+                alert(res?.message || "خطا در ذخیره نتیجه تست.");
+                return;
+              }
+
+              setSelectedTest(null);
+              setHormoneAnswers({
+                energy: "",
+                focus: "",
+                sleep: "",
+                mood: "",
+              });
+            }}
+            className="flex-1 rounded-2xl bg-gradient-to-l from-yellow-500 to-yellow-600 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg"
+          >
+            محاسبه
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+      {/* تست کیفیت خواب - نسخه لوکس */}
+{selectedTest === "sleep" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
+    <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[28px] bg-white shadow-2xl border border-yellow-100">
+      <div className="bg-gradient-to-l from-[#4b0614] to-[#6b1022] px-5 py-5 text-center">
+        <p className="text-[11px] tracking-[0.25em] text-yellow-200/75">
+          GENINO HEALTH
+        </p>
+        <h3 className="mt-2 text-xl font-bold text-yellow-100">
+          کیفیت خواب
+        </h3>
+        <p className="mt-2 text-xs leading-6 text-white/70">
+          وضعیت خواب شبانه و انرژی صبحگاهی خود را مشخص کنید.
+        </p>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {[
+          {
+            title: "میانگین خواب شبانه شما چقدر است؟",
+            keyName: "hours",
+            options: [
+              { label: "کافی", hint: "بیش از ۷ ساعت", value: "good" },
+              { label: "متوسط", hint: "بین ۵ تا ۷ ساعت", value: "medium" },
+              { label: "کم", hint: "کمتر از ۵ ساعت", value: "low" },
+            ],
+          },
+          {
+            title: "در طول شب چند بار بیدار می‌شوید؟",
+            keyName: "wakeups",
+            options: [
+              { label: "کم", hint: "خیلی کم یا تقریباً هیچ‌وقت", value: "good" },
+              { label: "متوسط", hint: "یک تا دو بار", value: "medium" },
+              { label: "زیاد", hint: "بیش از دو بار", value: "low" },
+            ],
+          },
+          {
+            title: "بعد از بیدار شدن چه میزان انرژی دارید؟",
+            keyName: "energy",
+            options: [
+              { label: "بالا", hint: "صبح‌ها سرحال و آماده‌ام", value: "good" },
+              { label: "متوسط", hint: "انرژی قابل قبول دارم", value: "medium" },
+              { label: "پایین", hint: "اغلب خسته بیدار می‌شوم", value: "low" },
+            ],
+          },
+          {
+            title: "قبل از خواب از موبایل، تلویزیون یا صفحه‌نمایش استفاده می‌کنید؟",
+            keyName: "screen",
+            options: [
+              { label: "کم", hint: "کم یا تقریباً هیچ‌وقت", value: "good" },
+              { label: "گاهی", hint: "بعضی شب‌ها", value: "medium" },
+              { label: "زیاد", hint: "اغلب قبل از خواب", value: "low" },
+            ],
+          },
+        ].map((question, index) => (
+          <div
+            key={question.keyName}
+            className="rounded-3xl border border-yellow-100 bg-[#fbf7ef] p-4"
+          >
+            <p className="mb-3 text-sm font-semibold text-stone-800">
+              {index + 1}. {question.title}
+            </p>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, hours: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.hours === "good"
-                    ? "bg-indigo-100 border-indigo-400"
-                    : "border-indigo-200 hover:bg-indigo-50"
-                }`}
-              >
-                بیش از ۷ ساعت 🌙
-              </button>
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, hours: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.hours === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-indigo-200 hover:bg-indigo-50"
-                }`}
-              >
-                بین ۵ تا ۷ ساعت 😌
-              </button>
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, hours: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.hours === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                کمتر از ۵ ساعت 😫
-              </button>
+              {question.options.map((option) => {
+                const isSelected =
+                  sleepAnswers[question.keyName] === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      setSleepAnswers({
+                        ...sleepAnswers,
+                        [question.keyName]: option.value,
+                      })
+                    }
+                    className={`rounded-2xl border px-3 py-3 text-right transition ${
+                      isSelected
+                        ? "border-yellow-400 bg-white shadow-md"
+                        : "border-stone-100 bg-white/70 hover:bg-white"
+                    }`}
+                  >
+                    <span
+                      className={`block text-sm font-semibold ${
+                        isSelected ? "text-yellow-700" : "text-stone-700"
+                      }`}
+                    >
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-5 text-stone-400">
+                      {option.hint}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
+        ))}
 
-          {/* 🌃 بیدار شدن شبانه */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۲. در طول شب چند بار از خواب بیدار می‌شی؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, wakeups: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.wakeups === "good"
-                    ? "bg-indigo-100 border-indigo-400"
-                    : "border-indigo-200 hover:bg-indigo-50"
-                }`}
-              >
-                خیلی کم یا اصلاً 😴
-              </button>
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, wakeups: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.wakeups === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-indigo-200 hover:bg-indigo-50"
-                }`}
-              >
-                ۱ تا ۲ بار 😐
-              </button>
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, wakeups: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.wakeups === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                بیش از ۲ بار 😩
-              </button>
+        <div className="rounded-3xl border border-yellow-100 bg-white p-4">
+          <p className="mb-3 text-sm font-semibold text-stone-800">
+            راهنمای سریع نتیجه
+          </p>
+
+          <div className="space-y-2 text-xs sm:text-sm">
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۸ تا ۱۰</span>
+              <span className="font-medium text-stone-700">خواب باکیفیت</span>
             </div>
-          </div>
 
-          {/* ☀️ انرژی صبح */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۳. احساس انرژی‌ات بعد از بیدار شدن چطوره؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, energy: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.energy === "good"
-                    ? "bg-indigo-100 border-indigo-400"
-                    : "border-indigo-200 hover:bg-indigo-50"
-                }`}
-              >
-                پرانرژی ☀️
-              </button>
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, energy: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.energy === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-indigo-200 hover:bg-indigo-50"
-                }`}
-              >
-                معمولی 😶
-              </button>
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, energy: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.energy === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                خسته 😵
-              </button>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۵ تا ۷</span>
+              <span className="font-medium text-stone-700">قابل بهبود</span>
             </div>
-          </div>
 
-          {/* 📱 استفاده از موبایل */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۴. قبل از خواب از موبایل یا تلویزیون استفاده می‌کنی؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, screen: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.screen === "good"
-                    ? "bg-indigo-100 border-indigo-400"
-                    : "border-indigo-200 hover:bg-indigo-50"
-                }`}
-              >
-                نه، اصلاً 📵
-              </button>
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, screen: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.screen === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-indigo-200 hover:bg-indigo-50"
-                }`}
-              >
-                گاهی 📱
-              </button>
-              <button
-                onClick={() => setSleepAnswers({ ...sleepAnswers, screen: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  sleepAnswers.screen === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                زیاد 💻
-              </button>
-            </div>
-          </div>
-
-          {/* 📊 جدول تفسیر */}
-          <div className="mt-6">
-            <h4 className="text-yellow-700 font-semibold text-sm mb-2">
-              جدول تفسیر کیفیت خواب
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs sm:text-sm text-gray-700 border border-yellow-200 rounded-xl overflow-hidden">
-                <thead className="bg-yellow-50 text-yellow-800">
-                  <tr>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">امتیاز کل</th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">وضعیت خواب</th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">توصیه</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۸ تا ۱۰</td>
-                    <td className="py-1.5 px-3 text-green-700 font-medium">🌙 خواب عمیق و سالم</td>
-                    <td className="py-1.5 px-3">عالی! ادامه همین روال.</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۵ تا ۷</td>
-                    <td className="py-1.5 px-3 text-yellow-600 font-medium">😌 خواب متوسط</td>
-                    <td className="py-1.5 px-3">قبل خواب نور آبی و استرس رو کم کن.</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۰ تا ۴</td>
-                    <td className="py-1.5 px-3 text-red-600 font-medium">😫 خواب بی‌کیفیت</td>
-                    <td className="py-1.5 px-3">زمان خواب و رژیم غذایی رو تنظیم کن.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۰ تا ۴</span>
+              <span className="font-medium text-stone-700">نیازمند اصلاح خواب</span>
             </div>
           </div>
         </div>
-      </GoldenModal>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTest(null);
+              setSleepAnswers({
+                hours: "",
+                wakeups: "",
+                energy: "",
+                screen: "",
+              });
+            }}
+            className="flex-1 rounded-2xl border border-stone-200 py-3 text-sm text-stone-600 hover:bg-stone-50"
+          >
+            انصراف
+          </button>
+
+          <button
+            type="button"
+            onClick={async () => {
+              let score = 0;
+              sleepAnswers.hours === "good" && (score += 2);
+              sleepAnswers.hours === "medium" && (score += 1);
+
+              sleepAnswers.wakeups === "good" && (score += 2);
+              sleepAnswers.wakeups === "medium" && (score += 1);
+
+              sleepAnswers.energy === "good" && (score += 2);
+              sleepAnswers.energy === "medium" && (score += 1);
+
+              sleepAnswers.screen === "good" && (score += 2);
+              sleepAnswers.screen === "medium" && (score += 1);
+
+              let status = "";
+              let tip = "";
+
+              if (score >= 8) {
+                status = "خواب باکیفیت";
+                tip = "الگوی خواب شما از نظر مدت، پیوستگی و انرژی صبحگاهی در وضعیت مناسبی قرار دارد.";
+              } else if (score >= 5) {
+                status = "قابل بهبود";
+                tip = "کیفیت خواب شما قابل قبول است، اما کاهش صفحه‌نمایش قبل از خواب و نظم بیشتر می‌تواند کمک کند.";
+              } else {
+                status = "نیازمند اصلاح خواب";
+                tip = "کم‌خوابی، بیدار شدن مکرر یا خستگی صبحگاهی می‌تواند نیازمند توجه جدی‌تر باشد.";
+              }
+
+              const payload = {
+                date: new Date().toISOString(),
+                type: "تست کیفیت خواب",
+                score: `${score}/10`,
+                status,
+                tip,
+                answers: sleepAnswers,
+              };
+
+              const res = await createMenHealthReport(payload);
+
+              if (res?.ok && res.report) {
+                setResults((prev) => [res.report, ...prev]);
+              } else {
+                alert(res?.message || "خطا در ذخیره نتیجه تست.");
+                return;
+              }
+
+              setSelectedTest(null);
+              setSleepAnswers({
+                hours: "",
+                wakeups: "",
+                energy: "",
+                screen: "",
+              });
+            }}
+            className="flex-1 rounded-2xl bg-gradient-to-l from-yellow-500 to-yellow-600 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg"
+          >
+            محاسبه
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
 
       {/* 🧠 تست تمرکز و انگیزه */}
-      <GoldenModal
-        show={selectedTest === "focus"}
-        title="🧠 تست تمرکز و انگیزه"
-        description="با چند سؤال ساده، میزان تمرکز و انگیزه ذهنی خودت رو بسنج."
-        confirmLabel="محاسبه تمرکز و انگیزه 💪"
-        onConfirm={async () => {
-          let score = 0;
-          focusAnswers.attention === "good" && (score += 2);
-          focusAnswers.attention === "medium" && (score += 1);
+      {/* تست تمرکز و انگیزه - نسخه لوکس */}
+{selectedTest === "focus" && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
+    <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[28px] bg-white shadow-2xl border border-yellow-100">
+      <div className="bg-gradient-to-l from-[#4b0614] to-[#6b1022] px-5 py-5 text-center">
+        <p className="text-[11px] tracking-[0.25em] text-yellow-200/75">
+          GENINO HEALTH
+        </p>
+        <h3 className="mt-2 text-xl font-bold text-yellow-100">
+          تمرکز و انگیزه
+        </h3>
+        <p className="mt-2 text-xs leading-6 text-white/70">
+          وضعیت تمرکز، انگیزه و خستگی ذهنی خود را مشخص کنید.
+        </p>
+      </div>
 
-          focusAnswers.motivation === "good" && (score += 2);
-          focusAnswers.motivation === "medium" && (score += 1);
+      <div className="p-5 space-y-4">
+        {[
+          {
+            title: "در زمان کار یا مطالعه چقدر تمرکز دارید؟",
+            keyName: "attention",
+            options: [
+              { label: "بالا", hint: "تمرکز پایدار و کم‌حواس‌پرتی", value: "good" },
+              { label: "متوسط", hint: "گاهی تمرکزم کم می‌شود", value: "medium" },
+              { label: "پایین", hint: "تمرکز برایم سخت است", value: "low" },
+            ],
+          },
+          {
+            title: "انگیزه شما برای انجام کارها چگونه است؟",
+            keyName: "motivation",
+            options: [
+              { label: "زیاد", hint: "باانگیزه و پیگیر هستم", value: "good" },
+              { label: "معمولی", hint: "انگیزه‌ام نوسان دارد", value: "medium" },
+              { label: "کم", hint: "شروع یا ادامه کارها سخت است", value: "low" },
+            ],
+          },
+          {
+            title: "در طول روز چقدر خستگی ذهنی دارید؟",
+            keyName: "tired",
+            options: [
+              { label: "کم", hint: "ذهنم اغلب آماده و سبک است", value: "good" },
+              { label: "متوسط", hint: "گاهی احساس فشار ذهنی دارم", value: "medium" },
+              { label: "زیاد", hint: "اغلب ذهنم خسته و سنگین است", value: "low" },
+            ],
+          },
+          {
+            title: "هنگام کار چقدر درگیر موبایل یا شبکه‌های اجتماعی می‌شوید؟",
+            keyName: "phone",
+            options: [
+              { label: "کم", hint: "حواس‌پرتی دیجیتال کمی دارم", value: "good" },
+              { label: "گاهی", hint: "گاهی تمرکزم را قطع می‌کند", value: "medium" },
+              { label: "زیاد", hint: "زیاد از کار اصلی دور می‌شوم", value: "low" },
+            ],
+          },
+        ].map((question, index) => (
+          <div
+            key={question.keyName}
+            className="rounded-3xl border border-yellow-100 bg-[#fbf7ef] p-4"
+          >
+            <p className="mb-3 text-sm font-semibold text-stone-800">
+              {index + 1}. {question.title}
+            </p>
 
-          focusAnswers.tired === "good" && (score += 2);
-          focusAnswers.tired === "medium" && (score += 1);
-
-          focusAnswers.phone === "good" && (score += 2);
-          focusAnswers.phone === "medium" && (score += 1);
-
-          let status = "";
-          let tip = "";
-
-          if (score >= 8) {
-            status = "💎 عالی";
-            tip = "تمرکز و انگیزه‌ات در سطح بسیار بالاست. این تعادل ذهنی رو حفظ کن!";
-          } else if (score >= 5) {
-            status = "⚖️ متوسط";
-            tip = "خوبه، ولی برای تمرکز بیشتر زمان کار و استراحت رو متعادل کن.";
-          } else {
-            status = "🌀 پایین";
-            tip = "ذهن خسته‌ست. استراحت، ورزش و هدف‌گذاری جدید کمکت می‌کنه.";
-          }
-
-          const payload = {
-  date: new Date().toISOString(),
-  type: "تست تمرکز و انگیزه 🧠",
-  score: `${score}/10`,
-  status,
-  tip,
-  answers: focusAnswers,
-};
-
-const res = await createMenHealthReport(payload);
-
-if (res?.ok && res.report) {
-  setResults((prev) => [res.report, ...prev]);
-} else {
-  alert(res?.message || "خطا در ذخیره نتیجه تست.");
-  return;
-}
-          setSelectedTest(null);
-          setFocusAnswers({
-            attention: "",
-            motivation: "",
-            tired: "",
-            phone: "",
-          });
-        }}
-        onCancel={() => {
-          setSelectedTest(null);
-          setFocusAnswers({
-            attention: "",
-            motivation: "",
-            tired: "",
-            phone: "",
-          });
-        }}
-      >
-        <div className="space-y-4 text-sm">
-          {/* 🎯 تمرکز */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۱. در طول کار یا مطالعه چقدر تمرکز داری؟</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, attention: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.attention === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                بالا و پایدار 🎯
-              </button>
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, attention: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.attention === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                گاهی حواسم پرت می‌شه 🙂
-              </button>
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, attention: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.attention === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                تمرکز سخته 😵
-              </button>
+              {question.options.map((option) => {
+                const isSelected =
+                  focusAnswers[question.keyName] === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      setFocusAnswers({
+                        ...focusAnswers,
+                        [question.keyName]: option.value,
+                      })
+                    }
+                    className={`rounded-2xl border px-3 py-3 text-right transition ${
+                      isSelected
+                        ? "border-yellow-400 bg-white shadow-md"
+                        : "border-stone-100 bg-white/70 hover:bg-white"
+                    }`}
+                  >
+                    <span
+                      className={`block text-sm font-semibold ${
+                        isSelected ? "text-yellow-700" : "text-stone-700"
+                      }`}
+                    >
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-5 text-stone-400">
+                      {option.hint}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
+        ))}
 
-          {/* 💪 انگیزه */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۲. احساس انگیزه برای انجام کارهات چقدره؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, motivation: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.motivation === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                زیاد 💪
-              </button>
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, motivation: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.motivation === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                معمولی 😐
-              </button>
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, motivation: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.motivation === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                کم 😔
-              </button>
+        <div className="rounded-3xl border border-yellow-100 bg-white p-4">
+          <p className="mb-3 text-sm font-semibold text-stone-800">
+            راهنمای سریع نتیجه
+          </p>
+
+          <div className="space-y-2 text-xs sm:text-sm">
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۸ تا ۱۰</span>
+              <span className="font-medium text-stone-700">تمرکز پایدار</span>
             </div>
-          </div>
 
-          {/* 🧘‍♂️ خستگی ذهنی */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۳. در طول روز چقدر احساس خستگی ذهنی داری؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, tired: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.tired === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                خیلی کم 🧘‍♂️
-              </button>
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, tired: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.tired === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                متوسط ⚖️
-              </button>
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, tired: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.tired === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                زیاد 😩
-              </button>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۵ تا ۷</span>
+              <span className="font-medium text-stone-700">قابل بهبود</span>
             </div>
-          </div>
 
-          {/* 📱 حواس‌پرتی دیجیتال */}
-          <div>
-            <p className="font-semibold text-gray-800 mb-2">۴. هنگام کار از موبایل یا شبکه اجتماعی استفاده می‌کنی؟</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, phone: "good" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.phone === "good"
-                    ? "bg-yellow-200 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                نه 📵
-              </button>
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, phone: "medium" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.phone === "medium"
-                    ? "bg-yellow-100 border-yellow-400"
-                    : "border-yellow-200 hover:bg-yellow-50"
-                }`}
-              >
-                گاهی 📱
-              </button>
-              <button
-                onClick={() => setFocusAnswers({ ...focusAnswers, phone: "low" })}
-                className={`w-full px-3 py-2 rounded-xl border text-center ${
-                  focusAnswers.phone === "low"
-                    ? "bg-gray-100 border-yellow-200"
-                    : "border-yellow-100 hover:bg-yellow-50"
-                }`}
-              >
-                زیاد 😅
-              </button>
-            </div>
-          </div>
-
-          {/* 📊 جدول تفسیر */}
-          <div className="mt-6">
-            <h4 className="text-yellow-700 font-semibold text-sm mb-2">
-              جدول تفسیر سطح تمرکز و انگیزه
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs sm:text-sm text-gray-700 border border-yellow-200 rounded-xl overflow-hidden">
-                <thead className="bg-yellow-50 text-yellow-800">
-                  <tr>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">امتیاز کل</th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">وضعیت</th>
-                    <th className="py-2 px-3 text-right border-b border-yellow-100">توصیه</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۸ تا ۱۰</td>
-                    <td className="py-1.5 px-3 text-green-600 font-medium">💎 عالی</td>
-                    <td className="py-1.5 px-3">تمرکز بالا و انگیزه پایدار، عالی!</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۵ تا ۷</td>
-                    <td className="py-1.5 px-3 text-yellow-600 font-medium">⚖️ متوسط</td>
-                    <td className="py-1.5 px-3">روتین روزانه‌ات رو منظم‌تر کن.</td>
-                  </tr>
-                  <tr className="hover:bg-yellow-50">
-                    <td className="py-1.5 px-3">۰ تا ۴</td>
-                    <td className="py-1.5 px-3 text-red-600 font-medium">🌀 پایین</td>
-                    <td className="py-1.5 px-3">نیاز به استراحت و هدف‌گذاری دوباره داری.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex justify-between rounded-2xl bg-[#fbf7ef] px-4 py-2.5 border border-stone-100">
+              <span className="text-stone-400">۰ تا ۴</span>
+              <span className="font-medium text-stone-700">نیازمند بازیابی ذهنی</span>
             </div>
           </div>
         </div>
-      </GoldenModal>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTest(null);
+              setFocusAnswers({
+                attention: "",
+                motivation: "",
+                tired: "",
+                phone: "",
+              });
+            }}
+            className="flex-1 rounded-2xl border border-stone-200 py-3 text-sm text-stone-600 hover:bg-stone-50"
+          >
+            انصراف
+          </button>
+
+          <button
+            type="button"
+            onClick={async () => {
+              let score = 0;
+              focusAnswers.attention === "good" && (score += 2);
+              focusAnswers.attention === "medium" && (score += 1);
+
+              focusAnswers.motivation === "good" && (score += 2);
+              focusAnswers.motivation === "medium" && (score += 1);
+
+              focusAnswers.tired === "good" && (score += 2);
+              focusAnswers.tired === "medium" && (score += 1);
+
+              focusAnswers.phone === "good" && (score += 2);
+              focusAnswers.phone === "medium" && (score += 1);
+
+              let status = "";
+              let tip = "";
+
+              if (score >= 8) {
+                status = "تمرکز پایدار";
+                tip = "تمرکز، انگیزه و مدیریت حواس‌پرتی شما در وضعیت مطلوبی قرار دارد.";
+              } else if (score >= 5) {
+                status = "قابل بهبود";
+                tip = "با نظم بیشتر در زمان کار، استراحت کوتاه و کاهش حواس‌پرتی دیجیتال می‌توانید تمرکز بهتری بسازید.";
+              } else {
+                status = "نیازمند بازیابی ذهنی";
+                tip = "خستگی ذهنی، افت انگیزه یا حواس‌پرتی زیاد می‌تواند نشانه نیاز به استراحت، نظم و بازنگری در برنامه روزانه باشد.";
+              }
+
+              const payload = {
+                date: new Date().toISOString(),
+                type: "تست تمرکز و انگیزه",
+                score: `${score}/10`,
+                status,
+                tip,
+                answers: focusAnswers,
+              };
+
+              const res = await createMenHealthReport(payload);
+
+              if (res?.ok && res.report) {
+                setResults((prev) => [res.report, ...prev]);
+              } else {
+                alert(res?.message || "خطا در ذخیره نتیجه تست.");
+                return;
+              }
+
+              setSelectedTest(null);
+              setFocusAnswers({
+                attention: "",
+                motivation: "",
+                tired: "",
+                phone: "",
+              });
+            }}
+            className="flex-1 rounded-2xl bg-gradient-to-l from-yellow-500 to-yellow-600 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg"
+          >
+            محاسبه
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
 
      {/* 📊 باکس نتایج تست‌ها */}
 <motion.div
@@ -1920,6 +1724,8 @@ if (res?.ok && res.report) {
           <li>National Institutes of Health (NIH) – Focus & Motivation Studies 2020–2024</li>
         </ul>
       </motion.div>
+
+
       {/* 🧠 جعبه آگاهی ژنینو */}
       <motion.div
         className="relative z-[6] -mt-2 mb-2 w-full max-w-2xl"

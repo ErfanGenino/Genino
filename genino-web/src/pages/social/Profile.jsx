@@ -93,6 +93,7 @@ export default function Profile() {
   const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
   const avatarCropImgRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isPreparingAvatar, setIsPreparingAvatar] = useState(false);
 
   const cropBoxRef = useRef(null);
   const dragStateRef = useRef({
@@ -393,62 +394,37 @@ function setDefaultAddress(index) {
 
   if (!originalFile) return;
 
-  if (originalFile.size > 15 * 1024 * 1024) {
-    alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
-    return;
-  }
+  try {
+    setUploading(true);
+    setIsPreparingAvatar(true);
 
-  let fileForPreview = originalFile;
-
-  const fileName = originalFile.name?.toLowerCase() || "";
-  const isHeic =
-    originalFile.type === "image/heic" ||
-    originalFile.type === "image/heif" ||
-    fileName.endsWith(".heic") ||
-    fileName.endsWith(".heif");
-
-    if (isHeic) {
-  alert(
-    "عکس‌های HEIC فعلاً در بعضی گوشی‌ها پشتیبانی کامل ندارند. لطفاً در تنظیمات دوربین، فرمت عکس را روی JPG قرار بده."
-  );
-  return;
-}
-
-  const browserCanPreviewOriginal = await canBrowserPreview(originalFile);
-
-  if (isHeic || !browserCanPreviewOriginal) {
-    try {
-      fileForPreview = await prepareImage(originalFile, {
-        quality: 0.9,
-        outputFileName: "avatar.jpg",
-      });
-    } catch (err) {
-      console.error("AVATAR PREPARE FALLBACK ERROR:", err);
-      alert(
-        err?.message ||
-          "این عکس قابل پردازش نیست. لطفاً عکس دیگری انتخاب کن."
-      );
-      return;
+    if (avatarCropPreview) {
+      URL.revokeObjectURL(avatarCropPreview);
     }
+
+    const preparedFile = await prepareImage(originalFile, {
+      quality: 0.9,
+      maxWidthOrHeight: 1800,
+      outputFileName: "avatar.jpg",
+    });
+
+    const previewUrl = URL.createObjectURL(preparedFile);
+
+    setAvatarCropFile(preparedFile);
+    setAvatarCropPreview(previewUrl);
+    setAvatarZoom(1);
+    setAvatarPosition({ x: 50, y: 50 });
+  } catch (err) {
+    console.error("AVATAR PREPARE ERROR:", err);
+
+    alert(
+      err?.message ||
+        "آماده‌سازی عکس انجام نشد. لطفاً عکس دیگری انتخاب کن."
+    );
+  } finally {
+    setUploading(false);
+    setIsPreparingAvatar(false);
   }
-
-  const browserCanPreviewFinal = await canBrowserPreview(fileForPreview);
-
-  if (!browserCanPreviewFinal) {
-    alert("این عکس در مرورگر قابل نمایش نیست. لطفاً یک عکس دیگر انتخاب کن.");
-    return;
-  }
-
-  if (avatarCropPreview) {
-    URL.revokeObjectURL(avatarCropPreview);
-  }
-
-  const previewUrl = URL.createObjectURL(fileForPreview);
-
-  setAvatarCropFile(fileForPreview);
-  setAvatarCropPreview(previewUrl);
-  setAvatarZoom(1);
-  setAvatarPosition({ x: 50, y: 50 });
 }
 
 async function confirmCroppedAvatar() {
@@ -785,7 +761,13 @@ if (loading) {
   disabled={uploading}
 />
 </label>
-{uploading && (
+{isPreparingAvatar && (
+  <p className="mt-2 text-[11px] text-gray-600">
+    ⏳ در حال آماده‌سازی عکس...
+  </p>
+)}
+
+{uploading && !isPreparingAvatar && (
   <p className="mt-2 text-[11px] text-gray-600">
     لطفاً چند لحظه صبر کن… تصویر در حال آپلود است.
   </p>

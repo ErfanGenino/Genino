@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function PromoSlider({
   slides = [],
@@ -13,6 +14,16 @@ export default function PromoSlider({
   const timeoutRef = useRef(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+
+  const navigate = useNavigate();
+
+const handleSlideClick = () => {
+  const currentSlide = slides[index];
+
+  if (currentSlide?.link) {
+    navigate(currentSlide.link);
+  }
+};
 
   useEffect(() => {
     if (!slides.length) return;
@@ -60,13 +71,14 @@ export default function PromoSlider({
 
   return (
     <div
-      className={`relative w-full ${height} overflow-visible rounded-3xl select-none pb-14 sm:pb-0 ${className}`}
+      className={`relative w-full overflow-hidden rounded-3xl select-none ${className}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       style={{
-        background: "transparent", // ☑️ کاملاً شفاف
-        boxShadow: "none", // ☑️ حذف سایه باکس
-      }}
+  aspectRatio: "3 / 2",
+  background: "transparent",
+  boxShadow: "none",
+}}
     >
       <AnimatePresence initial={false} mode="wait" custom={direction}>
         <motion.div
@@ -77,65 +89,46 @@ export default function PromoSlider({
           animate="center"
           exit="exit"
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className={`absolute inset-0 flex flex-col items-center justify-center text-center ${
-            variant === "golden" ? "text-white" : "text-yellow-700"
-          }`}
+          onClick={handleSlideClick}
+className={`absolute inset-0 flex cursor-pointer flex-col items-center justify-center text-center ${
+  variant === "golden" ? "text-white" : "text-yellow-700"
+}`}
           style={{
             backgroundImage: slides[index].image
               ? `url(${slides[index].image})`
               : "none",
-            backgroundSize: "contain",
+            backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
         >
-          {/* 🔹 حذف افکت‌های پس‌زمینه — فقط متن باقی می‌ماند */}
-          <div className="relative z-10 px-6">
-            <motion.h2
-              key={`title-${index}-${slides[index]?.image || slides[index]?.text || "slide"}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]"
-            >
-              {slides[index].text}
-            </motion.h2>
-            <motion.p
-              key={`sub-${index}-${slides[index]?.image || slides[index]?.sub || "slide"}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.1 }}
-              className="text-base sm:text-lg md:text-xl font-light text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.6)]"
-            >
-              {slides[index].sub}
-            </motion.p>
-          </div>
+          {/* لایه لطیف برند ژنینو روی تصویر */}
+<div className="absolute inset-0 bg-gradient-to-l from-black/10 via-transparent to-yellow-900/10" />
         </motion.div>
       </AnimatePresence>
 
       {/* دکمه‌های چپ و راست */}
 <div
   className="
-    absolute z-20 flex gap-3
-    left-1/2 -translate-x-1/2
-    -bottom-12
-
-    sm:left-0 sm:right-0 sm:bottom-auto
-    sm:top-1/2 sm:-translate-y-1/2
-    sm:translate-x-0
-    sm:justify-between
-    sm:px-3
+    absolute inset-y-0 left-0 right-0
+    z-20 flex items-center justify-between
+    px-2 sm:px-3
+    pointer-events-none
   "
 >
   <button
-    onClick={prevSlide}
+  onClick={(e) => {
+    e.stopPropagation();
+    prevSlide();
+  }}
     className="
-      w-7 h-7 sm:w-10 sm:h-10
+      pointer-events-auto
+      w-5 h-5 sm:w-6 sm:h-6
       rounded-full
       bg-black/20
       backdrop-blur-sm
       text-white
-      text-xl sm:text-3xl
+      text-sm sm:text-lg
       font-bold
       flex items-center justify-center
       hover:bg-black/40
@@ -147,14 +140,18 @@ export default function PromoSlider({
   </button>
 
   <button
-    onClick={nextSlide}
+  onClick={(e) => {
+    e.stopPropagation();
+    nextSlide();
+  }}
     className="
-      w-7 h-7 sm:w-10 sm:h-10
+      pointer-events-auto
+      w-5 h-5 sm:w-6 sm:h-6
       rounded-full
       bg-black/20
       backdrop-blur-sm
       text-white
-      text-xl sm:text-3xl
+      text-sm sm:text-lg
       font-bold
       flex items-center justify-center
       hover:bg-black/40

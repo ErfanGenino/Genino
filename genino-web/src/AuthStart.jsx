@@ -51,6 +51,8 @@ export default function AuthStart() {
   const [invitePhone, setInvitePhone] = useState("");
   const [inviteUsername, setInviteUsername] = useState("");
   const [isSendingLifeInvite, setIsSendingLifeInvite] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [canInstallPwa, setCanInstallPwa] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -381,6 +383,38 @@ const handleSendInvite = async () => {
   }
 };
 
+useEffect(() => {
+  const handleBeforeInstallPrompt = (e) => {
+    e.preventDefault();
+    setDeferredPrompt(e);
+    setCanInstallPwa(true);
+  };
+
+  window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+  return () => {
+    window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  };
+}, []);
+
+const handleInstallPwa = async () => {
+  if (!deferredPrompt) {
+    alert("اگر گزینه نصب نمایش داده نشد، از منوی مرورگر گزینه Add to Home Screen یا نصب برنامه را انتخاب کنید.");
+    return;
+  }
+
+  deferredPrompt.prompt();
+
+  const choiceResult = await deferredPrompt.userChoice;
+
+  if (choiceResult.outcome === "accepted") {
+    setDeferredPrompt(null);
+    setCanInstallPwa(false);
+  }
+};
+
+
+
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-3 sm:pt-6 lg:pt-8 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
@@ -514,7 +548,7 @@ transition-all
 </motion.div>
 
 <motion.div
-  className="relative w-full max-w-4xl mt-2 mb-4 sm:mt-4 sm:mb-8 rounded-3xl overflow-hidden z-20"
+  className="relative w-full max-w-3xl mt-2 mb-4 sm:mt-4 sm:mb-8 rounded-3xl overflow-hidden z-20"
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -524,17 +558,17 @@ transition-all
     interval={6}
 
     /* 🌟 ارتفاع بزرگ‌تر */
-    height="h-56 sm:h-80 md:h-[30rem]"
+    height="h-52 sm:h-60 md:h-64 lg:h-72"
 
     className="rounded-3xl overflow-hidden shadow-[0_10px_25px_rgba(212,175,55,0.25)]"
     slides={[
-  { id: 1, text: "", sub: "", image: "/images/slides/authstart/1.jpg" },
-  { id: 2, text: "", sub: "", image: "/images/slides/authstart/2.jpg" },
-  { id: 3, text: "", sub: "", image: "/images/slides/authstart/3.jpg" },
-  { id: 4, text: "", sub: "", image: "/images/slides/authstart/4.jpg" },
-  { id: 5, text: "", sub: "", image: "/images/slides/authstart/5.jpg" },
-  { id: 6, text: "", sub: "", image: "/images/slides/authstart/6.jpg" },
-  { id: 7, text: "", sub: "", image: "/images/slides/authstart/7.jpg" },
+  { id: 1, image: "/images/slides/authstart/1.jpg", link: "/shop" },
+  { id: 2, image: "/images/slides/authstart/2.jpg", link: "/shop" },
+  { id: 3, image: "/images/slides/authstart/3.jpg", link: "/shop" },
+  { id: 4, image: "/images/slides/authstart/4.jpg", link: "/shop" },
+  { id: 5, image: "/images/slides/authstart/5.jpg", link: "/shop" },
+  { id: 6, image: "/images/slides/authstart/6.jpg", link: "/shop" },
+  { id: 7, image: "/images/slides/authstart/7.jpg", link: "/shop" },
 ]}
   />
 </motion.div>
@@ -586,27 +620,27 @@ transition-all
           <motion.div
   whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
   transition={{ type: "spring", stiffness: 200, damping: 15 }}
-  className="flex flex-col justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[360px] cursor-pointer hover:shadow-lg"
+  className="flex flex-row sm:flex-col items-stretch sm:items-center justify-start sm:justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[180px] sm:h-[300px] md:h-[280px] lg:h-[290px] cursor-pointer hover:shadow-lg p-0 sm:p-3 gap-0 sm:gap-4"
 >
   {/* عکس کارت */}
-  <div className="h-56 overflow-hidden flex-shrink-0">
-    <img
-      src={item.image || logo}
-      alt={item.title}
-      className="w-full h-full object-contain sm:object-cover bg-[#fff8e6] hover:scale-105 transition-transform duration-500"
-    />
-  </div>
+  <div className="w-1/2 h-full sm:w-[70%] sm:h-auto sm:aspect-square md:w-[65%] lg:w-[85%] overflow-hidden flex-shrink-0 rounded-none sm:rounded-2xl bg-[#fff8e6] flex items-center justify-center">
+  <img
+    src={item.image || logo}
+    alt={item.title}
+    className="w-full h-full object-cover sm:object-contain hover:scale-105 transition-transform duration-500"
+  />
+</div>
 
   {/* متن کارت */}
-  <div className="p-4 text-center flex-grow flex flex-col items-center justify-center">
-    <h3 className="text-base font-extrabold text-yellow-700 mb-2 leading-snug">
-      {item.title}
-    </h3>
+  <div className="w-1/2 h-full sm:w-full flex flex-col justify-center sm:justify-center px-4 text-center">
+  <h3 className="text-[15px] font-extrabold text-yellow-700 leading-6 sm:text-sm md:text-base">
+    {item.title}
+  </h3>
 
-    <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-      {item.desc}
-    </p>
-  </div>
+  <p className="mt-2 text-[12px] leading-5 text-gray-600 sm:hidden">
+    {item.desc}
+  </p>
+</div>
 </motion.div>
         </Link>
       ))}
@@ -633,7 +667,7 @@ transition-all
     <motion.div
       whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
       transition={{ type: "spring", stiffness: 200, damping: 15 }}
-      className="relative flex flex-col justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[360px] cursor-pointer hover:shadow-lg"
+      className="relative flex flex-row sm:flex-col items-stretch sm:items-center justify-start sm:justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[180px] sm:h-[300px] md:h-[280px] lg:h-[290px] cursor-pointer hover:shadow-lg p-0 sm:p-3 gap-0 sm:gap-4"
     >
       {item.title === "شبکه اجتماعی ژنینو" && socialUnreadCount > 0 && (
         <div className="absolute top-3 left-3 z-20">
@@ -643,23 +677,23 @@ transition-all
         </div>
       )}
 
-      <div className="h-56 overflow-hidden flex-shrink-0">
-        <img
-          src={item.image || logo}
-          alt={item.title}
-          className="w-full h-full object-contain sm:object-cover bg-[#fff8e6] hover:scale-105 transition-transform duration-500"
-        />
-      </div>
+      <div className="w-1/2 h-full sm:w-[70%] sm:h-auto sm:aspect-square md:w-[65%] lg:w-[85%] overflow-hidden flex-shrink-0 rounded-none sm:rounded-2xl bg-[#fff8e6] flex items-center justify-center">
+  <img
+    src={item.image || logo}
+    alt={item.title}
+    className="w-full h-full object-cover sm:object-contain hover:scale-105 transition-transform duration-500"
+  />
+</div>
 
-      <div className="p-4 text-center flex-grow flex flex-col items-center justify-center">
-        <h3 className="text-base font-extrabold text-yellow-700 mb-2 leading-snug">
-          {item.title}
-        </h3>
+      <div className="w-1/2 h-full sm:w-full flex flex-col justify-center sm:justify-center px-4 text-center">
+  <h3 className="text-[15px] font-extrabold text-yellow-700 leading-6 sm:text-sm md:text-base">
+    {item.title}
+  </h3>
 
-        <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-          {item.desc}
-        </p>
-      </div>
+  <p className="mt-2 text-[12px] leading-5 text-gray-600 sm:hidden">
+    {item.desc}
+  </p>
+</div>
     </motion.div>
   </Link>
 ))}
@@ -686,25 +720,25 @@ transition-all
     <motion.div
       whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
       transition={{ type: "spring", stiffness: 200, damping: 15 }}
-      className="flex flex-col justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[360px] cursor-pointer hover:shadow-lg"
+      className="flex flex-row sm:flex-col items-stretch sm:items-center justify-start sm:justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[180px] sm:h-[300px] md:h-[280px] lg:h-[290px] cursor-pointer hover:shadow-lg p-0 sm:p-3 gap-0 sm:gap-4"
     >
-      <div className="h-56 overflow-hidden flex-shrink-0">
-        <img
-          src={item.image || logo}
-          alt={item.title}
-          className="w-full h-full object-contain sm:object-cover bg-[#fff8e6] hover:scale-105 transition-transform duration-500"
-        />
-      </div>
+      <div className="w-1/2 h-full sm:w-[70%] sm:h-auto sm:aspect-square md:w-[65%] lg:w-[85%] overflow-hidden flex-shrink-0 rounded-none sm:rounded-2xl bg-[#fff8e6] flex items-center justify-center">
+  <img
+    src={item.image || logo}
+    alt={item.title}
+    className="w-full h-full object-cover sm:object-contain hover:scale-105 transition-transform duration-500"
+  />
+</div>
 
-      <div className="p-4 text-center flex-grow flex flex-col items-center justify-center">
-        <h3 className="text-base font-extrabold text-yellow-700 mb-2 leading-snug">
-          {item.title}
-        </h3>
+      <div className="w-1/2 h-full sm:w-full flex flex-col justify-center sm:justify-center px-4 text-center">
+  <h3 className="text-[15px] font-extrabold text-yellow-700 leading-6 sm:text-sm md:text-base">
+    {item.title}
+  </h3>
 
-        <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-          {item.desc}
-        </p>
-      </div>
+  <p className="mt-2 text-[12px] leading-5 text-gray-600 sm:hidden">
+    {item.desc}
+  </p>
+</div>
     </motion.div>
   </Link>
 ))}
@@ -976,10 +1010,20 @@ transition-all
         <div className="text-4xl mb-3">📱</div>
 
         <p className="text-sm sm:text-base text-gray-600 leading-8 font-bold">
-          اپلیکیشن رسمی ژنینو
-          <br />
-          ژانویه ۲۰۲۷ افتتاح می‌شود ✨
-        </p>
+  اپلیکیشن رسمی ژنینو
+  <br />
+  ژانویه ۲۰۲۷ افتتاح می‌شود ✨
+  <br />
+  اما همین حالا می‌توانید وب‌اپلیکیشن ژنینو را روی گوشی نصب کنید.
+</p>
+
+        <button
+  type="button"
+  onClick={handleInstallPwa}
+  className="mt-5 w-full rounded-2xl bg-gradient-to-r from-amber-600 to-yellow-500 py-3 text-white font-bold shadow-md hover:shadow-lg transition"
+>
+  🌐 دریافت وب‌اپلیکیشن ژنینو
+</button>
 
         <button
           type="button"

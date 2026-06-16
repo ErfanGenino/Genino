@@ -1,14 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
 
-    <link rel="icon" href="/icon.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/pwa-192.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#efe7dc" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Genino</title>
+    <title>ژنینو | Genino | دستیار هوشمند والدین و خانواده</title>
+
+<meta
+  name="description"
+  content="ژنینو Genino دستیار هوشمند والدین، کودکان و خانواده است؛ شامل رشد کودک، سلامت، آموزش، فروشگاه تخصصی، شبکه اجتماعی، رویدادها و خدمات خانواده."
+/>
+
+<meta name="keywords" content="ژنینو, Genino, دستیار هوشمند والدین, رشد کودک, خانواده, فروشگاه کودک, خدمات کودک" />
+
+<meta property="og:title" content="ژنینو | Genino | دستیار هوشمند والدین و خانواده" />
+<meta
+  property="og:description"
+  content="ژنینو Genino پلتفرمی هوشمند برای والدین، کودکان و خانواده؛ همراهی برای رشد، سلامت، آموزش و زندگی خانوادگی."
+/>
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://genino.ir/" />
+<meta property="og:image" content="https://genino.ir/icon.png" />
 
     <style>
   html,
@@ -118,7 +135,7 @@
       const splash = document.getElementById("splash-screen");
       if (!splash) return;
 
-      const minimumVisibleTime = 4200;
+      const minimumVisibleTime = 1500;
       const elapsed = Date.now() - splashStartTime;
       const remaining = Math.max(0, minimumVisibleTime - elapsed);
 

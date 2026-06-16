@@ -218,6 +218,7 @@ function formatFaDate(iso) {
 
 export default function MyCycle() {
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("genino_token");
   const [form, setForm] = useState({
     lastPeriod: "",
     cycleLength: 28,
@@ -239,6 +240,46 @@ export default function MyCycle() {
   const [deleteError, setDeleteError] = useState("");
   const [showMaleBlockModal, setShowMaleBlockModal] = useState(false);
   const [isMaleUser, setIsMaleUser] = useState(false);
+
+
+  if (!isLoggedIn) {
+  return (
+    <main
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-b from-[#fffafc] to-[#fff7f4] flex items-center justify-center px-6 py-10"
+    >
+      <section className="w-full max-w-2xl rounded-[2rem] border border-pink-100 bg-white/85 p-8 text-center shadow-[0_20px_60px_rgba(244,114,182,0.14)] backdrop-blur-xl">
+        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-pink-100 to-rose-50 shadow-inner">
+          <Heart className="h-10 w-10 text-pink-500" />
+        </div>
+
+        <h1 className="text-2xl font-black text-pink-700 sm:text-3xl">
+          ورود به حساب کاربری
+        </h1>
+
+        <p className="mx-auto mt-4 max-w-md text-sm leading-8 text-gray-600">
+          برای استفاده از تقویم چرخه، ذخیره سوابق سلامت بانوان و مشاهده گزارش‌های شخصی، ابتدا وارد حساب کاربری خود شوید.
+        </p>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <Link
+            to="/login"
+            className="rounded-2xl bg-gradient-to-l from-pink-500 to-rose-400 px-6 py-3 font-extrabold text-white shadow-[0_10px_25px_rgba(244,114,182,0.25)]"
+          >
+            ورود به حساب کاربری
+          </Link>
+
+          <Link
+            to="/"
+            className="rounded-2xl border border-pink-200 bg-white px-6 py-3 font-extrabold text-pink-700"
+          >
+            بازگشت
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+}
 
   // 👩‍🦰 نام کاربر برای خوش‌آمدگویی (از localStorage)
 useEffect(() => {

@@ -7,9 +7,29 @@ function withTimeout(promise, ms, message) {
   ]);
 }
 
+function loadImageFromBlob(blob) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("IMAGE_LOAD_ERROR"));
+    };
+
+    img.src = url;
+  });
+}
+
 export async function prepareImage(file, options = {}) {
   const {
-    quality = 0.9,
+    quality = 0.88,
+    maxWidthOrHeight = 1800,
     outputFileName = "image.jpg",
   } = options;
 
@@ -21,40 +41,64 @@ export async function prepareImage(file, options = {}) {
     fileName.endsWith(".heic") ||
     fileName.endsWith(".heif");
 
-  // اگر HEIC نیست، مستقیم برگردان
-  if (!isHeic) {
-    return file;
-  }
+  let sourceBlob = file;
 
   try {
-    const { default: heic2any } = await withTimeout(
-      import("heic2any"),
-      8000,
-      "LOAD_HEIC_CONVERTER_TIMEOUT"
-    );
+    if (isHeic) {
+      const { default: heic2any } = await withTimeout(
+        import("heic2any"),
+        8000,
+        "LOAD_HEIC_CONVERTER_TIMEOUT"
+      );
 
-    const convertedBlob = await withTimeout(
-      heic2any({
-        blob: file,
-        toType: "image/jpeg",
-        quality,
-      }),
-      30000,
-      "HEIC_CONVERT_TIMEOUT"
-    );
+      const convertedBlob = await withTimeout(
+        heic2any({
+          blob: file,
+          toType: "image/jpeg",
+          quality,
+        }),
+        30000,
+        "HEIC_CONVERT_TIMEOUT"
+      );
 
-    const blob = Array.isArray(convertedBlob)
-      ? convertedBlob[0]
-      : convertedBlob;
+      sourceBlob = Array.isArray(convertedBlob)
+        ? convertedBlob[0]
+        : convertedBlob;
+    }
 
-    return new File([blob], outputFileName, {
+    const img = await loadImageFromBlob(sourceBlob);
+
+    const maxSide = Math.max(img.width, img.height);
+    const scale = Math.min(1, maxWidthOrHeight / maxSide);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const outputBlob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) reject(new Error("IMAGE_COMPRESS_ERROR"));
+          else resolve(blob);
+        },
+        "image/jpeg",
+        quality
+      );
+    });
+
+    return new File([outputBlob], outputFileName, {
       type: "image/jpeg",
     });
   } catch (err) {
-    console.error("HEIC CONVERT ERROR:", err);
+    console.error("PREPARE IMAGE ERROR:", err);
 
     throw new Error(
-      "تبدیل عکس HEIC انجام نشد. لطفاً در تنظیمات دوربین، فرمت عکس را روی JPG قرار بده یا عکس دیگری انتخاب کن."
+      "آماده‌سازی عکس انجام نشد. لطفاً یک عکس JPG، PNG یا WEBP انتخاب کن یا اگر عکس HEIC است، فرمت دوربین را روی JPG بگذار."
     );
   }
 }

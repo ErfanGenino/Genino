@@ -18,6 +18,7 @@ import { authFetch } from "../services/api";
 export default function MyChild() {
 
 const navigate = useNavigate();
+const isLoggedIn = !!localStorage.getItem("genino_token");
 
 
 const [isLoading, setIsLoading] = useState(true);
@@ -240,6 +241,57 @@ const canAddChild = Boolean(currentUserAsParent);
 const isMineTab = activeTab === "mine";
 const isFollowedTab = activeTab === "followed";
 const canManageChild = isMineTab && canAddChild;
+
+if (!isLoggedIn) {
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-[#fffaf0] px-4 py-8">
+      <section className="mx-auto max-w-2xl rounded-[2rem] border border-yellow-100 bg-white/80 p-8 text-center shadow-[0_20px_60px_rgba(255,190,0,0.12)] backdrop-blur-xl">
+        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-yellow-100 to-amber-50 shadow-inner">
+          <Baby className="h-10 w-10 text-yellow-600" />
+        </div>
+
+        <h1 className="text-2xl font-black text-yellow-900 sm:text-3xl">
+          ورود به حساب کاربری
+        </h1>
+
+        <p className="mx-auto mt-4 max-w-md text-sm leading-8 text-gray-600">
+          برای مشاهده پروفایل فرزندان، پرونده پزشکی، آلبوم خاطرات و سایر امکانات
+          بخش کودک من، ابتدا وارد حساب کاربری خود شوید.
+        </p>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <Link
+            to="/login"
+            className="
+              rounded-2xl
+              bg-gradient-to-l from-yellow-400 to-amber-300
+              px-6 py-3
+              font-extrabold
+              text-yellow-950
+              shadow-[0_10px_25px_rgba(245,158,11,0.25)]
+            "
+          >
+            ورود به حساب کاربری
+          </Link>
+
+          <Link
+            to="/"
+            className="
+              rounded-2xl
+              border border-yellow-200
+              bg-white
+              px-6 py-3
+              font-extrabold
+              text-yellow-800
+            "
+          >
+            بازگشت
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+}
 
 
 if (isLoading) {

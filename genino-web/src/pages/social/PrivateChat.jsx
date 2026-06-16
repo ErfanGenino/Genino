@@ -26,6 +26,7 @@ import {
   presignChatVoiceUpload,
   putFileToPresignedUrl,
 } from "../../services/api";
+import { prepareImage } from "../../utils/image/prepareImage";
 
 
 
@@ -282,78 +283,40 @@ useEffect(() => {
   e.target.value = "";
 
   if (!file) return;
-  setIsPreparingImagePreview(true);
 
-  if (filePreview?.url?.startsWith("blob:")) {
-    URL.revokeObjectURL(filePreview.url);
-  }
+  try {
+    setIsPreparingImagePreview(true);
 
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (filePreview?.url?.startsWith("blob:")) {
+      URL.revokeObjectURL(filePreview.url);
+    }
 
-  if (!allowedTypes.includes(file.type)) {
-  setIsPreparingImagePreview(false);
+    const preparedFile = await prepareImage(file, {
+      quality: 0.88,
+      maxWidthOrHeight: 1800,
+      outputFileName: "chat-image.jpg",
+    });
 
-  alert("فعلاً فقط فرمت‌های JPG، PNG و WEBP پشتیبانی می‌شوند. لطفاً اگر عکس HEIC است، آن را از تنظیمات گوشی به JPG تغییر بده.");
-  return;
-}
+    const previewUrl = URL.createObjectURL(preparedFile);
 
-if (file.size > 15 * 1024 * 1024) {
-  setIsPreparingImagePreview(false);
+    setFilePreview({
+      url: previewUrl,
+      type: "image",
+      blob: preparedFile,
+      contentType: preparedFile.type || "image/jpeg",
+      ext: "jpg",
+      fileSize: preparedFile.size,
+    });
+  } catch (err) {
+    console.error(err);
 
-  alert("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");
-  return;
-}
-
-  const img = new Image();
-  const previewUrl = URL.createObjectURL(file);
-
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-
-    const MAX_WIDTH = 1280;
-    const scale = Math.min(1, MAX_WIDTH / img.width);
-
-    canvas.width = Math.round(img.width * scale);
-    canvas.height = Math.round(img.height * scale);
-
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    URL.revokeObjectURL(previewUrl);
-
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          setIsPreparingImagePreview(false);
-          alert("آماده‌سازی تصویر انجام نشد.");
-          return;
-        }
-
-        const url = URL.createObjectURL(blob);
-        setIsPreparingImagePreview(false);
-        setFilePreview({
-          url,
-          type: "image",
-          blob,
-          contentType: "image/jpeg",
-          ext: "jpg",
-          fileSize: blob.size,
-        });
-      },
-      "image/jpeg",
-      0.82
+    alert(
+      err?.message ||
+        "آماده‌سازی عکس انجام نشد. لطفاً عکس دیگری انتخاب کن."
     );
-  };
-
-  img.onerror = () => {
+  } finally {
     setIsPreparingImagePreview(false);
-    URL.revokeObjectURL(previewUrl);
-    alert("این عکس در مرورگر قابل نمایش نیست. لطفاً JPG، PNG یا WEBP انتخاب کن.");
-  };
-
-  img.src = previewUrl;
+  }
 };
 
 const sendVoiceMessage = async ({ blob, duration }) => {
@@ -1528,7 +1491,7 @@ const getRecordedDurationSeconds = () => {
     <ImageIcon size={20} className="text-yellow-600" />
     <input
   type="file"
-  accept="image/jpeg,image/png,image/webp"
+  accept="image/*,.heic,.heif"
   className="hidden"
   onChange={handleFileChange}
 />

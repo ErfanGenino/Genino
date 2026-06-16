@@ -105,14 +105,14 @@ export default function SingleWorld() {
               </p>
             </div>
 
-            <div className="relative h-72 md:h-[390px]">
-              <img
-                src={heroImg}
-                alt="جهان مجردها"
-                className="h-full w-full object-cover object-center"
-              />
-              <div className="absolute inset-0 bg-gradient-to-l from-[#6b442e] via-[#6b442e]/20 to-transparent md:bg-gradient-to-r" />
-            </div>
+            <div className="relative h-auto bg-[#6b442e] md:h-[390px]">
+  <img
+    src={heroImg}
+    alt="جهان مجردها"
+    className="h-auto w-full object-contain md:h-full md:object-cover md:object-center"
+  />
+  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#6b442e]/80 via-transparent to-transparent md:bg-gradient-to-r md:from-[#6b442e] md:via-[#6b442e]/20 md:to-transparent" />
+</div>
           </div>
         </motion.div>
 

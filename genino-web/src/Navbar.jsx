@@ -1,5 +1,5 @@
 //src/Navbar.jsx
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { LogIn, UserPlus, Menu, X, LogOut, Play, Pause } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import logo from "./assets/logo-genino.png";
@@ -11,7 +11,10 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showDashboardSelector, setShowDashboardSelector] = useState(false);
+  const [dashboardMenuOpen, setDashboardMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAmbassador, setIsAmbassador] = useState(false);
   const audioRef = useRef(null);
   const playlistRef = useRef([]);
   const currentTrackIndexRef = useRef(0);
@@ -27,6 +30,9 @@ function shuffleArray(array) {
 }
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const desktopDashboardMenuRef = useRef(null);
+  const mobileDashboardMenuRef = useRef(null);
 
   // 📌 مدیریت حالت اسکرول
   useEffect(() => {
@@ -43,6 +49,13 @@ function shuffleArray(array) {
 
   const token = localStorage.getItem("genino_token");
   if (!token) return;
+  try {
+  const ambassadorRes = await authFetch("/ambassadors/me");
+
+  setIsAmbassador(Boolean(ambassadorRes?.ok && ambassadorRes?.ambassador));
+} catch (err) {
+  setIsAmbassador(false);
+}
 
   const fresh = await getUserProfile();
   if (fresh?.ok && fresh.user) {
@@ -95,6 +108,7 @@ function shuffleArray(array) {
   const links = [
   { to: "/", label: "خانه" },
   { to: "/mychild", label: "کودک من" },
+  { to: "/genino-children", label: "کودکان ژنینویی" },
   { to: "/shop", label: "فروشگاه تخصصی" },
   { to: "/my-cycle", label: "سلامت بانوان" },
   { to: "/my-men-health", label: "سلامت آقایان" },
@@ -209,6 +223,59 @@ async function toggleMusic() {
   }
 }
 
+const isAmbassadorDashboard =
+  window.location.pathname.startsWith("/dashboard-ambassador");
+
+const isUserDashboard =
+  window.location.pathname.startsWith("/dashboard-") &&
+  !isAmbassadorDashboard;
+
+useEffect(() => {
+  setDashboardMenuOpen(false);
+  setMenuOpen(false);
+}, [location.pathname]);
+
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    const clickedInsideDesktop =
+      desktopDashboardMenuRef.current &&
+      desktopDashboardMenuRef.current.contains(event.target);
+
+    const clickedInsideMobile =
+      mobileDashboardMenuRef.current &&
+      mobileDashboardMenuRef.current.contains(event.target);
+
+    if (!clickedInsideDesktop && !clickedInsideMobile) {
+      setDashboardMenuOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  document.addEventListener("touchstart", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+    document.removeEventListener("touchstart", handleClickOutside);
+  };
+}, []);
+
+useEffect(() => {
+  const closeDashboardMenu = () => {
+    setDashboardMenuOpen(false);
+  };
+
+  window.addEventListener("scroll", closeDashboardMenu);
+  window.addEventListener("resize", closeDashboardMenu);
+
+  return () => {
+    window.removeEventListener("scroll", closeDashboardMenu);
+    window.removeEventListener("resize", closeDashboardMenu);
+  };
+}, []);
+
+
+
+
 
   return (
     <>
@@ -252,75 +319,119 @@ async function toggleMusic() {
 
           {/* 🔸 سمت چپ */}
           <div className="hidden md:flex items-center gap-2 mr-auto">
-            <button
-  onClick={toggleMusic}
-  className="flex items-center justify-center
-           w-7 h-7 rounded-md
-           text-yellow-600/70
-           hover:text-yellow-700
-           transition-all duration-300"
-  aria-label={isMusicPlaying ? "توقف موسیقی آرامش‌بخش" : "پخش موسیقی آرامش‌بخش"}
-  title={isMusicPlaying ? "توقف موسیقی" : "پخش موسیقی"}
->
-  {isMusicPlaying ? <Pause size={11} strokeWidth={2.3} /> : <Play size={11} strokeWidth={2.3} />}
-</button>
+            
             {user ? (
-              <>
-                {/* نمایش نام کاربر */}
-                <Link
-                  to={`/dashboard-${user.lifeStage}`}
-                  className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 
-                             px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-yellow-200 transition"
-                >
-                {/* آواتار کوچک */}
-                <img
-                   src={user?.avatarUrl || "/avatars/101.png"}
-                   alt="avatar"
-                   className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
-                />
+  <>
+    <div className="relative" ref={desktopDashboardMenuRef}>
+      <button
+        type="button"
+        onClick={() => {
+          if (isAmbassador) {
+  setMenuOpen(false);
+  setDashboardMenuOpen((prev) => !prev);
+  return;
+}
 
-            {/* نام کاربر (کمی کوچیکتر) */}
-            <span className="text-[13px] text-gray-700 font-medium leading-none">
-               {user.fullName}
-               </span>
-            </Link>
+          navigate(`/dashboard-${user.lifeStage}`);
+        }}
+        className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-yellow-200 transition"
+      >
+        <img
+          src={user?.avatarUrl || "/avatars/101.png"}
+          alt="avatar"
+          className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
+        />
 
+        <span className="text-[13px] text-gray-700 font-medium leading-none">
+          {user.fullName}
+        </span>
 
-                {/* 🔔 اعلان‌ها */}
-                <button
-                  onClick={() => navigate("/notifications")}
-                  className="relative flex items-center justify-center
-                             w-7 h-7 rounded-md
-                             text-yellow-600/70
-                             hover:text-yellow-700
-                             transition-all duration-300"
-                  aria-label="اعلان‌ها"
-                >
-                <Bell size={14} strokeWidth={2.3} />
-                {unreadCount > 0 && (
-                <span
-                className="absolute -top-2 -left-2 min-w-[20px] h-5 px-1
-                           rounded-full bg-red-500 text-white text-[11px]
-                           flex items-center justify-center font-bold shadow"
-                >
-                {unreadCount > 99 ? "99+" : unreadCount}
-                 </span>
-                 )}
-                </button>
+        {isAmbassador && (
+          <span className="text-[10px] font-black text-[#b98522] px-1">
+            ▼
+          </span>
+        )}
+      </button>
 
+      {isAmbassador && dashboardMenuOpen && (
+  <motion.div
+    initial={{ opacity: 0, y: -4 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -4 }}
+    transition={{ duration: 0.15 }}
+    className="
+  absolute top-12 right-0 z-[120]
+  w-56 rounded-2xl
+  border border-yellow-200
+  bg-white shadow-lg p-2
+"
+onClick={(e) => e.stopPropagation()}
+  >
+    <button
+      type="button"
+      onClick={() => {
+        setDashboardMenuOpen(false);
+        setMenuOpen(false);
+        navigate(`/dashboard-${user.lifeStage}`);
+      }}
+      className={`
+        w-full rounded-xl px-4 py-3
+        text-right text-sm font-medium transition
+        ${
+          isUserDashboard
+            ? "bg-yellow-50 text-yellow-800"
+            : "bg-white hover:bg-yellow-50 text-gray-700"
+        }
+      `}
+    >
+      داشبورد کاربری
+    </button>
 
-                {/* خروج */}
-                <button
-                  onClick={() => setShowLogoutConfirm(true)}
-                  className="flex items-center gap-1
-                             text-red-400/80
-                             hover:text-red-500
-                             transition-all duration-300"
-                >
-                  <LogOut size={13} strokeWidth={2.3} />
-                  <span>خروج</span>
-                </button>
-              </>
+    <button
+      type="button"
+      onClick={() => {
+        setDashboardMenuOpen(false);
+        setMenuOpen(false);
+        navigate("/dashboard-ambassador");
+      }}
+      className={`
+        mt-2 w-full rounded-xl px-4 py-3
+        text-right text-sm font-medium transition
+        ${
+          isAmbassadorDashboard
+            ? "bg-yellow-50 text-yellow-800"
+            : "bg-white hover:bg-yellow-50 text-gray-700"
+        }
+      `}
+    >
+      داشبورد سفیران
+    </button>
+  </motion.div>
+)}
+    </div>
+
+    <button
+      onClick={() => navigate("/notifications")}
+      className="relative flex items-center justify-center w-7 h-7 rounded-md text-yellow-600/70 hover:text-yellow-700 transition-all duration-300"
+      aria-label="اعلان‌ها"
+    >
+      <Bell size={14} strokeWidth={2.3} />
+      {unreadCount > 0 && (
+        <span className="absolute -top-2 -left-2 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] flex items-center justify-center font-bold shadow">
+          {unreadCount > 99 ? "99+" : unreadCount}
+        </span>
+      )}
+    </button>
+
+    <button
+      onClick={() => setShowLogoutConfirm(true)}
+      className="flex items-center gap-1 text-red-400/80 hover:text-red-500 transition-all duration-300"
+    >
+      <LogOut size={13} strokeWidth={2.3} />
+      <span>خروج</span>
+    </button>
+  </>
+              
             ) : (
               <>
                 <Link
@@ -346,76 +457,185 @@ async function toggleMusic() {
                 </Link>
               </>
             )}
-          </div>
-
-          {/* 🔸 دکمه داشبورد در موبایل */}
-{/* 🔸 دکمه داشبورد در موبایل */}
-{user && (
-  <button
-    onClick={() => {
-      setMenuOpen(false);
-      navigate(`/dashboard-${user.lifeStage}`);
-    }}
-    className="md:hidden 
-      flex items-center gap-2 
-      bg-yellow-100 border border-yellow-300 
-      px-3 py-1.5 rounded-xl 
-      hover:bg-yellow-200 transition"
-  >
-    {/* آواتار کوچک */}
-    <img
-      src={user?.avatarUrl || "/avatars/101.png"}
-      alt="avatar"
-      className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
-      onError={(e) => {
-        e.currentTarget.src = "/avatars/101.png";
-      }}
-    />
-
-    {/* نام کاربر (کوچیکتر) */}
-    <span className="text-[13px] font-medium text-yellow-800 leading-none">
-      {user.fullName}
-    </span>
-  </button>
-)}
-
-<button
+            <button
   onClick={toggleMusic}
-  className="md:hidden flex items-center justify-center
+  className="flex items-center justify-center
            w-7 h-7 rounded-md
            text-yellow-600/70
            hover:text-yellow-700
            transition-all duration-300"
   aria-label={isMusicPlaying ? "توقف موسیقی آرامش‌بخش" : "پخش موسیقی آرامش‌بخش"}
+  title={isMusicPlaying ? "توقف موسیقی" : "پخش موسیقی"}
 >
   {isMusicPlaying ? <Pause size={11} strokeWidth={2.3} /> : <Play size={11} strokeWidth={2.3} />}
 </button>
 
-          {/* 🔸 منوی موبایل */}
-          <button
+<button
   className="relative flex items-center justify-center
-           w-7 h-7 rounded-md
-           text-yellow-600/70
-           hover:text-yellow-700
-           transition-all duration-300"
-  onClick={() => setMenuOpen(!menuOpen)}
+    w-7 h-7 rounded-md
+    text-yellow-600/70
+    hover:text-yellow-700
+    transition-all duration-300"
+  onClick={() => {
+  setDashboardMenuOpen(false);
+  setMenuOpen((prev) => !prev);
+}}
 >
   {menuOpen ? (
-  <X size={15} strokeWidth={2.3} />
-) : (
-  <Menu size={15} strokeWidth={2.3} />
-)}
-
-  {!menuOpen && unreadCount > 0 && (
-    <span
-      className="absolute -top-1 -left-1 min-w-[18px] h-[18px]
-                 px-1 rounded-full bg-red-500 text-white
-                 text-[10px] font-bold flex items-center justify-center shadow"
-    >
-      {unreadCount > 99 ? "99+" : unreadCount}
-    </span>
+    <X size={15} strokeWidth={2.3} />
+  ) : (
+    <Menu size={15} strokeWidth={2.3} />
   )}
 </button>
+          </div>
+
+{/* 🔸 دکمه داشبورد در موبایل */}
+<div className="md:hidden flex items-center gap-2 mr-auto">
+  {user ? (
+    <div className="relative" ref={mobileDashboardMenuRef}>
+      <button
+        onClick={() => {
+          if (isAmbassador) {
+  setMenuOpen(false);
+  setDashboardMenuOpen((prev) => !prev);
+  return;
+}
+
+          setMenuOpen(false);
+          navigate(`/dashboard-${user.lifeStage}`);
+        }}
+        className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 
+          px-3 py-1.5 rounded-xl hover:bg-yellow-200 transition"
+      >
+        <img
+          src={user?.avatarUrl || "/avatars/101.png"}
+          alt="avatar"
+          className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
+          onError={(e) => {
+            e.currentTarget.src = "/avatars/101.png";
+          }}
+        />
+
+        <span className="text-[13px] font-medium text-yellow-800 leading-none">
+          {user.fullName}
+        </span>
+
+        {isAmbassador && (
+          <span className="text-[10px] font-black text-[#b98522] px-1">
+            ▼
+          </span>
+        )}
+      </button>
+
+      {isAmbassador && dashboardMenuOpen && (
+  <motion.div
+    initial={{ opacity: 0, y: -4 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -4 }}
+    transition={{ duration: 0.15 }}
+    className="
+  absolute top-12 right-0 z-[120]
+  w-56 rounded-2xl
+  border border-yellow-200
+  bg-white shadow-lg p-2
+"
+onClick={(e) => e.stopPropagation()}
+  >
+    <button
+      type="button"
+      onClick={() => {
+        setDashboardMenuOpen(false);
+        setMenuOpen(false);
+        navigate(`/dashboard-${user.lifeStage}`);
+      }}
+      className={`
+        w-full rounded-xl px-4 py-3
+        text-right text-sm font-medium transition
+        ${
+          isUserDashboard
+            ? "bg-yellow-50 text-yellow-800"
+            : "bg-white hover:bg-yellow-50 text-gray-700"
+        }
+      `}
+    >
+      داشبورد کاربری
+    </button>
+
+    <button
+      type="button"
+      onClick={() => {
+        setDashboardMenuOpen(false);
+        setMenuOpen(false);
+        navigate("/dashboard-ambassador");
+      }}
+      className={`
+        mt-2 w-full rounded-xl px-4 py-3
+        text-right text-sm font-medium transition
+        ${
+          isAmbassadorDashboard
+            ? "bg-yellow-50 text-yellow-800"
+            : "bg-white hover:bg-yellow-50 text-gray-700"
+        }
+      `}
+    >
+      داشبورد سفیران
+    </button>
+  </motion.div>
+)}
+    </div>
+  ) : (
+    <>
+      <Link
+        to="/login"
+        className="flex items-center gap-1 rounded-xl border border-yellow-300 px-2.5 py-1.5 text-xs font-bold text-yellow-700 hover:bg-yellow-50 transition"
+      >
+        <LogIn size={14} />
+        ورود
+      </Link>
+
+      <Link
+        to="/signup"
+        className="flex items-center gap-1 rounded-xl bg-yellow-500 px-2.5 py-1.5 text-xs font-bold text-white shadow hover:bg-yellow-600 transition"
+      >
+        <UserPlus size={14} />
+        ثبت‌نام
+      </Link>
+    </>
+  )}
+
+  <button
+    onClick={toggleMusic}
+    className="flex items-center justify-center w-7 h-7 rounded-md text-yellow-600/70 hover:text-yellow-700 transition-all duration-300"
+    aria-label={isMusicPlaying ? "توقف موسیقی آرامش‌بخش" : "پخش موسیقی آرامش‌بخش"}
+  >
+    {isMusicPlaying ? (
+      <Pause size={11} strokeWidth={2.3} />
+    ) : (
+      <Play size={11} strokeWidth={2.3} />
+    )}
+  </button>
+
+  <button
+    className="relative flex items-center justify-center w-7 h-7 rounded-md text-yellow-600/70 hover:text-yellow-700 transition-all duration-300"
+    onClick={() => {
+  setDashboardMenuOpen(false);
+  setMenuOpen((prev) => !prev);
+}}
+  >
+    {menuOpen ? (
+      <X size={15} strokeWidth={2.3} />
+    ) : (
+      <Menu size={15} strokeWidth={2.3} />
+    )}
+
+    {!menuOpen && unreadCount > 0 && (
+      <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow">
+        {unreadCount > 99 ? "99+" : unreadCount}
+      </span>
+    )}
+  </button>
+</div>
+      
         </nav>
 
         
@@ -512,6 +732,44 @@ async function toggleMusic() {
               <span>خروج</span>
               <LogOut size={14} strokeWidth={2.3} />
             </button>
+
+            <Link
+  to="/genino-ambassadors"
+  onClick={() => setMenuOpen(false)}
+  className="
+    relative overflow-hidden
+    flex items-center justify-between
+    rounded-2xl
+    px-4 py-3
+    text-sm font-extrabold
+    text-white
+    bg-gradient-to-l
+    from-[#d4af37]
+    via-[#e6c15a]
+    to-[#b98522]
+    shadow-[0_0_20px_rgba(212,175,55,0.45)]
+    hover:scale-[1.02]
+    transition-all duration-300
+  "
+>
+  <motion.div
+    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+    animate={{ x: ["-150%", "150%"] }}
+    transition={{
+      repeat: Infinity,
+      duration: 2.5,
+      ease: "linear",
+    }}
+  />
+
+  <span className="relative z-10">
+    💎 کسب درآمد با سفیران ژنینو
+  </span>
+
+  <span className="relative z-10 text-lg">
+    ✨
+  </span>
+</Link>
             
           </>
         ) : (

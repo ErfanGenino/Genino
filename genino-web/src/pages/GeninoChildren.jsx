@@ -164,6 +164,7 @@ export default function GeninoChildren() {
   const [childrenPageIndex, setChildrenPageIndex] = useState(0);
   const [achievementItems, setAchievementItems] = useState([]);
   const [topIssuers, setTopIssuers] = useState([]);
+  const isLoggedIn = !!localStorage.getItem("genino_token");
 
 
   const getChildAgeText = (child) => {
@@ -484,6 +485,39 @@ const handleUnfollowChild = async () => {
     alert(res?.message || "خطا در آنفالو کودک");
   }
 };
+
+if (!isLoggedIn) {
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,223,120,0.35),transparent_35%),linear-gradient(180deg,#fffdf8,#fff7df,#fffdf8)] px-4 py-8 text-right">
+      <section className={`${sectionCard} mt-0 max-w-2xl text-center`}>
+        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-yellow-100 to-yellow-50 shadow-inner">
+          <Sparkles className="h-10 w-10 text-yellow-600" />
+        </div>
+
+        <h1 className={`${goldenTitle} text-2xl font-black sm:text-3xl`}>
+          ورود به حساب کاربری
+        </h1>
+
+        <p className="mx-auto mt-4 max-w-md text-sm leading-8 text-gray-600">
+          برای مشاهده کودکان ژنینویی، دنبال‌کردن کودکان و دسترسی به دستاوردها، ابتدا وارد حساب کاربری خود شوید.
+        </p>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <Link to="/login" className={primaryButton}>
+            ورود به حساب کاربری
+          </Link>
+
+          <Link to="/" className={softButton}>
+            بازگشت
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+
+
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,223,120,0.35),transparent_35%),linear-gradient(180deg,#fffdf8,#fff7df,#fffdf8)] px-4 py-8 text-right">
