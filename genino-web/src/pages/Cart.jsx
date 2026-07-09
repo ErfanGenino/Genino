@@ -149,7 +149,9 @@ export default function Cart() {
                   <div className="text-right">
                     <h2 className="font-semibold text-lg text-gray-800">{item.name}</h2>
                     <p className="text-sm text-gray-500">{item.category}</p>
-                    <p className="text-yellow-600 font-bold mt-1">{item.price}</p>
+                    <p className="text-yellow-600 font-bold mt-1">
+                      {Number(item.price).toLocaleString("fa-IR")} ریال
+                    </p>
                   </div>
                 </div>
 
@@ -188,7 +190,7 @@ export default function Cart() {
           <p className="text-lg text-gray-800 font-semibold">
             جمع کل:{" "}
             <span className="text-yellow-600 font-bold">
-              {totalPrice.toLocaleString()} تومان
+              {Number(totalPrice).toLocaleString("fa-IR")} ریال
             </span>
           </p>
           <button className="mt-4 sm:mt-0 bg-yellow-500 text-white px-6 py-3 rounded-xl hover:bg-yellow-600 transition shadow-md">

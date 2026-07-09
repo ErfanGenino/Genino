@@ -42,10 +42,20 @@ export function CartProvider({ children }) {
   }
 
   // 💰 محاسبه جمع کل
-  const totalPrice = cartItems.reduce((sum, item) => {
-    const numericPrice = parseInt(item.price.replace(/[^\d]/g, "")) || 0;
-    return sum + numericPrice * (item.quantity || 1);
-  }, 0);
+  const getNumericPrice = (price) => {
+  if (typeof price === "number") return price;
+
+  if (typeof price === "string") {
+    return parseInt(price.replace(/[^\d]/g, ""), 10) || 0;
+  }
+
+  return 0;
+};
+
+const totalPrice = cartItems.reduce((sum, item) => {
+  const numericPrice = getNumericPrice(item.price);
+  return sum + numericPrice * (item.quantity || 1);
+}, 0);
 
   return (
     <CartContext.Provider

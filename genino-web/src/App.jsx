@@ -19,6 +19,11 @@ import ProductDetail from "./pages/ProductDetail.jsx";
 import MusicPositiveEnergyHub from "./pages/single-world/MusicPositiveEnergyHub";
 import MusicCategoryPage from "./pages/single-world/MusicCategoryPage";
 import ScrollToTop from "./components/Core/ScrollToTop.jsx";
+import AdminProtectedRoute from "./admin/components/AdminProtectedRoute";
+import VendorShopPage from "./pages/vendor/VendorShopPage.jsx";
+import VendorProductCreate from "./pages/vendor/VendorProductCreate";
+import VendorNotifications from "./pages/vendor/VendorNotifications";
+
 
 
 const Shop = lazy(() => import("./pages/Shop.jsx"));
@@ -268,6 +273,16 @@ const GeninoAmbassadorIncome = lazy(() => import("./pages/ambassador/GeninoAmbas
 const GeninoAmbassadorRules = lazy(() => import("./pages/ambassador/GeninoAmbassadorRules.jsx"));
 const GeninoAmbassadorRegister = lazy(() => import("./pages/ambassador/GeninoAmbassadorRegister.jsx"));
 const DashboardAmbassador = lazy(() => import("./pages/dashboard/DashboardAmbassador"));
+const VendorDashboard = lazy(() => import("./pages/dashboard/VendorDashboard"));
+const AdminLogin = lazy(() => import("./admin/pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./admin/pages/AdminDashboard"));
+const AdminFinance = lazy(() => import("./admin/pages/AdminFinance"));
+const AdminVendorPackages = lazy(() => import("./admin/pages/AdminVendorPackages"));
+const AdminDiscountCodes = lazy(() => import("./admin/pages/AdminDiscountCodes"));
+const AdminFinanceSettings = lazy(() => import("./admin/pages/AdminFinanceSettings"));
+const AdminAmbassadors = lazy(() => import("./admin/pages/AdminAmbassadors"));
+const AdminVendors = lazy(() => import("./admin/pages/AdminVendors"));
+
 
 // ✅ اگر هنوز داشبوردها را نساختی، موقتاً می‌تونی از سایدبارها استفاده کنی:
 // import SidebarUser from "./components/SidebarUser.jsx";
@@ -279,7 +294,7 @@ console.log("APP ROUTES LOADED");
   return (
     <>
       {/* نوار ناوبری بالای همه‌ی صفحات */}
-      <Navbar />
+      {!window.location.pathname.startsWith("/admin") && <Navbar />}
 
       <ScrollToTop />
 
@@ -547,6 +562,20 @@ console.log("APP ROUTES LOADED");
         <Route path="/genino-ambassadors/rules" element={<GeninoAmbassadorRules />}/>
         <Route path="/genino-ambassadors/register" element={<ProtectedRoute><GeninoAmbassadorRegister /></ProtectedRoute>}/>
         <Route path="/dashboard-ambassador" element={<ProtectedRoute><DashboardAmbassador /></ProtectedRoute>}/>
+        <Route path="/dashboard-vendor" element={<VendorDashboard />} />
+        <Route path="/vendor/notifications" element={<VendorNotifications />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>}/>
+        <Route path="/admin/finance" element={<AdminProtectedRoute><AdminFinance /></AdminProtectedRoute>}/>
+        <Route path="/admin/finance/packages" element={<AdminProtectedRoute><AdminVendorPackages /></AdminProtectedRoute>}/>
+        <Route path="/admin/finance/discount-codes" element={<AdminProtectedRoute><AdminDiscountCodes /></AdminProtectedRoute>}/>
+        <Route path="/admin/finance/settings" element={<AdminProtectedRoute><AdminFinanceSettings /></AdminProtectedRoute>}/>
+        <Route path="/admin/ambassadors" element={<AdminProtectedRoute><AdminAmbassadors /></AdminProtectedRoute>}/>
+        <Route path="/admin/vendors" element={<AdminProtectedRoute><AdminVendors /></AdminProtectedRoute>}/>
+        <Route path="/vendor/shop/:vendorId" element={<VendorShopPage />} />
+        <Route path="/vendor/product/create" element={<VendorProductCreate />}/>
+        <Route path="/vendor/product/edit/:productId" element={<VendorProductCreate />} />
+
 
 
 

@@ -32,26 +32,7 @@ const academy = [
   "سوالات متداول مشتریان",
 ];
 
-const customers = [
-  {
-    name: "فروشگاه نی‌نی طلایی",
-    type: "فروشگاه کودک",
-    sales: "۱۲,۴۰۰,۰۰۰ تومان",
-    subscription: "۲۶ روز باقی‌مانده",
-  },
-  {
-    name: "مدرسه مهر آینده",
-    type: "مدرسه",
-    sales: "۸,۹۰۰,۰۰۰ تومان",
-    subscription: "۹ روز باقی‌مانده",
-  },
-  {
-    name: "خانه بازی رنگین‌کمان",
-    type: "خانه بازی",
-    sales: "۵,۳۰۰,۰۰۰ تومان",
-    subscription: "۴۵ روز باقی‌مانده",
-  },
-];
+
 
 
 const leaderboard = [
@@ -64,6 +45,9 @@ export default function DashboardAmbassador() {
   const [ambassador, setAmbassador] = useState(null);
 const [loading, setLoading] = useState(true);
 const [error, setError] = useState("");
+const [openCustomerId, setOpenCustomerId] = useState(null);
+
+const customers = ambassador?.vendorRelations || [];
 
 const dashboardStats = [
   {
@@ -87,7 +71,7 @@ const dashboardStats = [
   {
   icon: Wallet,
   title: "پورسانت",
-  value: `${(ambassador?.payableCommission || 0).toLocaleString("fa-IR")} تومان`,
+  value: `${(ambassador?.payableCommission || 0).toLocaleString("fa-IR")} ریال`,
   desc: "قابل دریافت",
   featured: true,
 },
@@ -97,15 +81,15 @@ const dashboardStats = [
 const financeStats = [
   {
     title: "کل پورسانت",
-    value: `${(ambassador?.totalCommission || 0).toLocaleString("fa-IR")} تومان`,
+    value: `${(ambassador?.totalCommission || 0).toLocaleString("fa-IR")} ریال`,
   },
   {
     title: "تسویه‌شده",
-    value: `${(ambassador?.paidCommission || 0).toLocaleString("fa-IR")} تومان`,
+    value: `${(ambassador?.paidCommission || 0).toLocaleString("fa-IR")} ریال`,
   },
   {
     title: "قابل دریافت",
-    value: `${(ambassador?.payableCommission || 0).toLocaleString("fa-IR")} تومان`,
+    value: `${(ambassador?.payableCommission || 0).toLocaleString("fa-IR")} ریال`,
   },
 ];
 
@@ -311,52 +295,131 @@ if (error) {
         </div>
 
         <DashboardCard title="🏪 مشتریان جذب‌شده و وضعیت اشتراک">
-          <div className="grid gap-3 md:hidden">
-            {customers.map((customer) => (
-              <div
-                key={customer.name}
-                className="rounded-2xl border border-yellow-100 bg-yellow-50/60 p-4"
-              >
-                <div className="font-black text-[#7a5217]">{customer.name}</div>
-                <div className="mt-1 text-xs text-stone-500">
-                  {customer.type}
+          <div className="grid gap-4">
+  {customers.length === 0 ? (
+    <div className="rounded-2xl border border-yellow-100 bg-yellow-50/60 p-5 text-center text-sm font-bold text-stone-500">
+      هنوز مشتری جذب‌شده‌ای ثبت نشده است.
+    </div>
+  ) : (
+    customers.map((customer) => {
+      const totalCustomerCommission =
+        (customer.payableCommissionAmount || 0) +
+        (customer.salesCommissionAmount || 0);
+
+      const isOpen = openCustomerId === customer.id;
+
+      return (
+        <div
+          key={customer.id}
+          className="rounded-3xl border border-yellow-100 bg-yellow-50/60 p-4"
+        >
+          <button
+            type="button"
+            onClick={() =>
+              setOpenCustomerId(isOpen ? null : customer.id)
+            }
+            className="flex w-full items-center justify-between gap-3"
+          >
+            <div className="text-right">
+              <div className="text-lg font-black text-[#7a5217]">
+                {customer.vendor?.businessName || "نام کسب‌وکار ثبت نشده"}
+              </div>
+
+              <div className="mt-1 text-xs text-stone-500">
+                {customer.vendor?.mainActivityField || "زمینه فعالیت ثبت نشده"}
+              </div>
+            </div>
+
+            <div className="text-2xl font-black text-[#b98522]">
+              {isOpen ? "−" : "+"}
+            </div>
+          </button>
+
+          {isOpen && (
+            <div className="mt-4 grid gap-2 text-xs">
+              <Info
+                label="استان / شهر"
+                value={`${customer.vendor?.province || "-"} / ${
+                  customer.vendor?.city || "-"
+                }`}
+              />
+
+              <Info label="موبایل" value={customer.vendor?.phone || "-"} />
+
+              <Info label="ایمیل" value={customer.vendor?.email || "-"} />
+
+              <Info
+                label="بسته همکاری"
+                value={customer.packageTitle || "ثبت نشده"}
+              />
+
+              <Info
+                label="مبلغ بسته"
+                value={`${(customer.packagePrice || 0).toLocaleString(
+                  "fa-IR"
+                )} ریال`}
+              />
+
+              <Info
+                label="تخفیف سفیر"
+                value={`${(
+                  customer.ambassadorDiscountAmount || 0
+                ).toLocaleString("fa-IR")} ریال`}
+              />
+
+              <Info
+                label="مبنای پورسانت"
+                value={`${(
+                  customer.subscriptionCommissionBaseAmount || 0
+                ).toLocaleString("fa-IR")} ریال`}
+              />
+
+              <Info
+                label={`پورسانت اشتراک (${
+                  customer.subscriptionCommissionPercent || 0
+                }٪)`}
+                value={`${(
+                  customer.subscriptionCommissionAmount || 0
+                ).toLocaleString("fa-IR")} ریال`}
+              />
+
+              <Info
+                label="فروش کل"
+                value={`${(customer.totalSalesAmount || 0).toLocaleString(
+                  "fa-IR"
+                )} ریال`}
+              />
+
+              <Info
+                label={`پورسانت فروش (${
+                  customer.salesCommissionPercent || 0
+                }٪)`}
+                value={`${(
+                  customer.salesCommissionAmount || 0
+                ).toLocaleString("fa-IR")} ریال`}
+              />
+
+              <div className="rounded-2xl border border-[#d4af37]/40 bg-white px-3 py-3">
+                <div className="text-stone-500">
+                  جمع پورسانت قابل دریافت
                 </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                  <Info label="فروش" value={customer.sales} />
-                  <Info label="اشتراک" value={customer.subscription} />
+                <div className="mt-2 text-lg font-black text-[#7a5217]">
+                  {totalCustomerCommission.toLocaleString("fa-IR")} ریال
                 </div>
               </div>
-            ))}
-          </div>
 
-          <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[700px] border-separate border-spacing-y-3 text-right text-sm">
-              <thead>
-                <tr className="text-stone-500">
-                  <th className="px-4">نام مشتری</th>
-                  <th className="px-4">نوع</th>
-                  <th className="px-4">فروش</th>
-                  <th className="px-4">مانده اشتراک</th>
-                </tr>
-              </thead>
+              <Info label="وضعیت اتصال" value={customer.status || "ثبت نشده"} />
+            </div>
+          )}
+        </div>
+      );
+    })
+  )}
+</div>
 
-              <tbody>
-                {customers.map((customer) => (
-                  <tr key={customer.name} className="bg-yellow-50/60">
-                    <td className="rounded-r-2xl px-4 py-4 font-extrabold text-[#7a5217]">
-                      {customer.name}
-                    </td>
-                    <td className="px-4 py-4">{customer.type}</td>
-                    <td className="px-4 py-4">{customer.sales}</td>
-                    <td className="rounded-l-2xl px-4 py-4 font-bold text-[#b98522]">
-                      {customer.subscription}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+
+          
         </DashboardCard>
 
         <div className="grid gap-4 lg:grid-cols-2">

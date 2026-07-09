@@ -8,6 +8,7 @@ export default function PromoSlider({
   interval = 5,
   height = "h-64",
   className = "",
+  onIndexChange,
 }) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -30,6 +31,12 @@ const handleSlideClick = () => {
     scheduleNext();
     return () => clearTimeout(timeoutRef.current);
   }, [index, slides.length]);
+
+  useEffect(() => {
+    if (typeof onIndexChange === "function") {
+    onIndexChange(index);
+    }
+  }, [index, onIndexChange]);
 
   const scheduleNext = () => {
     clearTimeout(timeoutRef.current);

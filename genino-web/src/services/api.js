@@ -191,6 +191,38 @@ if ((res.status === 401 || res.status === 403) && token) {
 
 }
 
+async function adminFetch(url, options = {}) {
+  const token = localStorage.getItem("adminToken");
+
+  const headers = {
+    ...(options.headers || {}),
+  };
+
+  const hasBody =
+    options.body !== undefined &&
+    options.body !== null;
+
+  if (hasBody && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${BASE_URL}${url}`, {
+    ...options,
+    headers,
+  });
+
+  const data = await res.json();
+
+  return {
+    status: res.status,
+    ...data,
+  };
+}
+
 // --- ثبت نام ---
 export async function registerUser(formData) {
   const res = await authFetch("/auth/register", {
@@ -791,5 +823,176 @@ export async function registerAmbassador(payload) {
 export async function getMyAmbassador() {
   return authFetch("/ambassadors/me", {
     method: "GET",
+  });
+}
+
+// --- Vendors ---
+
+export async function registerVendor(payload) {
+  return authFetch("/vendors/register", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function loginVendor(payload) {
+  const res = await authFetch("/vendors/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  if (res?.ok && res?.token) {
+    saveTokens(res.token, res.refreshToken);
+  }
+
+  return res;
+}
+
+export async function getVendorById(id) {
+  return authFetch(`/vendors/${id}`, {
+    method: "GET",
+  });
+}
+
+export async function getVendorProfile() {
+  return authFetch("/vendors/me");
+}
+
+export async function confirmVendorPackage(payload) {
+  return authFetch(`/vendors/${payload.vendorId}/confirm-package`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateVendorBankingInfo(vendorId, payload) {
+  return authFetch(`/vendors/${vendorId}/banking`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function presignVendorDocumentUpload(payload) {
+  return authFetch("/uploads/presign/vendor-document", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function addVendorDocument(vendorId, payload) {
+  return authFetch(
+    `/vendor-documents/${vendorId}/documents`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function listVendorDocuments(vendorId) {
+  return authFetch(
+    `/vendor-documents/${vendorId}/documents`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function deleteVendorDocument(
+  vendorId,
+  documentId
+) {
+  return authFetch(
+    `/vendor-documents/${vendorId}/documents/${documentId}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
+export async function acceptVendorContract(vendorId) {
+  return authFetch(`/vendors/${vendorId}/accept-contract`, {
+    method: "POST",
+  });
+}
+
+
+// --- Vendor Packages ---
+
+export async function getVendorPackages() {
+  return authFetch("/vendor-packages", {
+    method: "GET",
+  });
+}
+
+export async function validateDiscountCode(code) {
+  return authFetch("/discount-codes/validate", {
+    method: "POST",
+    body: JSON.stringify({
+      code,
+    }),
+  });
+}
+
+export async function validateAmbassadorCode(code, vendorId) {
+  return authFetch("/ambassadors/validate-code", {
+    method: "POST",
+    body: JSON.stringify({
+      code,
+      vendorId,
+    }),
+  });
+}
+
+export async function useDiscountCode(code, vendorId) {
+  return authFetch("/discount-codes/use", {
+    method: "POST",
+    body: JSON.stringify({
+      code,
+      vendorId,
+    }),
+  });
+}
+
+export async function getFinanceSettings() {
+  return authFetch("/admin/finance-settings", {
+    method: "GET",
+  });
+}
+
+export async function getAdminVendors() {
+  return adminFetch("/admin/vendors");
+}
+
+export async function getVendorReviewHistory(vendorId) {
+  return adminFetch(`/admin/vendors/${vendorId}/review-history`, {
+    method: "GET",
+  });
+}
+
+export async function approveAdminVendor(vendorId) {
+  return adminFetch(`/admin/vendors/${vendorId}/approve`, {
+    method: "POST",
+  });
+}
+
+export async function requestCorrectionAdminVendor(
+  vendorId,
+  reason,
+  fields
+) {
+  return adminFetch(`/admin/vendors/${vendorId}/request-correction`, {
+    method: "POST",
+    body: JSON.stringify({
+      reason,
+      fields,
+    }),
+  });
+}
+
+export async function rejectAdminVendor(vendorId, reason) {
+  return adminFetch(`/admin/vendors/${vendorId}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
   });
 }

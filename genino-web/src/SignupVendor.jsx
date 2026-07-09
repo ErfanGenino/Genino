@@ -5,6 +5,7 @@ import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useNavigate } from "react-router-dom";
+import { registerVendor } from "./services/api";
 
 const iranProvinces = {
   "خارج از ایران": ["خارج از ایران"],
@@ -243,7 +244,7 @@ const canContinue =
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const fields = Object.keys(formData);
@@ -264,13 +265,24 @@ const canContinue =
       return;
     }
 
-    setMessage(
-      "ثبت‌نام اولیه با موفقیت انجام شد. در حال ورود به داشبورد ارائه‌دهندگان..."
-    );
 
-    setTimeout(() => {
-      navigate("/dashboard-vendor");
-    }, 1200);
+    setMessage("در حال ثبت اطلاعات فروشنده...");
+
+const res = await registerVendor(formData);
+
+if (!res?.ok) {
+  setMessage(res?.message || "ثبت‌نام فروشنده با خطا مواجه شد.");
+  return;
+}
+
+localStorage.setItem("genino_vendor_id", String(res.vendor.id));
+window.dispatchEvent(new Event("genino_vendor_changed"));
+
+setMessage("ثبت‌نام اولیه با موفقیت انجام شد. در حال ورود به داشبورد ارائه‌دهندگان...");
+
+setTimeout(() => {
+  navigate(`/dashboard-vendor?vendorId=${res.vendor.id}`);
+}, 1200);
   };
 
   const inputClass = (name) =>

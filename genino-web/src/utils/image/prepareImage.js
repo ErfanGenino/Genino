@@ -1,3 +1,5 @@
+//D:\projects\Genino\genino-web\src\utils\image\preparelmage.js
+
 function withTimeout(promise, ms, message) {
   return Promise.race([
     promise,

@@ -7,6 +7,7 @@ import { useCart } from "../context/CartContext.jsx";
 import { useNavigate } from "react-router-dom";
 import PromoSlider from "@components/Social/PromoSlider.jsx";
 import shopHeader from "../assets/shop/shop-header.webp";
+import { shopCategories } from "../data/shopCategories";
 
 export default function Shop() {
   const [flyingItems, setFlyingItems] = useState([]);
@@ -17,6 +18,7 @@ export default function Shop() {
   const [selectedType, setSelectedType] = useState("");
   const { addToCart, cartItems } = useCart();
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
 
   const itemsPerPage = 12;
   const cartRef = useRef(null);
@@ -73,23 +75,40 @@ export default function Shop() {
   };
 }, [selectedType]);
 
-  // 🛍️ محصولات نمونه
-  const products = Array.from({ length: 90 }).map((_, i) => ({
-    id: i + 1,
-    name: `محصول شماره ${i + 1}`,
-    price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
-    image: logo,
-    category: ["آموزشی", "هنر", "اسباب‌بازی"][i % 3],
-  }));
+useEffect(() => {
+  async function loadProducts() {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/vendor-products/public`
+      );
+
+      const data = await res.json();
+
+      if (!data.ok) return;
+
+      setProducts(data.products);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  loadProducts();
+}, []);
+
+  
 
   // 🧩 فیلترها
   const filteredProducts = products.filter((item) => {
-    const matchCategory = category === "همه" || item.category === category;
-    const matchSearch = item.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return matchCategory && matchSearch;
-  });
+  const firstCategory = item.categoryLinks?.[0]?.category || "";
+  const title = item.title || "";
+
+  const matchCategory = category === "همه" || firstCategory === category;
+  const matchSearch = title
+    .toLowerCase()
+    .includes(searchQuery.toLowerCase());
+
+  return matchCategory && matchSearch;
+});
 
   // 📄 صفحه‌بندی
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -141,59 +160,29 @@ export default function Shop() {
   },
 ];
 
-  const goodsCategories = [
-  {
-    title: "سیسمونی تخصصی",
-    image: "/images/shop/categories/sismooni.webp",
-    route: "/shop/sismooni",
-  },
-  {
-    title: "نوزاد، کودک و نوجوان",
-    image: "/images/shop/categories/kids.webp",
-    route: "/shop/kids",
-  },
-  {
-    title: "مد و پوشاک",
-    image: "/images/shop/categories/fashion.webp",
-    route: "/shop/fashion",
-  },
-  {
-    title: "کالای خواب و حمام",
-    image: "/images/shop/categories/bed-bath.webp",
-    route: "/shop/bed-bath",
-  },
-  {
-    title: "ساعت و زیور‌آلات",
-    image: "/images/shop/categories/watch-jewelry.webp",
-    route: "/shop/watch-jewelry",
-  },
-  {
-    title: "کالای ورزشی",
-    image: "/images/shop/categories/sport.webp",
-    route: "/shop/sport",
-  },
-  {
-    title: "سلامت و پزشکی",
-    image: "/images/shop/categories/medical.webp",
-    route: "/shop/medical",
-  },
-  {
-    title: "آرایشی و بهداشتی",
-    image: "/images/shop/categories/beauty.webp",
-    route: "/shop/beauty",
-  },
-  {
-    title: "عطر و ادکلن",
-    image: "/images/shop/categories/perfume.webp",
-    route: "/shop/perfume",
-  },
-  {
-    title: "هنر دست زنان و مردان قدرتمند سرزمین من",
-    image: "/images/shop/categories/handmade.webp",
-    route: "/shop/handmade",
-  },
+  const categoryImageMap = {
+  sismooni: "sismooni",
+  kids: "kids",
+  fashion: "fashion",
+  bedBath: "bed-bath",
+  watchJewelry: "watch-jewelry",
+  sport: "sport",
+  medical: "medical",
+  beauty: "beauty",
+  perfume: "perfume",
+  handmade: "handmade",
+};
+
+const goodsCategories = [
+  ...shopCategories.map((cat) => ({
+    title: cat.title,
+    key: cat.key,
+    image: `/images/shop/categories/${categoryImageMap[cat.key]}.webp`,
+    route: `/shop/${categoryImageMap[cat.key]}`,
+  })),
   {
     title: "نمایش همه کالاها",
+    key: "all-products",
     image: "/images/shop/categories/all-products.webp",
   },
 ];
@@ -581,20 +570,20 @@ setCurrentPage(1);
         className="relative h-full overflow-hidden rounded-3xl border border-white/80 bg-white/85 p-2.5 shadow-[0_14px_38px_rgba(120,90,20,0.08)] backdrop-blur-md transition duration-300 hover:border-yellow-200 hover:shadow-[0_18px_45px_rgba(120,90,20,0.13)]"
       >
         <div className="absolute right-3 top-3 z-10 rounded-full bg-yellow-50 px-2 py-1 text-[10px] font-bold text-yellow-700 shadow-sm">
-          {item.category}
+          {item.categoryLinks?.[0]?.productItem || "محصول"}
         </div>
 
         <div className="flex h-32 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fffaf0] to-[#f7efd9] sm:h-36">
           <img
-            src={item.image}
-            alt={item.name}
+            src={item.images?.[0] || logo}
+            alt={item.title}
             className="h-20 w-20 object-contain transition duration-300 group-hover:scale-105 sm:h-24 sm:w-24"
           />
         </div>
 
         <div className="px-1 pt-3 text-right">
           <h2 className="line-clamp-1 text-xs font-extrabold text-gray-800 sm:text-sm">
-            {item.name}
+            {item.title}
           </h2>
 
           <p className="mt-1 line-clamp-1 text-[10px] text-gray-400 sm:text-xs">
@@ -603,7 +592,7 @@ setCurrentPage(1);
 
           <div className="mt-3 flex items-center justify-between gap-2">
             <p className="text-[11px] font-black text-yellow-700 sm:text-sm">
-              {item.price}
+              {Number(item.price).toLocaleString("fa-IR")} ریال
             </p>
           </div>
 
@@ -611,8 +600,7 @@ setCurrentPage(1);
             whileTap={{ scale: 0.97 }}
             onClick={(e) => {
               e.preventDefault();
-              addToCart(item);
-              handleFlyAnimation(e);
+              navigate(`/product/${item.id}`);
             }}
             className="mt-3 flex h-9 w-full items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#b88724] via-[#d4af37] to-[#f1d477] text-[11px] font-bold text-white shadow-[0_10px_24px_rgba(184,135,36,0.25)] transition hover:from-[#a8791f] hover:via-[#c49d2f] hover:to-[#e5c867] sm:text-xs"
           >

@@ -1,8 +1,9 @@
 // D:\projects\Genino\genino-web\src\login.jsx
 import { useState } from "react";
 import logo from "./assets/logo-genino.png";
-import { loginUser, getUserProfile } from "./services/api";
+import { loginUser, getUserProfile, loginVendor } from "./services/api";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+
 
 export default function Login() {
   const [identifier, setIdentifier] = useState("");
@@ -11,6 +12,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const [loginType, setLoginType] = useState("user");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -22,6 +24,36 @@ export default function Login() {
 
     try {
       setMessage("⏳ در حال ورود...");
+
+      if (loginType === "vendor") {
+  const data = await loginVendor({
+    identifier,
+    password,
+  });
+
+  if (!data.ok) {
+    setMessage(`❌ ${data.message}`);
+    return;
+  }
+
+  localStorage.setItem("genino_token", data.token);
+  window.dispatchEvent(new Event("genino_token_changed"));
+
+  localStorage.setItem(
+  "genino_vendor_id",
+  String(data.vendor.id)
+);
+
+  window.dispatchEvent(new Event("genino_vendor_changed"));
+
+  setMessage("🌿 ورود فروشنده با موفقیت انجام شد");
+
+  setTimeout(() => {
+    navigate(`/dashboard-vendor?vendorId=${data.vendor.id}`);
+  }, 1200);
+
+  return;
+}
 
       const data = await loginUser({ identifier, password });
 
@@ -96,6 +128,31 @@ export default function Login() {
             <p className="mt-2 text-sm font-medium text-stone-500">
               خوش آمدی به دنیای هوشمند کودک و خانواده 🌱
             </p>
+            <div className="mt-5 grid w-full grid-cols-2 rounded-2xl border border-yellow-200 bg-yellow-50/50 p-1">
+  <button
+    type="button"
+    onClick={() => setLoginType("user")}
+    className={`rounded-xl px-3 py-2 text-xs font-black transition ${
+      loginType === "user"
+        ? "bg-white text-[#7a5217] shadow-sm"
+        : "text-stone-500"
+    }`}
+  >
+    ورود کاربر ژنینو
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setLoginType("vendor")}
+    className={`rounded-xl px-3 py-2 text-xs font-black transition ${
+      loginType === "vendor"
+        ? "bg-white text-[#7a5217] shadow-sm"
+        : "text-stone-500"
+    }`}
+  >
+    ورود فروشنده
+  </button>
+</div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -142,7 +199,7 @@ export default function Login() {
               type="submit"
               className="w-full rounded-2xl bg-gradient-to-l from-[#d4af37] to-[#b98522] px-6 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-yellow-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
             >
-              ورود به حساب کاربری
+             {loginType === "vendor" ? "ورود به پنل فروشندگان" : "ورود به حساب کاربری"} 
             </button>
           </form>
 

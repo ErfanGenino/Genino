@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import logo from "./assets/logo-genino.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell } from "lucide-react";
-import { authFetch, getUserProfile, logoutUser } from "./services/api";
+import { authFetch, getUserProfile, logoutUser, getVendorById } from "./services/api";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,6 +14,7 @@ function Navbar() {
   const [showDashboardSelector, setShowDashboardSelector] = useState(false);
   const [dashboardMenuOpen, setDashboardMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [vendor, setVendor] = useState(null);
   const [isAmbassador, setIsAmbassador] = useState(false);
   const audioRef = useRef(null);
   const playlistRef = useRef([]);
@@ -45,6 +46,13 @@ function shuffleArray(array) {
   useEffect(() => {
   const updateUser = async () => {
   const storedUser = localStorage.getItem("genino_user");
+  const vendorId = localStorage.getItem("genino_vendor_id");
+
+if (vendorId && !storedUser) {
+  setUser(null);
+  setIsAmbassador(false);
+  return;
+}
   setUser(storedUser ? JSON.parse(storedUser) : null);
 
   const token = localStorage.getItem("genino_token");
@@ -83,25 +91,76 @@ function shuffleArray(array) {
 }, []);
 
 
+useEffect(() => {
+  const updateVendor = async () => {
+  const vendorId = localStorage.getItem("genino_vendor_id");
+
+  if (!vendorId) {
+    setVendor(null);
+    return;
+  }
+
+  try {
+  const res = await getVendorById(vendorId);
+
+  if (res?.ok) {
+    setVendor(res.vendor);
+  } else {
+    setVendor({ id: vendorId });
+  }
+} catch (err) {
+  setVendor({ id: vendorId });
+}
+};
+
+  updateVendor();
+
+  window.addEventListener("genino_vendor_changed", updateVendor);
+  window.addEventListener("storage", updateVendor);
+  window.addEventListener("focus", updateVendor);
+
+  return () => {
+    window.removeEventListener("genino_vendor_changed", updateVendor);
+    window.removeEventListener("storage", updateVendor);
+    window.removeEventListener("focus", updateVendor);
+  };
+}, []);
+
+
   // ⭐ خروج کاربر
   async function handleLogoutConfirm() {
-  await logoutUser();
+  setUser(null);
+  setVendor(null);
+  setIsAmbassador(false);
+  setShowLogoutConfirm(false);
+  setDashboardMenuOpen(false);
+  setMenuOpen(false);
+  setUnreadCount(0);
 
-  // ✅ اضافه کن
-  window.dispatchEvent(new Event("genino_user_changed"));
-  window.dispatchEvent(new Event("genino_token_changed"));
+  sessionStorage.clear();
 
+  localStorage.removeItem("genino_token");
+  localStorage.removeItem("genino_vendor_id");
+  localStorage.removeItem("genino_refresh_token");
+  localStorage.removeItem("genino_user");
   localStorage.removeItem("doctorRecords");
   localStorage.removeItem("children");
   localStorage.removeItem("lifeStage");
   localStorage.removeItem("userData");
   localStorage.removeItem("genino_notifications");
-  window.dispatchEvent(new Event("genino_notifications_changed"));
-  sessionStorage.clear();
 
-  setUser(null);
-  setShowLogoutConfirm(false);
+  window.dispatchEvent(new Event("genino_user_changed"));
+  window.dispatchEvent(new Event("genino_token_changed"));
+  window.dispatchEvent(new Event("genino_vendor_changed"));
+  window.dispatchEvent(new Event("genino_notifications_changed"));
+
   navigate("/login", { replace: true });
+
+  try {
+    await logoutUser();
+  } catch (err) {
+    console.error("LOGOUT API ERROR:", err);
+  }
 }
 
 
@@ -124,6 +183,7 @@ function shuffleArray(array) {
 
   const inDashboard = window.location.pathname.startsWith("/dashboard");
   const [unreadCount, setUnreadCount] = useState(0);
+  const [vendorUnreadCount, setVendorUnreadCount] = useState(0);
 
 useEffect(() => {
   let intervalId;
@@ -131,11 +191,12 @@ useEffect(() => {
   const loadUnread = async () => {
     try {
       const token = localStorage.getItem("genino_token");
+const vendorId = localStorage.getItem("genino_vendor_id");
 
-      if (!token) {
-        setUnreadCount(0);
-        return;
-      }
+if (!token || vendorId) {
+  setUnreadCount(0);
+  return;
+}
 
       const res = await authFetch("/notifications");
 
@@ -176,6 +237,51 @@ useEffect(() => {
     window.removeEventListener("genino_token_changed", loadUnread);
     window.removeEventListener("genino_user_changed", loadUnread);
     window.removeEventListener("storage", loadUnread);
+  };
+}, []);
+
+useEffect(() => {
+  let intervalId;
+
+  const loadVendorUnread = async () => {
+    try {
+      const token = localStorage.getItem("genino_token");
+      const vendorId = localStorage.getItem("genino_vendor_id");
+
+      if (!token || !vendorId) {
+        setVendorUnreadCount(0);
+        return;
+      }
+
+      const res = await authFetch("/vendor-notifications");
+
+      if (res?.ok && Array.isArray(res.notifications)) {
+        const unread = res.notifications.filter((n) => !n.read).length;
+        setVendorUnreadCount(unread);
+      } else {
+        setVendorUnreadCount(0);
+      }
+    } catch (err) {
+      console.error("خطا در دریافت تعداد اعلان‌های فروشنده:", err);
+      setVendorUnreadCount(0);
+    }
+  };
+
+  loadVendorUnread();
+
+  intervalId = setInterval(loadVendorUnread, 15000);
+
+  window.addEventListener("focus", loadVendorUnread);
+  window.addEventListener("genino_vendor_notifications_changed", loadVendorUnread);
+  window.addEventListener("genino_vendor_changed", loadVendorUnread);
+  window.addEventListener("storage", loadVendorUnread);
+
+  return () => {
+    clearInterval(intervalId);
+    window.removeEventListener("focus", loadVendorUnread);
+    window.removeEventListener("genino_vendor_notifications_changed", loadVendorUnread);
+    window.removeEventListener("genino_vendor_changed", loadVendorUnread);
+    window.removeEventListener("storage", loadVendorUnread);
   };
 }, []);
 
@@ -320,20 +426,25 @@ useEffect(() => {
           {/* 🔸 سمت چپ */}
           <div className="hidden md:flex items-center gap-2 mr-auto">
             
-            {user ? (
+            {user || vendor ? (
   <>
     <div className="relative" ref={desktopDashboardMenuRef}>
       <button
         type="button"
         onClick={() => {
-          if (isAmbassador) {
-  setMenuOpen(false);
-  setDashboardMenuOpen((prev) => !prev);
-  return;
-}
+  if (vendor) {
+    navigate("/dashboard-vendor");
+    return;
+  }
 
-          navigate(`/dashboard-${user.lifeStage}`);
-        }}
+  if (isAmbassador) {
+    setMenuOpen(false);
+    setDashboardMenuOpen((prev) => !prev);
+    return;
+  }
+
+  navigate(`/dashboard-${user.lifeStage}`);
+}}
         className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-yellow-200 transition"
       >
         <img
@@ -343,8 +454,13 @@ useEffect(() => {
         />
 
         <span className="text-[13px] text-gray-700 font-medium leading-none">
-          {user.fullName}
-        </span>
+  {vendor
+  ? `پنل فروشنده | ${
+      vendor.businessName ||
+      "فروشنده"
+    }`
+  : user.fullName}
+</span>
 
         {isAmbassador && (
           <span className="text-[10px] font-black text-[#b98522] px-1">
@@ -411,14 +527,24 @@ onClick={(e) => e.stopPropagation()}
     </div>
 
     <button
-      onClick={() => navigate("/notifications")}
-      className="relative flex items-center justify-center w-7 h-7 rounded-md text-yellow-600/70 hover:text-yellow-700 transition-all duration-300"
+      onClick={() => {
+  if (vendor) {
+    navigate("/vendor/notifications");
+  } else {
+    navigate("/notifications");
+  }
+}}
+className="relative flex items-center justify-center w-7 h-7 rounded-md text-yellow-600/70 hover:text-yellow-700 transition-all duration-300"
       aria-label="اعلان‌ها"
     >
       <Bell size={14} strokeWidth={2.3} />
-      {unreadCount > 0 && (
+      {(vendor ? vendorUnreadCount : unreadCount) > 0 && (
         <span className="absolute -top-2 -left-2 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] flex items-center justify-center font-bold shadow">
-          {unreadCount > 99 ? "99+" : unreadCount}
+          {(vendor ? vendorUnreadCount : unreadCount) > 99
+  ? "99+"
+  : vendor
+  ? vendorUnreadCount
+  : unreadCount}
         </span>
       )}
     </button>
@@ -491,7 +617,7 @@ onClick={(e) => e.stopPropagation()}
 
 {/* 🔸 دکمه داشبورد در موبایل */}
 <div className="md:hidden flex items-center gap-2 mr-auto">
-  {user ? (
+  {user || vendor ? (
     <div className="relative" ref={mobileDashboardMenuRef}>
       <button
         onClick={() => {
@@ -502,7 +628,12 @@ onClick={(e) => e.stopPropagation()}
 }
 
           setMenuOpen(false);
-          navigate(`/dashboard-${user.lifeStage}`);
+          if (vendor) {
+  navigate("/dashboard-vendor");
+  return;
+}
+
+navigate(`/dashboard-${user.lifeStage}`);
         }}
         className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 
           px-3 py-1.5 rounded-xl hover:bg-yellow-200 transition"
@@ -517,7 +648,12 @@ onClick={(e) => e.stopPropagation()}
         />
 
         <span className="text-[13px] font-medium text-yellow-800 leading-none">
-          {user.fullName}
+          {vendor
+  ? `پنل فروشنده | ${
+      vendor.businessName ||
+      "فروشنده"
+    }`
+  : user.fullName}
         </span>
 
         {isAmbassador && (
@@ -628,11 +764,15 @@ onClick={(e) => e.stopPropagation()}
       <Menu size={15} strokeWidth={2.3} />
     )}
 
-    {!menuOpen && unreadCount > 0 && (
-      <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow">
-        {unreadCount > 99 ? "99+" : unreadCount}
-      </span>
-    )}
+    {!menuOpen && (vendor ? vendorUnreadCount : unreadCount) > 0 && (
+  <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow">
+    {(vendor ? vendorUnreadCount : unreadCount) > 99
+      ? "99+"
+      : vendor
+      ? vendorUnreadCount
+      : unreadCount}
+  </span>
+)}
   </button>
 </div>
       
@@ -684,22 +824,31 @@ onClick={(e) => e.stopPropagation()}
           </button>
         </div>
 
-{user ? (
+{user || vendor ? (
           <>
             <button
-              onClick={() => {
-                setMenuOpen(false);
-                navigate("/notifications");
-              }}
+  onClick={() => {
+    setMenuOpen(false);
+
+    if (vendor) {
+      navigate("/vendor/notifications");
+    } else {
+      navigate("/notifications");
+    }
+  }}
               className="flex items-center justify-between rounded-2xl border border-yellow-200 bg-yellow-50/70 px-4 py-3 text-sm font-bold text-yellow-800"
             >
               <span className="flex items-center gap-2">
                 <Bell size={18} />
                 اعلان‌ها
               </span>
-              {unreadCount > 0 ? (
+              {(vendor ? vendorUnreadCount : unreadCount) > 0 ? (
   <span className="min-w-[22px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] flex items-center justify-center font-bold">
-    {unreadCount > 99 ? "99+" : unreadCount}
+    {(vendor ? vendorUnreadCount : unreadCount) > 99
+      ? "99+"
+      : vendor
+      ? vendorUnreadCount
+      : unreadCount}
   </span>
 ) : (
   <span className="text-xs text-yellow-600">مشاهده</span>
