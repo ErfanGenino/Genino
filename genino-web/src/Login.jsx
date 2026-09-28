@@ -37,14 +37,20 @@ export default function Login() {
   }
 
   localStorage.setItem("genino_token", data.token);
-  window.dispatchEvent(new Event("genino_token_changed"));
 
-  localStorage.setItem(
+localStorage.setItem(
   "genino_vendor_id",
   String(data.vendor.id)
 );
 
-  window.dispatchEvent(new Event("genino_vendor_changed"));
+console.log(
+  "LOGIN SAVED:",
+  localStorage.getItem("genino_token"),
+  localStorage.getItem("genino_vendor_id")
+);
+
+window.dispatchEvent(new Event("genino_token_changed"));
+window.dispatchEvent(new Event("genino_vendor_changed"));
 
   setMessage("🌿 ورود فروشنده با موفقیت انجام شد");
 

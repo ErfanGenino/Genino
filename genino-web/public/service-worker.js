@@ -1,13 +1,21 @@
-const CACHE_NAME = "genino-pwa-v1";
+const CACHE_NAME = "genino-pwa-v2";
 
-self.addEventListener("install", (event) => {
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
 
-self.addEventListener("fetch", (event) => {
-  event.respondWith(fetch(event.request));
+      caches.keys().then((cacheNames) =>
+        Promise.all(
+          cacheNames
+            .filter((cacheName) => cacheName !== CACHE_NAME)
+            .map((cacheName) => caches.delete(cacheName))
+        )
+      ),
+    ])
+  );
 });

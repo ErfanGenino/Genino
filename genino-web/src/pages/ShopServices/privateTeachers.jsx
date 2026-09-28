@@ -149,8 +149,32 @@ export default function PrivateTeachers() {
   );
 
   const goToShopFilter = (item) => {
-    navigate(`/shop?category=${encodeURIComponent(item)}`);
-  };
+  // نمایش همه معلمان خصوصی
+  if (item === "همه معلمان خصوصی") {
+    navigate("/shop?service=private-teacher");
+    return;
+  }
+
+  // گزینه‌های «همه ...»
+  const allItems = [
+    "همه دروس مدرسه",
+    "همه زبان‌ها",
+    "همه هنرها",
+    "همه ورزش‌ها",
+    "همه مهارت‌ها",
+    "همه آزمون‌ها",
+  ];
+
+  if (allItems.includes(item)) {
+    navigate("/shop?service=private-teacher");
+    return;
+  }
+
+  // فیلتر براساس حوزه تدریس معلم
+  navigate(
+    `/shop?service=private-teacher&teacherField=${encodeURIComponent(item)}`
+  );
+};
 
   return (
     <main

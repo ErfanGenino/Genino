@@ -8,7 +8,7 @@ export const shopGroups = [
       { title: "بهداشت و مراقبت", key: "hygiene-care" },
       { title: "لباس نوزاد", key: "baby-clothes" },
       { title: "اسباب‌بازی و رشد نوزاد", key: "toys-growth" },
-      { title: "نمایش همه", key: "all" }
+      { title: "نمایش همه", key: "sismooni-all" }
     ]
   },
 
@@ -19,7 +19,7 @@ export const shopGroups = [
       { title: "کودک", key: "child" },
       { title: "نوجوان", key: "teen" },
       { title: "بازی، رشد و سرگرمی", key: "play-growth" },
-      { title: "نمایش همه", key: "all" }
+      { title: "نمایش همه", key: "kids-all" }
     ]
   },
 
@@ -31,7 +31,7 @@ export const shopGroups = [
       { title: "پسران", key: "boys" },
       { title: "دختران", key: "girls" },
       { title: "پوشاک ورزشی", key: "sportswear" },
-      { title: "همه کالاهای مد و پوشاک", key: "all" }
+      { title: "همه کالاهای مد و پوشاک", key: "fashion-all" }
     ]
   },
 
@@ -40,7 +40,7 @@ export const shopGroups = [
     groups: [
       { title: "کالای خواب", key: "sleep" },
       { title: "کالای حمام", key: "bath" },
-      { title: "همه کالاهای خواب و حمام", key: "all" }
+      { title: "همه کالاهای خواب و حمام", key: "bedBath-all" }
     ]
   },
 
@@ -49,7 +49,7 @@ export const shopGroups = [
     groups: [
       { title: "ساعت", key: "watch" },
       { title: "زیورآلات و اکسسوری", key: "jewelry" },
-      { title: "همه ساعت و زیورآلات", key: "all" }
+      { title: "همه ساعت و زیورآلات", key: "watchJewelry-all" }
     ]
   },
 
@@ -60,7 +60,7 @@ export const shopGroups = [
       { title: "ورزش بزرگسالان", key: "adults-sport" },
       { title: "توپ و بازی‌های گروهی", key: "ball-games" },
       { title: "بدنسازی و تناسب اندام", key: "fitness" },
-      { title: "همه کالاهای ورزشی", key: "all" }
+      { title: "همه کالاهای ورزشی", key: "sport-all" }
     ]
   },
 
@@ -70,7 +70,7 @@ export const shopGroups = [
       { title: "سلامت کودک", key: "child-health" },
       { title: "بهداشت فردی", key: "personal-hygiene" },
       { title: "تجهیزات پزشکی", key: "medical-equipment" },
-      { title: "نمایش همه", key: "all" }
+      { title: "نمایش همه", key: "medical-all" }
     ]
   },
 
@@ -85,7 +85,7 @@ export const shopGroups = [
       { title: "ابزار آرایشی", key: "makeup-tools" },
       { title: "اصلاح و پیرایش", key: "grooming" },
       { title: "بهداشت فردی", key: "personal-hygiene" },
-      { title: "نمایش همه", key: "all" }
+      { title: "نمایش همه", key: "beauty-all" }
     ]
   },
 
@@ -97,7 +97,7 @@ export const shopGroups = [
     { title: "عطر کودک و نوجوان", key: "kids-teen-perfume" },
     { title: "بادی اسپلش و اسپری", key: "body-splash-spray" },
     { title: "ست هدیه عطر", key: "perfume-gift-set" },
-    { title: "نمایش همه", key: "all" }
+    { title: "نمایش همه", key: "perfume-all" }
   ]
 },
 
@@ -110,7 +110,7 @@ export const shopGroups = [
     { title: "عروسک و اسباب‌بازی دست‌ساز", key: "handmade-dolls-toys" },
     { title: "دکوراسیون خانه", key: "home-decoration" },
     { title: "آثار هنری و تزئینی", key: "art-decorative" },
-    { title: "نمایش همه", key: "all" }
+    { title: "نمایش همه", key: "handmade-all" }
   ]
 }
 ];

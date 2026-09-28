@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Palette, Dumbbell, Brain, Book, Flower } from "lucide-react";
 import { authFetch } from "../../services/api";
 
-export default function AchievementsBar({ childId }) {
+
+export default function AchievementsBar({
+  childId,
+  openAchievementId,
+}) {
+  const navigate = useNavigate();
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedAchievement, setSelectedAchievement] = useState(null);
   const [showIssuerInfoModal, setShowIssuerInfoModal] =
@@ -86,123 +93,188 @@ const isFamilyIssuer = (issuer) => {
   return familyRoles.includes(issuer);
 };
 
-  const badges = [
+  const categoryConfig = [
   {
     id: 1,
     title: "دستاورد هنری",
+    categories: ["ART", "art"],
     icon: (
       <Palette className="w-8 h-8 text-[#cfa500]" />
     ),
-
-    achievements: [
-      {
-        id: 101,
-        title: "خلاقیت در نقاشی کودک",
-        date: "12 مهر 1404",
-        issuer: "آموزشگاه آوای هنر",
-        score: "۹۵ از ۱۰۰",
-        desc: "به دلیل خلاقیت بالا در ترکیب رنگ‌ها و طراحی آزاد کودکانه.",
-      },
-
-      {
-        id: 102,
-        title: "مهارت کاردستی",
-        date: "18 مهر 1404",
-        issuer: "خانه خلاقیت کودک",
-        score: "۹۰ از ۱۰۰",
-        desc: "ساخت کاردستی خلاقانه با دقت و تمرکز بالا.",
-      },
-
-      {
-        id: 103,
-        title: "نقاش کوچک طلایی",
-        date: "25 مهر 1404",
-        issuer: "آموزشگاه رنگین کمان",
-        score: "۹۸ از ۱۰۰",
-        desc: "نمایش استعداد ویژه در نقاشی آزاد.",
-      },
-    ],
   },
 
   {
     id: 2,
     title: "دستاورد ورزشی",
+    categories: ["SPORT", "sport"],
     icon: (
       <Dumbbell className="w-8 h-8 text-[#cfa500]" />
     ),
-
-    achievements: [
-      {
-        id: 201,
-        title: "شناگر کوچک",
-        date: "5 مهر 1404",
-        issuer: "استخر ناوا",
-        score: "۹۰ از ۱۰۰",
-        desc: "شنا در مسافت ۱۰ متر بدون کمک مربی.",
-      },
-    ],
   },
 
   {
     id: 3,
     title: "دستاورد پرورشی",
+    categories: [
+      "RESEARCH",
+      "research",
+      "nurture",
+    ],
     icon: (
       <Brain className="w-8 h-8 text-[#cfa500]" />
     ),
-
-    achievements: [
-      {
-        id: 301,
-        title: "مهربانی با دوستان",
-        date: "8 مهر 1404",
-        issuer: "مهد کودک مهر",
-        score: "۱۰۰ از ۱۰۰",
-        desc: "تعامل بسیار خوب با سایر کودکان.",
-      },
-    ],
   },
 
   {
     id: 4,
     title: "دستاورد علمی",
+    categories: ["SCIENCE", "science"],
     icon: (
       <Book className="w-8 h-8 text-[#cfa500]" />
     ),
-
-    achievements: [],
   },
 
   {
-  id: 5,
-  title: "دستاورد معنوی",
-
-  icon: (
-    <Flower className="w-8 h-8 text-[#cfa500]" />
-  ),
-
-  achievements: achievements
-    .filter((a) => a.category === "spiritual")
-    .map((a) => ({
-      id: a.id,
-
-      title: a.title,
-
-      date: new Date(a.issuedAt).toLocaleDateString("fa-IR"),
-
-     issuer: `${
-  getIssuerRoleText(a.issuerRole) || "عضو ژنینو"
-}${
-  a.issuerUser?.fullName
-    ? ` - ${a.issuerUser.fullName}`
-    : ""
-}`,
-
-      desc:
-        a.description ||
-        "توضیحی برای این دستاورد ثبت نشده است.",
-    })),
-},
+    id: 5,
+    title: "دستاورد معنوی",
+    categories: [
+      "MORAL",
+      "moral",
+      "spiritual",
+    ],
+    icon: (
+      <Flower className="w-8 h-8 text-[#cfa500]" />
+    ),
+  },
 ];
+
+
+const badges =
+  categoryConfig.map((category) => ({
+
+    id: category.id,
+
+    title: category.title,
+
+    icon: category.icon,
+
+    achievements: achievements
+      .filter((achievement) =>
+        category.categories.includes(
+          achievement.category
+        )
+      )
+      .map((achievement) => {
+
+        const isVendorAchievement =
+          Boolean(
+            achievement.issuerVendorId
+          );
+
+        let issuer = "عضو ژنینو";
+
+        if (
+          isVendorAchievement &&
+          achievement.issuerVendor
+        ) {
+
+          issuer =
+            achievement.issuerVendor
+              .businessName ||
+            "مرکز رسمی ژنینو";
+
+        } else {
+
+          const roleText =
+            getIssuerRoleText(
+              achievement.issuerRole
+            );
+
+          issuer =
+            achievement.issuerUser
+              ?.fullName
+              ? `${roleText} - ${achievement.issuerUser.fullName}`
+              : roleText;
+        }
+
+
+        return {
+  id: achievement.id,
+  title: achievement.title,
+
+  date: achievement.issuedAt
+    ? new Date(
+        achievement.issuedAt
+      ).toLocaleDateString(
+        "fa-IR"
+      )
+    : "تاریخ ثبت نشده",
+
+  issuer,
+
+  issuerType:
+    achievement.issuerType,
+
+  issuerRole:
+    achievement.issuerRole,
+
+  issuerVendorId:
+    achievement.issuerVendorId,
+
+  issuerUserId:
+    achievement.issuerUserId,
+
+  isVendorAchievement,
+
+  desc:
+    achievement.description ||
+    "توضیحی برای این دستاورد ثبت نشده است.",
+};
+      }),
+  }));
+
+
+  useEffect(() => {
+  if (
+    !openAchievementId ||
+    achievements.length === 0
+  ) {
+    return;
+  }
+  const achievementId =
+    Number(openAchievementId);
+
+  if (!achievementId) {
+    return;
+  }
+
+
+  for (const badge of badges) {
+    const achievement =
+      badge.achievements.find(
+        (item) =>
+          Number(item.id) ===
+          achievementId
+      );
+
+    if (achievement) {
+      // دسته مربوطه برای آیکون
+      // و عنوان مودال
+      setSelectedCategory(badge);
+      // باز کردن مستقیم
+      // همان دستاورد
+      setSelectedAchievement(
+        achievement
+      );
+      break;
+    }
+  }
+}, [
+  openAchievementId,
+  achievements,
+]);
+
+
 
   return (
     <>
@@ -239,18 +311,50 @@ const isFamilyIssuer = (issuer) => {
           "
         >
           <div
-            className="
-              w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl
-              bg-gradient-to-br from-yellow-50 to-amber-100
-              border border-yellow-100
-              shadow-sm
-              flex items-center justify-center
-            "
-          >
-            <div className="[&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-yellow-700 [&>svg]:drop-shadow-none">
-              {badge.icon}
-            </div>
-          </div>
+  className="
+    relative
+    w-9 h-9 sm:w-11 sm:h-11
+    rounded-xl sm:rounded-2xl
+    bg-gradient-to-br from-yellow-50 to-amber-100
+    border border-yellow-100
+    shadow-sm
+    flex items-center justify-center
+  "
+>
+  {/* تعداد دستاوردهای این دسته */}
+  <span
+    className="
+      absolute
+      -top-2
+      -left-2
+      z-10
+      flex
+      h-5
+      min-w-5
+      items-center
+      justify-center
+      rounded-full
+      border-2
+      border-white
+      bg-[#d4af37]
+      px-1
+      text-[9px]
+      font-black
+      leading-none
+      text-white
+      shadow-md
+      sm:h-6
+      sm:min-w-6
+      sm:text-[10px]
+    "
+  >
+    {badge.achievements.length}
+  </span>
+
+  <div className="[&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-yellow-700 [&>svg]:drop-shadow-none">
+    {badge.icon}
+  </div>
+</div>
 
           <p className="text-[9px] sm:text-[11px] mt-1 font-bold text-yellow-900 leading-5">
             {badge.title}
@@ -428,27 +532,167 @@ const isFamilyIssuer = (issuer) => {
         <div className="relative z-10 mt-5 flex flex-col gap-3">
 
           <button
-            type="button"
-            className="
-              w-full rounded-2xl
-              bg-gradient-to-r from-pink-500 to-rose-400
-              px-6 py-3 text-sm font-extrabold text-white
-              shadow-md transition
-              hover:from-pink-600 hover:to-rose-500
-            "
-          >
-             ارسال هدیه
-          </button>
+  type="button"
+  onClick={() => {
+    if (!childId) return;
+    setSelectedAchievement(null);
+    setSelectedCategory(null);
+    navigate(
+      `/child-wishlist/view?childId=${childId}`
+    );
+  }}
+  className="
+    w-full rounded-2xl
+    bg-gradient-to-r from-pink-500 to-rose-400
+    px-6 py-3 text-sm font-extrabold text-white
+    shadow-md transition
+    hover:from-pink-600 hover:to-rose-500
+  "
+>
+  ارسال هدیه
+</button>
+
           <button
   type="button"
   onClick={() => {
-    if (isFamilyIssuer(selectedAchievement.issuer)) {
-      setShowIssuerInfoModal(true);
-      return;
-    }
+    console.log(
+  "🏆 ACHIEVEMENT ISSUER DEBUG:",
+  selectedAchievement
+);
+  // دستاورد صادرشده توسط اعضای خانواده
+  if (!selectedAchievement.isVendorAchievement) {
+    setShowIssuerInfoModal(true);
+    return;
+  }
 
-    alert("بعداً به صفحه صادرکننده متصل می‌شود");
-  }}
+  const vendorId = selectedAchievement.issuerVendorId;
+
+  if (!vendorId) {
+    setShowIssuerInfoModal(true);
+    return;
+  }
+
+  // مدرسه
+if (
+  selectedAchievement.issuerType === "SCHOOL"
+) {
+  setSelectedAchievement(null);
+  setSelectedCategory(null);
+
+  navigate(
+    `/vendor/service/school/${vendorId}`
+  );
+
+  return;
+}
+
+
+// مهدکودک
+if (
+  selectedAchievement.issuerType ===
+  "KINDERGARTEN"
+) {
+  setSelectedAchievement(null);
+  setSelectedCategory(null);
+
+  navigate(
+    `/vendor/service/kindergarten/${vendorId}?view=public`
+  );
+
+  return;
+}
+
+// خانه بازی
+if (
+  selectedAchievement.issuerType ===
+  "PLAYHOUSE"
+) {
+  setSelectedAchievement(null);
+  setSelectedCategory(null);
+
+  navigate(
+    `/vendor/service/playhouse/${vendorId}?view=public`
+  );
+
+  return;
+}
+
+// مراکز آموزشی
+if (
+  selectedAchievement.issuerType ===
+  "EDUCATION_CLASS"
+) {
+  const vendorId =
+    selectedAchievement.issuerVendorId;
+
+  if (!vendorId) {
+    alert(
+      "شناسه مرکز آموزشی برای این دستاورد ثبت نشده است."
+    );
+    return;
+  }
+
+  setSelectedAchievement(null);
+  setSelectedCategory(null);
+
+  navigate(
+    `/vendor/service/education-class/${vendorId}?view=public`
+  );
+
+  return;
+}
+
+// کلاس هنری
+if (
+  selectedAchievement.issuerRole ===
+  "art_class"
+) {
+  setSelectedAchievement(null);
+  setSelectedCategory(null);
+
+  navigate(
+    `/vendor/service/art-class/${vendorId}?view=public`
+  );
+
+  return;
+}
+
+
+// کلاس ورزشی
+if (
+  selectedAchievement.issuerRole ===
+  "sport_class"
+) {
+  setSelectedAchievement(null);
+  setSelectedCategory(null);
+
+  navigate(
+    `/vendor/service/sport-class/${vendorId}?view=public`
+  );
+
+  return;
+}
+
+// معلم خصوصی
+if (
+  selectedAchievement.issuerRole === "private_teacher"
+) {
+  setSelectedAchievement(null);
+  setSelectedCategory(null);
+
+  navigate(
+    `/vendor/service/private-teacher/${vendorId}?view=public`
+  );
+
+  return;
+}
+
+
+// سایر صادرکنندگان رسمی
+alert(
+  "صفحه این نوع صادرکننده هنوز متصل نشده است."
+);
+}}
   className="
     w-full rounded-2xl
     bg-gradient-to-r from-yellow-500 to-yellow-400

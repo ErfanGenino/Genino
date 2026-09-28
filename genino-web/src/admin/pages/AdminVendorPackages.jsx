@@ -20,19 +20,21 @@ const onlyDigits = (value) => {
 
 export default function AdminVendorPackages() {
   const [packages, setPackages] = useState([]);
+  const [serviceCategories, setServiceCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingPackage, setEditingPackage] = useState(null);
   const [saving, setSaving] = useState(false);
   const [creatingPackage, setCreatingPackage] = useState(false);
 
   useEffect(() => {
-    loadPackages();
-  }, []);
+  loadPackages();
+  loadServiceCategories();
+}, []);
 
   const loadPackages = async () => {
     try {
       const { data } = await axios.get(
-        `${BASE_URL}/admin/vendor-packages`
+         `${BASE_URL}/admin/vendor-packages`
       );
 
       if (data?.ok) {
@@ -44,6 +46,21 @@ export default function AdminVendorPackages() {
       setLoading(false);
     }
   };
+
+  const loadServiceCategories = async () => {
+  try {
+    const { data } = await axios.get(
+      `${BASE_URL}/admin/vendor-packages/service-categories`
+    );
+
+    if(data?.ok){
+      setServiceCategories(data.categories);
+    }
+
+  } catch(err){
+    console.error(err);
+  }
+};
 
   const shopPackages = packages.filter(
     (pkg) => pkg.targetType === "SHOP"
@@ -59,19 +76,38 @@ export default function AdminVendorPackages() {
   try {
     setSaving(true);
 
+  if (
+  editingPackage.targetType === "SERVICE" &&
+  (
+    !editingPackage.achievementLimit ||
+    Number(editingPackage.achievementLimit) <= 0
+  )
+) {
+  alert(
+    "برای بسته خدماتی، تعداد مجوز دستاورد الزامی است."
+  );
+  return;
+}
+
     const payload = {
-      targetType: editingPackage.targetType,
-      title: editingPackage.title,
-      description: editingPackage.description,
-      price: Number(editingPackage.price),
-      durationMonths: Number(editingPackage.durationMonths),
-      hasDedicatedPage: !!editingPackage.hasDedicatedPage,
-      windowCount: editingPackage.windowCount,
-      achievementLimit: editingPackage.achievementLimit,
-      allowedUserCount: editingPackage.allowedUserCount,
-      isActive: editingPackage.isActive,
-      sortOrder: Number(editingPackage.sortOrder || 0),
-    };
+  targetType: editingPackage.targetType,
+
+  serviceCategoryId:
+    editingPackage.targetType === "SERVICE"
+      ? editingPackage.serviceCategoryId
+      : null,
+
+  title: editingPackage.title,
+  description: editingPackage.description,
+  price: Number(editingPackage.price),
+  durationMonths: Number(editingPackage.durationMonths),
+  hasDedicatedPage: !!editingPackage.hasDedicatedPage,
+  windowCount: editingPackage.windowCount,
+  achievementLimit: editingPackage.achievementLimit,
+  allowedUserCount: editingPackage.allowedUserCount,
+  isActive: editingPackage.isActive,
+  sortOrder: Number(editingPackage.sortOrder || 0),
+};
 
     const { data } = editingPackage.isNew
       ? await axios.post(`${BASE_URL}/admin/vendor-packages`, payload)
@@ -133,6 +169,7 @@ const handleTogglePackage = async (packageId) => {
       setEditingPackage({
         isNew: true,
         targetType: "SHOP",
+        serviceCategoryId:null,
         title: "",
         description: "",
         price: 0,
@@ -170,7 +207,7 @@ const handleTogglePackage = async (packageId) => {
                     key={pkg.id}
                     className="rounded-2xl bg-white p-5 shadow-sm"
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col gap-2">
                       <h3 className="font-bold text-stone-800">
                         {pkg.title}
                       </h3>
@@ -269,10 +306,20 @@ const handleTogglePackage = async (packageId) => {
                     key={pkg.id}
                     className="rounded-2xl bg-white p-5 shadow-sm"
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col gap-2">
                       <h3 className="font-bold text-stone-800">
                         {pkg.title}
                       </h3>
+
+                      {pkg.serviceCategory && (
+  <div className="mt-2 text-xs text-amber-700">
+    نوع خدمت:
+    <span className="font-bold">
+      {" "}
+      {pkg.serviceCategory.title}
+    </span>
+  </div>
+)}
 
                       <span
                         className={`rounded-full px-3 py-1 text-xs ${
@@ -295,6 +342,14 @@ const handleTogglePackage = async (packageId) => {
       {pkg.hasDedicatedPage ? "دارد" : "ندارد"}
     </span>
   </div>
+
+  <div>
+  تعداد پنجره:
+  <span className="font-bold text-stone-800">
+    {" "}
+    {pkg.windowCount ?? "نامحدود"}
+  </span>
+</div>
 
   <div>
     مدت اعتبار:
@@ -372,7 +427,9 @@ const handleTogglePackage = async (packageId) => {
   <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-3 sm:items-center sm:p-4">
     <div className="my-4 max-h-[calc(100vh-32px)] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-4 shadow-xl sm:my-0 sm:p-6">
       <h2 className="text-xl font-bold text-stone-800">
-        ویرایش بسته همکاری
+       {editingPackage.isNew
+ ? "ایجاد بسته همکاری جدید"
+ : "ویرایش بسته همکاری"} 
       </h2>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -408,6 +465,7 @@ const handleTogglePackage = async (packageId) => {
         setEditingPackage({
           ...editingPackage,
           targetType: "SERVICE",
+          serviceCategoryId: null,
           windowCount: null,
           achievementLimit: editingPackage.achievementLimit ?? 0,
           allowedUserCount: editingPackage.allowedUserCount ?? 1,
@@ -423,6 +481,43 @@ const handleTogglePackage = async (packageId) => {
     </button>
   </div>
 </div>
+
+{editingPackage.targetType === "SERVICE" && (
+  <div className="sm:col-span-2">
+    <label className="text-sm font-bold text-stone-600">
+      نوع خدمت
+    </label>
+
+    <select
+      value={editingPackage.serviceCategoryId || ""}
+      onChange={(e)=>
+        setEditingPackage({
+          ...editingPackage,
+          serviceCategoryId:
+            Number(e.target.value)
+        })
+      }
+      className="mt-2 w-full rounded-xl border border-stone-200 p-3 text-sm"
+    >
+
+      <option value="">
+        انتخاب کنید
+      </option>
+
+      {serviceCategories.map((item)=>(
+        <option
+          key={item.id}
+          value={item.id}
+        >
+          {item.title}
+        </option>
+      ))}
+
+    </select>
+
+  </div>
+)}
+
         <div>
           <label className="text-sm font-bold text-stone-600">
             عنوان بسته
@@ -483,27 +578,27 @@ const handleTogglePackage = async (packageId) => {
 
         
 
-        {editingPackage.targetType === "SHOP" ? (
-  <div>
-    <label className="text-sm font-bold text-stone-600">
-      تعداد پنجره
-    </label>
+        <div>
+  <label className="text-sm font-bold text-stone-600">
+    تعداد پنجره فروش
+  </label>
 
-    <input
-      type="number"
-      value={editingPackage.windowCount || ""}
-      onChange={(e) =>
-        setEditingPackage({
-          ...editingPackage,
-          windowCount: e.target.value
-            ? Number(e.target.value)
-            : null,
-        })
-      }
-      className="mt-2 w-full rounded-xl border border-stone-200 p-3 text-sm"
-    />
-  </div>
-) : (
+  <input
+    type="number"
+    value={editingPackage.windowCount || ""}
+    onChange={(e) =>
+      setEditingPackage({
+        ...editingPackage,
+        windowCount: e.target.value
+          ? Number(e.target.value)
+          : null,
+      })
+    }
+    className="mt-2 w-full rounded-xl border border-stone-200 p-3 text-sm"
+  />
+</div>
+
+{editingPackage.targetType === "SERVICE" && (
   <>
     <div>
       <label className="text-sm font-bold text-stone-600">

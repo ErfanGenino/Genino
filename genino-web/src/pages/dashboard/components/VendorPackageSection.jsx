@@ -108,6 +108,12 @@ export default function VendorPackageSection({
                   {pkg.title}
                 </p>
 
+                {pkg.serviceCategory && (
+  <p className="mt-2 text-[10px] font-bold text-amber-700">
+    نوع خدمت: {pkg.serviceCategory.title}
+  </p>
+)}
+
                 <div className="mt-3 space-y-2 text-[10px] text-stone-600">
                   <div>
                     صفحه اختصاصی:
@@ -116,33 +122,34 @@ export default function VendorPackageSection({
                     </span>
                   </div>
 
-                  {pkg.targetType === "SHOP" ? (
-                    <div>
-                      تعداد پنجره:
-                      <span className="font-black text-[#6f4a18]">
-                        {" "}
-                        {pkg.windowCount ?? "نامحدود"}
-                      </span>
-                    </div>
-                  ) : (
-                    <>
-                      <div>
-                        مجوز دستاورد:
-                        <span className="font-black text-[#6f4a18]">
-                          {" "}
-                          {pkg.achievementLimit ?? "ندارد"}
-                        </span>
-                      </div>
+                  <div>
+  تعداد پنجره فروش:
+  <span className="font-black text-[#6f4a18]">
+    {" "}
+    {pkg.windowCount ?? "نامحدود"}
+  </span>
+</div>
 
-                      <div>
-                        تعداد کاربران:
-                        <span className="font-black text-[#6f4a18]">
-                          {" "}
-                          {pkg.allowedUserCount ?? "نامحدود"}
-                        </span>
-                      </div>
-                    </>
-                  )}
+
+{pkg.targetType === "SERVICE" && (
+  <>
+    <div>
+      مجوز صدور دستاورد:
+      <span className="font-black text-[#6f4a18]">
+        {" "}
+        {pkg.achievementLimit ?? "ندارد"}
+      </span>
+    </div>
+
+    <div>
+      مجوز دسترسی کاربران:
+      <span className="font-black text-[#6f4a18]">
+        {" "}
+        {pkg.allowedUserCount ?? "نامحدود"}
+      </span>
+    </div>
+  </>
+)}
 
                   <div>
                     اعتبار:

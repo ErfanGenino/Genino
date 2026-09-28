@@ -1,3 +1,5 @@
+// D:\projects\Genino\genino-web\src\pages\favorites\FavoritesPage.jsx
+
 import { Heart, ShoppingBag, Briefcase, BookOpen, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -5,22 +7,72 @@ import { motion } from "framer-motion";
 import {
   getFavoriteArticles,
   removeFavoriteArticle,
+  getFavoriteProducts,
 } from "../../services/api";
+import logo from "../../assets/logo-genino.png";
+import { formatPrice } from "../../utils/productDiscount";
 
 export default function FavoritesPage() {
 
   const [favoriteArticles, setFavoriteArticles] = useState([]);
+  const [favoriteProducts, setFavoriteProducts] = useState([]);
 
 useEffect(() => {
-  const loadFavoriteArticles = async () => {
-    const res = await getFavoriteArticles();
+  let isMounted = true;
 
-    if (res?.ok) {
-      setFavoriteArticles(res.articles || []);
+  const loadFavorites = async () => {
+    try {
+      const [articlesRes, productsRes] = await Promise.all([
+        getFavoriteArticles(),
+        getFavoriteProducts(),
+      ]);
+
+      if (!isMounted) return;
+
+      if (articlesRes?.ok) {
+        setFavoriteArticles(articlesRes.articles || []);
+      }
+
+      if (productsRes?.ok) {
+        const fixedProducts = (productsRes.products || []).map(
+          (product) => ({
+            ...product,
+
+            images:
+              typeof product.images === "string"
+                ? JSON.parse(product.images)
+                : Array.isArray(product.images)
+                ? product.images
+                : [],
+          })
+        );
+
+        setFavoriteProducts(fixedProducts);
+      }
+    } catch (error) {
+      console.error("LOAD FAVORITES ERROR:", error);
     }
   };
 
-  loadFavoriteArticles();
+  loadFavorites();
+
+  const handleFavoriteProductsChanged = () => {
+    loadFavorites();
+  };
+
+  window.addEventListener(
+    "genino_favorite_products_changed",
+    handleFavoriteProductsChanged
+  );
+
+  return () => {
+    isMounted = false;
+
+    window.removeEventListener(
+      "genino_favorite_products_changed",
+      handleFavoriteProductsChanged
+    );
+  };
 }, []);
 
 const removeArticle = async (article) => {
@@ -87,9 +139,12 @@ const removeArticle = async (article) => {
 
           <div className="mb-2 flex items-center justify-between gap-3">
   <Link to="/favorites/products">
-    <h2 className="text-xl font-black text-gray-800 hover:text-yellow-600 transition">
-      کالاهای مورد علاقه
-    </h2>
+    <h2 className="text-xl font-black text-gray-800 transition hover:text-yellow-600">
+  کالاهای مورد علاقه
+  <span className="mr-2 text-sm text-yellow-600">
+    ({favoriteProducts.length})
+  </span>
+</h2>
   </Link>
 
   <Link
@@ -104,9 +159,53 @@ const removeArticle = async (article) => {
             محصولات محبوبت را ذخیره کن تا بعداً سریع‌تر پیدایشان کنی.
           </p>
 
-          <div className="mt-8 rounded-2xl border border-dashed border-yellow-200 bg-yellow-50/40 py-10 text-center text-sm text-gray-500">
-            هنوز کالایی اضافه نشده
-          </div>
+          <div className="mt-5 flex-1 space-y-3 overflow-y-auto pr-1">
+  {favoriteProducts.length === 0 ? (
+    <div className="rounded-2xl border border-dashed border-yellow-200 bg-yellow-50/40 py-10 text-center text-sm text-gray-500">
+      هنوز کالایی اضافه نشده
+    </div>
+  ) : (
+    favoriteProducts.slice(0, 3).map((product) => (
+      <Link
+        key={product.id}
+        to={`/product/${product.id}`}
+        className="
+          flex items-center gap-3
+          rounded-2xl border border-yellow-100
+          bg-white/80 p-3 shadow-sm
+          transition hover:bg-yellow-50
+        "
+      >
+        <img
+          src={product.images?.[0] || logo}
+          alt={product.title}
+          className="
+            h-14 w-14 shrink-0
+            rounded-xl border border-yellow-100
+            bg-white object-contain p-1
+          "
+        />
+
+        <div className="min-w-0 flex-1 text-right">
+          <h3 className="line-clamp-1 text-sm font-bold text-gray-800">
+            {product.title}
+          </h3>
+
+          <p className="mt-1 line-clamp-1 text-xs text-gray-500">
+            برند:{" "}
+            {product.brandFa ||
+              product.brandEn ||
+              "بدون برند"}
+          </p>
+
+          <p className="mt-1 text-xs font-black text-yellow-700">
+            {formatPrice(product.price)}
+          </p>
+        </div>
+      </Link>
+    ))
+  )}
+</div>
           <Link
   to="/shop"
   className="mt-4 flex items-center justify-center rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-400 px-4 py-3 text-sm font-bold text-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-lg"

@@ -4,19 +4,161 @@
 // ============================================================================
 
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { shopCategories } from "../../data/shopCategories";
 import { shopGroups } from "../../data/shopGroups";
 import { shopItems } from "../../data/shopItems";
+import DatePicker from "react-multi-date-picker";
+import DateObject from "react-date-object";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
 
 export default function VendorProductCreate() {
   const navigate = useNavigate();
   const { productId } = useParams();
+  const [searchParams] = useSearchParams();
 
   const isEditMode = Boolean(productId);
 
+  const pageSource = searchParams.get("source");
+  const sourceVendorId = searchParams.get("vendorId");
+
+  const isSchoolSource =
+  pageSource === "school" &&
+  Boolean(sourceVendorId);
+
+const isKindergartenSource =
+  pageSource === "kindergarten" &&
+  Boolean(sourceVendorId);
+
+  const isPlayhouseSource =
+  pageSource === "playhouse" &&
+  Boolean(sourceVendorId);
+
+  const isEducationClassSource =
+  pageSource === "education-class" &&
+  Boolean(sourceVendorId);
+
+  const isSportClassSource =
+  pageSource === "sport-class" &&
+  Boolean(sourceVendorId);
+
+  const isPrivateTeacherSource =
+  pageSource === "private-teacher" &&
+  Boolean(sourceVendorId);
+
+const getReturnPath = (currentVendorId) => {
+
+  if (isSchoolSource) {
+    return `/vendor/service/school/${
+      sourceVendorId || currentVendorId
+    }`;
+  }
+
+  if (isKindergartenSource) {
+    return `/vendor/service/kindergarten/${
+      sourceVendorId || currentVendorId
+    }`;
+  }
+
+  if (isPlayhouseSource) {
+    return `/vendor/service/playhouse/${
+      sourceVendorId || currentVendorId
+    }`;
+  }
+
+  if (isEducationClassSource) {
+  return `/vendor/service/education-class/${
+    sourceVendorId || currentVendorId
+  }`;
+}
+
+  if (isSportClassSource) {
+  return `/vendor/service/sport-class/${
+    sourceVendorId || currentVendorId
+  }`;
+}
+
+  if (isPrivateTeacherSource) {
+  return `/vendor/service/private-teacher/${
+    sourceVendorId ||
+    currentVendorId
+  }`;
+}
+
+  return `/vendor/shop/${currentVendorId}`;
+};
+
+  const toEnglishNumber = (value = "") =>
+  String(value).replace(/[۰-۹]/g, (digit) => {
+    return "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(digit)];
+  });
+
+const gregorianToPersianDate = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new DateObject({
+    date,
+    calendar: "gregorian",
+  })
+    .convert(persian, persian_fa)
+    .format("YYYY-MM-DD");
+};
+
+const persianToGregorianIso = (value, endOfDay = false) => {
+  if (!value) return null;
+
+  try {
+    const normalizedValue =
+      typeof value === "object" && value?.format
+        ? value.format("YYYY-MM-DD")
+        : toEnglishNumber(String(value)).replace(/\//g, "-");
+
+    const persianDate = new DateObject({
+      date: normalizedValue,
+      format: "YYYY-MM-DD",
+      calendar: persian,
+      locale: persian_fa,
+    });
+
+    const gregorianDate = persianDate.convert("gregorian").toDate();
+
+    if (
+      !(gregorianDate instanceof Date) ||
+      Number.isNaN(gregorianDate.getTime())
+    ) {
+      return null;
+    }
+
+    if (endOfDay) {
+      gregorianDate.setHours(23, 59, 59, 999);
+    } else {
+      gregorianDate.setHours(0, 0, 0, 0);
+    }
+
+    return gregorianDate.toISOString();
+  } catch (error) {
+    console.error("DISCOUNT DATE CONVERSION ERROR:", error);
+    return null;
+  }
+};
+
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
+  const [discountType, setDiscountType] = useState("NONE");
+  const [discountValue, setDiscountValue] = useState("");
+  const [discountStartAt, setDiscountStartAt] = useState("");
+  const [discountEndAt, setDiscountEndAt] = useState("");
   const [description, setDescription] = useState("");
   const [images, setImages] = useState([]);
   const [categoryLinks, setCategoryLinks] = useState([
@@ -26,8 +168,18 @@ export default function VendorProductCreate() {
   const [brandEn, setBrandEn] = useState("");
   const [material, setMaterial] = useState("");
   const [inventoryRows, setInventoryRows] = useState([
-  { size: "", colorName: "", colorHex: "", quantity: "", unit: "" },
-  ]);
+  {
+    size: "",
+    colors: [
+      {
+        colorName: "",
+        colorHex: "",
+        quantity: "",
+        unit: "عدد"
+      }
+    ]
+  }
+]);
   const [gender, setGender] = useState([]);
   const [seasons, setSeasons] = useState([]);
   const [ageRanges, setAgeRanges] = useState([]);
@@ -48,6 +200,13 @@ export default function VendorProductCreate() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
+
+
+
+  const hasError = (name) => {
+  return validationErrors.includes(name);
+};
 
 
 
@@ -78,6 +237,15 @@ const p = data.product;
 
 setTitle(p.title || "");
 setPrice(formatPrice(String(p.price || "")));
+setDiscountType(p.discountType || "NONE");
+setDiscountValue(String(p.discountValue || ""));
+setDiscountStartAt(
+  gregorianToPersianDate(p.discountStartAt)
+);
+
+setDiscountEndAt(
+  gregorianToPersianDate(p.discountEndAt)
+);
 setDescription(p.description || "");
 
 setImages(Array.isArray(p.images) ? p.images : []);
@@ -94,7 +262,19 @@ setAgeRanges(Array.isArray(p.ageRanges) ? p.ageRanges : []);
 setInventoryRows(
   Array.isArray(p.inventoryRows) && p.inventoryRows.length > 0
     ? p.inventoryRows
-    : [{ size: "", colorName: "", colorHex: "", quantity: "", unit: "" }]
+    : [
+        {
+          size: "",
+          colors: [
+            {
+              colorName: "",
+              colorHex: "",
+              quantity: "",
+              unit: "عدد",
+            },
+          ],
+        },
+      ]
 );
 
 setStandards(Array.isArray(p.standards) ? p.standards : []);
@@ -272,23 +452,103 @@ const careOptions = [
   "خشکشویی توصیه می‌شود",
 ];
 
-const updateInventoryRow = (index, field, value) => {
+const updateInventorySize = (index, value) => {
   setInventoryRows((prev) =>
-    prev.map((row, i) =>
-      i === index ? { ...row, [field]: value } : row
+    prev.map((item, i) =>
+      i === index
+        ? { ...item, size: value }
+        : item
     )
   );
 };
 
-const addInventoryRow = () => {
+
+const updateInventoryColor = (
+  sizeIndex,
+  colorIndex,
+  field,
+  value
+) => {
+  setInventoryRows((prev) =>
+    prev.map((sizeItem, i) => {
+      if (i !== sizeIndex) return sizeItem;
+
+      return {
+        ...sizeItem,
+        colors: sizeItem.colors.map((color, j) =>
+          j === colorIndex
+            ? { ...color, [field]: value }
+            : color
+        ),
+      };
+    })
+  );
+};
+
+
+const addInventorySize = () => {
   setInventoryRows((prev) => [
     ...prev,
-    { size: "", colorName: "", colorHex: "", quantity: "", unit: "" },
+    {
+      size: "",
+      colors: [
+        {
+          colorName: "",
+          colorHex: "",
+          quantity: "",
+          unit: "عدد",
+        },
+      ],
+    },
   ]);
 };
 
-const removeInventoryRow = (index) => {
-  setInventoryRows((prev) => prev.filter((_, i) => i !== index));
+
+const removeInventorySize = (index) => {
+  setInventoryRows((prev) =>
+    prev.filter((_, i) => i !== index)
+  );
+};
+
+
+const addInventoryColor = (sizeIndex) => {
+  setInventoryRows((prev) =>
+    prev.map((item, i) =>
+      i === sizeIndex
+        ? {
+            ...item,
+            colors: [
+              ...item.colors,
+              {
+                colorName: "",
+                colorHex: "",
+                quantity: "",
+                unit: "عدد",
+              },
+            ],
+          }
+        : item
+    )
+  );
+};
+
+
+const removeInventoryColor = (
+  sizeIndex,
+  colorIndex
+) => {
+  setInventoryRows((prev) =>
+    prev.map((item, i) =>
+      i === sizeIndex
+        ? {
+            ...item,
+            colors: item.colors.filter(
+              (_, j) => j !== colorIndex
+            ),
+          }
+        : item
+    )
+  );
 };
 
   
@@ -345,20 +605,40 @@ const removeInventoryRow = (index) => {
   return data.publicUrl;
 };
 
-  const handleSubmit = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
 
-    const uploadedImages = [];
+const scrollToSection = (id) => {
+  const element = document.getElementById(id);
 
-for (const item of images) {
-  if (typeof item === "string") {
-    uploadedImages.push(item);
-  } else {
-    const url = await uploadImageToArvan(item);
-    uploadedImages.push(url);
+  if (element) {
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   }
-}
+};
+
+
+  const handleSubmit = async () => {
+  if (isSubmitting) return;
+
+  const token = localStorage.getItem("genino_token");
+  const vendorId = localStorage.getItem("genino_vendor_id");
+
+  if (!token || !vendorId || vendorId === "undefined") {
+    alert(
+      "نشست فروشنده منقضی شده است. لطفاً دوباره وارد حساب فروشنده شوید."
+    );
+
+    localStorage.removeItem("genino_token");
+    localStorage.removeItem("genino_refresh_token");
+    localStorage.removeItem("genino_vendor_id");
+
+    navigate("/", { replace: true });
+    return;
+  }
+
+  setIsSubmitting(true);
+
     const hasInvalidCategoryLink = categoryLinks.some(
   (item) =>
     !item.category ||
@@ -367,43 +647,131 @@ for (const item of images) {
 );
 
 const hasInvalidInventoryRow = inventoryRows.some(
-  (row) =>
-    !row.size ||
-    !row.colorName ||
-    !row.colorHex ||
-    !row.quantity ||
-    !row.unit
+  (sizeItem) =>
+    !sizeItem.size ||
+    !sizeItem.colors.length ||
+    sizeItem.colors.some(
+      (color) =>
+        !color.colorName ||
+        !color.colorHex ||
+        !color.quantity ||
+        !color.unit
+    )
 );
 
+const missingFields = [];
+
+if (!title) missingFields.push("نام کالا");
+if (!brandFa) missingFields.push("برند فارسی");
+if (!brandEn) missingFields.push("برند انگلیسی");
+if (!material) missingFields.push("جنس کالا");
+if (!price) missingFields.push("قیمت");
+if (!description) missingFields.push("توضیحات کالا");
+
+if (images.length === 0) {
+  missingFields.push("تصاویر کالا");
+}
+
+if (gender.length === 0) {
+  missingFields.push("جنسیت");
+}
+
+if (seasons.length === 0) {
+  missingFields.push("فصل");
+}
+
+if (ageRanges.length === 0) {
+  missingFields.push("بازه سنی");
+}
+
+if (!madeInCountry) {
+  missingFields.push("کشور سازنده");
+}
+
+if (!weight) missingFields.push("وزن");
+if (!length) missingFields.push("طول");
+if (!width) missingFields.push("عرض");
+if (!height) missingFields.push("ارتفاع");
+
+if (!hasWarranty) {
+  missingFields.push("وضعیت گارانتی");
+}
+
 if (
-  !title ||
-  !brandFa ||
-  !brandEn ||
-  !material ||
-  !price ||
-  !description ||
-  images.length === 0 ||
-  gender.length === 0 ||
-  seasons.length === 0 ||
-  ageRanges.length === 0 ||
-  !madeInCountry ||
-  !weight ||
-  !length ||
-  !width ||
-  !height ||
-  !hasWarranty ||
-  (hasWarranty === "دارد" && !warrantyPeriod) ||
-  standards.length === 0 ||
-  careInstructions.length === 0 ||
-  hasInvalidCategoryLink ||
-  hasInvalidInventoryRow 
+  hasWarranty === "دارد" &&
+  !warrantyPeriod
 ) {
-  alert("لطفاً تمام اطلاعات محصول را تکمیل کرده و حداقل یک تصویر انتخاب کنید.");
+  missingFields.push("مدت گارانتی");
+}
+
+if (standards.length === 0) {
+  missingFields.push("استانداردها");
+}
+
+if (careInstructions.length === 0) {
+  missingFields.push("روش نگهداری");
+}
+
+if (hasInvalidCategoryLink) {
+  missingFields.push("دسته‌بندی کالا");
+}
+
+if (hasInvalidInventoryRow) {
+  missingFields.push("موجودی کالا");
+}
+
+if (discountType !== "NONE") {
+  const numericDiscount = Number(discountValue || 0);
+  const numericPrice = Number(price.replace(/,/g, "") || 0);
+
+  if (!numericDiscount || numericDiscount <= 0) {
+    missingFields.push("مقدار تخفیف");
+  }
+
+  if (
+    discountType === "PERCENT" &&
+    numericDiscount > 90
+  ) {
+    missingFields.push("درصد تخفیف حداکثر ۹۰٪");
+  }
+
+  if (
+    discountType === "AMOUNT" &&
+    numericDiscount > numericPrice * 0.9
+  ) {
+    missingFields.push("مبلغ تخفیف حداکثر ۹۰٪ قیمت");
+  }
+}
+
+if (
+  discountType !== "NONE" &&
+  discountStartAt &&
+  discountEndAt
+) {
+  const startIso = persianToGregorianIso(discountStartAt);
+  const endIso = persianToGregorianIso(discountEndAt, true);
+
+  if (!startIso || !endIso) {
+    missingFields.push("تاریخ تخفیف معتبر");
+  } else if (new Date(endIso) < new Date(startIso)) {
+    missingFields.push("تاریخ پایان تخفیف");
+  }
+}
+
+if (missingFields.length > 0) {
+
+  setValidationErrors(missingFields);
+
   setIsSubmitting(false);
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+
   return;
 }
 
-    const vendorId = localStorage.getItem("genino_vendor_id");
 
     if (!vendorId) {
       alert("فروشنده یافت نشد");
@@ -411,9 +779,35 @@ if (
       return;
     }
 
-    const payload = {
+
+
+    try {
+  const uploadedImages = [];
+
+  for (const item of images) {
+    if (typeof item === "string") {
+      uploadedImages.push(item);
+    } else {
+      const url = await uploadImageToArvan(item);
+      uploadedImages.push(url);
+    }
+  }
+
+  const payload = {
   title,
   price: price.replace(/,/g, ""),
+  discountType,
+discountValue:
+  discountValue ? Number(discountValue) : null,
+discountStartAt:
+  discountType !== "NONE" && discountStartAt
+    ? persianToGregorianIso(discountStartAt)
+    : null,
+
+discountEndAt:
+  discountType !== "NONE" && discountEndAt
+    ? persianToGregorianIso(discountEndAt, true)
+    : null,
   description,
 
   images: uploadedImages,
@@ -439,56 +833,52 @@ if (
   warrantyPeriod,
   warrantyUnit,
   careNote,
-  mainImageIndex: 0,
-  vendorId: localStorage.getItem("genino_vendor_id"),
+
+  mainImageIndex,
+  vendorId,
 };
 
-
-
-
-
-    try {
-      console.log("vendorId:", vendorId);
-      if (!vendorId || vendorId === "undefined") {
-  alert("vendorId وجود ندارد - لطفاً دوباره لاگین کنید");
-  setIsSubmitting(false);
-  return;
-}
-
-
-      const res = await fetch(
-  isEditMode
-    ? `${import.meta.env.VITE_API_BASE_URL}/vendor-products/${productId}`
-    : `${import.meta.env.VITE_API_BASE_URL}/vendor-products/create`,
-  {
-    method: isEditMode ? "PUT" : "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("genino_token")}`,
-    },
-    body: JSON.stringify(payload),
-  }
-);
-
-
-      const data = await res.json();
-
-      if (!data.ok) {
-        alert(data.message || "خطا در ثبت محصول");
-        setIsSubmitting(false);
-        return;
-      }
-
-      setShowSuccessModal(true);
-
-setTimeout(() => {
-  navigate(`/vendor/shop/${vendorId}`);
-}, 1600);
-    } catch (err) {
-      console.error(err);
-      alert("خطا در ارتباط با سرور");
-      setIsSubmitting(false);
+  const res = await fetch(
+    isEditMode
+      ? `${import.meta.env.VITE_API_BASE_URL}/vendor-products/${productId}`
+      : `${import.meta.env.VITE_API_BASE_URL}/vendor-products/create`,
+    {
+      method: isEditMode ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
     }
+  );
+
+  const data = await res.json();
+
+  if (!data.ok) {
+    throw new Error(data.message || "خطا در ثبت محصول");
+  }
+
+  setShowSuccessModal(true);
+
+  setTimeout(() => {
+  navigate(
+    getReturnPath(vendorId),
+    {
+      replace: true,
+    }
+  );
+}, 1600);
+
+} catch (err) {
+  console.error("VENDOR PRODUCT SUBMIT ERROR:", err);
+
+  alert(
+    err.message ||
+      "ثبت محصول انجام نشد. لطفاً اتصال اینترنت و وضعیت ورود را بررسی کنید."
+  );
+} finally {
+  setIsSubmitting(false);
+}
 
     
   };
@@ -629,12 +1019,15 @@ const toggleGender = (value) => {
   return (
     <main className="min-h-screen bg-[#f8f1e7] p-4 text-right">
 
+
+  
+
       <h1 className="text-xl font-black text-[#6f4a18] mb-4">
         {isEditMode ? "ویرایش محصول" : "افزودن محصول جدید"}
       </h1>
 
       {/* عنوان */}
-      <div className="mb-4">
+      <div id="title-section" className="mb-4">
   <label className="mb-2 block text-sm font-bold text-[#6f4a18]">
     نام کالا
   </label>
@@ -643,23 +1036,27 @@ const toggleGender = (value) => {
     value={title}
     onChange={(e) => setTitle(e.target.value)}
     placeholder="نام کالا را وارد کنید"
-    className="
-      w-full rounded-2xl
-      border border-yellow-200
-      bg-white
-      px-4 py-3
-      shadow-sm
-      transition
-      focus:border-[#d4af37]
-      focus:ring-4
-      focus:ring-yellow-100
-      outline-none
-    "
+    className={`
+w-full rounded-2xl
+bg-white
+px-4 py-3
+shadow-sm
+outline-none
+transition
+focus:ring-4
+focus:ring-yellow-100
+
+${
+ hasError("نام کالا")
+ ? "border border-red-400 ring-2 ring-red-100"
+ : "border border-yellow-200 focus:border-[#d4af37]"
+}
+`}
   />
 </div>
 
 {/* برند فارسی */}
-<div className="mb-4">
+<div id="brand-fa-section" className="mb-4">
   <label className="mb-2 block text-sm font-bold text-[#6f4a18]">
     برند (فارسی)
   </label>
@@ -668,12 +1065,27 @@ const toggleGender = (value) => {
     value={brandFa}
     onChange={(e) => setBrandFa(e.target.value)}
     placeholder="برند کالا را به فارسی وارد کنید"
-    className="w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none transition focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
+    className={`
+w-full rounded-2xl
+bg-white
+px-4 py-3
+shadow-sm
+outline-none
+transition
+focus:ring-4
+focus:ring-yellow-100
+
+${
+ hasError("برند فارسی")
+ ? "border border-red-400 ring-2 ring-red-100"
+ : "border border-yellow-200 focus:border-[#d4af37]"
+}
+`}
   />
 </div>
 
 {/* برند انگلیسی */}
-<div className="mb-4">
+<div id="brand-en-section" className="mb-4">
   <label className="mb-2 block text-sm font-bold text-[#6f4a18]">
     برند (English)
   </label>
@@ -682,7 +1094,22 @@ const toggleGender = (value) => {
     value={brandEn}
     onChange={(e) => setBrandEn(e.target.value)}
     placeholder="برند کالا را به انگلیسی وارد کنید"
-    className="w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none transition focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
+    className={`
+w-full rounded-2xl
+bg-white
+px-4 py-3
+shadow-sm
+outline-none
+transition
+focus:ring-4
+focus:ring-yellow-100
+
+${
+ hasError("برند انگلیسی")
+ ? "border border-red-400 ring-2 ring-red-100"
+ : "border border-yellow-200 focus:border-[#d4af37]"
+}
+`}
   />
 </div>
 
@@ -694,7 +1121,22 @@ const toggleGender = (value) => {
 <select
   value={madeInCountry}
   onChange={(e) => setMadeInCountry(e.target.value)}
-  className="w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none transition focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
+  className={`
+w-full rounded-2xl
+bg-white
+px-4 py-3
+shadow-sm
+outline-none
+transition
+focus:ring-4
+focus:ring-yellow-100
+
+${
+ hasError("کشور سازنده")
+ ? "border border-red-400 ring-2 ring-red-100"
+ : "border border-yellow-200 focus:border-[#d4af37]"
+}
+`}
 >
   <option value="">کشور سازنده را انتخاب کنید</option>
 
@@ -706,7 +1148,7 @@ const toggleGender = (value) => {
 </select>
 
 {/* جنس کالا */}
-<div className="mb-4">
+<div id="material-section" className="mb-4">
   <label className="mb-2 block text-sm font-bold text-[#6f4a18]">
     جنس کالا
   </label>
@@ -715,12 +1157,27 @@ const toggleGender = (value) => {
     value={material}
     onChange={(e) => setMaterial(e.target.value)}
     placeholder="جنس کالا را وارد کنید"
-    className="w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none transition focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
+    className={`
+w-full rounded-2xl
+bg-white
+px-4 py-3
+shadow-sm
+outline-none
+transition
+focus:ring-4
+focus:ring-yellow-100
+
+${
+ hasError("جنس کالا")
+ ? "border border-red-400 ring-2 ring-red-100"
+ : "border border-yellow-200 focus:border-[#d4af37]"
+}
+`}
   />
 </div>
 
       {/* قیمت */}
-      <div className="mb-4">
+      <div id="price-section" className="mb-4">
   <label className="mb-2 block text-sm font-bold text-[#6f4a18]">
     قیمت
   </label>
@@ -731,18 +1188,22 @@ const toggleGender = (value) => {
       onChange={handlePriceChange}
       inputMode="numeric"
       placeholder="قیمت کالا را وارد کنید"
-      className="
-        w-full rounded-2xl
-        border border-yellow-200
-        bg-white
-        py-3 pr-4 pl-16
-        shadow-sm
-        transition
-        outline-none
-        focus:border-[#d4af37]
-        focus:ring-4
-        focus:ring-yellow-100
-      "
+      className={`
+w-full rounded-2xl
+bg-white
+px-4 py-3
+shadow-sm
+outline-none
+transition
+focus:ring-4
+focus:ring-yellow-100
+
+${
+ hasError("قیمت")
+ ? "border border-red-400 ring-2 ring-red-100"
+ : "border border-yellow-200 focus:border-[#d4af37]"
+}
+`}
     />
 
     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-stone-500">
@@ -753,10 +1214,14 @@ const toggleGender = (value) => {
 
    
 {/* دسته‌بندی */  /* گروه کالا */  /* عنوان کالا */}
-<div className="mb-4">
+<div id="category-section" className="mb-4">
   <label className="mb-2 block text-sm font-bold text-[#6f4a18]">
-    اتصال کالا به دسته‌بندی‌ها
-  </label>
+  اتصال کالا به دسته‌بندی‌ها
+
+  <span className="mt-1 block text-xs font-medium leading-5 text-gray-500">
+    (حداکثر ۳ دسته‌بندی مرتبط انتخاب کنید. انتخاب صحیح دسته‌بندی باعث می‌شود کالای شما در بخش‌های مختلف ژنینو، جستجوها و فیلترهای مرتبط نمایش داده شود و شانس دیده شدن و فروش آن افزایش یابد.)
+  </span>
+</label>
 
   <div className="space-y-4">
     {categoryLinks.map((link, index) => {
@@ -797,7 +1262,22 @@ const toggleGender = (value) => {
             onChange={(e) =>
               updateCategoryLink(index, "category", e.target.value)
             }
-            className="mb-3 w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none transition focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
+            className={`
+w-full rounded-2xl
+bg-white
+px-4 py-3
+shadow-sm
+outline-none
+transition
+focus:ring-4
+focus:ring-yellow-100
+
+${
+ hasError("دسته‌بندی کالا")
+ ? "border border-red-400 ring-2 ring-red-100"
+ : "border border-yellow-200 focus:border-[#d4af37]"
+}
+`}
           >
             <option value="">دسته‌بندی کالا را انتخاب کنید</option>
 
@@ -859,109 +1339,456 @@ const toggleGender = (value) => {
   )}
 </div>
 
+{/* تخفیف محصول */}
+
+<div className="mb-5 rounded-3xl border border-yellow-200 bg-white p-5 shadow-sm">
+
+<label className="mb-3 block text-sm font-bold text-[#6f4a18]">
+  تخفیف محصول
+</label>
+
+
+<div className="flex flex-wrap gap-3">
+
+{[
+  {value:"NONE", label:"بدون تخفیف"},
+  {value:"PERCENT", label:"درصدی"},
+  {value:"AMOUNT", label:"مبلغ ثابت"},
+].map(item=>(
+
+<button
+key={item.value}
+type="button"
+onClick={() => {
+  setDiscountType(item.value);
+
+  if (item.value === "NONE") {
+    setDiscountValue("");
+    setDiscountStartAt("");
+    setDiscountEndAt("");
+  }
+}}
+className={`
+rounded-xl px-4 py-2 font-bold transition
+
+${
+discountType === item.value
+?
+"bg-[#d4af37] text-white"
+:
+"border border-yellow-200 bg-white text-[#6f4a18]"
+}
+
+`}
+>
+{item.label}
+</button>
+
+))}
+
+</div>
+
+
+{discountType !== "NONE" && (
+
+<div className="mt-4">
+
+
+<label className="mb-2 block text-xs font-bold text-gray-600">
+{
+discountType === "PERCENT"
+?
+"درصد تخفیف (حداکثر ۹۰٪)"
+:
+"مبلغ تخفیف (حداکثر ۹۰٪ قیمت کالا)"
+}
+</label>
+
+
+<input
+value={
+  discountType === "AMOUNT"
+    ? formatPrice(discountValue)
+    : discountValue
+}
+onChange={(e)=>{
+
+  const value =
+    e.target.value.replace(/\D/g,"");
+
+  setDiscountValue(value);
+
+}}
+inputMode="numeric"
+placeholder="مقدار تخفیف"
+className="
+w-full rounded-2xl
+border border-yellow-200
+bg-white px-4 py-3
+"
+/>
+
+
+
+<div className="mt-4">
+
+<p className="mb-2 text-xs font-bold text-gray-600">
+مدت تخفیف
+</p>
+
+
+<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+  <div>
+    <label className="mb-2 block text-xs font-bold text-gray-500">
+      تاریخ شروع تخفیف
+    </label>
+
+    <DatePicker
+      calendar={persian}
+      locale={persian_fa}
+      value={discountStartAt}
+      onChange={(date) =>
+        setDiscountStartAt(
+          date ? date.format("YYYY-MM-DD") : ""
+        )
+      }
+      format="YYYY/MM/DD"
+      portal
+      containerStyle={{
+        width: "100%",
+        zIndex: 3000,
+      }}
+      inputClass="
+        w-full rounded-xl
+        border border-yellow-200
+        bg-white px-3 py-2
+        text-right outline-none
+        transition
+        focus:border-[#d4af37]
+        focus:ring-4
+        focus:ring-yellow-100
+      "
+      placeholder="انتخاب تاریخ شروع"
+    />
+  </div>
+
+  <div>
+    <label className="mb-2 block text-xs font-bold text-gray-500">
+      تاریخ پایان تخفیف
+    </label>
+
+    <DatePicker
+      calendar={persian}
+      locale={persian_fa}
+      value={discountEndAt}
+      onChange={(date) =>
+        setDiscountEndAt(
+          date ? date.format("YYYY-MM-DD") : ""
+        )
+      }
+      format="YYYY/MM/DD"
+      minDate={
+  discountStartAt
+    ? new DateObject({
+        date: discountStartAt,
+        format: "YYYY-MM-DD",
+        calendar: persian,
+        locale: persian_fa,
+      })
+    : undefined
+}
+      portal
+      containerStyle={{
+        width: "100%",
+        zIndex: 3000,
+      }}
+      inputClass="
+        w-full rounded-xl
+        border border-yellow-200
+        bg-white px-3 py-2
+        text-right outline-none
+        transition
+        focus:border-[#d4af37]
+        focus:ring-4
+        focus:ring-yellow-100
+      "
+      placeholder="انتخاب تاریخ پایان"
+    />
+  </div>
+
+</div>
+
+<p className="mt-2 text-xs text-gray-500">
+در صورت خالی گذاشتن تاریخ‌ها، تخفیف بدون محدودیت زمانی خواهد بود.
+</p>
+
+</div>
+
+
+</div>
+
+)}
+
+</div>
+
 
 
 {/* موجودی کالا */}
-<div className="mb-4">
+<div id="inventory-section" className="mb-4">
   <label className="mb-2 block text-sm font-bold text-[#6f4a18]">
     موجودی کالا
   </label>
 
-  <div className="space-y-4">
-    {inventoryRows.map((row, index) => (
+  <div className="space-y-5">
+
+    {inventoryRows.map((sizeItem, sizeIndex) => (
+
       <div
-        key={index}
+        key={sizeIndex}
         className="rounded-2xl border border-yellow-200 bg-white p-4 shadow-sm"
       >
+
         <div className="mb-3 flex items-center justify-between">
+
           <p className="text-sm font-black text-[#6f4a18]">
-            ردیف {index + 1}
+            سایز شماره {sizeIndex + 1}
           </p>
+
 
           {inventoryRows.length > 1 && (
             <button
               type="button"
-              onClick={() => removeInventoryRow(index)}
+              onClick={() => removeInventorySize(sizeIndex)}
               className="text-xs font-bold text-red-500"
             >
-              حذف
+              حذف سایز
             </button>
           )}
+
         </div>
 
+
+        {/* سایز */}
         <input
-          value={row.size}
+          value={sizeItem.size}
           onChange={(e) =>
-            updateInventoryRow(index, "size", e.target.value)
+            updateInventorySize(
+              sizeIndex,
+              e.target.value
+            )
           }
-          placeholder="سایز کالا؛ مثلا ۱ تا ۲ سال"
-          className="mb-3 w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
+          placeholder="مثلا ۱ تا ۲ سال"
+          className={`
+w-full rounded-2xl
+bg-white
+px-4 py-3
+shadow-sm
+outline-none
+transition
+focus:ring-4
+focus:ring-yellow-100
+
+${
+ hasError("موجودی کالا")
+ ? "border border-red-400 ring-2 ring-red-100"
+ : "border border-yellow-200 focus:border-[#d4af37]"
+}
+`}
         />
 
-        <select
-          value={row.colorName}
-          onChange={(e) => {
-            const selected = productColors.find(
-              (color) => color.name === e.target.value
-            );
 
-            updateInventoryRow(index, "colorName", selected?.name || "");
-            updateInventoryRow(index, "colorHex", selected?.hex || "");
-          }}
-          className="mb-3 w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
-        >
-          <option value="">رنگ کالا را انتخاب کنید</option>
+        {/* رنگ‌ها */}
 
-          {productColors.map((color) => (
-            <option key={color.name} value={color.name}>
-              {color.name}
-            </option>
+        <p className="mb-3 text-sm font-bold text-[#6f4a18]">
+          رنگ‌ها و موجودی
+        </p>
+
+
+        <div className="space-y-3">
+
+          {sizeItem.colors.map((color, colorIndex)=>(
+
+            <div
+              key={colorIndex}
+              className="
+              rounded-xl
+              border border-yellow-100
+              bg-yellow-50
+              p-3
+              "
+            >
+
+              <div className="flex gap-2">
+
+                <select
+                  value={color.colorName}
+                  onChange={(e)=>{
+
+                    const selected =
+                    productColors.find(
+                      c=>c.name===e.target.value
+                    );
+
+                    updateInventoryColor(
+                      sizeIndex,
+                      colorIndex,
+                      "colorName",
+                      selected?.name || ""
+                    );
+
+                    updateInventoryColor(
+                      sizeIndex,
+                      colorIndex,
+                      "colorHex",
+                      selected?.hex || ""
+                    );
+
+                  }}
+
+                  className="
+                  w-1/2 rounded-xl
+                  border border-yellow-200
+                  bg-white px-3 py-2
+                  "
+                >
+
+                  <option value="">
+                    انتخاب رنگ
+                  </option>
+
+                  {productColors.map((c)=>(
+                    <option
+                      key={c.name}
+                      value={c.name}
+                    >
+                      {c.name}
+                    </option>
+                  ))}
+
+                </select>
+
+
+                <input
+                  value={color.quantity}
+                  onChange={(e)=>
+                    updateInventoryColor(
+                      sizeIndex,
+                      colorIndex,
+                      "quantity",
+                      e.target.value
+                    )
+                  }
+                  placeholder="تعداد"
+                  className="
+                  w-1/2 rounded-xl
+                  border border-yellow-200
+                  bg-white px-3 py-2
+                  "
+                />
+
+              </div>
+
+
+              <div className="mt-2 flex items-center justify-between">
+
+                <select
+                  value={color.unit}
+                  onChange={(e)=>
+                    updateInventoryColor(
+                      sizeIndex,
+                      colorIndex,
+                      "unit",
+                      e.target.value
+                    )
+                  }
+                  className="
+                  rounded-xl
+                  border border-yellow-200
+                  bg-white px-3 py-2
+                  "
+                >
+
+                  <option value="عدد">
+                    عدد
+                  </option>
+
+                  <option value="جفت">
+                    جفت
+                  </option>
+
+                  <option value="بسته">
+                    بسته
+                  </option>
+
+                  <option value="ست">
+                    ست
+                  </option>
+
+                </select>
+
+
+                {sizeItem.colors.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeInventoryColor(
+                        sizeIndex,
+                        colorIndex
+                      )
+                    }
+                    className="text-xs font-bold text-red-500"
+                  >
+                    حذف رنگ
+                  </button>
+                )}
+
+              </div>
+
+            </div>
+
           ))}
-        </select>
 
-        {row.colorHex && (
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold text-stone-500">
-            <span
-              className="h-5 w-5 rounded-full border border-stone-300"
-              style={{ backgroundColor: row.colorHex }}
-            />
-            {row.colorName}
-          </div>
-        )}
+        </div>
 
-        <input
-          value={row.quantity}
-          onChange={(e) =>
-            updateInventoryRow(index, "quantity", e.target.value)
+
+        <button
+          type="button"
+          onClick={() =>
+            addInventoryColor(sizeIndex)
           }
-          placeholder="میزان موجودی"
-          className="mb-3 w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
-        />
-
-        <select
-          value={row.unit}
-          onChange={(e) =>
-            updateInventoryRow(index, "unit", e.target.value)
-          }
-          className="w-full rounded-2xl border border-yellow-200 bg-white px-4 py-3 shadow-sm outline-none focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
+          className="
+          mt-3 w-full rounded-xl
+          border border-yellow-300
+          bg-yellow-50 py-2
+          text-sm font-bold text-[#7a5526]
+          "
         >
-          <option value="">واحد شمارش را انتخاب کنید</option>
-          <option value="عدد">عدد</option>
-          <option value="جفت">جفت</option>
-          <option value="بسته">بسته</option>
-          <option value="ست">ست</option>
-        </select>
+          + افزودن رنگ
+        </button>
+
+
       </div>
+
     ))}
+
   </div>
+
 
   <button
     type="button"
-    onClick={addInventoryRow}
-    className="mt-3 w-full rounded-2xl border border-yellow-300 bg-yellow-50 py-3 text-sm font-black text-[#7a5526]"
+    onClick={addInventorySize}
+    className="
+    mt-4 w-full rounded-2xl
+    border border-yellow-300
+    bg-yellow-50 py-3
+    text-sm font-black text-[#7a5526]
+    "
   >
-    + افزودن ردیف موجودی
+    + افزودن سایز جدید
   </button>
+
+
 </div>
 
 
@@ -991,7 +1818,16 @@ const toggleGender = (value) => {
     مناسب برای چه جنسیتی؟
   </label>
 
-  <div className="mb-5 flex flex-wrap gap-3">
+  <div
+  className={`
+  mb-5 flex flex-wrap gap-3 rounded-2xl p-2
+  ${
+    hasError("جنسیت")
+      ? "border border-red-400 bg-red-50 ring-2 ring-red-100"
+      : ""
+  }
+  `}
+>
 
     {[
       "دخترانه",
@@ -1023,7 +1859,16 @@ const toggleGender = (value) => {
     مناسب برای چه فصلی؟
   </label>
 
-  <div className="flex flex-wrap gap-3">
+  <div
+  className={`
+  flex flex-wrap gap-3 rounded-2xl p-2
+  ${
+    hasError("فصل")
+      ? "border border-red-400 bg-red-50 ring-2 ring-red-100"
+      : ""
+  }
+  `}
+>
 
     {seasonOptions.map((season) => (
 
@@ -1051,7 +1896,16 @@ const toggleGender = (value) => {
   مناسب برای چه بازه سنی؟
 </label>
 
-<div className="flex flex-wrap gap-3">
+<div
+  className={`
+  flex flex-wrap gap-3 rounded-2xl p-2
+  ${
+    hasError("بازه سنی")
+      ? "border border-red-400 bg-red-50 ring-2 ring-red-100"
+      : ""
+  }
+  `}
+>
   {ageRangeOptions.map((item) => (
     <button
       key={item}
@@ -1090,7 +1944,19 @@ const toggleGender = (value) => {
 
         <input
           value={item.value}
-          onChange={(e) => item.setValue(e.target.value.replace(/\D/g, ""))}
+          onChange={(e) => {
+  const value = e.target.value;
+
+  if (item.label === "وزن") {
+    item.setValue(
+      value.replace(/[^0-9.]/g, "")
+    );
+  } else {
+    item.setValue(
+      value.replace(/\D/g, "")
+    );
+  }
+}}
           placeholder={item.unit}
           className="w-full rounded-xl border border-yellow-200 bg-white px-2 py-3 text-center text-sm shadow-sm outline-none focus:border-[#d4af37] focus:ring-4 focus:ring-yellow-100"
         />
@@ -1126,7 +1992,16 @@ const toggleGender = (value) => {
     گارانتی کالا
   </label>
 
-  <div className="flex gap-3 mb-3">
+  <div
+  className={`
+  flex gap-3 mb-3 rounded-2xl p-2
+  ${
+    hasError("وضعیت گارانتی")
+      ? "border border-red-400 bg-red-50 ring-2 ring-red-100"
+      : ""
+  }
+  `}
+>
     {["دارد", "ندارد"].map((item) => (
       <button
         key={item}
@@ -1172,7 +2047,16 @@ const toggleGender = (value) => {
     استانداردها و مجوزهای کالا
   </label>
 
-  <div className="flex flex-wrap gap-3">
+  <div
+  className={`
+  flex flex-wrap gap-3 rounded-2xl p-2
+  ${
+    hasError("استانداردها")
+      ? "border border-red-400 bg-red-50 ring-2 ring-red-100"
+      : ""
+  }
+  `}
+>
     {standardOptions.map((item) => (
       <button
         key={item}
@@ -1196,7 +2080,16 @@ const toggleGender = (value) => {
     شرایط و روش نگهداری کالا
   </label>
 
-  <div className="flex flex-wrap gap-3">
+  <div
+  className={`
+  flex flex-wrap gap-3 rounded-2xl p-2
+  ${
+    hasError("روش نگهداری")
+      ? "border border-red-400 bg-red-50 ring-2 ring-red-100"
+      : ""
+  }
+  `}
+>
     {careOptions.map((item) => (
       <button
         key={item}
@@ -1262,7 +2155,7 @@ const toggleGender = (value) => {
 </div>
 
       {/* آپلود تصاویر حرفه‌ای */}
-<div className="mb-5">
+<div id="images-section" className="mb-5">
   <label className="mb-2 block text-sm font-bold text-[#6f4a18]">
     تصاویر کالا
   </label>
@@ -1413,10 +2306,14 @@ const toggleGender = (value) => {
       </h2>
 
       <p className="mt-2 text-sm leading-6 text-gray-500">
-       {isEditMode
-  ? "تغییرات محصول با موفقیت ذخیره شد و تا چند لحظه دیگر به فروشگاه منتقل می‌شوید."
-  : "محصول شما در فروشگاه ثبت شد و تا چند لحظه دیگر به صفحه فروشگاه منتقل می‌شوید."}
-      </p>
+  {isEditMode
+    ? isSchoolSource
+      ? "تغییرات محصول با موفقیت ذخیره شد و تا چند لحظه دیگر به صفحه مدرسه منتقل می‌شوید."
+      : "تغییرات محصول با موفقیت ذخیره شد و تا چند لحظه دیگر به فروشگاه منتقل می‌شوید."
+    : isSchoolSource
+      ? "محصول با موفقیت ثبت شد و تا چند لحظه دیگر به صفحه مدرسه منتقل می‌شوید."
+      : "محصول شما در فروشگاه ثبت شد و تا چند لحظه دیگر به صفحه فروشگاه منتقل می‌شوید."}
+</p>
 
       <div className="mx-auto mt-5 h-1.5 w-32 overflow-hidden rounded-full bg-yellow-100">
         <div className="h-full w-full animate-pulse rounded-full bg-[#d4af37]" />
@@ -1450,6 +2347,21 @@ const toggleGender = (value) => {
     : "ثبت محصول"}
 </button>
 
+{validationErrors.length > 0 && (
+  <div className="
+    mt-3
+    text-center
+    text-xs
+    font-bold
+    text-red-500
+    leading-6
+  ">
+    لطفاً {validationErrors.length} مورد زیر را تکمیل کنید:
+    <span className="mr-1">
+      {validationErrors.join("، ")}
+    </span>
+  </div>
+)}
     </main>
   );
 }

@@ -1,3 +1,4 @@
+// D:\projects\Genino\genino-web\src\pages\GeninoChildren.jsx
 import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, RotateCcw, Sparkles, Trophy, Heart, Star } from "lucide-react";
@@ -10,7 +11,7 @@ import {
 import logo from "../assets/logo-genino.png";
 import childrenHero from "../assets/genino-children-page.jpg";
 import { Baby } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const sampleChildren = Array.from({ length: 20 }).map((_, index) => ({
   id: index + 1,
@@ -140,6 +141,7 @@ const primaryButton =
   "rounded-2xl bg-gradient-to-l from-yellow-500 via-amber-400 to-yellow-300 px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-yellow-400/25 transition hover:-translate-y-0.5 hover:shadow-xl";
 
 export default function GeninoChildren() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedChild, setSelectedChild] = useState(null);
@@ -237,6 +239,164 @@ const getIssuerRoleLabel = (role) => {
   };
 
   return map[role] || role || "عضو درختواره";
+};
+
+
+const getVendorIssuerInfo = (item) => {
+  const vendor = item?.issuerVendor;
+
+  if (!vendor) return null;
+
+  if (vendor.schoolProfile) {
+    return {
+      vendorId: vendor.id,
+      profileId: vendor.schoolProfile.id,
+      type: "SCHOOL",
+      typeLabel: "مدرسه",
+      name: vendor.schoolProfile.schoolName || vendor.businessName,
+      image: vendor.avatarUrl || logo,
+      city: vendor.city || "شهر ثبت نشده",
+    };
+  }
+
+  if (vendor.kindergartenProfile) {
+    return {
+      vendorId: vendor.id,
+      profileId: vendor.kindergartenProfile.id,
+      type: "KINDERGARTEN",
+      typeLabel: "مهدکودک",
+      name: vendor.kindergartenProfile.kindergartenName || vendor.businessName,
+      image: vendor.avatarUrl || logo,
+      city: vendor.city || "شهر ثبت نشده",
+    };
+  }
+
+  if (vendor.playhouseProfile) {
+    return {
+      vendorId: vendor.id,
+      profileId: vendor.playhouseProfile.id,
+      type: "PLAYHOUSE",
+      typeLabel: "خانه بازی",
+      name: vendor.playhouseProfile.playhouseName || vendor.businessName,
+      image: vendor.avatarUrl || logo,
+      city: vendor.city || "شهر ثبت نشده",
+    };
+  }
+
+  if (vendor.educationClassProfile) {
+    return {
+      vendorId: vendor.id,
+      profileId: vendor.educationClassProfile.id,
+      type: "EDUCATION_CLASS",
+      typeLabel: "کلاس آموزشی",
+      name: vendor.educationClassProfile.centerName || vendor.businessName,
+      image: vendor.avatarUrl || logo,
+      city: vendor.city || "شهر ثبت نشده",
+    };
+  }
+
+  if (vendor.artClassProfile) {
+    return {
+      vendorId: vendor.id,
+      profileId: vendor.artClassProfile.id,
+      type: "ART_CLASS",
+      typeLabel: "کلاس هنری",
+      name: vendor.artClassProfile.centerName || vendor.businessName,
+      image: vendor.avatarUrl || logo,
+      city: vendor.city || "شهر ثبت نشده",
+    };
+  }
+
+  if (vendor.sportClassProfile) {
+    return {
+      vendorId: vendor.id,
+      profileId: vendor.sportClassProfile.id,
+      type: "SPORT_CLASS",
+      typeLabel: "کلاس ورزشی",
+      name: vendor.sportClassProfile.centerName || vendor.businessName,
+      image: vendor.avatarUrl || logo,
+      city: vendor.city || "شهر ثبت نشده",
+    };
+  }
+
+  if (vendor.privateTeacherProfile) {
+    return {
+      vendorId: vendor.id,
+      profileId: vendor.privateTeacherProfile.id,
+      type: "PRIVATE_TUTOR",
+      typeLabel: "معلم خصوصی",
+      name: vendor.privateTeacherProfile.teacherName || vendor.businessName,
+      image: vendor.avatarUrl || logo,
+      city: vendor.city || "شهر ثبت نشده",
+    };
+  }
+
+  return {
+    vendorId: vendor.id,
+    profileId: null,
+    type: item?.issuerType || "VENDOR",
+    typeLabel: vendor.mainActivityField || "ارائه‌دهنده خدمات",
+    name: vendor.businessName || "ارائه‌دهنده خدمات ژنینو",
+    image: vendor.avatarUrl || logo,
+    city: vendor.city || "شهر ثبت نشده",
+  };
+};
+
+
+const getAchievementIssuerInfo = (item) => {
+  const vendorInfo = getVendorIssuerInfo(item);
+
+  if (vendorInfo) {
+    return {
+      ...vendorInfo,
+      isVendor: true,
+      isFamily: false,
+    };
+  }
+
+  return {
+    userId: item?.issuerUser?.id,
+    type: "USER",
+    typeLabel: getIssuerRoleLabel(item?.issuerRole),
+    name: item?.issuerUser?.fullName || "صادرکننده ژنینویی",
+    image: item?.issuerUser?.avatarUrl || logo,
+    city: item?.issuerUser?.city || "شهر ثبت نشده",
+    isVendor: false,
+    isFamily: true,
+  };
+};
+
+const goToIssuerPage = (issuer) => {
+  if (!issuer) return;
+
+  if (issuer.isFamily) {
+    setShowIssuerInfoModal(true);
+    return;
+  }
+
+  if (!issuer.vendorId) {
+    alert("اطلاعات صفحه صادرکننده کامل نیست.");
+    return;
+  }
+
+  const vendorRoutes = {
+    SCHOOL: `/vendor/service/school/${issuer.vendorId}`,
+    KINDERGARTEN: `/vendor/service/kindergarten/${issuer.vendorId}`,
+    PLAYHOUSE: `/vendor/service/playhouse/${issuer.vendorId}`,
+    EDUCATION_CLASS: `/vendor/service/education-class/${issuer.vendorId}`,
+    ART_CLASS: `/vendor/service/art-class/${issuer.vendorId}`,
+    SPORT_CLASS: `/vendor/service/sport-class/${issuer.vendorId}`,
+    PRIVATE_TUTOR: `/vendor/service/private-teacher/${issuer.vendorId}`,
+  };
+
+  const targetRoute = vendorRoutes[issuer.type];
+
+  if (!targetRoute) {
+    alert("صفحه این صادرکننده در ژنینو تعریف نشده است.");
+    return;
+  }
+
+  navigate(targetRoute);
 };
 
   const filteredChildren = useMemo(() => {
@@ -785,84 +945,48 @@ if (!isLoggedIn) {
           </div>
 
           <div>
-            <p className="mb-2 text-center text-xs font-bold text-gray-500">
-              صادر کننده
-            </p>
+  <p className="mb-2 text-center text-xs font-bold text-gray-500">
+    صادر کننده
+  </p>
 
-            <div
-              onClick={() =>
-  setSelectedIssuer({
-    name:
-      item.issuerUser?.fullName ||
-      "صادرکننده ژنینویی",
+  {(() => {
+    const issuer = getAchievementIssuerInfo(item);
 
-    image:
-      item.issuerUser?.avatarUrl || logo,
-
-    role: item.issuerRole,
-    description: item.description,
-    achievementTitle: item.title,
-    city:
-  item.issuerUser?.city ||
-  "شهر ثبت نشده",
-
-specialty:
-  [
-    "father",
-    "mother",
-    "sister",
-    "brother",
-    "khale",
-    "amme",
-    "dayi",
-    "ammo",
-    "grandfather_paternal",
-    "grandmother_paternal",
-    "grandfather_maternal",
-    "grandmother_maternal",
-    "عضو درختواره",
-  ].includes(item.issuerRole)
-    ? getIssuerRoleLabel(item.issuerRole)
-: "همراهی تخصصی با رشد کودک",
-    isFamily:
-      [
-        "father",
-        "mother",
-        "sister",
-        "brother",
-        "khale",
-        "amme",
-        "dayi",
-        "ammo",
-        "grandfather_paternal",
-        "grandmother_paternal",
-        "grandfather_maternal",
-        "grandmother_maternal",
-        "عضو درختواره",
-      ].includes(item.issuerRole),
-  })
-}
-              className="flex h-[150px] cursor-pointer flex-col rounded-2xl border-2 border-[#d4af37] bg-white p-2 overflow-hidden hover:shadow-[0_0_14px_rgba(212,175,55,0.28)] transition"
-            >
-              <div className="flex h-[92px] flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-yellow-50">
-                {item.issuerUser?.avatarUrl ? (
-  <img
-    src={item.issuerUser.avatarUrl}
-    alt={item.issuerUser.fullName}
-    className="h-full w-full object-cover"
-  />
-) : (
-  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sky-50 to-yellow-50">
-    <Trophy className="h-10 w-10 text-yellow-500" />
-  </div>
-)}
-              </div>
-
-              <p className="flex h-[42px] items-center justify-center text-center text-xs font-extrabold text-gray-700 leading-5 line-clamp-2">
-                {item.issuerUser?.fullName || "صادرکننده ژنینویی"}
-              </p>
+    return (
+      <div
+        onClick={() =>
+          setSelectedIssuer({
+            ...issuer,
+            role: item.issuerRole,
+            description: item.description,
+            achievementTitle: item.title,
+            specialty: issuer.typeLabel,
+          })
+        }
+        className="flex h-[150px] cursor-pointer flex-col rounded-2xl border-2 border-[#d4af37] bg-white p-2 overflow-hidden hover:shadow-[0_0_14px_rgba(212,175,55,0.28)] transition"
+      >
+        <div className="flex h-[92px] flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-yellow-50">
+          {issuer.image ? (
+            <img
+              src={issuer.image}
+              alt={issuer.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sky-50 to-yellow-50">
+              <Trophy className="h-10 w-10 text-yellow-500" />
             </div>
-          </div>
+          )}
+        </div>
+
+        <p className="flex h-[42px] items-center justify-center text-center text-xs font-extrabold text-gray-700 leading-5 line-clamp-2">
+          {issuer.name}
+        </p>
+      </div>
+    );
+  })()}
+</div>
+
         </div>
       </div>
     ))}
@@ -870,240 +994,7 @@ specialty:
 </section>
 
 
-{/* باکس برترین دریافت کنندگان دستاورد */}
-<section className={`${sectionCard} bg-gradient-to-br from-rose-50/90 via-white/80 to-yellow-50/80`}>
-  <div className="mb-5 text-center">
-    <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-  <h2 className={`${goldenTitle} text-xl font-black sm:text-2xl`}>
-  برترین دریافت‌کنندگان دستاورد
-</h2>
 
-  <div className="flex items-center gap-2">
-    <span className="text-sm font-bold text-gray-700">
-      در سال
-    </span>
-
-    <select
-      value={selectedYear}
-      onChange={(e) => setSelectedYear(e.target.value)}
-      className="rounded-xl border-2 border-[#d4af37] bg-white px-3 py-2 text-sm font-bold text-gray-700 outline-none"
-    >
-      <option value="1405">1405</option>
-      <option value="1404">1404</option>
-      <option value="1403">1403</option>
-    </select>
-
-    <span className="text-sm font-bold text-gray-700">
-      ماه
-    </span>
-
-    <select
-      value={selectedMonth}
-      onChange={(e) => setSelectedMonth(e.target.value)}
-      className="rounded-xl border-2 border-[#d4af37] bg-white px-3 py-2 text-sm font-bold text-gray-700 outline-none"
-    >
-      <option>همه ماه‌ها</option>
-      <option>فروردین</option>
-      <option>اردیبهشت</option>
-      <option>خرداد</option>
-      <option>تیر</option>
-      <option>مرداد</option>
-      <option>شهریور</option>
-      <option>مهر</option>
-      <option>آبان</option>
-      <option>آذر</option>
-      <option>دی</option>
-      <option>بهمن</option>
-      <option>اسفند</option>
-    </select>
-  </div>
-</div>
-  </div>
-
-  <div
-  style={{ height: "500px" }}
-  className="overflow-y-auto overflow-x-auto rounded-[1.5rem] border border-rose-100 bg-white/90 shadow-inner"
->
-      <table className="w-full min-w-[900px] table-fixed border-collapse text-center text-sm">
-        <thead className="text-yellow-800">
-          <tr>
-            <th
-  style={{
-    backgroundColor: "#fff4cc",
-    backgroundImage: "none",
-    opacity: 1,
-    backdropFilter: "none",
-    WebkitBackdropFilter: "none",
-  }}
-  className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm"
->
-              رتبه
-            </th>
-            <th
-  style={{
-    backgroundColor: "#fff4cc",
-    backgroundImage: "none",
-    opacity: 1,
-    backdropFilter: "none",
-    WebkitBackdropFilter: "none",
-  }}
-  className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm"
->
-              نام
-            </th>
-            <th
-  style={{
-    backgroundColor: "#fff4cc",
-    backgroundImage: "none",
-    opacity: 1,
-    backdropFilter: "none",
-    WebkitBackdropFilter: "none",
-  }}
-  className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm"
->
-              دستاورد هنری
-            </th>
-            <th
-  style={{
-    backgroundColor: "#fff4cc",
-    backgroundImage: "none",
-    opacity: 1,
-    backdropFilter: "none",
-    WebkitBackdropFilter: "none",
-  }}
-  className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm"
->
-              دستاورد ورزشی
-            </th>
-            <th
-  style={{
-    backgroundColor: "#fff4cc",
-    backgroundImage: "none",
-    opacity: 1,
-    backdropFilter: "none",
-    WebkitBackdropFilter: "none",
-  }}
-  className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm"
->
-              دستاورد پرورشی
-            </th>
-            <th
-  style={{
-    backgroundColor: "#fff4cc",
-    backgroundImage: "none",
-    opacity: 1,
-    backdropFilter: "none",
-    WebkitBackdropFilter: "none",
-  }}
-  className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm"
->
-              دستاورد علمی
-            </th>
-            <th
-  style={{
-    backgroundColor: "#fff4cc",
-    backgroundImage: "none",
-    opacity: 1,
-    backdropFilter: "none",
-    WebkitBackdropFilter: "none",
-  }}
-  className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm"
->
-              دستاورد معنوی
-            </th>
-            <th
-  style={{
-    backgroundColor: "#fff4cc",
-    backgroundImage: "none",
-    opacity: 1,
-    backdropFilter: "none",
-    WebkitBackdropFilter: "none",
-  }}
-  className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm"
->
-              مجموع دستاوردها
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {topReceivers.map((item) => (
-            <tr key={item.rank} className="odd:bg-white even:bg-rose-50/70">
-              <td className="border-b border-rose-100 px-3 py-3 font-extrabold text-yellow-700">
-                {item.rank}
-              </td>
-
-              <td className="border-b border-rose-100 px-2 py-2">
-                <div
-  onClick={() => setSelectedChild(getFullChildForModal(item.child))}
-  style={{ width: "82px", height: "96px" }}
-  className="mx-auto flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-yellow-200 bg-white p-1.5 shadow-sm transition hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-[0_10px_25px_rgba(180,130,30,0.18)]"
->
-  <div
-    style={{ height: "60px" }}
-    className="flex flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-yellow-50"
-  >
-    {item.child?.photo ? (
-  <img
-    src={item.child.photo}
-    alt={item.child.fullName}
-    className="h-full w-full object-cover"
-  />
-) : (
-  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-yellow-50 to-pink-50">
-    <Baby className="h-10 w-10 text-yellow-500" />
-  </div>
-)}
-  </div>
-
-  <p
-    style={{ height: "26px" }}
-    className="flex items-center justify-center text-center text-[11px] font-extrabold text-gray-700 leading-4 line-clamp-1"
-  >
-    {item.child.fullName}
-  </p>
-</div>
-              </td>
-
-              <td
-  onClick={() => openAchievementList(item.child, "دستاورد هنری", item.art)}
-  className="cursor-pointer border-b border-rose-100 px-3 py-3 font-bold text-gray-700 hover:bg-yellow-50"
->
-                {item.art}
-              </td>
-              <td
-  onClick={() => openAchievementList(item.child, "دستاورد ورزشی", item.sport)}
-  className="cursor-pointer border-b border-rose-100 px-3 py-3 font-bold text-gray-700 hover:bg-yellow-50"
->
-                {item.sport}
-              </td>
-              <td
-  onClick={() => openAchievementList(item.child, "دستاورد پرورشی", item.nurture)}
-  className="cursor-pointer border-b border-rose-100 px-3 py-3 font-bold text-gray-700 hover:bg-yellow-50"
->
-                {item.nurture}
-              </td>
-              <td
-  onClick={() => openAchievementList(item.child, "دستاورد علمی", item.science)}
-  className="cursor-pointer border-b border-rose-100 px-3 py-3 font-bold text-gray-700 hover:bg-yellow-50"
->
-                {item.science}
-              </td>
-              <td
-  onClick={() => openAchievementList(item.child, "دستاورد معنوی", item.spiritual)}
-  className="cursor-pointer border-b border-rose-100 px-3 py-3 font-bold text-gray-700 hover:bg-yellow-50"
->
-                {item.spiritual}
-              </td>
-              <td className="border-b border-rose-100 px-3 py-3 text-base font-extrabold text-rose-600">
-                {item.total}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-</section>
 
 
 {/* باکس برترین صادرکنندگان دستاورد */}
@@ -1154,15 +1045,13 @@ specialty:
     style={{ height: "500px" }}
     className="overflow-y-auto overflow-x-auto rounded-[1.5rem] border border-lime-100 bg-white/90 shadow-inner"
   >
-    <table className="w-full min-w-[1000px] table-fixed border-collapse text-center text-sm">
+    <table className="w-full min-w-[620px] sm:min-w-[800px] lg:min-w-[1000px] table-fixed border-collapse text-center text-sm">
       <thead className="text-yellow-800">
         <tr>
           {[
             "رتبه",
             "نام",
             "نوع فعالیت",
-            "شرح فعالیت",
-            "نوع دستاوردهای صادره",
             "مجموع دستاوردهای صادره",
           ].map((title) => (
             <th
@@ -1173,8 +1062,10 @@ specialty:
                 opacity: 1,
               }}
               className={`sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-3 py-3 font-extrabold shadow-sm ${
-                title === "شرح فعالیت" ? "w-[280px]" : ""
-              }`}
+  title === "رتبه"
+    ? "w-[75px] sm:w-auto"
+    : ""
+}`}
             >
               {title}
             </th>
@@ -1185,7 +1076,7 @@ specialty:
       <tbody>
         {topIssuers.map((item) => (
           <tr key={item.rank} className="odd:bg-white even:bg-lime-50/70">
-            <td className="border-b border-lime-100 px-3 py-3 font-extrabold text-yellow-700">
+            <td className="w-[75px] sm:w-auto border-b border-lime-100 px-1 py-3 font-extrabold text-yellow-700">
               {item.rank}
             </td>
 
@@ -1215,7 +1106,7 @@ specialty:
   isFamily: false,
 })
                 }
-                style={{ width: "82px", height: "96px" }}
+                style={{ width: "120px", height: "105px" }}
                 className="mx-auto flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-yellow-200 bg-white p-1.5 shadow-sm transition hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-[0_10px_25px_rgba(180,130,30,0.18)]"
               >
                 <div
@@ -1236,24 +1127,16 @@ specialty:
                 </div>
 
                 <p
-                  style={{ height: "26px" }}
-                  className="flex items-center justify-center text-center text-[11px] font-extrabold text-gray-700 leading-4 line-clamp-1"
-                >
-                  {item.issuer?.fullName || "صادرکننده ژنینویی"}
-                </p>
+  style={{ height: "34px" }}
+  className="flex items-center justify-center text-center text-[11px] font-extrabold text-gray-700 leading-4 line-clamp-2"
+>
+  {item.issuer?.fullName || "صادرکننده ژنینویی"}
+</p>
               </div>
             </td>
 
             <td className="border-b border-lime-100 px-3 py-3 font-bold text-gray-700">
               {item.activityType}
-            </td>
-
-            <td className="border-b border-lime-100 px-4 py-3 text-xs font-medium leading-7 text-gray-600">
-              {item.description}
-            </td>
-
-            <td className="border-b border-lime-100 px-3 py-3 font-bold text-gray-700">
-              {item.issuedTypes}
             </td>
 
             <td
@@ -1334,38 +1217,78 @@ specialty:
 </div>
 
         <div className="mt-6 flex flex-col gap-3">
+          {selectedChild.currentUserParentRole ? (
+  <div
+    className="
+      w-full rounded-2xl
+      border border-yellow-300
+      bg-yellow-50
+      px-6 py-3
+      text-center text-sm font-extrabold
+      text-yellow-800
+    "
+  >
+    ❤️ شما{" "}
+    {selectedChild.currentUserParentRole === "father"
+      ? "پدر"
+      : "مادر"}{" "}
+    {selectedChild.fullName} هستید و نیازی به فالو کردن ندارید
+  </div>
+) : (
+  <button
+    type="button"
+    onClick={() => {
+      if (
+        activeTab === "followed" ||
+        selectedChild.followStatus === "APPROVED" ||
+        selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE"
+      ) {
+        handleUnfollowChild();
+        return;
+      }
+
+      setFollowRole("");
+      setShowFollowModal(true);
+    }}
+    className="w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 px-6 py-3 text-sm font-extrabold text-white shadow-md hover:from-yellow-600 hover:to-yellow-500 transition"
+  >
+    {selectedChild.followStatus === "PENDING_PARENT"
+      ? "در انتظار تأیید"
+      : activeTab === "followed" ||
+        selectedChild.followStatus === "APPROVED" ||
+        selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE"
+      ? "آنفالو"
+      : "فالو کردن"}
+  </button>
+)}
+
           <button
   type="button"
   onClick={() => {
-  if (
-  activeTab === "followed" ||
-  selectedChild.followStatus === "APPROVED" ||
-  selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE"
-) {
-    handleUnfollowChild();
-    return;
-  }
+    const isFollowed =
+      selectedChild.followStatus === "APPROVED" ||
+      selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE" ||
+      followedChildren.some(
+        (child) => Number(child.id) === Number(selectedChild.id)
+      );
 
-  setFollowRole("");
-  setShowFollowModal(true);
-}}
-  className="w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 px-6 py-3 text-sm font-extrabold text-white shadow-md hover:from-yellow-600 hover:to-yellow-500 transition"
+    const isMyChild = Boolean(selectedChild.currentUserParentRole);
+
+    if (!isFollowed && !isMyChild) {
+      alert(
+        `برای ارسال هدیه به ${selectedChild.fullName} باید ابتدا این کودک را فالو کنید.`
+      );
+      return;
+    }
+
+    navigate(
+      `/child-wishlist/view?childId=${selectedChild.id}`
+    );
+  }}
+  className="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-rose-400 px-6 py-3 text-sm font-extrabold text-white shadow-md hover:from-pink-600 hover:to-rose-500 transition"
 >
-  {selectedChild.followStatus === "PENDING_PARENT"
-  ? "در انتظار تأیید"
-  : activeTab === "followed" ||
-selectedChild.followStatus === "APPROVED" ||
-selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE"
-  ? "آنفالو"
-  : "فالو کردن"}
+  ارسال هدیه
 </button>
-
-          <button
-            type="button"
-            className="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-rose-400 px-6 py-3 text-sm font-extrabold text-white shadow-md hover:from-pink-600 hover:to-rose-500 transition"
-          >
-           ارسال هدیه
-          </button>
 
           <button
             type="button"
@@ -1497,7 +1420,7 @@ selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE"
   <p>{selectedIssuer.city}</p>
 
   <p>
-    ویژگی بارز: {selectedIssuer.specialty}
+    گروه: {selectedIssuer.specialty}
   </p>
 
   <p className="rounded-2xl border border-yellow-200 bg-white/80 p-3 leading-7 text-gray-700">
@@ -1512,16 +1435,7 @@ selectedChild.followStatus === "APPROVED_WITH_CHANGED_ROLE"
         <div className="mt-6 flex flex-col gap-3">
           <button
   type="button"
-  onClick={() => {
-    if (selectedIssuer.isFamily) {
-      setShowIssuerInfoModal(true);
-      return;
-    }
-
-    alert(
-      "صفحه اختصاصی این ارائه‌دهنده خدمات به‌زودی در ژنینو فعال خواهد شد ✨"
-    );
-  }}
+  onClick={() => goToIssuerPage(selectedIssuer)}
   className="w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 px-6 py-3 text-sm font-extrabold text-white shadow-md hover:from-yellow-600 hover:to-yellow-500 transition"
 >
   از صفحه ما دیدن فرمائید

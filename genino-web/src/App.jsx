@@ -1,6 +1,9 @@
 // src/App.jsx
 import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
+import {
+  FavoriteProductsProvider,
+} from "./context/FavoriteProductsContext";
 
 
 
@@ -245,6 +248,7 @@ const Notifications = lazy(() => import("./pages/Notifications"));
 const FavoritesPage = lazy(() => import("./pages/favorites/FavoritesPage.jsx"));
 const FavoriteArticlesPage = lazy(() => import("./pages/favorites/FavoriteArticlesPage.jsx"));
 const FavoriteProductsPage = lazy(() => import("./pages/favorites/FavoriteProductsPage.jsx"));
+const FavoriteChildProductsPage = lazy(() => import("./pages/favorites/FavoriteChildProductsPage.jsx"));
 const FavoriteServicesPage = lazy(() => import("./pages/favorites/FavoriteServicesPage.jsx"));
 const LifeCompanion = lazy(() => import("./pages/LifeCompanion"));
 const RelationshipCare = lazy(() => import("./pages/RelationshipCare"));
@@ -282,6 +286,38 @@ const AdminDiscountCodes = lazy(() => import("./admin/pages/AdminDiscountCodes")
 const AdminFinanceSettings = lazy(() => import("./admin/pages/AdminFinanceSettings"));
 const AdminAmbassadors = lazy(() => import("./admin/pages/AdminAmbassadors"));
 const AdminVendors = lazy(() => import("./admin/pages/AdminVendors"));
+const VendorReports = lazy(() => import("./pages/vendor/VendorReports"));
+const Gift = lazy(() => import("./pages/Gift.jsx"));
+const FavoriteChildProductsManagePage = lazy(() => import("./pages/favorites/FavoriteChildProductsManagePage.jsx"));
+const GeninoHealth = lazy(() => import("./pages/GeninoHealth.jsx"));
+const VendorSchoolPage = lazy(() => import("./pages/vendor/service/VendorSchoolPage"));
+const VendorKindergartenPage = lazy(() => import("./pages/vendor/service/VendorKindergartenPage"));
+const VendorPlayhousePage = lazy(() => import("./pages/vendor/service/VendorPlayhousePage"));
+const VendorEducationClassPage = lazy(() => import("./pages/vendor/service/VendorEducationClassPage"));
+const VendorArtClassPage = lazy(() => import("./pages/vendor/service/VendorArtClassPage"));
+const VendorSportClassPage = lazy(() => import("./pages/vendor/service/VendorSportClassPage"));
+const VendorPrivateTeacherPage = lazy(() => import("./pages/vendor/service/VendorPrivateTeacherPage"));
+const ChildWorld = lazy(() => import("./pages/ChildWorld.jsx"));
+const VendorAccountSettings = lazy(() => import("./pages/vendor/VendorAccountSettings"));
+const VendorServiceCreate = lazy(() => import("./pages/vendor/VendorServiceCreate.jsx"));
+const ServiceDetail = lazy(() => import("./pages/ServiceDetail.jsx"));
+const MyReservations = lazy(() => import("./pages/MyReservations.jsx"));
+const Classes = lazy(() => import("./pages/Classes.jsx"));
+const ChildNurses = lazy(() => import("./pages/ChildNurses.jsx"));
+const JoinNurse = lazy(() => import("./pages/JoinNurse.jsx"));
+const AdminNurses = lazy(() => import("./admin/pages/AdminNurses"));
+const NurseProfile = lazy(() => import("./pages/NurseProfile.jsx"));
+const PublicNurseProfile = lazy(() => import("./pages/PublicNurseProfile.jsx"));
+const ServiceCourseDetail = lazy(() => import("./pages/ServiceCourseDetail.jsx"));
+const ShopCompare = lazy(() => import("./pages/ShopCompare.jsx"));
+const ProductCompareResult = lazy(() => import("./pages/ProductCompareResult.jsx"));
+const SchoolCompareResult = lazy(() => import("./pages/SchoolCompareResult.jsx"));
+const KindergartenCompareResult = lazy(() => import("./pages/KindergartenCompareResult.jsx"));
+const PlayhouseCompareResult = lazy(() => import("./pages/PlayhouseCompareResult.jsx"));
+const EducationClassCompareResult = lazy(() => import("./pages/EducationClassCompareResult.jsx"));
+const ArtClassCompareResult = lazy(() => import("./pages/ArtClassCompareResult.jsx"));
+const SportClassCompareResult = lazy(() => import("./pages/SportClassCompareResult.jsx"));
+const PrivateTeacherCompareResult = lazy(() => import("./pages/PrivateTeacherCompareResult.jsx"));
 
 
 // ✅ اگر هنوز داشبوردها را نساختی، موقتاً می‌تونی از سایدبارها استفاده کنی:
@@ -292,7 +328,7 @@ export default function App() {
 
 console.log("APP ROUTES LOADED");
   return (
-    <>
+    <FavoriteProductsProvider>
       {/* نوار ناوبری بالای همه‌ی صفحات */}
       {!window.location.pathname.startsWith("/admin") && <Navbar />}
 
@@ -575,13 +611,47 @@ console.log("APP ROUTES LOADED");
         <Route path="/vendor/shop/:vendorId" element={<VendorShopPage />} />
         <Route path="/vendor/product/create" element={<VendorProductCreate />}/>
         <Route path="/vendor/product/edit/:productId" element={<VendorProductCreate />} />
+        <Route path="/vendor/reports" element={<VendorReports />}/>
+        <Route path="/gift" element={<ProtectedRoute><Gift /></ProtectedRoute>}/>
+        <Route path="/child-wishlist/view" element={<FavoriteChildProductsPage />}/>
+        <Route path="/favorites/child/manage" element={<ProtectedRoute><FavoriteChildProductsManagePage /></ProtectedRoute>}/>
+        <Route path="/genino-health" element={<GeninoHealth />} />
+        <Route path="/vendor/service/school/:vendorId" element={<VendorSchoolPage />} />
+        <Route path="/vendor/service/kindergarten/:vendorId" element={<VendorKindergartenPage />} />
+        <Route path="/vendor/service/playhouse/:vendorId" element={<VendorPlayhousePage />} />
+        <Route path="/vendor/service/education-class/:vendorId" element={<VendorEducationClassPage />} />
+        <Route path="/vendor/service/art-class/:vendorId" element={<VendorArtClassPage />} />
+        <Route path="/vendor/service/sport-class/:vendorId" element={<VendorSportClassPage />} />
+        <Route path="/vendor/service/private-teacher/:vendorId" element={<VendorPrivateTeacherPage />} />
+        <Route path="/child-world" element={<ProtectedRoute><ChildWorld /></ProtectedRoute>} />
+        <Route path="/vendor/account-settings" element={<VendorAccountSettings />} />
+        <Route path="/vendor/service/create" element={<VendorServiceCreate />}/>
+        <Route path="/vendor/service/edit/:serviceId" element={<VendorServiceCreate />}/>
+        <Route path="/service/:id" element={<ServiceDetail />}/>
+        <Route path="/my-reservations" element={<ProtectedRoute><MyReservations /></ProtectedRoute>}/>
+        <Route path="/classes" element={<Classes />} />
+        <Route path="/child-nurses" element={<ChildNurses />} />
+        <Route path="/join/nurse" element={<ProtectedRoute><JoinNurse /></ProtectedRoute>}/>
+        <Route path="/admin/nurses" element={<AdminProtectedRoute><AdminNurses /></AdminProtectedRoute>}/>
+        <Route path="/nurse/profile" element={<ProtectedRoute><NurseProfile /></ProtectedRoute>}/>
+        <Route path="/child-nurses/:id" element={<ProtectedRoute><PublicNurseProfile /></ProtectedRoute>}/>
+        <Route path="/course/:id" element={<ServiceCourseDetail />}/>
+        <Route path="/shop/compare" element={<ShopCompare />}/>
+        <Route path="/shop/compare/products/result" element={<ProductCompareResult />}/>
+        <Route path="/shop/compare/services/schools/result" element={<SchoolCompareResult />}/>
+        <Route path="/shop/compare/services/kindergartens/result" element={<KindergartenCompareResult />}/>
+        <Route path="/shop/compare/services/playhouses/result" element={<PlayhouseCompareResult />}/>
+        <Route path="/shop/compare/services/education-classes/result" element={<EducationClassCompareResult />}/>
+        <Route path="/shop/compare/services/art-classes/result" element={<ArtClassCompareResult />}/>
+        <Route path="/shop/compare/services/sport-classes/result" element={<SportClassCompareResult />}/>
+        <Route path="/shop/compare/services/private-teachers/result" element={<PrivateTeacherCompareResult />}/>
 
 
 
 
         </Routes>
       </Suspense>
-    </>
+    </FavoriteProductsProvider>
   );
 }
 {/* <Navbar /> */}

@@ -1,5 +1,6 @@
 // D:\projects\Genino\genino-web\src\pages\ProductDetail.jsx
-import { useParams, useNavigate } from "react-router-dom";
+
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingBag,
@@ -17,14 +18,27 @@ import { useCart } from "../context/CartContext.jsx";
 import logo from "../assets/logo-genino.png";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { shopGroups } from "../data/shopGroups";
+import DiscountCountdown from "../components/Core/DiscountCountdown";
+import ProductCard from "../components/Product/ProductCard";
+import normalizeProduct from "../utils/normalizeProduct";
+import { getRecommendedProducts } from "../services/recommendationService";
+
+
 
 export default function ProductDetail() {
   // ✈️ انیمیشن پرواز
   const [flyingItems, setFlyingItems] = useState([]);
   const [isBouncing, setIsBouncing] = useState(false);
   const cartRef = useRef(null);
-
   const { id } = useParams();
+
+  const [searchParams] = useSearchParams();
+  const mode =
+  searchParams.get("mode") || "shop";
+  const giftChildId =
+  searchParams.get("childId");
+  const giftChildName =
+  searchParams.get("childName");
   const [product, setProduct] = useState({
     images: [],
     categoryLinks: [],
@@ -32,12 +46,148 @@ export default function ProductDetail() {
   });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { addToCart, cartItems } = useCart();
+  const [openingVendorPage, setOpeningVendorPage] =
+  useState(false);
+
+  const [showLoginModal, setShowLoginModal] =
+  useState(false);
+
+  const [addingToCart, setAddingToCart] =
+  useState(false);
+
+const [addingToGiftCart, setAddingToGiftCart] =
+  useState(false);
+
+
+const getVendorPagePath = (vendor) => {
+  if (!vendor?.id) return null;
+
+  if (vendor.activityType === "product") {
+    return `/vendor/shop/${vendor.id}`;
+  }
+
+  if (vendor.activityType === "service") {
+    switch (vendor.mainActivityField) {
+      case "مدارس":
+        return `/vendor/service/school/${vendor.id}`;
+
+      case "مهدکودک‌ها":
+        return `/vendor/service/kindergarten/${vendor.id}`;
+
+      case "خانه‌های بازی":
+        return `/vendor/service/playhouse/${vendor.id}`;
+
+      case "کلاس‌های آموزشی":
+        return `/vendor/service/education-class/${vendor.id}`;
+
+      case "کلاس‌های هنری":
+        return `/vendor/service/art-class/${vendor.id}`;
+
+      case "کلاس‌های ورزشی":
+        return `/vendor/service/sport-class/${vendor.id}`;
+
+      case "معلمان خصوصی":
+      case "معلم خصوصی":
+        return `/vendor/service/private-teacher/${vendor.id}`;
+
+      default:
+        return `/vendor/service/${vendor.id}`;
+    }
+  }
+
+  if (vendor.activityType === "both") {
+    return `/vendor/shop/${vendor.id}`;
+  }
+
+  return `/vendor/shop/${vendor.id}`;
+};
+
+const handleOpenVendorPage = async () => {
+  const productVendorId = product.vendor?.id;
+
+  if (!productVendorId || openingVendorPage) {
+    return;
+  }
+
+  try {
+    setOpeningVendorPage(true);
+
+    /*
+      ممکن است اطلاعات داخل product.vendor فقط شامل
+      id و businessName باشد؛ بنابراین اطلاعات کامل
+      وندور را از API دریافت می‌کنیم.
+    */
+    const res = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/vendors/${productVendorId}`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data?.ok || !data?.vendor) {
+      throw new Error(
+        data?.message ||
+          "اطلاعات ارائه‌دهنده دریافت نشد."
+      );
+    }
+
+    const targetPath =
+      getVendorPagePath(data.vendor);
+
+    if (!targetPath) {
+      throw new Error(
+        "صفحه ارائه‌دهنده مشخص نیست."
+      );
+    }
+
+    navigate(targetPath);
+  } catch (error) {
+    console.error(
+      "OPEN PRODUCT VENDOR PAGE ERROR:",
+      error
+    );
+
+    alert(
+      error?.message ||
+        "خطا در ورود به صفحه ارائه‌دهنده"
+    );
+  } finally {
+    setOpeningVendorPage(false);
+  }
+};
+
+  const isVendor = !!localStorage.getItem("genino_vendor_id");
+  const {
+ addToCart,
+ addToGiftCart,
+ cartCount,
+ giftCartCount
+} = useCart();
   const smartRef = useRef(null);
+  const [zoomPosition, setZoomPosition] = useState({
+  x: "50%",
+  y: "50%",
+  });
+  const [isZooming, setIsZooming] = useState(false);
+
+  
 
   useEffect(() => {
   async function loadProduct() {
     try {
+
+      // 👁 ثبت بازدید محصول
+await fetch(
+  `${import.meta.env.VITE_API_BASE_URL}/vendor-products/public/${id}/view`,
+  {
+    method:"POST",
+  }
+);
+
       const res = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/vendor-products/public/${id}`
       );
@@ -98,6 +248,7 @@ useEffect(() => {
   const [activeSpecTab, setActiveSpecTab] = useState("همه");
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColorName, setSelectedColorName] = useState("");
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
   const inventoryOptions = Array.isArray(product.inventoryRows)
@@ -110,32 +261,152 @@ useEffect(() => {
     .find((g) => g.key === product.categoryLinks?.[0]?.group)?.title ||
   "ثبت نشده";
 
-const availableSizes = [...new Set(inventoryOptions.map((item) => item.size))];
+const availableSizes = [
+  ...new Set(
+    inventoryOptions.map((item) => item.size)
+  ),
+];
 
-const availableColorsForSelectedSize = inventoryOptions.filter(
+
+const selectedSizeRow = inventoryOptions.find(
   (item) => item.size === selectedSize
 );
 
-const selectedInventory = inventoryOptions.find(
-  (item) =>
-    item.size === selectedSize &&
-    item.colorName === selectedColorName
+
+const availableColorsForSelectedSize =
+  selectedSizeRow?.colors || [];
+
+const allAvailableColors = [
+  ...new Map(
+    inventoryOptions
+      .flatMap((item) => item.colors || [])
+      .map((color) => [
+        color.colorName,
+        color,
+      ])
+  ).values(),
+];
+
+
+const activeColorsForSelectedSize =
+  selectedSizeRow?.colors?.map(
+    (color) => color.colorName
+  ) || [];
+
+const selectedInventory = selectedSizeRow?.colors?.find(
+  (color) =>
+    color.colorName === selectedColorName
 );
+
+const maxQuantity =
+  Number(selectedInventory?.quantity || 0);
+
+function getStockText(quantity, unit = "عدد") {
+  const count = Number(quantity || 0);
+
+  if (count <= 0) {
+    return "ناموجود";
+  }
+
+  if (count <= 5) {
+    return `تنها ${count} ${unit} باقی مانده`;
+  }
+
+  if (count <= 10) {
+    return `${count} ${unit} موجود`;
+  }
+
+  return "موجود است";
+}
+
+
+const activeDiscount = useMemo(() => {
+
+  if (!product.discountType || product.discountType === "NONE") {
+    return null;
+  }
+
+
+  const now = new Date();
+
+
+  if (product.discountStartAt) {
+    const start = new Date(product.discountStartAt);
+
+    if (now < start) {
+      return null;
+    }
+  }
+
+
+  if (product.discountEndAt) {
+    const end = new Date(product.discountEndAt);
+
+    if (now > end) {
+      return null;
+    }
+  }
+
+
+  const price = Number(product.price || 0);
+
+  let finalPrice = price;
+
+
+  if (product.discountType === "PERCENT") {
+
+    finalPrice =
+      price -
+      (price * Number(product.discountValue || 0)) / 100;
+
+  }
+
+
+  if (product.discountType === "AMOUNT") {
+
+    finalPrice =
+      price -
+      Number(product.discountValue || 0);
+
+  }
+
+
+  if (finalPrice < 0) {
+    finalPrice = 0;
+  }
+
+
+  return {
+    oldPrice: price,
+    finalPrice,
+    type: product.discountType,
+    value: product.discountValue,
+  };
+
+
+}, [product]);
 
 const cartProduct = {
   id: product.id,
   name: product.title,
   title: product.title,
-  price: Number(product.price || 0),
+  price:
+    activeDiscount?.finalPrice ??
+    Number(product.price || 0),
+  originalPrice: Number(product.price || 0),
+  discountType: activeDiscount?.type || "NONE",
+  discountValue: activeDiscount?.value || null,
   image: product.images?.[0] || logo,
   images: product.images || [],
   category: product.categoryLinks?.[0]?.productItem || "محصول",
-  selectedSize: selectedInventory?.size,
+  selectedSize,
   selectedColorName: selectedInventory?.colorName,
   selectedColorHex: selectedInventory?.colorHex,
   selectedUnit: selectedInventory?.unit,
-  quantity: 1,
+  quantity: selectedQuantity,
 };
+
+
 
 const productSpecs = [
   {
@@ -144,7 +415,7 @@ const productSpecs = [
     items: [
       ["برند فارسی", product.brandFa || "ژنینو"],
       ["برند انگلیسی", product.brandEn || "Genino"],
-      ["کشور سازنده", "ایران"],
+      ["کشور سازنده", product.madeInCountry || "ثبت نشده"],
       ["جنس کالا", product.material || "پارچه ضد حساسیت"],
       ["دسته‌بندی کالا", product.categoryLinks?.[0]?.category || product.category || "ثبت نشده"],
       ["گروه کالا", groupTitle],
@@ -214,15 +485,21 @@ const productSpecs = [
   icon: <ShieldCheck className="h-4 w-4" />,
   items: [
     [
-      "گارانتی",
-      product.hasWarranty ? "دارد" : "ندارد",
-    ],
-    [
-      "مدت گارانتی",
-      product.hasWarranty
-        ? `${product.warrantyPeriod || ""} ${product.warrantyUnit || ""}`.trim()
-        : "ندارد",
-    ],
+  "گارانتی",
+  product.hasWarranty === "دارد" ||
+  product.hasWarranty === true
+    ? "دارد"
+    : "ندارد",
+],
+[
+  "مدت گارانتی",
+  product.hasWarranty === "دارد" ||
+  product.hasWarranty === true
+    ? `${product.warrantyPeriod || ""} ${
+        product.warrantyUnit || ""
+      }`.trim() || "ثبت نشده"
+    : "ندارد",
+],
     [
       "استانداردها",
       Array.isArray(product.standards) && product.standards.length
@@ -256,44 +533,314 @@ const filteredSpecs = productSpecs
   }))
   .filter((section) => section.items.length > 0);
 
-  // 🔹 مشابه‌ها (صرفاً نمونه)
-  const baseList = Array.from({ length: 12 }).map((_, i) => ({
-    id: Number(id) + i + 1,
-    name: `محصول مشابه ${i + 1}`,
-    price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
-    image: logo,
-    category: categories[(Number(id) + i + 1) % categories.length],
-  }));
-  const relatedProducts = baseList.slice(0, 12);
+  // محصولات مشابه
+  const [relatedProducts,setRelatedProducts] = useState([]);
+useEffect(()=>{
+async function loadRelatedProducts(){
+try{
+const res = await fetch(
+`${import.meta.env.VITE_API_BASE_URL}/vendor-products/public/${id}/related`
+);
+const data = await res.json();
+if(data.ok){
+setRelatedProducts(
+data.products.map(normalizeProduct)
+);
+}
+}catch(err){
+console.error(
+"RELATED PRODUCTS ERROR",
+err
+);
+}
+}
+if(id){
+loadRelatedProducts();
+}
+},[id]);
 
-  // 🤖 پیشنهاد هوشمند (ماک): اولویت با دسته‌ی خود محصول، بعد بقیه
-  const recommendedProducts = useMemo(() => {
-    const same = baseList.filter(p => p.category === product.category).slice(0, 6);
-    const others = baseList.filter(p => p.category !== product.category).slice(0, 6);
-    return [...same, ...others].slice(0, 8);
-  }, [id]);
+  // 🤖 پیشنهاد هوشمند ژنینو
+const [
+  recommendedProducts,
+  setRecommendedProducts
+] = useState([]);
+useEffect(()=>{
+async function loadRecommended(){
+try{
+const products =
+await getRecommendedProducts(
+  id,
+  giftChildId
+);
+setRecommendedProducts(
+ products.map(normalizeProduct)
+);
+}catch(error){
+console.error(
+"SMART RECOMMENDATION ERROR",
+error
+);
+}
+}
+if(id){
+loadRecommended();
+}
+},[id,giftChildId]);
+
+async function handleAddToCart(e) {
+
+  const sourceRect =
+    e.currentTarget.getBoundingClientRect();
+
+  if (addingToCart) {
+    return;
+  }
+
+  if (!selectedInventory) {
+    alert(
+      "لطفاً ابتدا سایز و رنگ محصول را انتخاب کنید."
+    );
+    return;
+  }
+
+  if (selectedQuantity > maxQuantity) {
+    alert(
+      "تعداد انتخابی بیشتر از موجودی کالا است."
+    );
+    return;
+  }
+
+  try {
+
+    setAddingToCart(true);
+
+    const result = await addToCart({
+      productId: product.id,
+
+      quantity: selectedQuantity,
+
+      variant: {
+        size: selectedSize,
+        color: selectedInventory?.colorName,
+      },
+    });
+
+
+    // 👤 مهمان است
+    if (result?.loginRequired) {
+      setShowLoginModal(true);
+      return;
+    }
+
+
+    // ❌ خطای API
+    if (!result?.ok) {
+      alert(
+        result?.message ||
+        "افزودن کالا به سبد خرید انجام نشد."
+      );
+      return;
+    }
+
+
+    // ✅ فقط بعد از ثبت موفق در دیتابیس
+    handleFlyAnimation(sourceRect);
+
+  } catch (error) {
+
+    console.error(
+      "ADD PRODUCT TO CART ERROR:",
+      error
+    );
+
+    alert(
+      "خطایی در افزودن کالا به سبد خرید رخ داد."
+    );
+
+  } finally {
+
+    setAddingToCart(false);
+
+  }
+}
+
+
+async function handleAddToGiftCart(e) {
+
+  const sourceRect =
+    e.currentTarget.getBoundingClientRect();
+
+  if (addingToGiftCart) {
+    return;
+  }
+
+  // مدل محصول انتخاب نشده
+  if (!selectedInventory) {
+    alert(
+      "لطفاً ابتدا سایز و رنگ محصول را انتخاب کنید."
+    );
+    return;
+  }
+
+  // تعداد بیشتر از موجودی
+  if (selectedQuantity > maxQuantity) {
+    alert(
+      "تعداد انتخابی بیشتر از موجودی کالا است."
+    );
+    return;
+  }
+
+  // گیرنده هدیه مشخص نیست
+  if (!giftChildId) {
+    alert(
+      "گیرنده هدیه مشخص نیست."
+    );
+    return;
+  }
+
+
+  try {
+
+    setAddingToGiftCart(true);
+
+
+    const result =
+      await addToGiftCart({
+        productId:
+          product.id,
+
+        quantity:
+          selectedQuantity,
+
+        giftTarget: {
+          id:
+            giftChildId,
+
+          name:
+            giftChildName,
+
+          type:
+            "child",
+        },
+
+        variant: {
+          size:
+            selectedSize,
+
+          color:
+            selectedInventory?.colorName,
+        },
+      });
+
+
+    // 👤 کاربر وارد نشده
+    if (result?.loginRequired) {
+
+      setShowLoginModal(true);
+
+      return;
+    }
+
+
+    // ❌ خطای Backend
+    if (!result?.ok) {
+
+      alert(
+        result?.message ||
+        "افزودن کالا به سبد هدیه انجام نشد."
+      );
+
+      return;
+    }
+
+
+    // ✅ فقط بعد از ثبت واقعی در دیتابیس
+handleFlyAnimation(sourceRect);
+
+setTimeout(() => {
+
+  alert(
+    `هدیه برای ${
+      giftChildName || "کودک"
+    } به سبد هدیه اضافه شد 🎁`
+  );
+
+}, 1200);
+
+
+  } catch (error) {
+
+    console.error(
+      "ADD PRODUCT TO GIFT CART ERROR:",
+      error
+    );
+
+    alert(
+      "خطایی در افزودن کالا به سبد هدیه رخ داد."
+    );
+
+  } finally {
+
+    setAddingToGiftCart(false);
+
+  }
+}
+
 
   // ✈️ تابع پرواز
-  function handleFlyAnimation(e) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const cartRect = cartRef.current.getBoundingClientRect();
+  function handleFlyAnimation(sourceRect) {
 
-    const newItem = {
-      id: Date.now(),
-      startX: rect.left + rect.width / 2,
-      startY: rect.top + rect.height / 2,
-      endX: cartRect.left + cartRect.width / 2,
-      endY: cartRect.top + cartRect.height / 2,
-    };
-
-    setFlyingItems(prev => [...prev, newItem]);
-
-    setTimeout(() => {
-      setFlyingItems(prev => prev.filter(item => item.id !== newItem.id));
-      setIsBouncing(true);
-      setTimeout(() => setIsBouncing(false), 600);
-    }, 1000);
+  if (!sourceRect || !cartRef.current) {
+    return;
   }
+
+  const cartRect =
+    cartRef.current.getBoundingClientRect();
+
+  const newItem = {
+  id:
+    `${Date.now()}-${Math.random()}`,
+
+    startX:
+      sourceRect.left +
+      sourceRect.width / 2,
+
+    startY:
+      sourceRect.top +
+      sourceRect.height / 2,
+
+    endX:
+      cartRect.left +
+      cartRect.width / 2,
+
+    endY:
+      cartRect.top +
+      cartRect.height / 2,
+  };
+
+  setFlyingItems((prev) => [
+    ...prev,
+    newItem
+  ]);
+
+  setTimeout(() => {
+
+    setFlyingItems((prev) =>
+      prev.filter(
+        (item) =>
+          item.id !== newItem.id
+      )
+    );
+
+    setIsBouncing(true);
+
+    setTimeout(
+      () => setIsBouncing(false),
+      600
+    );
+
+  }, 1000);
+}
 
   // ⭐️ نظرات و امتیازدهی (لوکال)
   const [reviews, setReviews] = useState([]);
@@ -379,23 +926,267 @@ if (reviewData.ok) {
 
   return (
     <>
-      {/* ✈️ آیکون‌های پرواز */}
-      <AnimatePresence>
-        {flyingItems.map(item => (
-          <motion.div
-            key={item.id}
-            initial={{
-              x: item.startX, y: item.startY, scale: 1, opacity: 1, position: "fixed",
-            }}
-            animate={{ x: item.endX, y: item.endY, scale: 0.3, opacity: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: "easeInOut" }}
-            className="text-yellow-500 z-50 pointer-events-none"
+    <AnimatePresence>
+  {showLoginModal && (
+
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+
+      className="
+        fixed
+        inset-0
+        z-[100]
+        flex
+        items-center
+        justify-center
+        bg-black/40
+        p-4
+        backdrop-blur-sm
+      "
+
+      onClick={() =>
+        setShowLoginModal(false)
+      }
+    >
+
+      <motion.div
+        dir="rtl"
+
+        initial={{
+          opacity: 0,
+          scale: 0.92,
+          y: 20,
+        }}
+
+        animate={{
+          opacity: 1,
+          scale: 1,
+          y: 0,
+        }}
+
+        exit={{
+          opacity: 0,
+          scale: 0.92,
+          y: 20,
+        }}
+
+        onClick={(e) =>
+          e.stopPropagation()
+        }
+
+        className="
+          w-full
+          max-w-sm
+          rounded-[2rem]
+          border
+          border-yellow-100
+          bg-white
+          p-6
+          text-center
+          shadow-2xl
+        "
+      >
+
+        <div
+          className="
+            mx-auto
+            flex
+            h-14
+            w-14
+            items-center
+            justify-center
+            rounded-full
+            bg-yellow-50
+          "
+        >
+          <ShoppingBag
+            className="
+              h-7
+              w-7
+              text-[#b88724]
+            "
+          />
+        </div>
+
+
+        <h3
+          className="
+            mt-4
+            text-lg
+            font-black
+            text-[#6f4a18]
+          "
+        >
+          ورود به ژنینو
+        </h3>
+
+
+        <p
+          className="
+            mt-2
+            text-sm
+            leading-7
+            text-gray-500
+          "
+        >
+          برای افزودن کالا به سبد خرید،
+          ابتدا وارد حساب کاربری ژنینو شوید.
+        </p>
+
+
+        <div
+          className="
+            mt-6
+            grid
+            grid-cols-2
+            gap-3
+          "
+        >
+
+          <button
+            type="button"
+
+            onClick={() =>
+              setShowLoginModal(false)
+            }
+
+            className="
+              rounded-2xl
+              border
+              border-gray-200
+              py-2.5
+              text-sm
+              font-bold
+              text-gray-500
+            "
           >
-            <ShoppingBag className="w-8 h-8" />
-          </motion.div>
-        ))}
-      </AnimatePresence>
+            انصراف
+          </button>
+
+
+          <button
+            type="button"
+
+            onClick={() => {
+
+              setShowLoginModal(false);
+
+              navigate(
+                `/login?redirect=${encodeURIComponent(
+                  window.location.pathname +
+                  window.location.search
+                )}`
+              );
+
+            }}
+
+            className="
+              rounded-2xl
+              bg-gradient-to-r
+              from-[#8a641a]
+              to-[#d4af37]
+              py-2.5
+              text-sm
+              font-black
+              text-white
+              shadow
+            "
+          >
+            ورود / ثبت‌نام
+          </button>
+
+        </div>
+
+      </motion.div>
+
+    </motion.div>
+
+  )}
+</AnimatePresence>
+      {/* ✈️ آیکون پرواز به سبد خرید */}
+<AnimatePresence>
+  {flyingItems.map((item) => (
+
+    <motion.div
+      key={item.id}
+
+      initial={{
+        x: 0,
+        y: 0,
+        scale: 1.2,
+        opacity: 1,
+      }}
+
+      animate={{
+        x:
+          item.endX -
+          item.startX,
+
+        y:
+          item.endY -
+          item.startY,
+
+        scale: 0.25,
+        opacity: 0.2,
+      }}
+
+      exit={{
+        opacity: 0,
+      }}
+
+      transition={{
+        duration: 0.9,
+        ease: "easeInOut",
+      }}
+
+      style={{
+        position: "fixed",
+
+        left:
+          item.startX,
+
+        top:
+          item.startY,
+
+        transform:
+          "translate(-50%, -50%)",
+
+        zIndex: 9999,
+      }}
+
+      className="
+        pointer-events-none
+        text-yellow-500
+      "
+    >
+
+      <div
+        className="
+          flex
+          h-10
+          w-10
+          items-center
+          justify-center
+          rounded-full
+          bg-yellow-400
+          text-white
+          shadow-xl
+        "
+      >
+        <ShoppingBag
+          className="
+            h-6
+            w-6
+          "
+        />
+      </div>
+
+    </motion.div>
+
+  ))}
+</AnimatePresence>
 
       {/* 🛒 دکمه سبد خرید شناور (بالا سمت چپ) */}
 <motion.button
@@ -411,11 +1202,11 @@ if (reviewData.ok) {
 >
   <ShoppingBag className="w-5 h-5" />
   <span className="font-medium text-sm sm:text-base">سبد خرید</span>
-  {cartItems.length > 0 && (
-    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-      {cartItems.length}
-    </span>
-  )}
+  {(cartCount + giftCartCount) > 0 && (
+  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+    {cartCount + giftCartCount}
+  </span>
+)}
 </motion.button>
 
       <main className="relative min-h-screen bg-gradient-to-br from-[#fffdf8] to-[#f7f3e6] text-gray-800 p-6 overflow-hidden flex flex-col items-center">
@@ -447,7 +1238,7 @@ if (reviewData.ok) {
         <div dir="rtl" className="relative z-10 w-full flex items-center justify-between mb-10 px-6">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-yellow-600 font-medium hover:text-yellow-700 transition">
             <ArrowRight className="w-5 h-5" />
-            بازگشت به فروشگاه
+            بازگشت 
           </button>
 
         
@@ -465,16 +1256,76 @@ if (reviewData.ok) {
 <div className="rounded-[1.75rem] bg-gradient-to-br from-[#fff8e8] to-[#f7efd9] p-5">
 
   {/* تصویر اصلی */}
+  <div
+  className="
+    relative
+    mx-auto
+    h-72
+    w-full
+    overflow-hidden
+    rounded-2xl
+    bg-white
+    cursor-zoom-in
+  "
+  onMouseMove={(e)=>{
+    const rect =
+      e.currentTarget.getBoundingClientRect();
+    const x =
+      ((e.clientX - rect.left) / rect.width) * 100;
+    const y =
+      ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPosition({
+      x:`${x}%`,
+      y:`${y}%`,
+    });
+    setIsZooming(true);
+  }}
+  onMouseLeave={()=>{
+    setIsZooming(false);
+  }}
+  onTouchMove={(e)=>{
+    const touch = e.touches[0];
+    const rect =
+      e.currentTarget.getBoundingClientRect();
+    const x =
+      ((touch.clientX - rect.left) / rect.width) * 100;
+    const y =
+      ((touch.clientY - rect.top) / rect.height) * 100;
+    setZoomPosition({
+      x:`${x}%`,
+      y:`${y}%`,
+    });
+    setIsZooming(true);
+  }}
+  onTouchEnd={()=>{
+    setIsZooming(false);
+  }}
+>
+<img
+  src={product.images[selectedImage]}
+  alt={product.title}
 
-  <motion.img
-    key={selectedImage}
-    initial={{ opacity: 0.4, scale: 0.96 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.25 }}
-    src={product.images[selectedImage]}
-    alt={product.title}
-    className="mx-auto h-72 w-full rounded-2xl object-contain"
-  />
+  className="
+    h-full
+    w-full
+    object-contain
+    transition-transform
+    duration-200
+  "
+  style={{
+    transform:
+      isZooming
+      ?
+      "scale(2)"
+      :
+      "scale(1)",
+
+    transformOrigin:
+      `${zoomPosition.x} ${zoomPosition.y}`
+  }}
+/>
+</div>
+
 
   {/* تصاویر کوچک */}
 
@@ -535,12 +1386,29 @@ if (reviewData.ok) {
       </h1>
 
       <p className="mt-2 text-sm text-gray-600">
-  فروشگاه{" "}
+  ارائه‌دهنده{" "}
+
   <button
-    onClick={() => navigate(`/vendor/shop/${product.vendor?.id}`)}
-    className="font-black text-[#b88724] hover:text-[#8a641a] hover:underline transition"
+    type="button"
+    disabled={
+      !product.vendor?.id ||
+      openingVendorPage
+    }
+    onClick={handleOpenVendorPage}
+    className="
+      font-black
+      text-[#b88724]
+      transition
+      hover:text-[#8a641a]
+      hover:underline
+      disabled:cursor-wait
+      disabled:opacity-60
+    "
   >
-    {product.vendor?.businessName || "ثبت نشده"}
+    {openingVendorPage
+      ? "در حال ورود..."
+      : product.vendor?.businessName ||
+        "ثبت نشده"}
   </button>
 </p>
 
@@ -549,11 +1417,54 @@ if (reviewData.ok) {
       </p>
 
       <div className="mt-5 rounded-2xl border border-yellow-100 bg-yellow-50/70 p-4">
-        <p className="text-xs font-bold text-gray-500">قیمت محصول</p>
-        <p className="mt-1 text-2xl font-black text-yellow-700">
-          {Number(product.price || 0).toLocaleString("fa-IR")} ریال
-        </p>
-      </div>
+
+<p className="text-xs font-bold text-gray-500">
+قیمت محصول
+</p>
+
+
+{activeDiscount ? (
+  <div>
+    <div className="mt-2 flex items-center justify-between gap-3">
+      <p className="text-sm font-bold text-gray-400 line-through">
+        {activeDiscount.oldPrice.toLocaleString("fa-IR")} ریال
+      </p>
+
+      <span
+        className="
+          shrink-0 rounded-full
+          bg-red-500
+          px-3 py-1
+          text-xs font-black
+          text-white
+        "
+      >
+        {activeDiscount.type === "PERCENT"
+          ? `${activeDiscount.value}٪ تخفیف`
+          : `${Number(activeDiscount.value).toLocaleString("fa-IR")} ریال تخفیف`}
+      </span>
+    </div>
+
+    <p className="mt-2 text-2xl font-black text-yellow-700">
+      {activeDiscount.finalPrice.toLocaleString("fa-IR")} ریال
+    </p>
+    {product.discountEndAt && (
+  <DiscountCountdown
+    endDate={product.discountEndAt}
+    className="mt-2 text-[11px]"
+  />
+)}
+  </div>
+
+) : (
+
+<p className="mt-1 text-2xl font-black text-yellow-700">
+{Number(product.price || 0).toLocaleString("fa-IR")} ریال
+</p>
+
+)}
+
+</div>
 
       {/* انتخاب مدل محصول */}
 <div className="mt-5 rounded-[1.5rem] border border-yellow-200 bg-[#fffaf0] p-4">
@@ -564,13 +1475,17 @@ if (reviewData.ok) {
       </h3>
 
       <p className="mt-1 text-[11px] font-medium text-gray-500">
-        ابتدا سایز را انتخاب کنید، سپس رنگ‌های موجود برای همان سایز نمایش داده می‌شود.
+       رنگ‌های موجود محصول را مشاهده کنید.
+با انتخاب سایز، رنگ‌های قابل سفارش مشخص می‌شوند.
       </p>
     </div>
 
     {selectedInventory ? (
       <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-green-700 shadow-sm">
-        {selectedInventory.quantity} {selectedInventory.unit} موجود
+        {getStockText(
+          selectedInventory.quantity,
+          selectedInventory.unit
+        )}
       </span>
     ) : (
       <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-gray-400 shadow-sm">
@@ -593,6 +1508,7 @@ if (reviewData.ok) {
           onClick={() => {
             setSelectedSize(size);
             setSelectedColorName("");
+            setSelectedQuantity(1);
           }}
           className={`rounded-2xl border px-4 py-2 text-xs font-black transition ${
             selectedSize === size
@@ -612,50 +1528,96 @@ if (reviewData.ok) {
       ۲. انتخاب رنگ
     </p>
 
-    {!selectedSize ? (
-      <div className="rounded-2xl border border-dashed border-yellow-200 bg-white/70 p-4 text-center text-xs font-bold text-gray-400">
-        ابتدا یک سایز انتخاب کنید تا رنگ‌های موجود نمایش داده شود.
-      </div>
-    ) : (
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {availableColorsForSelectedSize.map((item) => (
-          <button
-            key={`${item.size}-${item.colorName}`}
-            type="button"
-            onClick={() => setSelectedColorName(item.colorName)}
-            className={`flex items-center justify-between rounded-2xl border px-3 py-3 transition ${
-              selectedColorName === item.colorName
-                ? "border-[#d4af37] bg-white shadow-[0_10px_25px_rgba(212,175,55,0.16)] ring-2 ring-yellow-100"
-                : "border-yellow-100 bg-white/70 hover:bg-white"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span
-                className="h-6 w-6 rounded-full border border-gray-200 shadow-sm"
-                style={{ backgroundColor: item.colorHex }}
-              />
+    <div className="grid grid-cols-4 gap-2 sm:grid-cols-3">
 
-              <span className="text-xs font-black text-gray-700">
-                {item.colorName}
-              </span>
-            </div>
+{allAvailableColors.map((item)=>{
 
-            <span className="text-[10px] font-bold text-green-600">
-              {item.quantity} {item.unit}
-            </span>
-          </button>
-        ))}
-      </div>
-    )}
+const isAvailable =
+  activeColorsForSelectedSize.includes(
+    item.colorName
+  );
+
+
+return (
+
+<button
+key={item.colorName}
+type="button"
+
+disabled={
+ selectedSize && !isAvailable
+}
+
+onClick={()=>{
+
+ if(!isAvailable) return;
+
+ setSelectedColorName(item.colorName);
+ setSelectedQuantity(1);
+
+}}
+
+className={`
+flex items-center justify-center
+rounded-2xl border px-2 py-2
+transition
+
+${
+selectedColorName === item.colorName
+?
+"border-[#d4af37] bg-white shadow ring-2 ring-yellow-100"
+:
+"border-yellow-100 bg-white/70"
+}
+
+${
+selectedSize && !isAvailable
+?
+"opacity-30 grayscale cursor-not-allowed"
+:
+"hover:bg-white"
+}
+
+`}
+>
+
+<div className="flex items-center gap-1">
+
+<span
+className="
+h-5 w-5 rounded-full
+border border-gray-200
+shadow-sm
+"
+style={{
+backgroundColor:item.colorHex
+}}
+/>
+
+
+<span className="text-[10px] font-black text-gray-700">
+{item.colorName}
+</span>
+
+</div>
+
+
+</button>
+
+);
+
+})}
+
+</div>
   </div>
 
   {/* خلاصه انتخاب */}
   <div className="mt-4 rounded-2xl bg-white px-3 py-3 text-xs font-bold text-gray-500">
     {selectedInventory ? (
-      <span>
-        انتخاب شما: سایز {selectedInventory.size}، رنگ {selectedInventory.colorName}
-      </span>
-    ) : (
+  <span>
+    انتخاب شما: سایز {selectedSize}، رنگ {selectedInventory.colorName}
+  </span>
+) : (
       <span>
         برای افزودن به سبد خرید، سایز و رنگ را انتخاب کنید.
       </span>
@@ -663,23 +1625,184 @@ if (reviewData.ok) {
   </div>
 </div>
 
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.97 }}
-        onClick={(e) => {
-  if (!selectedInventory) {
-    alert("لطفاً ابتدا سایز و رنگ محصول را انتخاب کنید.");
-    return;
-  }
+<div className="mt-4 flex items-center justify-center gap-4">
 
-  addToCart(cartProduct);
-  handleFlyAnimation(e);
+<button
+type="button"
+disabled={selectedQuantity <= 1}
+onClick={() =>
+  setSelectedQuantity((q)=>q-1)
+}
+className="
+h-9 w-9 rounded-full
+bg-yellow-100
+font-black text-[#6f4a18]
+disabled:opacity-40
+"
+>
+-
+</button>
+
+
+<span className="min-w-8 text-center text-lg font-black">
+{selectedQuantity}
+</span>
+
+
+<button
+type="button"
+disabled={
+ selectedQuantity >= maxQuantity
+}
+onClick={() =>
+ setSelectedQuantity((q)=>q+1)
+}
+className="
+h-9 w-9 rounded-full
+bg-yellow-100
+font-black text-[#6f4a18]
+disabled:opacity-40
+"
+>
++
+</button>
+
+</div>
+
+      <div
+  className="
+  mt-5
+  grid
+  grid-cols-1
+  sm:grid-cols-2
+  gap-3
+  "
+>
+
+
+{/* خرید شخصی */}
+{mode === "shop" && !isVendor && (
+<motion.button
+whileHover={{
+  scale: addingToCart ? 1 : 1.02
 }}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#7a5526] via-[#b88724] to-[#d4af37] py-3 font-bold text-white shadow-lg"
-      >
-        <ShoppingBag className="h-5 w-5" />
-        افزودن به سبد خرید
-      </motion.button>
+whileTap={{
+  scale: addingToCart ? 1 : 0.97
+}}
+
+onClick={handleAddToCart}
+disabled={addingToCart}
+
+className="
+flex
+items-center
+justify-center
+gap-2
+rounded-2xl
+bg-gradient-to-r
+from-[#7a5526]
+via-[#b88724]
+to-[#d4af37]
+py-3
+font-black
+text-white
+shadow-lg
+transition
+disabled:cursor-wait
+disabled:opacity-60
+"
+>
+<ShoppingBag
+className="
+h-5
+w-5
+"
+/>
+{addingToCart
+  ? "در حال افزودن..."
+  : "افزودن برای خودم"}
+</motion.button>
+)}
+
+{/* پیام مخصوص فروشنده */}
+{mode === "shop" && isVendor && (
+<div
+className="
+rounded-2xl
+border
+border-yellow-200
+bg-yellow-50
+p-4
+text-center
+text-sm
+font-bold
+leading-7
+text-[#7a5217]
+"
+>
+🛍️ برای خرید از فروشگاه ژنینو،  
+لطفاً با حساب کاربری ژنینو وارد شوید.
+<br />
+اگر قصد خرید دارید، از حساب فروشنده خارج شوید
+و با حساب مشتری وارد شوید.
+</div>
+)}
+
+{/* 🎁 هدیه بازی */}
+{mode === "gift" && (
+  <motion.button
+
+    whileHover={{
+      scale:
+        addingToGiftCart
+          ? 1
+          : 1.02,
+    }}
+
+    whileTap={{
+      scale:
+        addingToGiftCart
+          ? 1
+          : 0.97,
+    }}
+
+    onClick={handleAddToGiftCart}
+
+    disabled={addingToGiftCart}
+
+    className="
+      flex
+      items-center
+      justify-center
+      gap-2
+      rounded-2xl
+      border
+      border-yellow-300
+      bg-yellow-50
+      py-3
+      font-black
+      text-[#8a641a]
+      shadow-sm
+      transition
+      hover:bg-yellow-100
+      disabled:cursor-wait
+      disabled:opacity-60
+    "
+  >
+
+    <span>🎁</span>
+
+    {addingToGiftCart
+      ? "در حال افزودن هدیه..."
+      : `افزودن هدیه برای ${
+          giftChildName || "کودک"
+        }`
+    }
+
+  </motion.button>
+)}
+
+</div>
     </div>
   </div>
 
@@ -810,26 +1933,26 @@ if (reviewData.ok) {
   >
     <div className="grid grid-flow-col auto-cols-[70%] sm:auto-cols-[45%] md:auto-cols-[30%] lg:auto-cols-[22%] gap-5 px-2">
       {relatedProducts.map((item) => (
-        <motion.div
-          key={item.id}
-          whileHover={{ y: -4, boxShadow: "0 10px 25px rgba(212,175,55,0.15)" }}
-          transition={{ duration: 0.3 }}
-          onClick={() => navigate(`/product/${item.id}`)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all border border-yellow-100 cursor-pointer snap-start"
-        >
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-20 h-20 mx-auto mt-4 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110"
-          />
-          <div className="p-3 text-center">
-            <h3 className="text-sm font-semibold text-gray-700 mb-1 line-clamp-1">
-              {item.name}
-            </h3>
-            <p className="text-yellow-600 text-sm font-bold">{item.price}</p>
-          </div>
-        </motion.div>
-      ))}
+
+<div
+key={item.id}
+className="
+shrink-0
+w-[210px]
+sm:w-[220px]
+md:w-[240px]
+"
+>
+
+<ProductCard
+product={item}
+variant="shop"
+source="shop"
+/>
+
+</div>
+
+))}
     </div>
   </div>
 </section>
@@ -940,27 +2063,26 @@ if (reviewData.ok) {
   >
     <div className="grid grid-flow-col auto-cols-[70%] sm:auto-cols-[45%] md:auto-cols-[30%] lg:auto-cols-[22%] gap-5 px-2">
       {recommendedProducts.map((item) => (
-        <motion.div
-          key={item.id}
-          whileHover={{ y: -4, boxShadow: "0 10px 25px rgba(212,175,55,0.15)" }}
-          transition={{ duration: 0.3 }}
-          onClick={() => navigate(`/product/${item.id}`)}
-          className="group bg-white/90 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all border border-yellow-100 cursor-pointer snap-start"
-        >
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-20 h-20 mx-auto mt-4 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110"
-          />
-          <div className="p-3 text-center">
-            <div className="text-[11px] text-gray-500 mb-1">{item.category}</div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-1 line-clamp-1">
-              {item.name}
-            </h3>
-            <p className="text-yellow-600 text-sm font-bold">{item.price}</p>
-          </div>
-        </motion.div>
-      ))}
+
+<div
+key={item.id}
+className="
+shrink-0
+w-[210px]
+sm:w-[220px]
+md:w-[240px]
+"
+>
+
+<ProductCard
+product={item}
+variant="shop"
+source="shop"
+/>
+
+</div>
+
+))}
     </div>
   </div>
 </section>

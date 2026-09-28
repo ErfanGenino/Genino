@@ -187,12 +187,6 @@ if (docsRes?.ok) {
 
   setPackageConfirmed(isPackageSelected);
   if (res.vendor.selectedPackageId) {
-  setSelectedPackage({
-    id: res.vendor.selectedPackageId,
-    title: res.vendor.selectedPackageTitle,
-    price: res.vendor.selectedPackagePrice,
-  });
-
   setFinalPrice(
     res.vendor.selectedPackageFinalPrice
   );
@@ -229,6 +223,10 @@ useEffect(() => {
   const fullPackage = vendorPackages.find(
     (pkg) => pkg.id === vendor.selectedPackageId
   );
+
+  console.log("SELECTED PACKAGE FROM DB:", vendor.selectedPackageId);
+console.log("ALL PACKAGES:", vendorPackages);
+console.log("FULL PACKAGE FOUND:", fullPackage);
 
   if (!fullPackage) return;
 
@@ -268,6 +266,74 @@ const welcomeText = vendor
     : `${vendor.firstName || ""} ${vendor.lastName || ""} عزیز، خوش آمدید`
   : "به داشبورد ارائه‌دهندگان ژنینو خوش آمدید";
 
+const getVendorPageTitle = () => {
+  if (!vendor) {
+    return "ورود به صفحه من";
+  }
+  // فروش کالا
+  if (vendor.activityType === "product") {
+    return "ورود به فروشگاه من";
+  }
+  // خدمات
+  if (vendor.activityType === "service") {
+    switch (vendor.mainActivityField) {
+      case "مدارس":
+        return "ورود به صفحه مدرسه من";
+      case "مهدکودک‌ها":
+        return "ورود به صفحه مهدکودک من";
+      case "خانه‌های بازی":
+        return "ورود به صفحه خانه بازی من";
+      case "کلاس‌های آموزشی":
+        return "ورود به صفحه کلاس آموزشی من";
+      case "کلاس‌های هنری":
+        return "ورود به صفحه کلاس هنری من";
+      case "کلاس‌های ورزشی":
+        return "ورود به صفحه کلاس ورزشی من";
+      case "معلمان خصوصی":
+        return "ورود به صفحه معلم خصوصی من";
+      default:
+        return "ورود به صفحه خدمات من";
+    }
+  }
+  // کالا و خدمات
+  if (vendor.activityType === "both") {
+    return "ورود به صفحه اختصاصی من";
+  }
+  return "ورود به صفحه من";
+};
+
+
+const getVendorPagePath = () => {
+  if (!vendor?.id) return "/";
+  if (vendor.activityType === "product") {
+    return `/vendor/shop/${vendor.id}`;
+  }
+  if (vendor.activityType === "service") {
+    switch (vendor.mainActivityField) {
+      case "مدارس":
+        return `/vendor/service/school/${vendor.id}`;
+      case "مهدکودک‌ها":
+        return `/vendor/service/kindergarten/${vendor.id}`;
+      case "خانه‌های بازی":
+        return `/vendor/service/playhouse/${vendor.id}`;
+      case "کلاس‌های آموزشی":
+        return `/vendor/service/education-class/${vendor.id}`;
+      case "کلاس‌های هنری":
+        return `/vendor/service/art-class/${vendor.id}`;
+      case "کلاس‌های ورزشی":
+        return `/vendor/service/sport-class/${vendor.id}`;
+      case "معلمان خصوصی":
+        return `/vendor/service/private-teacher/${vendor.id}`;
+      default:
+        return `/vendor/service/${vendor.id}`;
+    }
+  }
+  if (vendor.activityType === "both") {
+    return `/vendor/shop/${vendor.id}`;
+  }
+  return "/";
+};
+
 
  
 const vendorPackageTargetType =
@@ -279,16 +345,147 @@ const vendorPackageTargetType =
     ? "BOTH"
     : null;
 
-const filteredVendorPackages = vendorPackageTargetType
-  ? vendorPackages.filter(
+
+// =========================================================
+// تبدیل زمینه فعالیت Vendor به code ثابت دسته خدمت
+// =========================================================
+
+const SERVICE_CATEGORY_CODE_MAP = {
+  "مدارس": "SCHOOL",
+  "مهدکودک‌ها": "KINDERGARTEN",
+  "خانه‌های بازی": "PLAYHOUSE",
+  "کلاس‌های آموزشی": "EDUCATION_CLASS",
+  "کلاس‌های هنری": "ART_CLASS",
+  "کلاس‌های ورزشی": "SPORT_CLASS",
+  "معلمان خصوصی": "PRIVATE_TEACHER",
+};
+
+
+const vendorServiceCategoryCode =
+  SERVICE_CATEGORY_CODE_MAP[
+    vendor?.mainActivityField
+  ] || null;
+
+  console.log(
+  "===== VENDOR PACKAGE DEBUG ====="
+);
+
+console.log(
+  "VENDOR ID:",
+  vendor?.id
+);
+
+console.log(
+  "VENDOR mainActivityField:",
+  vendor?.mainActivityField
+);
+
+console.log(
+  "EXPECTED CATEGORY CODE:",
+  vendorServiceCategoryCode
+);
+
+console.log(
+  "ALL SERVICE PACKAGES:",
+  vendorPackages
+    .filter(
       (pkg) =>
-        pkg.isActive &&
-        (
-          pkg.targetType === vendorPackageTargetType ||
-          pkg.targetType === "BOTH"
-        )
+        pkg.targetType === "SERVICE"
     )
-  : [];
+    .map((pkg) => ({
+      id: pkg.id,
+      title: pkg.title,
+      categoryId:
+        pkg.serviceCategoryId,
+      categoryTitle:
+        pkg.serviceCategory?.title,
+      categoryCode:
+        pkg.serviceCategory?.code,
+    }))
+);
+
+
+// =========================================================
+// بسته‌های قابل نمایش برای Vendor
+// =========================================================
+
+const filteredVendorPackages =
+  vendorPackageTargetType
+    ? vendorPackages.filter(
+        (pkg) => {
+
+          if (!pkg.isActive) {
+            return false;
+          }
+
+
+          // -----------------------------
+          // فروشنده کالا
+          // -----------------------------
+
+          if (
+            vendorPackageTargetType ===
+            "SHOP"
+          ) {
+
+            return (
+              pkg.targetType ===
+                "SHOP" ||
+              pkg.targetType ===
+                "BOTH"
+            );
+          }
+
+
+          // -----------------------------
+          // ارائه‌دهنده خدمات
+          // -----------------------------
+
+          if (
+            vendorPackageTargetType ===
+            "SERVICE"
+          ) {
+
+            if (
+              pkg.targetType !==
+              "SERVICE"
+            ) {
+              return false;
+            }
+
+
+            // روش اصلی:
+            // مقایسه code پایدار دسته
+            if (
+              vendorServiceCategoryCode &&
+              pkg.serviceCategory?.code
+            ) {
+
+              return (
+                pkg.serviceCategory.code ===
+                vendorServiceCategoryCode
+              );
+            }
+
+
+            // fallback برای داده‌های قدیمی
+            return (
+              pkg.serviceCategory?.title ===
+              vendor.mainActivityField
+            );
+          }
+
+
+          // -----------------------------
+          // کالا + خدمات
+          // -----------------------------
+
+          return (
+            pkg.targetType === "BOTH"
+          );
+        }
+      )
+    : [];
   
 const ambassadorDiscountAmount =
   financeSettings?.ambassadorVendorDiscountAmount || 0;
@@ -560,6 +757,7 @@ const handleVendorDocumentUpload = async (documentType, file) => {
 
 
 
+
   return (
     <main
       dir="rtl"
@@ -619,16 +817,15 @@ const handleVendorDocumentUpload = async (documentType, file) => {
 
     <button
       onClick={() => {
-        if (!vendor?.id) return;
-        navigate(`/vendor/shop/${vendor.id}`);
-      }}
+  navigate(getVendorPagePath());
+}}
       className="
         mt-3 w-full rounded-xl
         bg-gradient-to-r from-[#7a5526] via-[#b88724] to-[#d4af37]
         text-white font-bold py-3
       "
     >
-      ورود به فروشگاه من
+     {getVendorPageTitle()} 
     </button>
 
   </div>
@@ -672,6 +869,7 @@ const handleVendorDocumentUpload = async (documentType, file) => {
 />
 
         <VendorSelectedPackageSummary
+  vendor={vendor}
   packageConfirmed={packageConfirmed}
   selectedPackage={selectedPackage}
   packagePrice={packagePrice}

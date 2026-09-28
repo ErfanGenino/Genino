@@ -1,6 +1,6 @@
 //src/Navbar.jsx
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
-import { LogIn, UserPlus, Menu, X, LogOut, Play, Pause } from "lucide-react";
+import { LogIn, UserPlus, Menu, X, LogOut, Play, Pause, Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import logo from "./assets/logo-genino.png";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,7 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
   const [showDashboardSelector, setShowDashboardSelector] = useState(false);
   const [dashboardMenuOpen, setDashboardMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -47,16 +48,22 @@ function shuffleArray(array) {
   const updateUser = async () => {
   const storedUser = localStorage.getItem("genino_user");
   const vendorId = localStorage.getItem("genino_vendor_id");
+  if (vendorId) {
+    setUser(null);
+    setIsAmbassador(false);
+    return;
+  }
+  setUser(storedUser ? JSON.parse(storedUser) : null);
 
-if (vendorId && !storedUser) {
+  const token = localStorage.getItem("genino_token");
+
+if (!token || vendorId) {
   setUser(null);
   setIsAmbassador(false);
   return;
 }
-  setUser(storedUser ? JSON.parse(storedUser) : null);
 
-  const token = localStorage.getItem("genino_token");
-  if (!token) return;
+
   try {
   const ambassadorRes = await authFetch("/ambassadors/me");
 
@@ -80,13 +87,15 @@ if (vendorId && !storedUser) {
 
   // وقتی localStorage از تب دیگر تغییر کند
   window.addEventListener("storage", updateUser);
-
   window.addEventListener("focus", updateUser);
+
+
 
   return () => {
     window.removeEventListener("genino_user_changed", updateUser);
     window.removeEventListener("storage", updateUser);
     window.removeEventListener("focus", updateUser);
+    
   };
 }, []);
 
@@ -95,10 +104,12 @@ useEffect(() => {
   const updateVendor = async () => {
   const vendorId = localStorage.getItem("genino_vendor_id");
 
-  if (!vendorId) {
-    setVendor(null);
-    return;
-  }
+  const token = localStorage.getItem("genino_token");
+
+if (!token || !vendorId) {
+  setVendor(null);
+  return;
+}
 
   try {
   const res = await getVendorById(vendorId);
@@ -118,17 +129,20 @@ useEffect(() => {
   window.addEventListener("genino_vendor_changed", updateVendor);
   window.addEventListener("storage", updateVendor);
   window.addEventListener("focus", updateVendor);
+  
 
   return () => {
     window.removeEventListener("genino_vendor_changed", updateVendor);
     window.removeEventListener("storage", updateVendor);
     window.removeEventListener("focus", updateVendor);
+    
   };
 }, []);
 
 
   // ⭐ خروج کاربر
   async function handleLogoutConfirm() {
+    console.log("🚨 LOGOUT EXECUTED");
   setUser(null);
   setVendor(null);
   setIsAmbassador(false);
@@ -397,29 +411,75 @@ useEffect(() => {
           dir="rtl"
           className="w-full flex items-center justify-between px-3 sm:px-8 py-3"
         >
-          {/* 🔸 لوگو */}
-          <div className="flex-shrink-0">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="relative w-14 h-14 rounded-full flex items-center justify-center
-                bg-white border-2 border-yellow-400 shadow-sm
-                overflow-hidden hover:scale-110 transition-all duration-300">
-                <img
-                  src={logo}
-                  alt="Genino Logo"
-                  className="relative z-10 w-20 h-20 object-contain bg-white"
-                />
-              </div>
+          {/* 🔸 لوگو و دسترسی سریع به علایق */}
+<div className="flex-shrink-0">
+  <div className="flex items-center gap-2">
+    <Link
+      to="/"
+      className="flex items-center gap-2"
+      aria-label="صفحه اصلی ژنینو"
+    >
+      <div
+        className="
+          relative flex h-14 w-14 items-center justify-center
+          overflow-hidden rounded-full
+          border-2 border-yellow-400 bg-white shadow-sm
+          transition-all duration-300
+          hover:scale-110
+        "
+      >
+        <img
+          src={logo}
+          alt="Genino Logo"
+          className="relative z-10 h-20 w-20 bg-white object-contain"
+        />
+      </div>
+    </Link>
 
-              <div className="flex flex-col items-center leading-tight mt-0.5">
-                <span className="text-[15px] font-semibold text-yellow-700">
-                  ژنینو
-                </span>
-                <span className="text-[10.5px] text-gray-500 mt-0.5 tracking-tight">
-                  دستیار هوشمند
-                </span>
-              </div>
-            </Link>
-          </div>
+    <div className="mt-0.5 flex flex-col items-center leading-tight">
+      <Link
+        to="/"
+        className="text-[15px] font-semibold text-yellow-700 transition hover:text-yellow-800"
+      >
+        ژنینو
+      </Link>
+
+      {user && !vendor ? (
+        <Link
+          to="/favorites"
+          className="
+            group mt-0.5
+            flex items-center gap-1
+            text-[10.5px] font-medium
+            tracking-tight text-gray-500
+            transition-all duration-200
+            hover:text-yellow-700
+          "
+          aria-label="علایق من در ژنینو"
+          title="علایق من"
+        >
+          <span>علایق من</span>
+
+          <Heart
+            size={13}
+            strokeWidth={2.2}
+            className="
+              text-[#c89b2b]
+              transition-all duration-200
+              group-hover:scale-110
+              group-hover:fill-[#d4af37]
+              group-hover:text-[#d4af37]
+            "
+          />
+        </Link>
+      ) : (
+        <span className="mt-0.5 text-[10.5px] tracking-tight text-gray-500">
+          دستیار هوشمند
+        </span>
+      )}
+    </div>
+  </div>
+</div>
 
           
 
@@ -448,10 +508,17 @@ useEffect(() => {
         className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-yellow-200 transition"
       >
         <img
-          src={user?.avatarUrl || "/avatars/101.png"}
-          alt="avatar"
-          className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
-        />
+  src={
+    vendor
+      ? (vendor.avatarUrl || "/avatars/101.png")
+      : (user?.avatarUrl || "/avatars/101.png")
+  }
+  alt="avatar"
+  className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
+  onError={(e) => {
+    e.currentTarget.src = "/avatars/101.png";
+  }}
+/>
 
         <span className="text-[13px] text-gray-700 font-medium leading-none">
   {vendor
@@ -639,13 +706,17 @@ navigate(`/dashboard-${user.lifeStage}`);
           px-3 py-1.5 rounded-xl hover:bg-yellow-200 transition"
       >
         <img
-          src={user?.avatarUrl || "/avatars/101.png"}
-          alt="avatar"
-          className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
-          onError={(e) => {
-            e.currentTarget.src = "/avatars/101.png";
-          }}
-        />
+  src={
+    vendor
+      ? (vendor.avatarUrl || "/avatars/101.png")
+      : (user?.avatarUrl || "/avatars/101.png")
+  }
+  alt="avatar"
+  className="w-7 h-7 rounded-full object-cover border border-yellow-300 bg-white"
+  onError={(e) => {
+    e.currentTarget.src = "/avatars/101.png";
+  }}
+/>
 
         <span className="text-[13px] font-medium text-yellow-800 leading-none">
           {vendor
@@ -856,7 +927,7 @@ onClick={(e) => e.stopPropagation()}
             </button>
 
             <NavLink
-  to="/social/profile"
+  to={vendor ? "/vendor/account-settings" : "/social/profile"}
   onClick={() => setMenuOpen(false)}
   className={({ isActive }) =>
     [
@@ -867,9 +938,37 @@ onClick={(e) => e.stopPropagation()}
     ].join(" ")
   }
 >
-  <span>پروفایل</span>
-  <span className="text-xs text-yellow-600">مشاهده</span>
+  <span>{vendor ? "تنظیمات حساب" : "پروفایل"}</span>
+
+  <span className="text-xs text-yellow-600">
+    مشاهده
+  </span>
 </NavLink>
+
+<button
+  type="button"
+  onClick={() => {
+    setMenuOpen(false);
+    setShowOrdersModal(true);
+  }}
+  className="
+    flex items-center justify-between
+    rounded-2xl
+    border border-yellow-200
+    bg-yellow-50/70
+    px-4 py-3
+    text-sm font-bold
+    text-yellow-800
+    transition-all
+    hover:bg-yellow-100
+  "
+>
+  <span>سفارشات من</span>
+
+  <span className="text-xs text-yellow-600">
+    مشاهده
+  </span>
+</button>
 
             <button
               onClick={() => {
@@ -888,17 +987,16 @@ onClick={(e) => e.stopPropagation()}
   className="
     relative overflow-hidden
     flex items-center justify-between
+    h-[46px] min-h-[46px]
     rounded-2xl
-    px-4 py-3
-    text-sm font-extrabold
-    text-white
+    border border-yellow-200
     bg-gradient-to-l
     from-[#d4af37]
     via-[#e6c15a]
     to-[#b98522]
-    shadow-[0_0_20px_rgba(212,175,55,0.45)]
-    hover:scale-[1.02]
-    transition-all duration-300
+    px-4
+    text-sm font-bold text-white
+    transition-all
   "
 >
   <motion.div
@@ -912,11 +1010,11 @@ onClick={(e) => e.stopPropagation()}
   />
 
   <span className="relative z-10">
-    💎 کسب درآمد با سفیران ژنینو
+    کسب درآمد با سفیران ژنینو
   </span>
 
-  <span className="relative z-10 text-lg">
-    ✨
+  <span className="relative z-10 text-xs text-white/90">
+    مشاهده
   </span>
 </Link>
             
@@ -946,27 +1044,155 @@ onClick={(e) => e.stopPropagation()}
 
         <div className="my-2 h-px bg-gradient-to-l from-transparent via-yellow-200 to-transparent" />
 
-        {links.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) =>
-              [
-                "rounded-2xl px-4 py-3 text-sm font-bold transition-all",
-                isActive
-                  ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                  : "text-gray-700 hover:bg-yellow-50 hover:text-yellow-700",
-              ].join(" ")
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
+        {links.map((item, index) => (
+  <div
+    key={item.to}
+    className={
+      index !== links.length - 1
+        ? "border-b border-yellow-300"
+        : ""
+    }
+  >
+    <NavLink
+      to={item.to}
+      onClick={() => setMenuOpen(false)}
+      className={({ isActive }) =>
+        [
+          "block rounded-xl px-4 py-3 text-sm font-bold transition-all",
+          isActive
+            ? "bg-yellow-100 text-yellow-800"
+            : "text-gray-700 hover:bg-yellow-50 hover:text-yellow-700",
+        ].join(" ")
+      }
+    >
+      {item.label}
+    </NavLink>
+  </div>
+))}
 
         <div className="my-2 h-px bg-gradient-to-l from-transparent via-yellow-200 to-transparent" />
 
         
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+{/* 🛍️ مودال سفارشات من */}
+<AnimatePresence>
+  {showOrdersModal && (
+    <motion.div
+      className="
+        fixed inset-0 z-[999]
+        flex items-center justify-center
+        bg-black/40
+        backdrop-blur-sm
+        px-4
+      "
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setShowOrdersModal(false)}
+    >
+      <motion.div
+        dir="rtl"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ scale: 0.92, opacity: 0, y: 10 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.92, opacity: 0, y: 10 }}
+        transition={{ duration: 0.2 }}
+        className="
+          relative
+          w-full max-w-sm
+          rounded-3xl
+          border border-yellow-200
+          bg-white
+          p-6
+          shadow-2xl
+        "
+      >
+        <button
+          type="button"
+          onClick={() => setShowOrdersModal(false)}
+          className="
+            absolute left-4 top-4
+            flex h-8 w-8
+            items-center justify-center
+            rounded-full
+            bg-gray-100
+            text-gray-500
+            transition
+            hover:bg-gray-200
+          "
+        >
+          <X size={17} />
+        </button>
+
+        <div className="mb-6 text-center">
+          <h3 className="text-lg font-black text-yellow-800">
+            سفارشات من
+          </h3>
+
+          <p className="mt-1 text-xs text-gray-400">
+            بخش موردنظر را انتخاب کنید
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3">
+
+          {/* خریدهای من */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowOrdersModal(false);
+              navigate("/orders");
+            }}
+            className="
+              flex items-center justify-between
+              rounded-2xl
+              border border-yellow-200
+              bg-yellow-50
+              px-5 py-4
+              text-sm font-bold
+              text-yellow-800
+              transition
+              hover:bg-yellow-100
+            "
+          >
+            <span>خریدهای من</span>
+
+            <span className="text-xs text-yellow-600">
+              مشاهده
+            </span>
+          </button>
+
+          {/* رزروهای من */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowOrdersModal(false);
+              navigate("/my-reservations");
+            }}
+            className="
+              flex items-center justify-between
+              rounded-2xl
+              border border-purple-200
+              bg-purple-50
+              px-5 py-4
+              text-sm font-bold
+              text-[#76529a]
+              transition
+              hover:bg-purple-100
+            "
+          >
+            <span>رزروهای من</span>
+
+            <span className="text-xs text-[#76529a]/70">
+              مشاهده
+            </span>
+          </button>
+
+        </div>
       </motion.div>
     </motion.div>
   )}

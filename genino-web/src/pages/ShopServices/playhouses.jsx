@@ -78,8 +78,51 @@ export default function Playhouses() {
   );
 
   const goToShopFilter = (item) => {
-    navigate(`/shop?category=${encodeURIComponent(item)}`);
-  };
+  // رده سنی
+  if (activeSection === "رده سنی") {
+    if (
+      item === "همه رده‌های سنی" ||
+      item === "همه خانه‌های بازی"
+    ) {
+      navigate("/shop?service=playhouse");
+      return;
+    }
+
+    navigate(
+      `/shop?service=playhouse&playhouseAge=${encodeURIComponent(item)}`
+    );
+    return;
+  }
+
+  // نوع بازی
+  if (activeSection === "نوع بازی") {
+    if (item === "همه بازی‌ها") {
+      navigate("/shop?service=playhouse");
+      return;
+    }
+
+    navigate(
+      `/shop?service=playhouse&playhouseGame=${encodeURIComponent(item)}`
+    );
+    return;
+  }
+
+  // امکانات
+  if (activeSection === "امکانات") {
+    if (item === "همه امکانات") {
+      navigate("/shop?service=playhouse");
+      return;
+    }
+
+    navigate(
+      `/shop?service=playhouse&playhouseFacility=${encodeURIComponent(item)}`
+    );
+    return;
+  }
+
+  // نمایش همه
+  navigate("/shop?service=playhouse");
+};
 
   return (
     <main

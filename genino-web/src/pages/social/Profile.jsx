@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+// D:\projects\Genino\genino-web\src\pages\social\Profile.jsx
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Calendar, LogOut, Save, Camera, X } from "lucide-react";
 import { getUserProfile, updateUserProfile, authFetch } from "../../services/api";
@@ -7,8 +8,8 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
 import gregorian from "react-date-object/calendars/gregorian";
-import { useRef } from "react";
 import { prepareImage } from "../../utils/image/prepareImage";
+import { useSearchParams } from "react-router-dom";
 
 
 
@@ -87,6 +88,7 @@ export default function Profile() {
   const [localPreview, setLocalPreview] = useState("");
   const [serverUser, setServerUser] = useState(null);
   const birthRef = useRef(null);
+  const addressSectionRef = useRef(null);
   const [avatarCropFile, setAvatarCropFile] = useState(null);
   const [avatarCropPreview, setAvatarCropPreview] = useState("");
   const [avatarZoom, setAvatarZoom] = useState(1);
@@ -94,6 +96,8 @@ export default function Profile() {
   const avatarCropImgRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isPreparingAvatar, setIsPreparingAvatar] = useState(false);
+  const [searchParams] = useSearchParams();
+
 
   const cropBoxRef = useRef(null);
   const dragStateRef = useRef({
@@ -207,6 +211,24 @@ export default function Profile() {
       alive = false;
     };
   }, []);
+
+  useEffect(()=>{
+const section =
+searchParams.get("section");
+if(
+section === "addresses"
+&&
+addressSectionRef.current
+){
+setTimeout(()=>{
+addressSectionRef.current.scrollIntoView({
+behavior:"smooth",
+block:"start"
+});
+},500);
+}
+},[searchParams]);
+
 
   function setField(name, value) {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -863,7 +885,10 @@ if (loading) {
         </div>
 
         {/* 📍 آدرس‌ها */}
-<div className="mt-6 space-y-3">
+<div
+ref={addressSectionRef}
+className="mt-6 space-y-3 scroll-mt-24"
+>
   <div className="flex items-center justify-between">
     <p className="text-sm font-semibold text-gray-700">آدرس‌ها</p>
 

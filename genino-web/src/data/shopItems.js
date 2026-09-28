@@ -238,9 +238,9 @@ export const shopItems = [
   },
 
   {
-    groupKey: "all",
-    items: ["همه کالاهای سیسمونی تخصصی"]
-  },
+  groupKey: "sismooni-all",
+  items: ["همه کالاهای سیسمونی تخصصی"],
+},
 
 
 
@@ -433,9 +433,9 @@ export const shopItems = [
 
   // 📦 همه
   {
-    groupKey: "all",
-    items: ["همه کالاهای نوزاد، کودک و نوجوان"],
-  },
+  groupKey: "kids-all",
+  items: ["همه کالاهای نوزاد، کودک و نوجوان"],
+},
 
 
 
@@ -727,9 +727,9 @@ export const shopItems = [
 
   // 📦 همه
   {
-    groupKey: "all",
-    items: ["همه کالاهای مد و پوشاک"],
-  },
+  groupKey: "fashion-all",
+  items: ["همه کالاهای مد و پوشاک"],
+},
 
 
 
@@ -849,9 +849,9 @@ export const shopItems = [
 
   // 📦 همه
   {
-    groupKey: "all",
-    items: ["همه کالاهای خواب و حمام"],
-  },
+  groupKey: "bedBath-all",
+  items: ["همه کالاهای خواب و حمام"],
+},
 
 
 
@@ -974,9 +974,9 @@ export const shopItems = [
 
   // 📦 همه
   {
-    groupKey: "all",
-    items: ["همه ساعت و زیورآلات"],
-  },
+  groupKey: "watchJewelry-all",
+  items: ["همه ساعت و زیورآلات"],
+},
 
 
 
@@ -1207,9 +1207,9 @@ export const shopItems = [
 
   // 📦 همه
   {
-    groupKey: "all",
-    items: ["همه کالاهای ورزشی"],
-  },
+  groupKey: "sport-all",
+  items: ["همه کالاهای ورزشی"],
+},
 
 
 
@@ -1378,9 +1378,9 @@ export const shopItems = [
 
   // 📦 همه
   {
-    groupKey: "all",
-    items: ["همه کالاهای سلامت و پزشکی"],
-  },
+  groupKey: "medical-all",
+  items: ["همه کالاهای سلامت و پزشکی"],
+},
 
 
 
@@ -1776,9 +1776,9 @@ export const shopItems = [
 
   // 📦 همه
   {
-    groupKey: "all",
-    items: ["همه محصولات آرایشی و بهداشتی"],
-  },
+  groupKey: "beauty-all",
+  items: ["همه محصولات آرایشی و بهداشتی"],
+},
 
 
 
@@ -1979,7 +1979,7 @@ export const shopItems = [
 },
 
 {
-  groupKey: "all",
+  groupKey: "perfume-all",
   items: ["همه عطرها و ادکلن‌ها"],
 },
 
@@ -2238,7 +2238,7 @@ export const shopItems = [
 },
 
 {
-  groupKey: "all",
+  groupKey: "handmade-all",
   items: ["همه کالاهای هنر دست"],
 },
 ];

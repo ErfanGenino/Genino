@@ -18,14 +18,26 @@ export default function VendorBankSection({
   const isBankSubmitDisabled =
     !bankForm.bankName.trim() ||
     !bankForm.accountNumber.trim() ||
-    !bankForm.cardNumber.trim() ||
-    !bankForm.shebaNumber.trim() ||
+    !bankForm.cardNumber ||
+    bankForm.cardNumber.length !== 16 ||
+    !bankForm.shebaNumber ||
+    bankForm.shebaNumber.length !== 24
     !bankInfoConfirmed ||
     (isDocumentsLocked && !canEditBankInfo);
 
   const isBankLocked = isDocumentsLocked && !canEditBankInfo;
 
   const handleSubmitBankInfo = async () => {
+    if(bankForm.cardNumber.length !== 16){
+  alert("شماره کارت باید ۱۶ رقم باشد.");
+  return;
+}
+
+
+if(bankForm.shebaNumber.length !== 24){
+  alert("شماره شبا باید ۲۴ رقم باشد.");
+  return;
+}
     const res = await updateVendorBankingInfo(vendor.id, bankForm);
 
     if (!res?.ok) {
@@ -76,17 +88,20 @@ export default function VendorBankSection({
         />
 
         <input
-          value={bankForm.cardNumber}
-          disabled={isBankLocked}
-          onChange={(e) =>
-            setBankForm((prev) => ({
-              ...prev,
-              cardNumber: e.target.value,
-            }))
-          }
-          placeholder="شماره کارت *"
-          className="h-12 rounded-2xl border border-yellow-200 bg-white px-4"
-        />
+  value={bankForm.cardNumber}
+  disabled={isBankLocked}
+  maxLength={16}
+  onChange={(e) =>
+    setBankForm((prev) => ({
+      ...prev,
+      cardNumber: e.target.value
+        .replace(/\D/g, "")
+        .slice(0, 16),
+    }))
+  }
+  placeholder="شماره کارت ۱۶ رقمی *"
+  className="h-12 rounded-2xl border border-yellow-200 bg-white px-4"
+/>
 
         <div className="flex h-12 overflow-hidden rounded-2xl border border-yellow-200 bg-white">
           <input
@@ -96,7 +111,9 @@ export default function VendorBankSection({
             onChange={(e) =>
               setBankForm((prev) => ({
                 ...prev,
-                shebaNumber: e.target.value.replace(/\D/g, ""),
+                shebaNumber: e.target.value
+  .replace(/\D/g, "")
+  .slice(0,24),
               }))
             }
             placeholder="شماره شبا بدون IR"

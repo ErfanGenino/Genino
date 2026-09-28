@@ -22,9 +22,28 @@ const sections = categoryGroups.map((group) => ({
     (section) => section.title === activeSection
   );
 
-  const goToShopFilter = (item) => {
-    navigate(`/shop?category=${encodeURIComponent(item)}`);
-  };
+  const goToShopFilter = (section, item) => {
+  const params = new URLSearchParams();
+
+  params.set("category", "آرایشی و بهداشتی");
+
+  // نمایش همه کالاهای کل دسته آرایشی و بهداشتی
+  if (section.key === "beauty-all") {
+    navigate(`/shop?${params.toString()}`);
+    return;
+  }
+
+  // گروه انتخاب‌شده همیشه اعمال شود
+  params.set("group", section.key);
+
+  // اگر گزینه «همه ...» بود، item نفرست
+  // تا تمام کالاهای همین گروه نمایش داده شوند
+  if (!item.trim().startsWith("همه")) {
+    params.set("item", item);
+  }
+
+  navigate(`/shop?${params.toString()}`);
+};
 
   return (
     <main
@@ -91,7 +110,7 @@ const sections = categoryGroups.map((group) => ({
             {selectedSection?.items.map((item) => (
               <button
                 key={item}
-                onClick={() => goToShopFilter(item)}
+                onClick={() => goToShopFilter(selectedSection, item)}
                 className="min-h-12 rounded-2xl border border-yellow-200 bg-[#fff8e8] px-3 py-3 text-center text-[11px] font-bold text-gray-700 transition hover:bg-[#f3e3bd] hover:text-[#7a5526] hover:shadow-md"
               >
                 {item}

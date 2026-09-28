@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Baby } from "lucide-react";
 import { HeartPulse } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import FamilyTree from "./FamilyTree";
 import AchievementsBar from "@components/Dashboard/AchievementsBar";
 import TodayCalendarBox from "@components/Dashboard/TodayCalendarBox";
@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authFetch } from "../services/api";
+import { GraduationCap } from "lucide-react";
 
 
 
@@ -18,9 +19,17 @@ import { authFetch } from "../services/api";
 export default function MyChild() {
 
 const navigate = useNavigate();
+const [searchParams] = useSearchParams();
+const notificationChildId =
+  searchParams.get("childId");
+const notificationAchievementId =
+  searchParams.get("achievementId");
 const isLoggedIn = !!localStorage.getItem("genino_token");
-
-
+const currentUser =
+  JSON.parse(localStorage.getItem("genino_user") || "null");
+const isVendor =
+  !!localStorage.getItem("genino_vendor_id") ||
+  currentUser?.type === "vendor";
 const [isLoading, setIsLoading] = useState(true);
 const [confirmDelete, setConfirmDelete] = useState(false);
 const [showInviteModal, setShowInviteModal] = useState(false);
@@ -30,7 +39,6 @@ const [inviteUsername, setInviteUsername] = useState("");
 const [selectedChildForTree, setSelectedChildForTree] = useState(null);
 const [isInviting, setIsInviting] = useState(false);
 const [childAdmins, setChildAdmins] = useState([]);
-const [showWishlistModal, setShowWishlistModal] = useState(false);
 const [activeTab, setActiveTab] = useState("mine");
 const [selectedFollowedChild, setSelectedFollowedChild] = useState(null);
 const [showSpiritualAchievementModal, setShowSpiritualAchievementModal] = useState(false);
@@ -140,28 +148,107 @@ useEffect(() => {
         activeTab === "mine" ? "/children" : "/children/followed";
 
       const res = await authFetch(endpoint);
-      const data = Array.isArray(res) ? res : res?.children || [];
+const data =
+  Array.isArray(res)
+    ? res
+    : res?.children || [];
 
-      if (!Array.isArray(data)) {
-        throw new Error(res?.message || "children invalid");
-      }
+if (!Array.isArray(data)) {
+  throw new Error(
+    res?.message || "children invalid"
+  );
+}
+// اگر از اعلان وارد شده‌ایم و کودک
+// در تب فعلی نیست، تب دیگر را بررسی کن
+if (notificationChildId) {
+  const existsInCurrentTab =
+    data.some(
+      (child) =>
+        String(child.id) ===
+        String(notificationChildId)
+    );
+  if (!existsInCurrentTab) {
+    const otherTab =
+      activeTab === "mine"
+        ? "followed"
+        : "mine";
 
-      setChildrenList(data);
+    const otherEndpoint =
+      otherTab === "mine"
+        ? "/children"
+        : "/children/followed";
 
-      const validChildren = data.filter((c) => c.birthDate);
+    const otherRes =
+      await authFetch(otherEndpoint);
+
+    const otherData =
+      Array.isArray(otherRes)
+        ? otherRes
+        : otherRes?.children || [];
+
+    const existsInOtherTab =
+      Array.isArray(otherData) &&
+      otherData.some(
+        (child) =>
+          String(child.id) ===
+          String(notificationChildId)
+      );
+    if (existsInOtherTab) {
+      setActiveTab(otherTab);
+      return;
+    }
+  }
+}
+setChildrenList(data);
+const validChildren =
+  data.filter((c) => c.birthDate);
 
 if (validChildren.length > 0) {
-  const savedActiveChildId = localStorage.getItem(
-    activeTab === "mine" ? "activeChildId" : "activeFollowedChildId"
-  );
 
-  const exists = validChildren.find(
-    (c) => String(c.id) === String(savedActiveChildId)
-  );
+  // اولویت اول:
+  // کودکی که از اعلان آمده است
+
+  const notificationChild =
+    notificationChildId
+      ? validChildren.find(
+          (c) =>
+            String(c.id) ===
+            String(notificationChildId)
+        )
+      : null;
+
+
+  if (notificationChild) {
+    setActiveChildId(
+      notificationChild.id
+    );
+
+    return;
+  }
+
+
+  // حالت عادی صفحه
+
+  const savedActiveChildId =
+    localStorage.getItem(
+      activeTab === "mine"
+        ? "activeChildId"
+        : "activeFollowedChildId"
+    );
+
+  const exists =
+    validChildren.find(
+      (c) =>
+        String(c.id) ===
+        String(savedActiveChildId)
+    );
 
   setActiveChildId(
-    exists ? exists.id : validChildren[0].id
+    exists
+      ? exists.id
+      : validChildren[0].id
   );
+
 } else {
   setActiveChildId(null);
 }
@@ -175,7 +262,7 @@ if (validChildren.length > 0) {
   }
 
   loadChildrenFromApi();
-}, [activeTab]);
+}, [activeTab, notificationChildId]);
 
 
 useEffect(() => {
@@ -228,7 +315,6 @@ const pendingMotherInvite = childAdmins.find(
   (a) => a.role === "mother" && a.status === "PENDING"
 );
 
-const currentUser = JSON.parse(localStorage.getItem("genino_user") || "null");
 
 const currentUserAsParent = childAdmins.find(
   (a) =>
@@ -289,6 +375,41 @@ if (!isLoggedIn) {
           </Link>
         </div>
       </section>
+    </main>
+  );
+}
+
+
+if (isVendor) {
+  return (
+    <main
+      dir="rtl"
+      className="min-h-screen flex items-center justify-center bg-[#fffaf0] px-4"
+    >
+      <div className="max-w-md rounded-[2rem] border border-yellow-200 bg-white p-8 text-center shadow-xl">
+
+        <div className="text-5xl mb-4">
+          👶
+        </div>
+
+        <h2 className="text-xl font-black text-yellow-800">
+          دسترسی محدود است
+        </h2>
+
+        <p className="mt-4 text-sm leading-8 text-gray-600">
+          صفحه «کودک من» فقط برای کاربران ژنینو قابل استفاده است.
+          <br />
+          لطفاً با حساب کاربری والدین وارد شوید.
+        </p>
+
+        <button
+          onClick={() => navigate("/login")}
+          className="mt-6 rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-400 px-6 py-3 text-white font-bold"
+        >
+          ورود به حساب کاربری
+        </button>
+
+      </div>
     </main>
   );
 }
@@ -834,7 +955,12 @@ const getCurrentUserSpiritualSenderText = () => {
 
 
       {/* 🏅 نوار دستاوردهای کودک */}
-      <AchievementsBar childId={activeChild?.id} />
+      <AchievementsBar
+  childId={activeChild?.id}
+  openAchievementId={
+    notificationAchievementId
+  }
+/>
 
 
 
@@ -1098,28 +1224,59 @@ const getCurrentUserSpiritualSenderText = () => {
     <p className="font-extrabold text-yellow-800 mt-1">
       {activeChild?.gender === "girl" ? "دختر" : "پسر"}
     </p>
-    <button
-  type="button"
-  onClick={() => setShowWishlistModal(true)}
-  className={`
-  mt-3
-  text-[11px]
-  px-4 py-2
-  rounded-full
-  text-white
-  font-bold
-  hover:scale-[1.03]
-  active:scale-[0.98]
-  transition-all
-  ${
-    activeChild?.gender === "girl"
-      ? "bg-gradient-to-l from-pink-500 to-rose-400 shadow-[0_8px_20px_rgba(244,63,94,0.28)] hover:shadow-[0_10px_28px_rgba(244,63,94,0.38)]"
-      : "bg-gradient-to-l from-blue-500 to-cyan-400 shadow-[0_8px_20px_rgba(59,130,246,0.28)] hover:shadow-[0_10px_28px_rgba(59,130,246,0.38)]"
-  }
-`}
->
-  مشاهده کالاهای مورد علاقه {activeChild?.fullName || "کودک"}
-</button>
+    {canManageChild ? (
+  <button
+    type="button"
+    onClick={() =>
+      navigate(
+  `/favorites/child/manage?childId=${activeChild.id}`
+)
+    }
+    className={`
+      mt-3
+      text-[11px]
+      px-4 py-2
+      rounded-full
+      text-white
+      font-bold
+      hover:scale-[1.03]
+      active:scale-[0.98]
+      transition-all
+      ${
+        activeChild?.gender === "girl"
+          ? "bg-gradient-to-l from-pink-500 to-rose-400 shadow-[0_8px_20px_rgba(244,63,94,0.28)]"
+          : "bg-gradient-to-l from-blue-500 to-cyan-400 shadow-[0_8px_20px_rgba(59,130,246,0.28)]"
+      }
+    `}
+  >
+   انتخاب کالاهای مورد علاقه {activeChild?.fullName} 
+  </button>
+) : (
+  <button
+    type="button"
+    onClick={() =>
+      navigate(`/child-wishlist/view?childId=${activeChild.id}`)
+    }
+    className={`
+      mt-3
+      text-[11px]
+      px-4 py-2
+      rounded-full
+      text-white
+      font-bold
+      hover:scale-[1.03]
+      active:scale-[0.98]
+      transition-all
+      ${
+        activeChild?.gender === "girl"
+          ? "bg-gradient-to-l from-pink-500 to-rose-400"
+          : "bg-gradient-to-l from-blue-500 to-cyan-400"
+      }
+    `}
+  >
+   مشاهده کالاهای مورد علاقه {activeChild?.fullName} 
+  </button>
+)}
   </div>
 </div>
 
@@ -1202,76 +1359,163 @@ const getCurrentUserSpiritualSenderText = () => {
 
 {/* 🧩 دسترسی‌های کودک */}
 <motion.div
-  className="relative z-[6] mt-6 mb-12 w-full max-w-3xl px-4"
+  className="relative z-[6] mt-6 mb-12 w-full max-w-5xl px-4"
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.6 }}
 >
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
+    {/* 🌳 درختواره کودک */}
     <button
+      type="button"
       onClick={() => {
         if (!activeChild) return;
+
         setSelectedChildForTree(activeChild);
         setShowFamilyTree(true);
       }}
       disabled={!activeChild}
       className={`
         group relative overflow-hidden
-        min-h-[120px] rounded-[2rem]
+        w-full min-h-[120px]
+        rounded-[2rem]
         bg-white/80 backdrop-blur-xl
         border border-white/70
         shadow-[0_16px_45px_rgba(255,190,0,0.16)]
         p-5 text-right
-        hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(255,190,0,0.24)]
+        hover:-translate-y-1
+        hover:shadow-[0_22px_60px_rgba(255,190,0,0.24)]
+        active:scale-[0.98]
         transition-all duration-300
-        ${!activeChild ? "opacity-50 cursor-not-allowed" : ""}
+        ${!activeChild ? "cursor-not-allowed opacity-50" : ""}
       `}
     >
-      <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full bg-yellow-200/50 blur-2xl" />
+      <div className="absolute -top-12 -left-12 h-32 w-32 rounded-full bg-yellow-200/50 blur-2xl" />
 
-      <div className="relative z-10 flex items-center gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center text-3xl shadow-lg">
+      <div className="relative z-10 flex h-full items-center gap-4">
+        <div
+          className="
+            flex h-16 w-16 shrink-0
+            items-center justify-center
+            rounded-2xl
+            bg-gradient-to-br from-yellow-300 to-amber-400
+            text-3xl
+            shadow-lg
+            transition-transform duration-300
+            group-hover:scale-105
+          "
+        >
           🌳
         </div>
 
         <div>
-          <h3 className="font-extrabold text-yellow-900 text-lg">
+          <h3 className="text-lg font-extrabold text-yellow-900">
             درختواره کودک
           </h3>
-          <p className="text-xs text-gray-500 mt-1 leading-6">
+
+          <p className="mt-1 text-xs leading-6 text-gray-500">
             مشاهده ارتباط کودک با اعضای خانواده
           </p>
         </div>
       </div>
     </button>
 
+    {/* 📸 آلبوم خاطرات */}
     <Link
-      to={`/memory-album?childId=${activeChild?.id}${isFollowedTab ? "&mode=view" : ""}`}
-      className="
+      to={`/memory-album?childId=${activeChild?.id}${
+        isFollowedTab ? "&mode=view" : ""
+      }`}
+      className={`
         group relative overflow-hidden
-        min-h-[120px] rounded-[2rem]
+        w-full min-h-[120px]
+        rounded-[2rem]
         bg-white/80 backdrop-blur-xl
         border border-white/70
         shadow-[0_16px_45px_rgba(255,190,0,0.16)]
         p-5 text-right
-        hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(255,190,0,0.24)]
+        hover:-translate-y-1
+        hover:shadow-[0_22px_60px_rgba(255,190,0,0.24)]
+        active:scale-[0.98]
         transition-all duration-300
-      "
+        ${!activeChild ? "pointer-events-none opacity-50" : ""}
+      `}
     >
-      <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full bg-amber-200/50 blur-2xl" />
+      <div className="absolute -top-12 -left-12 h-32 w-32 rounded-full bg-amber-200/50 blur-2xl" />
 
-      <div className="relative z-10 flex items-center gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 to-yellow-500 flex items-center justify-center text-3xl shadow-lg">
+      <div className="relative z-10 flex h-full items-center gap-4">
+        <div
+          className="
+            flex h-16 w-16 shrink-0
+            items-center justify-center
+            rounded-2xl
+            bg-gradient-to-br from-amber-300 to-yellow-500
+            text-3xl
+            shadow-lg
+            transition-transform duration-300
+            group-hover:scale-105
+          "
+        >
           📸
         </div>
 
         <div>
-          <h3 className="font-extrabold text-yellow-900 text-lg">
+          <h3 className="text-lg font-extrabold text-yellow-900">
             آلبوم خاطرات
           </h3>
-          <p className="text-xs text-gray-500 mt-1 leading-6">
-            ثبت لحظه‌های شیرین رشد کودک
+
+          <p className="mt-1 text-xs leading-6 text-gray-500">
+            ثبت و مشاهده لحظه‌های شیرین رشد کودک
+          </p>
+        </div>
+      </div>
+    </Link>
+
+    {/* 🏫 دنیای کودک */}
+    <Link
+      to={`/child-world?childId=${activeChild?.id}&childName=${encodeURIComponent(
+        activeChild?.fullName || ""
+      )}${isFollowedTab ? "&mode=view" : ""}`}
+      className={`
+        group relative overflow-hidden
+        w-full min-h-[120px]
+        rounded-[2rem]
+        bg-white/80 backdrop-blur-xl
+        border border-white/70
+        shadow-[0_16px_45px_rgba(255,190,0,0.16)]
+        p-5 text-right
+        hover:-translate-y-1
+        hover:shadow-[0_22px_60px_rgba(255,190,0,0.24)]
+        active:scale-[0.98]
+        transition-all duration-300
+        ${!activeChild ? "pointer-events-none opacity-50" : ""}
+      `}
+    >
+      <div className="absolute -top-12 -left-12 h-32 w-32 rounded-full bg-orange-200/50 blur-2xl" />
+
+      <div className="relative z-10 flex h-full items-center gap-4">
+        <div
+          className="
+            flex h-16 w-16 shrink-0
+            items-center justify-center
+            rounded-2xl
+            bg-gradient-to-br from-orange-300 to-amber-500
+            text-white
+            shadow-lg
+            transition-transform duration-300
+            group-hover:scale-105
+          "
+        >
+          <GraduationCap className="h-8 w-8" />
+        </div>
+
+        <div>
+          <h3 className="text-lg font-extrabold text-yellow-900">
+            دنیای کودک
+          </h3>
+
+          <p className="mt-1 text-xs leading-6 text-gray-500">
+            مدارس، کلاس‌ها و فعالیت‌های کودک
           </p>
         </div>
       </div>
@@ -1430,75 +1674,6 @@ const getCurrentUserSpiritualSenderText = () => {
   </div>
 )}
 
-{showWishlistModal && (
-  <div
-    className="fixed inset-0 z-[120] bg-black/40 flex items-center justify-center px-4"
-    onClick={() => setShowWishlistModal(false)}
-  >
-    <div
-      className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden"
-      onClick={(e) => e.stopPropagation()}
-    >
-
-      {/* هدر */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-yellow-100">
-        <h3 className="text-lg font-extrabold text-yellow-900">
-          کالاهای مورد علاقه {activeChild?.fullName}
-        </h3>
-
-        <button
-          onClick={() => setShowWishlistModal(false)}
-          className="text-gray-400 hover:text-gray-700 transition"
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* لیست نمونه کالاها */}
-      <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
-
-        {[1, 2, 3].map((item) => (
-          <div
-            key={item}
-            className="flex items-center gap-3 rounded-2xl border border-yellow-100 bg-yellow-50/40 p-3"
-          >
-            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white border border-yellow-100 flex items-center justify-center text-3xl">
-              🧸
-            </div>
-
-            <div className="flex-1 text-right">
-              <p className="font-bold text-gray-800">
-                اسباب بازی کودک
-              </p>
-
-              <p className="text-sm text-yellow-700 mt-1">
-                ۱٬۲۵۰٬۰۰۰ تومان
-              </p>
-            </div>
-
-            <button
-              className="
-                px-3 py-2
-                rounded-xl
-                bg-gradient-to-l from-yellow-400 via-amber-300 to-yellow-500
-                hover:from-yellow-500 hover:to-amber-400
-                text-yellow-950
-                text-xs
-                font-extrabold
-                shadow-[0_8px_22px_rgba(245,158,11,0.30)]
-                hover:shadow-[0_10px_28px_rgba(245,158,11,0.42)]
-                transition-all
-              "
-            >
-              ارسال هدیه
-            </button>
-          </div>
-        ))}
-
-      </div>
-    </div>
-  </div>
-)}
 
 
 {showSpiritualAchievementModal && (

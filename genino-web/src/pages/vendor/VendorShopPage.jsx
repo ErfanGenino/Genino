@@ -7,13 +7,52 @@ import { useEffect, useState } from "react";
 import { ShoppingBag, Trash2, Pencil } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import PromoSlider from "@components/Social/PromoSlider.jsx";
+import ProductCard from "../../components/Product/ProductCard";
 
 
+
+
+function getLoggedInVendorId() {
+  const token = localStorage.getItem("genino_token");
+
+  if (!token) return null;
+
+  try {
+    const payloadPart = token.split(".")[1];
+
+    if (!payloadPart) return null;
+
+    const normalizedPayload = payloadPart
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+    const payload = JSON.parse(
+      decodeURIComponent(
+        atob(normalizedPayload)
+          .split("")
+          .map(
+            (char) =>
+              "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2)
+          )
+          .join("")
+      )
+    );
+
+    return payload.vendorId || null;
+  } catch (error) {
+    console.error("خطا در خواندن اطلاعات توکن:", error);
+    return null;
+  }
+}
 
 
 export default function VendorShopPage() {
   const { vendorId } = useParams();
   const navigate = useNavigate();
+  const loggedInVendorId = getLoggedInVendorId();
+  const isOwner =
+  loggedInVendorId !== null &&
+  Number(loggedInVendorId) === Number(vendorId);
   const [vendor, setVendor] = useState(null);
   const [products, setProducts] = useState([]);
   const [headerImages, setHeaderImages] = useState([]);
@@ -70,36 +109,58 @@ try {
   console.error(err);
 }
 
-    // 2. محصولات واقعی
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/vendor-products/vendor/${vendorId}`
-      );
+    // 2. دریافت محصولات فروشگاه
+try {
+  const productsUrl = isOwner
+    ? `${API_BASE_URL}/vendor-products/vendor/${vendorId}`
+    : `${API_BASE_URL}/vendor-products/public/vendor/${vendorId}`;
 
-      const data = await res.json();
+  const fetchOptions = isOwner
+    ? {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("genino_token")}`,
+          Accept: "application/json",
+        },
+      }
+    : {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      };
 
-      const fixedProducts = (data.products || []).map((p) => ({
-  ...p,
+  const res = await fetch(productsUrl, fetchOptions);
 
-  categoryLinks:
-    typeof p.categoryLinks === "string"
-      ? JSON.parse(p.categoryLinks)
-      : p.categoryLinks,
+  const data = await res.json();
 
-  images:
-    typeof p.images === "string"
-      ? JSON.parse(p.images)
-      : p.images || [],
-}));
+  if (!res.ok || !data.ok) {
+    throw new Error(data.message || "خطا در دریافت محصولات فروشگاه");
+  }
 
-setProducts(fixedProducts);
-    } catch (err) {
-      console.error(err);
-    }
+  const fixedProducts = (data.products || []).map((product) => ({
+    ...product,
+
+    categoryLinks:
+      typeof product.categoryLinks === "string"
+        ? JSON.parse(product.categoryLinks)
+        : product.categoryLinks || [],
+
+    images:
+      typeof product.images === "string"
+        ? JSON.parse(product.images)
+        : product.images || [],
+  }));
+
+  setProducts(fixedProducts);
+} catch (err) {
+  console.error("GET VENDOR SHOP PRODUCTS ERROR:", err);
+  setProducts([]);
+}
   }
 
   load();
-}, [vendorId]);
+}, [vendorId, isOwner, API_BASE_URL]);
 
   const canAddProduct =
     vendor && vendor.packageWindowCount && products.length < vendor.packageWindowCount;
@@ -173,6 +234,63 @@ const handlePublishProduct = async (productId) => {
     console.error(err);
     alert("خطا در ارتباط با سرور");
   }
+};
+
+const handleUnpublishProduct = async (productId) => {
+
+  try {
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/vendor-products/${productId}/unpublish`,
+      {
+        method:"PATCH",
+        headers:{
+          Authorization:
+          `Bearer ${localStorage.getItem("genino_token")}`,
+        },
+      }
+    );
+
+
+    const data = await res.json();
+
+
+    if(!data.ok){
+
+      alert(
+        data.message ||
+        "خطا در عدم انتشار محصول"
+      );
+
+      return;
+
+    }
+
+
+    setProducts((prev)=>
+      prev.map((item)=>
+        item.id === productId
+        ?
+        {
+          ...item,
+          status:"DRAFT"
+        }
+        :
+        item
+      )
+    );
+
+
+  } catch(error){
+
+    console.error(error);
+
+    alert(
+      "خطا در ارتباط با سرور"
+    );
+
+  }
+
 };
 
 const handleHeaderImageUpload = async (e) => {
@@ -277,33 +395,51 @@ const headerSlides = headerImages.map((img, index) => ({
         onIndexChange={setActiveHeaderIndex}
       />
 
-      <button
-        type="button"
-        onClick={() => handleDeleteHeaderImage(activeHeaderIndex)}
-        className="absolute left-4 top-4 z-50 rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-600 shadow"
-      >
-        حذف تصویر
-      </button>
+      {isOwner && (
+        <button
+          type="button"
+          onClick={() => handleDeleteHeaderImage(activeHeaderIndex)}
+          className="absolute left-4 top-4 z-50 rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-600 shadow"
+        >
+           حذف تصویر
+        </button>
+      )}
     </div>
   ) : (
     <div className="mx-auto flex max-w-3xl aspect-[3/2] flex-col items-center justify-center rounded-[1.75rem] border border-yellow-200/70 bg-gradient-to-r from-yellow-100 to-yellow-200 px-4 text-center shadow-[0_18px_45px_rgba(120,90,20,0.12)]">
-      <ShoppingBag className="mb-3 h-10 w-10 text-yellow-700" />
+  <ShoppingBag className="mb-3 h-10 w-10 text-yellow-700" />
 
+  {isOwner ? (
+    <>
       <p className="text-sm font-black text-[#6f4a18]">
         تصویر هدر فروشگاه خود را اضافه کنید
       </p>
 
       <p className="mt-2 max-w-md text-xs leading-6 text-gray-500">
-        می‌توانید عکس فروشگاه، برند، ویترین، محیط کار یا تصویر شاخص کسب‌وکارتان را قرار دهید.
+        می‌توانید عکس فروشگاه، برند، ویترین، محیط کار یا تصویر شاخص
+        کسب‌وکارتان را قرار دهید.
       </p>
 
       <p className="mt-1 text-xs font-bold text-yellow-700">
         بهترین سایز پیشنهادی: 1536 × 1024 پیکسل
       </p>
-    </div>
+    </>
+  ) : (
+    <>
+      <p className="text-sm font-black text-[#6f4a18]">
+        {vendor?.storeName || "فروشگاه ژنینو"}
+      </p>
+
+      <p className="mt-2 text-xs text-gray-500">
+        فروشگاه فعال در ژنینو
+      </p>
+    </>
+  )}
+</div>
   )}
 </div>
 
+{isOwner && (
   <div className="border-t border-yellow-100 bg-white/90 p-3">
     <label className="block">
       <input
@@ -334,6 +470,7 @@ const headerSlides = headerImages.map((img, index) => ({
       بهترین سایز: 1536 × 1024 پیکسل.
     </p>
   </div>
+)}
 </div>
 
         {/* اطلاعات */}
@@ -351,33 +488,56 @@ const headerSlides = headerImages.map((img, index) => ({
     📍 {vendor?.storeAddress || "موقعیت ثبت نشده"}
   </p>
 
+  {isOwner && (
   <div className="mt-3 inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">
     {vendor?.statusText || "فعال"}
   </div>
+)}
 </div>
       </div>
 
       {/* ================= آمار ================= */}
-      <div className="grid grid-cols-2 gap-3 mt-4">
+{isOwner ? (
+  <div className="mt-4 grid grid-cols-2 gap-3">
+    <div className="rounded-2xl bg-white p-3 text-center shadow">
+      <p className="text-xs text-gray-400">تعداد محصولات</p>
 
-        <div className="bg-white p-3 rounded-2xl shadow text-center">
-          <p className="text-xs text-gray-400">تعداد محصولات</p>
-          <p className="text-lg font-black text-yellow-700">
-            {products.length}/{vendor?.packageWindowCount}
-          </p>
-        </div>
+      <p className="text-lg font-black text-yellow-700">
+        {products.length}/{vendor?.packageWindowCount}
+      </p>
+    </div>
 
-        <div className="bg-white p-3 rounded-2xl shadow text-center">
-          <p className="text-xs text-gray-400">وضعیت</p>
-          <p className="text-sm font-bold text-green-600">
-            {vendor?.statusText || "فعال"}
-          </p>
-        </div>
+    <button
+  onClick={() => navigate("/vendor/reports")}
+  className="
+    rounded-2xl bg-white p-3 shadow
+    transition-all duration-200
+    hover:shadow-lg hover:-translate-y-0.5
+    active:scale-95
+    text-center
+  "
+>
+  <p className="text-xs text-gray-400">
+    گزارش‌های مهم مدیریتی
+  </p>
 
-      </div>
+  <p className="mt-2 text-sm font-bold text-[#7a5526]">
+    مشاهده گزارش‌ها
+  </p>
+</button>
+  </div>
+) : (
+  <div className="mt-4 rounded-2xl bg-white p-4 text-center shadow">
+    <p className="text-xs text-gray-400">تعداد محصولات فروشگاه</p>
+
+    <p className="mt-1 text-lg font-black text-yellow-700">
+      {filteredProducts.length}
+    </p>
+  </div>
+)}
 
       {/* ================= دکمه افزودن محصول ================= */}
-      {canAddProduct && (
+      {isOwner && canAddProduct && (
         <button
   onClick={() => navigate("/vendor/product/create")}
   className="
@@ -390,7 +550,7 @@ const headerSlides = headerImages.map((img, index) => ({
 </button>
       )}
 
-      {!canAddProduct && (
+      {isOwner && !canAddProduct && (
         <div className="mt-4 text-center text-red-500 text-xs font-bold">
           شما به سقف محصولات بسته خود رسیده‌اید
         </div>
@@ -398,8 +558,7 @@ const headerSlides = headerImages.map((img, index) => ({
 
       
 
-      {/* ================= لیست محصولات ================= */}
-<section
+      <section
   className="
     relative z-10 mt-6 mx-auto grid max-w-5xl
     grid-cols-2 gap-3
@@ -407,114 +566,185 @@ const headerSlides = headerImages.map((img, index) => ({
     lg:grid-cols-4 lg:gap-6
   "
 >
-  {filteredProducts.map((p) => {
-    const raw = p.images?.[0];
 
-    const imageName =
-      typeof raw === "string"
-        ? raw
-        : raw?.filename;
+{
+filteredProducts.map((p)=>(
 
-    return (
-      <div
-        key={p.id}
-        onClick={() => navigate(`/product/${p.id}`)}
-        className="group relative h-full overflow-hidden rounded-3xl border border-white/80 bg-white/85 p-2.5 shadow-[0_14px_38px_rgba(120,90,20,0.08)] backdrop-blur-md transition duration-300 hover:border-yellow-200 hover:shadow-[0_18px_45px_rgba(120,90,20,0.13)]"
-      >
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/vendor/product/edit/${p.id}`);
-          }}
-          className="
-            absolute left-12 top-3 z-20
-            flex h-8 w-8 items-center justify-center
-            rounded-full bg-yellow-50 text-yellow-700
-            shadow-sm transition hover:bg-yellow-100
-          "
-          title="ویرایش محصول"
-        >
-          <Pencil size={16} />
-        </button>
-
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDeleteProduct(p.id);
-          }}
-          className="
-            absolute left-3 top-3 z-20
-            flex h-8 w-8 items-center justify-center
-            rounded-full bg-red-50 text-red-600
-            shadow-sm transition hover:bg-red-100
-          "
-          title="حذف محصول"
-        >
-          <Trash2 size={16} />
-        </button>
-
-        <div className="absolute right-3 top-3 z-10 rounded-full bg-yellow-50 px-2 py-1 text-[10px] font-bold text-yellow-700 shadow-sm">
-          {p.categoryLinks?.[0]?.productItem || "محصول"}
-        </div>
-
-        <div className="flex h-32 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#fffaf0] to-[#f7efd9] sm:h-36">
-          {imageName ? (
-            <img
-              src={imageName}
-              alt={p.title}
-              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <ShoppingBag className="h-12 w-12 text-yellow-600" />
-          )}
-        </div>
-
-        <div className="px-1 pt-3 text-right">
-          <h3 className="line-clamp-1 text-xs font-extrabold text-gray-800 sm:text-sm">
-            {p.title}
-          </h3>
-
-          <p className="mt-1 line-clamp-1 text-[10px] text-gray-400 sm:text-xs">
-            {p.categoryLinks?.map((c) => c.productItem).join(" / ") ||
-              "بدون دسته‌بندی"}
-          </p>
-
-          <div className="mt-3 flex items-center justify-between gap-2">
-            <p className="text-[11px] font-black text-yellow-700 sm:text-sm">
-              {Number(p.price).toLocaleString("fa-IR")} ریال
-            </p>
-          </div>
-          {p.status !== "PUBLISHED" ? (
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      handlePublishProduct(p.id);
-    }}
-    className="
-      mt-3 w-full rounded-xl
-      bg-green-600 py-2
-      text-xs font-bold text-white
-      transition hover:bg-green-700
-    "
-  >
-    انتشار محصول
-  </button>
-) : (
   <div
-    className="
-      mt-3 w-full rounded-xl
-      bg-green-100 py-2
-      text-center text-xs font-bold text-green-700
-    "
+    key={p.id}
+    className="flex flex-col gap-2"
   >
-    ✅ منتشر شده
-  </div>
+
+    <ProductCard
+      product={p}
+      source="vendor-shop"
+      showFavorite={!isOwner}
+    />
+
+
+    {isOwner && (
+
+  <>
+
+    {/* دکمه‌های مدیریت */}
+
+    <div
+      className="
+      grid
+      grid-cols-2
+      gap-2
+      "
+    >
+
+      {/* ویرایش */}
+
+      <button
+
+        onClick={()=>{
+          navigate(
+            `/vendor/product/edit/${p.id}`
+          );
+        }}
+
+        className="
+        flex
+        items-center
+        justify-center
+        gap-1
+        rounded-xl
+        bg-yellow-50
+        py-2
+        text-xs
+        font-bold
+        text-yellow-700
+        shadow-sm
+        transition
+        hover:bg-yellow-100
+        "
+
+      >
+
+        <Pencil size={14}/>
+
+        ویرایش
+
+      </button>
+
+
+
+      {/* حذف */}
+
+      <button
+
+        onClick={()=>{
+          handleDeleteProduct(p.id);
+        }}
+
+        className="
+        flex
+        items-center
+        justify-center
+        gap-1
+        rounded-xl
+        bg-red-50
+        py-2
+        text-xs
+        font-bold
+        text-red-600
+        shadow-sm
+        transition
+        hover:bg-red-100
+        "
+
+      >
+
+        <Trash2 size={14}/>
+
+        حذف
+
+      </button>
+
+    </div>
+
+
+
+    {/* انتشار */}
+
+    {
+      p.status === "PUBLISHED"
+
+      ?
+
+      (
+
+        <button
+          onClick={()=>{
+            handleUnpublishProduct(p.id);
+          }}
+
+          className="
+          w-full
+          rounded-xl
+          bg-orange-50
+          py-2
+          text-xs
+          font-bold
+          text-orange-600
+          shadow-sm
+          transition
+          hover:bg-orange-100
+          "
+        >
+
+          عدم انتشار محصول
+
+        </button>
+
+      )
+
+      :
+
+      (
+
+        <button
+
+          onClick={()=>{
+            handlePublishProduct(p.id);
+          }}
+
+          className="
+          w-full
+          rounded-xl
+          bg-green-600
+          py-2
+          text-xs
+          font-bold
+          text-white
+          shadow-sm
+          transition
+          hover:bg-green-700
+          "
+
+        >
+
+          انتشار محصول
+
+        </button>
+
+      )
+
+    }
+
+
+  </>
+
 )}
-        </div>
-      </div>
-    );
-  })}
+
+  </div>
+
+))
+}
+
 </section>
 
     </main>

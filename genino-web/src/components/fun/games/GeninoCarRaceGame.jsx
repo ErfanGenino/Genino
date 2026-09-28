@@ -1,154 +1,220 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
-const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-const makeId = () => `${Date.now()}-${Math.random()}`;
+const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+const makeId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-// رکورد
 const LS_BEST = "genino_car_race_best_v2";
+
 const loadBest = () => {
   try {
-    const v = Number(localStorage.getItem(LS_BEST) || 0);
-    return Number.isFinite(v) ? v : 0;
+    const value = Number(localStorage.getItem(LS_BEST) || 0);
+    return Number.isFinite(value) ? value : 0;
   } catch {
     return 0;
   }
 };
-const saveBest = (v) => {
+
+const saveBest = (value) => {
   try {
-    localStorage.setItem(LS_BEST, String(v));
+    localStorage.setItem(LS_BEST, String(value));
   } catch {}
 };
 
-export default function CarRace3LaneGame({
+const CAR_PALETTES = {
+  player: ["#fbbf24", "#f59e0b", "#16a34a"],
+  cyan: ["#22d3ee", "#0284c7", "#0f172a"],
+  red: ["#fb7185", "#dc2626", "#450a0a"],
+  violet: ["#c084fc", "#7c3aed", "#2e1065"],
+  silver: ["#cbd5e1", "#64748b", "#0f172a"],
+  taxi: ["#fde047", "#f59e0b", "#713f12"],
+};
+
+function CarSprite({ kind = "cyan", player = false, shield = false }) {
+  const palette = player
+    ? CAR_PALETTES.player
+    : CAR_PALETTES[kind] || CAR_PALETTES.cyan;
+
+  return (
+    <div className="relative w-[46px] h-[78px] sm:w-[50px] sm:h-[84px]">
+      {shield && (
+        <motion.div
+          className="absolute -inset-3 rounded-[45%] border-2 border-yellow-300/70"
+          animate={{ scale: [0.94, 1.08, 0.94], opacity: [0.45, 0.95, 0.45] }}
+          transition={{ duration: 0.55, repeat: Infinity }}
+          style={{ boxShadow: "0 0 22px rgba(250,204,21,.45)" }}
+        />
+      )}
+
+      <div
+        className="absolute inset-x-[6px] top-[4px] bottom-[4px] rounded-[16px] border border-white/25 overflow-hidden"
+        style={{
+          background: `linear-gradient(150deg, ${palette[0]} 0%, ${palette[1]} 55%, ${palette[2]} 100%)`,
+          boxShadow: player
+            ? "0 8px 18px rgba(0,0,0,.35), 0 0 18px rgba(250,204,21,.25)"
+            : "0 7px 16px rgba(0,0,0,.35)",
+        }}
+      >
+        <div className="absolute top-[13px] left-[7px] right-[7px] h-[18px] rounded-[7px] bg-sky-100/75 border border-white/30">
+          <div className="absolute inset-[3px] rounded-[4px] bg-gradient-to-b from-sky-300/80 to-slate-800/80" />
+        </div>
+        <div className="absolute bottom-[14px] left-[8px] right-[8px] h-[13px] rounded-[5px] bg-slate-950/65" />
+        <div className="absolute top-[7px] left-[7px] w-[7px] h-[5px] rounded-full bg-yellow-100 shadow-[0_0_7px_rgba(254,240,138,.8)]" />
+        <div className="absolute top-[7px] right-[7px] w-[7px] h-[5px] rounded-full bg-yellow-100 shadow-[0_0_7px_rgba(254,240,138,.8)]" />
+        <div className="absolute bottom-[6px] left-[7px] w-[7px] h-[5px] rounded-full bg-red-400 shadow-[0_0_7px_rgba(248,113,113,.8)]" />
+        <div className="absolute bottom-[6px] right-[7px] w-[7px] h-[5px] rounded-full bg-red-400 shadow-[0_0_7px_rgba(248,113,113,.8)]" />
+        {kind === "taxi" && !player && (
+          <div className="absolute top-[1px] left-1/2 -translate-x-1/2 px-1.5 py-[1px] rounded-sm bg-yellow-200 text-[6px] font-black text-black">
+            TAXI
+          </div>
+        )}
+      </div>
+
+      <div className="absolute left-0 top-[16px] w-[7px] h-[17px] rounded-l-md bg-black" />
+      <div className="absolute right-0 top-[16px] w-[7px] h-[17px] rounded-r-md bg-black" />
+      <div className="absolute left-0 bottom-[14px] w-[7px] h-[17px] rounded-l-md bg-black" />
+      <div className="absolute right-0 bottom-[14px] w-[7px] h-[17px] rounded-r-md bg-black" />
+
+      {player && (
+        <motion.div
+          className="absolute -bottom-9 left-1/2 -translate-x-1/2 w-8 h-12 rounded-full pointer-events-none"
+          animate={{ scaleY: [0.75, 1.2, 0.75], opacity: [0.5, 0.9, 0.5] }}
+          transition={{ duration: 0.22, repeat: Infinity }}
+          style={{
+            background:
+              "radial-gradient(ellipse at top, rgba(253,224,71,.95), rgba(249,115,22,.7) 35%, rgba(239,68,68,.2) 65%, transparent 72%)",
+            filter: "blur(2px)",
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function CoinSprite() {
+  return (
+    <motion.div
+      className="relative w-9 h-9 rounded-full border-2 border-yellow-100 flex items-center justify-center font-black text-yellow-950 text-sm"
+      animate={{ rotateY: [0, 180, 360], scale: [1, 0.72, 1] }}
+      transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+      style={{
+        background: "radial-gradient(circle at 35% 30%, #fef08a, #facc15 45%, #ca8a04 80%)",
+        boxShadow: "0 0 18px rgba(250,204,21,.55)",
+      }}
+    >
+      G
+    </motion.div>
+  );
+}
+
+function RoadsideLights({ offset }) {
+  return (
+    <>
+      {Array.from({ length: 8 }).map((_, i) => {
+        const y = ((i * 92 + offset) % 736) - 80;
+        return (
+          <React.Fragment key={i}>
+            <div className="absolute left-[3%] w-[3px] h-12 bg-slate-500/60" style={{ top: y }}>
+              <div className="absolute -left-[5px] -top-1 w-3 h-3 rounded-full bg-cyan-200 shadow-[0_0_14px_rgba(103,232,249,.9)]" />
+            </div>
+            <div className="absolute right-[3%] w-[3px] h-12 bg-slate-500/60" style={{ top: y }}>
+              <div className="absolute -left-[5px] -top-1 w-3 h-3 rounded-full bg-fuchsia-200 shadow-[0_0_14px_rgba(244,114,182,.8)]" />
+            </div>
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+}
+
+export default function GeninoCarRaceGame({
   stages = 10,
   stageSeconds = 30,
   livesStart = 3,
 }) {
-  // صحنه
   const stageRef = useRef(null);
-  const H = 480;
-  const W = 360;
-
-  // لاین‌ها (درصد)
-  const lanesX = useMemo(() => [18, 50, 82], []);
-
-  // ماشین بازیکن
-  const [lane, setLane] = useState(1);
-  const playerY = 395;
-  const playerW = 44;
-  const playerH = 70;
-
-  // وضعیت بازی
-  const [stage, setStage] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(stageSeconds);
-  const [status, setStatus] = useState("ready"); // ready | playing | paused | stage | lose | win
-  const [score, setScore] = useState(0);
-  const [best, setBest] = useState(() => loadBest());
-
-  // جان + شیلد
-  const [lives, setLives] = useState(livesStart);
-  const [shield, setShield] = useState(false);
-  const shieldRef = useRef(false);
-  useEffect(() => {
-    shieldRef.current = shield;
-  }, [shield]);
-
-  // آبجکت‌ها: car | coin
-  const [objs, setObjs] = useState([]); // {id,type,lane,y,speed,kind}
-  const objsRef = useRef([]);
-  useEffect(() => {
-    objsRef.current = objs;
-  }, [objs]);
-
-  // UI
-  const [shake, setShake] = useState(false);
-  const [toast, setToast] = useState(null);
-  const [stageBanner, setStageBanner] = useState(null);
-
-  // کنترل
-  const swipeStart = useRef(null);
-
-  // Tap (برای حرکت با ضربه روی نیمه چپ/راست)
-const tapStartRef = useRef(null);
-
-const onPointerDownRoad = (e) => {
-  if (status !== "playing") return;
-  // اگر روی دکمه‌ها زد، Tap حساب نکن
-  if (e.target?.closest?.("button")) return;
-  tapStartRef.current = { x: e.clientX, y: e.clientY };
-};
-
-const onPointerUpRoad = (e) => {
-  if (status !== "playing") return;
-
-  const st = tapStartRef.current;
-  tapStartRef.current = null;
-  if (!st) return;
-
-  // اگر روی دکمه‌ها زد، Tap حساب نکن
-  if (e.target?.closest?.("button")) return;
-
-  const dx = Math.abs(e.clientX - st.x);
-  const dy = Math.abs(e.clientY - st.y);
-
-  // اگر حرکت زیاد بود یعنی Swipe بوده
-  const TH = 14;
-  if (dx > TH || dy > TH) return;
-
-  // تشخیص نیمه چپ/راست صفحه بازی
-  const rect = stageRef.current?.getBoundingClientRect();
-  if (!rect) return;
-
-  const mid = rect.left + rect.width / 2;
-
-  if (e.clientX < mid) setLane((ln) => clamp(ln - 1, 0, 2));
-  else setLane((ln) => clamp(ln + 1, 0, 2));
-};
-
-  // RAF
   const rafRef = useRef(null);
   const lastT = useRef(performance.now());
   const spawnAcc = useRef(0);
   const coinAcc = useRef(0);
-
-  // تایمر مرحله (با timestamp برای دقت و بدون drift)
+  const swipeStart = useRef(null);
+  const tapStartRef = useRef(null);
   const endAtRef = useRef(null);
-  const pausedLeftMsRef = useRef(null); // زمان باقی‌مانده هنگام پاز
+  const pausedLeftMsRef = useRef(null);
+  const nearMissRef = useRef(new Set());
+  const objsRef = useRef([]);
+  const shieldRef = useRef(false);
 
-  // سختی مرحله
+  const H = 620;
+  const lanesX = useMemo(() => [20, 50, 80], []);
+  const playerY = 500;
+  const playerH = 84;
+
+  const [lane, setLane] = useState(1);
+  const [stage, setStage] = useState(1);
+  const [timeLeft, setTimeLeft] = useState(stageSeconds);
+  const [status, setStatus] = useState("ready");
+  const [score, setScore] = useState(0);
+  const [best, setBest] = useState(() => loadBest());
+  const [lives, setLives] = useState(livesStart);
+  const [shield, setShield] = useState(false);
+  const [objs, setObjs] = useState([]);
+  const [roadOffset, setRoadOffset] = useState(0);
+  const [shake, setShake] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [stageBanner, setStageBanner] = useState(null);
+  const [combo, setCombo] = useState(0);
+
+  useEffect(() => {
+    objsRef.current = objs;
+  }, [objs]);
+
+  useEffect(() => {
+    shieldRef.current = shield;
+  }, [shield]);
+
   const stageCfg = useMemo(() => {
-    const baseSpeed = 220;
-    const speedGain = 28;
-    const roadSpeed = baseSpeed + (stage - 1) * speedGain;
-
-    const baseSpawn = 0.85; // cars/sec
-    const spawnGain = 0.13;
-    const spawnRate = baseSpawn + (stage - 1) * spawnGain;
-
-    const coinRate = clamp(0.20 + (stage - 1) * 0.03, 0.2, 0.55); // coins/sec
-
-    const maxObjs = clamp(7 + stage, 9, 18);
-
+    const roadSpeed = 225 + (stage - 1) * 27;
+    const spawnRate = 0.72 + (stage - 1) * 0.115;
+    const coinRate = clamp(0.22 + (stage - 1) * 0.025, 0.22, 0.46);
+    const maxObjs = clamp(7 + stage, 8, 17);
     return { roadSpeed, spawnRate, coinRate, maxObjs };
   }, [stage]);
 
-  const flashShake = () => {
-    setShake(true);
-    setTimeout(() => setShake(false), 220);
-  };
+  const speedLabel =
+    stage <= 2 ? "آرام" : stage <= 5 ? "سریع" : stage <= 8 ? "خیلی سریع" : "توربو";
 
-  const bestIfNeeded = (v) => {
-    setBest((b) => {
-      if (v > b) {
-        saveBest(v);
-        return v;
+  const updateBest = (value) => {
+    setBest((old) => {
+      if (value > old) {
+        saveBest(value);
+        return value;
       }
-      return b;
+      return old;
     });
   };
 
+  const showToast = (message, duration = 650) => {
+    setToast(message);
+    window.setTimeout(() => setToast(null), duration);
+  };
+
+  const flashShake = () => {
+    setShake(true);
+    window.setTimeout(() => setShake(false), 260);
+  };
+
+  const resetRuntime = () => {
+    spawnAcc.current = 0;
+    coinAcc.current = 0;
+    nearMissRef.current = new Set();
+    pausedLeftMsRef.current = null;
+    swipeStart.current = null;
+    tapStartRef.current = null;
+  };
+
   const hardReset = () => {
+    resetRuntime();
     setLane(1);
     setStage(1);
     setTimeLeft(stageSeconds);
@@ -156,81 +222,44 @@ const onPointerUpRoad = (e) => {
     setLives(livesStart);
     setShield(false);
     setObjs([]);
+    setCombo(0);
     setToast(null);
     setStageBanner(null);
     setStatus("ready");
-    swipeStart.current = null;
     endAtRef.current = null;
-    pausedLeftMsRef.current = null;
   };
 
   const start = () => {
+    resetRuntime();
     setLane(1);
     setStage(1);
     setScore(0);
     setLives(livesStart);
     setShield(false);
     setObjs([]);
-    setToast("شروع شد! جاخالی بده 🚗💨");
-    setTimeout(() => setToast(null), 900);
-
+    setCombo(0);
     setStatus("playing");
     lastT.current = performance.now();
-
     endAtRef.current = Date.now() + stageSeconds * 1000;
     setTimeLeft(stageSeconds);
+    showToast("🏁 حرکت!");
   };
 
-  const restart = () => {
-    setLane(1);
-    setScore(0);
-    setLives(livesStart);
-    setShield(false);
-    setObjs([]);
-    setToast("دوباره! این بار رکورد بزن 😄");
-    setTimeout(() => setToast(null), 900);
-
-    setStage(1);
-    setStatus("playing");
-    lastT.current = performance.now();
-
-    endAtRef.current = Date.now() + stageSeconds * 1000;
-    setTimeLeft(stageSeconds);
-  };
+  const restart = start;
 
   const pauseGame = () => {
-  if (status !== "playing") return;
+    if (status !== "playing" || !endAtRef.current) return;
+    pausedLeftMsRef.current = Math.max(0, endAtRef.current - Date.now());
+    setStatus("paused");
+  };
 
-  const endAt = endAtRef.current;
-  if (!endAt) return;
-
-  // زمان باقی‌مانده رو ذخیره کن
-  pausedLeftMsRef.current = Math.max(0, endAt - Date.now());
-
-  setStatus("paused");
-  setToast("⏸ بازی متوقف شد");
-  setTimeout(() => setToast(null), 700);
-};
-
-const resumeGame = () => {
-  if (status !== "paused") return;
-
-  const left = pausedLeftMsRef.current ?? timeLeft * 1000;
-
-  // ادامه تایمر از همان جا
-  endAtRef.current = Date.now() + left;
-
-  // جلوگیری از جهش dt در RAF
-  lastT.current = performance.now();
-
-  setStatus("playing");
-  setToast("▶ ادامه بده!");
-  setTimeout(() => setToast(null), 700);
-};
-
-  const showStageBanner = (txt) => {
-    setStageBanner(txt);
-    setTimeout(() => setStageBanner(null), 1100);
+  const resumeGame = () => {
+    if (status !== "paused") return;
+    const left = pausedLeftMsRef.current ?? timeLeft * 1000;
+    endAtRef.current = Date.now() + left;
+    lastT.current = performance.now();
+    setStatus("playing");
+    showToast("▶ ادامه بده!");
   };
 
   const nextStage = () => {
@@ -238,639 +267,579 @@ const resumeGame = () => {
 
     if (next > stages) {
       setStatus("win");
-      bestIfNeeded(score);
+      updateBest(score);
       return;
     }
 
     setStatus("stage");
-    showStageBanner(`مرحله ${next} — سرعت بیشتر شد! ⚡`);
-
-    setTimeout(() => {
+    setStageBanner(`مرحله ${next}`);
+    window.setTimeout(() => {
       setStage(next);
       setObjs([]);
       setShield(false);
-
+      setCombo(0);
+      spawnAcc.current = 0;
+      coinAcc.current = 0;
       endAtRef.current = Date.now() + stageSeconds * 1000;
       setTimeLeft(stageSeconds);
-
       setStatus("playing");
+      setStageBanner(null);
       lastT.current = performance.now();
-    }, 1200);
+    }, 1150);
   };
 
-  // تایمر دقیق timeLeft
   useEffect(() => {
     if (status !== "playing") return;
 
-    const t = setInterval(() => {
-      const endAt = endAtRef.current;
-      if (!endAt) return;
-
-      const ms = endAt - Date.now();
-      const s = Math.max(0, Math.ceil(ms / 1000));
-      setTimeLeft(s);
-
+    const timer = window.setInterval(() => {
+      if (!endAtRef.current) return;
+      const ms = endAtRef.current - Date.now();
+      setTimeLeft(Math.max(0, Math.ceil(ms / 1000)));
       if (ms <= 0) {
-        clearInterval(t);
+        window.clearInterval(timer);
         nextStage();
       }
-    }, 200);
+    }, 180);
 
-    return () => clearInterval(t);
+    return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, stage]);
 
-  // کیبورد
   useEffect(() => {
-    const down = (e) => {
+    const onKeyDown = (e) => {
       if (status !== "playing") return;
-      const k = e.key.toLowerCase();
-      if (["arrowleft", "arrowright", "a", "d"].includes(k)) e.preventDefault();
+      const key = e.key.toLowerCase();
+      if (["arrowleft", "arrowright", "a", "d"].includes(key)) e.preventDefault();
 
-      if (k === "arrowleft" || k === "a") setLane((ln) => clamp(ln - 1, 0, 2));
-      if (k === "arrowright" || k === "d") setLane((ln) => clamp(ln + 1, 0, 2));
+      if (key === "arrowleft" || key === "a") {
+        setLane((value) => clamp(value - 1, 0, 2));
+      }
+      if (key === "arrowright" || key === "d") {
+        setLane((value) => clamp(value + 1, 0, 2));
+      }
     };
 
-    window.addEventListener("keydown", down, { passive: false });
-    return () => window.removeEventListener("keydown", down);
+    window.addEventListener("keydown", onKeyDown, { passive: false });
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [status]);
 
-  // سوایپ موبایل
+  const moveLeft = () => {
+    if (status === "playing") setLane((value) => clamp(value - 1, 0, 2));
+  };
+
+  const moveRight = () => {
+    if (status === "playing") setLane((value) => clamp(value + 1, 0, 2));
+  };
+
   const onTouchStart = (e) => {
     if (status !== "playing") return;
-    const t = e.touches?.[0];
-    if (!t) return;
-    swipeStart.current = { x: t.clientX, y: t.clientY };
+    const touch = e.touches?.[0];
+    if (touch) swipeStart.current = { x: touch.clientX, y: touch.clientY };
   };
-  const onTouchEnd = (e) => {
-    if (status !== "playing") return;
-    const st = swipeStart.current;
-    if (!st) return;
-    const t = e.changedTouches?.[0];
-    if (!t) return;
 
-    const dx = t.clientX - st.x;
-    const dy = t.clientY - st.y;
+  const onTouchEnd = (e) => {
+    if (status !== "playing" || !swipeStart.current) return;
+    const touch = e.changedTouches?.[0];
+    if (!touch) return;
+
+    const dx = touch.clientX - swipeStart.current.x;
+    const dy = touch.clientY - swipeStart.current.y;
     swipeStart.current = null;
 
-    const ax = Math.abs(dx);
-    const ay = Math.abs(dy);
-    const TH = 18;
-    if (ax < TH && ay < TH) return;
-
-    if (ax > ay) {
-      if (dx > 0) setLane((ln) => clamp(ln + 1, 0, 2));
-      else setLane((ln) => clamp(ln - 1, 0, 2));
+    if (Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy)) {
+      dx > 0 ? moveRight() : moveLeft();
     }
   };
 
-  // اسپاون ماشین رقیب (منصفانه)
-  const spawnEnemyCar = () => {
-    const existing = objsRef.current.filter((o) => o.type === "car");
+  const onPointerDownRoad = (e) => {
+    if (status !== "playing" || e.target?.closest?.("button")) return;
+    tapStartRef.current = { x: e.clientX, y: e.clientY };
+  };
 
+  const onPointerUpRoad = (e) => {
+    if (status !== "playing" || e.target?.closest?.("button")) return;
+    const startPoint = tapStartRef.current;
+    tapStartRef.current = null;
+    if (!startPoint) return;
+
+    const dx = Math.abs(e.clientX - startPoint.x);
+    const dy = Math.abs(e.clientY - startPoint.y);
+    if (dx > 14 || dy > 14) return;
+
+    const rect = stageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    e.clientX < rect.left + rect.width / 2 ? moveLeft() : moveRight();
+  };
+
+  const spawnEnemyCar = () => {
+    const existingCars = objsRef.current.filter((o) => o.type === "car");
     let lanePick = Math.floor(Math.random() * 3);
 
-    // جلوگیری از اسپاون “خیلی نزدیک” توی همان لاین
-    const tooCloseSameLane = existing.some((c) => c.lane === lanePick && c.y < 170);
-    if (tooCloseSameLane) lanePick = (lanePick + 1) % 3;
+    if (existingCars.some((c) => c.lane === lanePick && c.y < 155)) {
+      lanePick = (lanePick + 1) % 3;
+    }
 
-    // 1/6 مواقع تو لاین خودت اسپاون نکنه (منصف‌تر)
-    if (Math.random() < 0.16 && lanePick === lane) lanePick = (lanePick + 1) % 3;
-
-    const kind =
-      Math.random() < 0.18 ? "taxi" : Math.random() < 0.5 ? "neo" : "van";
-
+    const kinds = ["cyan", "red", "violet", "silver", "taxi"];
     return {
       id: makeId(),
       type: "car",
       lane: lanePick,
-      y: -90,
-      speed: stageCfg.roadSpeed * (0.92 + Math.random() * 0.22),
-      kind,
+      y: -100,
+      speed: stageCfg.roadSpeed * (0.9 + Math.random() * 0.22),
+      kind: kinds[Math.floor(Math.random() * kinds.length)],
     };
   };
 
-  const spawnCoin = () => {
-    return {
-      id: makeId(),
-      type: "coin",
-      lane: Math.floor(Math.random() * 3),
-      y: -60,
-      speed: stageCfg.roadSpeed * (0.95 + Math.random() * 0.15),
-    };
-  };
+  const spawnCoin = () => ({
+    id: makeId(),
+    type: "coin",
+    lane: Math.floor(Math.random() * 3),
+    y: -55,
+    speed: stageCfg.roadSpeed * (0.96 + Math.random() * 0.12),
+  });
 
-  // برخورد ساده (هم‌لاین + هم‌پوشانی Y)
-  const overlapY = (aTop, aH, bTop, bH, pad = 10) => {
-    const aB = aTop + aH;
-    const bB = bTop + bH;
-    return aTop < bB - pad && aB > bTop + pad;
-  };
+  const overlapY = (aTop, aH, bTop, bH, pad = 9) =>
+    aTop < bTop + bH - pad && aTop + aH > bTop + pad;
 
-  const checkCarHit = (obj) => {
-    if (obj.type !== "car") return false;
-    if (obj.lane !== lane) return false;
+  const checkCarHit = (obj) =>
+    obj.type === "car" &&
+    obj.lane === lane &&
+    overlapY(playerY, playerH, obj.y, 84, 12);
 
-    const carH = 70;
-    return overlapY(playerY, playerH, obj.y, carH, 10);
-  };
-
-  const checkCoinPickup = (obj) => {
-    if (obj.type !== "coin") return false;
-    if (obj.lane !== lane) return false;
-
-    const coinH = 34;
-    return overlapY(playerY, playerH, obj.y, coinH, 6);
-  };
+  const checkCoinPickup = (obj) =>
+    obj.type === "coin" &&
+    obj.lane === lane &&
+    overlapY(playerY, playerH, obj.y, 36, 5);
 
   const loseGame = () => {
     setStatus("lose");
     flashShake();
-    setToast("💥 برخورد کردی! دوباره تلاش کن.");
-    bestIfNeeded(score);
+    updateBest(score);
   };
 
   const takeHit = () => {
     if (shieldRef.current) return;
 
-    setLives((lv) => {
-      const nn = lv - 1;
-      if (nn <= 0) {
+    setCombo(0);
+    setLives((current) => {
+      const next = current - 1;
+      flashShake();
+
+      if (next <= 0) {
         loseGame();
         return 0;
       }
-      // شیلد 2 ثانیه
+
       setShield(true);
-      setToast("🛡️ شیلد فعال شد!");
-      setTimeout(() => setToast(null), 700);
-      setTimeout(() => setShield(false), 2000);
-      flashShake();
-      return nn;
+      showToast("🛡️ مراقب باش!");
+      window.setTimeout(() => setShield(false), 1800);
+      return next;
     });
   };
 
-  // Near miss: اگر ماشین خیلی نزدیک رد شد ولی برخورد نکرد
-  const nearMissRef = useRef(new Set()); // ids
-
-  // RAF loop
   useEffect(() => {
     if (status !== "playing") return;
 
-    const loop = (t) => {
-      const dt = (t - lastT.current) / 1000;
-      lastT.current = t;
+    const loop = (time) => {
+      const dt = Math.min((time - lastT.current) / 1000, 0.04);
+      lastT.current = time;
 
-      // امتیاز زنده موندن
-      setScore((s) => s + Math.round(6 * dt * (1 + (stage - 1) * 0.12)));
+      setRoadOffset((value) => (value + stageCfg.roadSpeed * dt) % 120);
+      setScore((value) => value + Math.max(1, Math.round(5 * dt * (1 + stage * 0.1))));
 
-      // spawn cars
       spawnAcc.current += dt * stageCfg.spawnRate;
       if (spawnAcc.current >= 1) {
-        const n = Math.floor(spawnAcc.current);
-        spawnAcc.current -= n;
-
-        setObjs((prev) => {
-          const next = [...prev];
-          for (let i = 0; i < n; i++) {
+        const count = Math.floor(spawnAcc.current);
+        spawnAcc.current -= count;
+        setObjs((previous) => {
+          const next = [...previous];
+          for (let i = 0; i < count; i += 1) {
             if (next.length < stageCfg.maxObjs) next.push(spawnEnemyCar());
           }
           return next;
         });
       }
 
-      // spawn coins
       coinAcc.current += dt * stageCfg.coinRate;
       if (coinAcc.current >= 1) {
-        const n = Math.floor(coinAcc.current);
-        coinAcc.current -= n;
-
-        setObjs((prev) => {
-          const next = [...prev];
-          for (let i = 0; i < n; i++) {
-            if (next.length < stageCfg.maxObjs) next.push(spawnCoin());
-          }
-          return next;
-        });
+        coinAcc.current -= Math.floor(coinAcc.current);
+        setObjs((previous) =>
+          previous.length < stageCfg.maxObjs ? [...previous, spawnCoin()] : previous
+        );
       }
 
-      // move + collision
-      setObjs((prev) => {
+      setObjs((previous) => {
         let hit = false;
-        let gainedCoins = 0;
-        let gainedNear = 0;
+        let coinPoints = 0;
+        let nearPoints = 0;
 
-        const next = prev
+        const moved = previous
           .map((o) => ({ ...o, y: o.y + o.speed * dt }))
-          .filter((o) => o.y < H + 140);
+          .filter((o) => o.y < H + 120);
 
-        // coin pickup + car hit
-        for (const o of next) {
-          if (!hit && checkCarHit(o)) {
-            hit = true;
-          }
+        for (const obj of moved) {
+          if (!hit && checkCarHit(obj)) hit = true;
         }
 
-        // coin pickup
-        const afterCoin = next.filter((o) => {
-          if (checkCoinPickup(o)) {
-            gainedCoins += 25;
+        const afterCoins = moved.filter((obj) => {
+          if (checkCoinPickup(obj)) {
+            coinPoints += 30;
             return false;
           }
           return true;
         });
 
-        // near miss: ماشین در همان لاین با فاصله بسیار کم (اما بدون hit)
-        for (const o of afterCoin) {
-          if (o.type !== "car") continue;
-          if (o.lane !== lane) continue;
-          if (nearMissRef.current.has(o.id)) continue;
+        for (const obj of afterCoins) {
+          if (obj.type !== "car" || obj.lane !== lane || nearMissRef.current.has(obj.id)) {
+            continue;
+          }
 
-          // نزدیکِ نزدیک: عبور در فاصله کم از بالای ماشین
-          const carH = 70;
-          const gap = Math.abs((o.y + carH) - playerY);
-          if (gap < 10 && gap > 0) {
-            nearMissRef.current.add(o.id);
-            gainedNear += 12;
+          const gap = Math.abs(obj.y + 84 - playerY);
+          if (gap < 14 && gap > 2 && !checkCarHit(obj)) {
+            nearMissRef.current.add(obj.id);
+            nearPoints += 15;
           }
         }
 
-        if (gainedCoins > 0) {
-          setScore((s) => s + gainedCoins);
-          setToast(`🪙 +${gainedCoins}`);
-          setTimeout(() => setToast(null), 450);
+        if (coinPoints) {
+          setScore((value) => value + coinPoints);
+          setCombo((value) => value + 1);
+          showToast(`🪙 +${coinPoints}`, 380);
         }
-        if (gainedNear > 0) {
-          setScore((s) => s + gainedNear);
+
+        if (nearPoints) {
+          setScore((value) => value + nearPoints);
+          setCombo((value) => value + 1);
+          showToast(`⚡ سبقت نزدیک +${nearPoints}`, 420);
         }
 
         if (hit) {
           takeHit();
-          // حذف ماشین‌های همان لاین نزدیک برای جلوگیری از تکرار
-          return afterCoin.filter((o) => !(o.type === "car" && o.lane === lane && Math.abs(o.y - playerY) < 80));
+          return afterCoins.filter(
+            (obj) =>
+              !(
+                obj.type === "car" &&
+                obj.lane === lane &&
+                Math.abs(obj.y - playerY) < 105
+              )
+          );
         }
 
-        return afterCoin;
+        return afterCoins;
       });
 
       rafRef.current = requestAnimationFrame(loop);
     };
 
+    lastT.current = performance.now();
     rafRef.current = requestAnimationFrame(loop);
-    return () => rafRef.current && cancelAnimationFrame(rafRef.current);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, stage, stageCfg.spawnRate, stageCfg.coinRate, stageCfg.maxObjs, lane]);
+  }, [status, stage, lane, stageCfg.roadSpeed, stageCfg.spawnRate, stageCfg.coinRate, stageCfg.maxObjs]);
 
-  // visuals
   const laneX = lanesX[lane];
-
-  const CarVisual = ({ kind = "neo" }) => {
-    const style =
-      kind === "taxi"
-        ? {
-            bg: "linear-gradient(135deg, rgba(250,204,21,.95), rgba(245,158,11,.85))",
-            glow: "0 0 18px rgba(250,204,21,.35)",
-          }
-        : kind === "van"
-        ? {
-            bg: "linear-gradient(135deg, rgba(148,163,184,.95), rgba(30,41,59,.95))",
-            glow: "0 0 18px rgba(148,163,184,.18)",
-          }
-        : {
-            bg: "linear-gradient(135deg, rgba(34,211,238,.95), rgba(236,72,153,.85))",
-            glow: "0 0 18px rgba(34,211,238,.22), 0 0 18px rgba(236,72,153,.15)",
-          };
-
-    return (
-      <div
-        className="relative w-11 h-[70px] rounded-2xl border border-white/15"
-        style={{ background: style.bg, boxShadow: style.glow }}
-      >
-        <div className="absolute left-2 top-3 right-2 h-2 rounded-full bg-white/40" />
-        <div className="absolute left-2 bottom-3 right-2 h-2 rounded-full bg-black/25" />
-        <div className="absolute -left-2 top-4 w-2 h-3 rounded-md bg-white/30" />
-        <div className="absolute -right-2 top-4 w-2 h-3 rounded-md bg-white/30" />
-      </div>
-    );
-  };
-
-  const CoinVisual = () => (
-    <div
-      className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center"
-      style={{
-        background: "radial-gradient(circle, rgba(250,204,21,1), rgba(245,158,11,0.9))",
-        boxShadow: "0 0 18px rgba(250,204,21,0.35)",
-      }}
-    >
-      <div className="w-3 h-3 rounded-full bg-white/35" />
-    </div>
-  );
+  const progress = clamp(((stageSeconds - timeLeft) / stageSeconds) * 100, 0, 100);
 
   return (
-    <div className="w-full">
-      <div
+    <div className="w-full flex justify-center">
+      <motion.div
         ref={stageRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        style={{ touchAction: "none" }}
-        className={[
-          "relative rounded-3xl border border-yellow-200 overflow-hidden select-none",
-          "bg-gradient-to-b from-[#081026] via-[#050815] to-[#020617]",
-          shake ? "animate-[wiggle_0.22s_ease-in-out_1]" : "",
-        ].join(" ")}
+        onPointerDown={onPointerDownRoad}
+        onPointerUp={onPointerUpRoad}
+        animate={shake ? { x: [0, 8, -7, 5, -3, 0] } : { x: 0 }}
+        transition={{ duration: 0.25 }}
+        style={{ touchAction: "none", height: "min(74dvh, 680px)" }}
+        className="relative w-full max-w-[430px] min-h-[560px] overflow-hidden rounded-[28px] border border-white/15 bg-[#07101d] shadow-[0_25px_70px_rgba(2,6,23,.55)] select-none"
       >
-        <style>{`
-          @keyframes wiggle {
-            0% { transform: translate(0,0); }
-            25% { transform: translate(5px, -2px); }
-            50% { transform: translate(-4px, 3px); }
-            75% { transform: translate(4px, 2px); }
-            100% { transform: translate(0,0); }
-          }
-        `}</style>
+        {/* Sky / city */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#071426] via-[#0b1724] to-[#020617]" />
+        <div
+          className="absolute inset-x-0 top-0 h-[38%] opacity-80"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 20%, rgba(14,165,233,.18), transparent 42%), radial-gradient(circle at 20% 30%, rgba(168,85,247,.14), transparent 34%)",
+          }}
+        />
 
-        {/* HUD */}
-        <div className="absolute top-3 left-3 right-3 z-30 flex justify-between text-sm text-white">
-          <div className="flex flex-wrap items-center gap-2">
-            🧩 مرحله: <span className="font-bold text-yellow-300">{stage}/{stages}</span>
-            <span className="text-white/30">|</span>
-            ⏱ <span className="font-bold">{timeLeft}</span>s
-            <span className="text-white/30">|</span>
-            🏁 امتیاز: <span className="font-bold">{score}</span>
-            <span className="text-white/30">|</span>
-            🏆 رکورد: <span className="font-bold text-emerald-200">{best}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs bg-white/10 border border-white/15 rounded-full px-3 py-1">
-            سرعت: <span className="font-bold text-cyan-200">{Math.round(stageCfg.roadSpeed)}</span>
-            <span className="text-white/30">|</span>
-            {Array.from({ length: livesStart }).map((_, i) => (
-              <span key={i} className={i < lives ? "opacity-100" : "opacity-25"}>
-                ❤️
-              </span>
-            ))}
-            {shield && <span className="text-yellow-200 font-bold">Shield</span>}
-            <button
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => (status === "playing" ? pauseGame() : status === "paused" ? resumeGame() : null)}
-            className="ml-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 hover:bg-white/15 transition"
-            aria-label={status === "paused" ? "ادامه" : "پاز"}
+        <div className="absolute top-[15%] left-0 right-0 h-[18%] opacity-60 pointer-events-none">
+          {Array.from({ length: 13 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute bottom-0 bg-slate-950 border-t border-slate-700/40"
+              style={{
+                left: `${i * 8 - 2}%`,
+                width: `${7 + (i % 3) * 2}%`,
+                height: `${28 + (i % 5) * 11}%`,
+              }}
             >
-            {status === "paused" ? "▶ ادامه" : "⏸ پاز"}
-            </button>
-          </div>
+              <div className="absolute inset-2 opacity-60 bg-[radial-gradient(circle,#fde68a_1px,transparent_1.5px)] bg-[length:9px_11px]" />
+            </div>
+          ))}
         </div>
 
-        {/* Toast */}
-        <AnimatePresence>
-          {(toast || stageBanner) && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
-              className="absolute top-12 left-0 right-0 z-40 flex justify-center"
-            >
-              <div className="px-4 py-2 rounded-2xl border border-white/15 bg-black/45 text-white text-xs">
-                {stageBanner || toast}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Road */}
-          <div
-          className="relative w-full"
-          style={{ height: H, maxWidth: W, margin: "0 auto" }}
-          onPointerDown={onPointerDownRoad}
-          onPointerUp={onPointerUpRoad}
-          >
-          
-          {/* Background glow */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div
-              className="absolute -top-24 left-0 right-0 h-72 opacity-70"
-              style={{
-                background:
-                  "radial-gradient(circle at 30% 30%, rgba(34,211,238,0.20), transparent 55%)," +
-                  "radial-gradient(circle at 70% 45%, rgba(236,72,153,0.18), transparent 55%)," +
-                  "radial-gradient(circle at 55% 20%, rgba(250,204,21,0.12), transparent 50%)",
-              }}
-            />
-          </div>
+        <div
+          className="absolute left-[7%] right-[7%] top-[19%] bottom-0 overflow-hidden"
+          style={{
+            clipPath: "polygon(34% 0, 66% 0, 100% 100%, 0 100%)",
+            background:
+              "linear-gradient(90deg,#111827 0%,#202938 12%,#29313d 50%,#202938 88%,#111827 100%)",
+            boxShadow: "inset 0 0 35px rgba(0,0,0,.65)",
+          }}
+        >
+          <div className="absolute inset-y-0 left-[1.5%] w-[1.5%] bg-yellow-300/80" />
+          <div className="absolute inset-y-0 right-[1.5%] w-[1.5%] bg-yellow-300/80" />
 
-          {/* Lane lines */}
-          <div className="absolute inset-0 pointer-events-none">
-            {[33.33, 66.66].map((x, i) => (
+          {[33.333, 66.666].map((x) => (
+            <div key={x} className="absolute inset-y-0 w-[3px]" style={{ left: `${x}%` }}>
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-full rounded-full bg-white/75"
+                  style={{
+                    height: 44,
+                    top: `${i * 86 + (roadOffset % 86) - 86}px`,
+                    boxShadow: "0 0 5px rgba(255,255,255,.25)",
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+
+          <div
+            className="absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(0deg, transparent 0 22px, rgba(255,255,255,.3) 23px 24px)",
+              backgroundPositionY: `${roadOffset}px`,
+            }}
+          />
+        </div>
+
+        <RoadsideLights offset={roadOffset * 1.45} />
+
+        {/* Speed streaks */}
+        {stage >= 6 && status === "playing" && (
+          <div className="absolute inset-0 pointer-events-none opacity-50">
+            {Array.from({ length: 12 }).map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute top-0 bottom-0 w-[2px]"
-                style={{
-                  left: `${x}%`,
-                  background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05))",
-                }}
-                animate={{ opacity: [0.12, 0.35, 0.12] }}
-                transition={{ duration: 1.3, repeat: Infinity }}
+                className="absolute w-[2px] h-16 bg-gradient-to-b from-transparent via-cyan-100/50 to-transparent"
+                style={{ left: `${5 + ((i * 17) % 90)}%`, top: `${(i * 73) % 90}%` }}
+                animate={{ y: [0, 180], opacity: [0, 0.7, 0] }}
+                transition={{ duration: 0.45 + (i % 3) * 0.08, repeat: Infinity, ease: "linear" }}
               />
             ))}
           </div>
+        )}
 
-          {/* Objects */}
-          <AnimatePresence>
-            {objs.map((o) => (
+        {/* HUD */}
+        <div className="absolute top-3 left-3 right-3 z-40">
+          <div className="rounded-2xl border border-white/10 bg-slate-950/65 backdrop-blur-md px-3 py-2.5 shadow-lg">
+            <div className="flex items-center justify-between gap-2 text-white">
+              <div className="min-w-0">
+                <div className="text-[10px] text-white/55">امتیاز</div>
+                <div className="font-black text-base leading-none">{score}</div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-[10px] text-white/55">مرحله</div>
+                <div className="font-black text-yellow-300 leading-none">
+                  {stage}/{stages}
+                </div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-[10px] text-white/55">زمان</div>
+                <div className={`font-black leading-none ${timeLeft <= 5 ? "text-red-300" : ""}`}>
+                  {timeLeft}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: livesStart }).map((_, i) => (
+                  <span key={i} className={`text-sm ${i < lives ? "" : "grayscale opacity-20"}`}>
+                    ❤️
+                  </span>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() =>
+                  status === "playing"
+                    ? pauseGame()
+                    : status === "paused"
+                    ? resumeGame()
+                    : null
+                }
+                className="w-9 h-9 rounded-xl border border-white/10 bg-white/10 flex items-center justify-center active:scale-95"
+                aria-label={status === "paused" ? "ادامه بازی" : "توقف بازی"}
+              >
+                {status === "paused" ? "▶" : "Ⅱ"}
+              </button>
+            </div>
+
+            <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
               <motion.div
-                key={o.id}
-                className="absolute z-10"
+                className="h-full rounded-full bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-500"
+                animate={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-2 flex justify-between items-center px-1 text-[10px] text-white/60">
+            <span>🏆 {best}</span>
+            <span>{combo >= 2 ? `🔥 کمبو ×${combo}` : `سرعت: ${speedLabel}`}</span>
+          </div>
+        </div>
+
+        {/* Game objects */}
+        <div className="absolute left-[7%] right-[7%] top-[19%] bottom-0 z-20">
+          <AnimatePresence>
+            {objs.map((obj) => (
+              <motion.div
+                key={obj.id}
+                className="absolute"
                 style={{
-                  left: `${lanesX[o.lane]}%`,
-                  top: o.y,
+                  left: `${lanesX[obj.lane]}%`,
+                  top: `${(obj.y / H) * 100}%`,
                   transform: "translateX(-50%)",
                 }}
-                initial={{ opacity: 0, scale: 0.98 }}
+                initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
+                exit={{ opacity: 0, scale: 1.25 }}
               >
-                {o.type === "car" ? <CarVisual kind={o.kind} /> : <CoinVisual />}
+                {obj.type === "car" ? <CarSprite kind={obj.kind} /> : <CoinSprite />}
               </motion.div>
             ))}
           </AnimatePresence>
 
           {/* Player */}
           <motion.div
-            className="absolute z-20"
+            className="absolute z-30"
+            animate={{ left: `${laneX}%` }}
             style={{
-              left: `${laneX}%`,
-              top: playerY,
+              top: `${(playerY / H) * 100}%`,
               transform: "translateX(-50%)",
-              opacity: shield ? 0.85 : 1,
             }}
-            transition={{ type: "spring", stiffness: 360, damping: 26 }}
+            transition={{ type: "spring", stiffness: 430, damping: 29, mass: 0.65 }}
           >
-            <div
-              className="relative w-11 h-[70px] rounded-2xl border border-white/15"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(250,204,21,.95), rgba(16,185,129,.82))",
-                boxShadow: shield
-                  ? "0 0 26px rgba(250,204,21,.25), 0 0 26px rgba(16,185,129,.22)"
-                  : "0 0 22px rgba(250,204,21,.18), 0 0 22px rgba(16,185,129,.14)",
-              }}
-            >
-              <div className="absolute left-2 top-3 right-2 h-2 rounded-full bg-white/50" />
-              <div className="absolute left-2 bottom-3 right-2 h-2 rounded-full bg-black/25" />
-              <motion.div
-                className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full"
-                animate={{ scale: [0.85, 1.12, 0.85], opacity: [0.55, 1, 0.55] }}
-                transition={{ duration: 0.5, repeat: Infinity }}
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(251,191,36,1), rgba(239,68,68,0.85), transparent)",
-                }}
-              />
-              {shield && (
-                <motion.div
-                  className="absolute inset-0 rounded-2xl"
-                  animate={{ opacity: [0.25, 1, 0.25] }}
-                  transition={{ duration: 0.35, repeat: Infinity }}
-                  style={{
-                    border: "2px solid rgba(250,204,21,0.35)",
-                    boxShadow: "0 0 18px rgba(250,204,21,0.22)",
-                  }}
-                />
-              )}
-            </div>
+            <CarSprite player shield={shield} />
           </motion.div>
-
-          {/* Mobile Controls */}
-<div className="absolute bottom-3 left-0 right-0 z-30 flex items-end justify-between px-3">
-  {/* راهنما */}
-  <div className="text-[11px] text-white/60">
-    کنترل: ← → / A D / سوایپ
-  </div>
-
-  {/* دکمه‌ها: یکی چپ، یکی راست */}
-  <div className="flex w-full items-center justify-between">
-    
-
-    <button
-      onPointerDown={(e) => e.stopPropagation()}
-      onClick={() => status === "playing" && setLane((ln) => clamp(ln + 1, 0, 2))}
-      className="w-14 h-14 rounded-2xl border border-white/15 bg-white/5 text-white font-extrabold active:bg-white/10"
-      aria-label="راست"
-    >
-      ▶
-    </button>
-
-    <button
-      onPointerDown={(e) => e.stopPropagation()}
-      onClick={() => status === "playing" && setLane((ln) => clamp(ln - 1, 0, 2))}
-      className="w-14 h-14 rounded-2xl border border-white/15 bg-white/5 text-white font-extrabold active:bg-white/10"
-      aria-label="چپ"
-    >
-      ◀
-    </button>
-  </div>
-</div>
         </div>
 
-        {/* Ready */}
-        {status === "ready" && (
-          <div className="absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center text-center px-5">
-            <div className="w-full max-w-md rounded-3xl border border-white/15 bg-white/5 p-6 text-white">
-              <div className="text-3xl mb-2">🚗 سبقت‌گیر ژنینو (Pro)</div>
-              <div className="text-white/80 text-sm mb-4 leading-6">
-                ۳ لاین داری. جاخالی بده + سکه جمع کن 🪙
-                <br />
-                هر مرحله ۳۰ ثانیه و سرعت بیشتر میشه.
-              </div>
-
-              <div className="flex items-center justify-center gap-2 text-xs text-white/70 mb-5">
-                🏆 رکورد فعلی: <span className="font-bold text-emerald-200">{best}</span>
-              </div>
-
-              <div className="flex justify-center gap-2">
-                <button
-                  onClick={start}
-                  className="px-6 py-3 rounded-xl bg-yellow-400 text-black font-extrabold hover:brightness-105 transition"
-                >
-                  شروع بازی
-                </button>
-                <button
-                  onClick={hardReset}
-                  className="px-6 py-3 rounded-xl bg-white/10 text-white font-extrabold border border-white/20 hover:bg-white/15 transition"
-                >
-                  ریست
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Lose */}
+        {/* Toast */}
         <AnimatePresence>
-          {status === "lose" && (
+          {(toast || stageBanner) && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center text-center px-5"
+              initial={{ opacity: 0, y: 12, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              className="absolute top-[22%] left-0 right-0 z-50 flex justify-center pointer-events-none"
             >
-              <div className="w-full max-w-md rounded-3xl border border-white/15 bg-white/5 p-6 text-white">
-                <div className="text-3xl mb-2">💥 برخورد!</div>
-                <div className="text-white/80 mb-4">
-                  امتیاز: <span className="font-bold">{score}</span>
-                  <span className="text-white/30"> | </span>
-                  رکورد: <span className="font-bold text-emerald-200">{best}</span>
-                </div>
-
-                <div className="flex justify-center gap-2">
-                  <button
-                    onClick={restart}
-                    className="px-6 py-3 rounded-xl bg-yellow-400 text-black font-extrabold hover:brightness-105 transition"
-                  >
-                    دوباره
-                  </button>
-                  <button
-                    onClick={hardReset}
-                    className="px-6 py-3 rounded-xl bg-white/10 text-white font-extrabold border border-white/20 hover:bg-white/15 transition"
-                  >
-                    خروج
-                  </button>
-                </div>
+              <div className="rounded-full border border-white/15 bg-black/65 backdrop-blur-md px-4 py-2 text-xs font-bold text-white shadow-xl">
+                {stageBanner || toast}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Win */}
+        {/* Controls */}
+        <div className="absolute bottom-4 left-4 right-4 z-40 flex justify-between items-end pointer-events-none">
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={moveLeft}
+            className="pointer-events-auto w-16 h-16 sm:w-[70px] sm:h-[70px] rounded-[22px] border border-white/15 bg-slate-950/55 backdrop-blur-md text-white text-2xl font-black shadow-xl active:scale-90 active:bg-white/20 transition"
+            aria-label="حرکت به چپ"
+          >
+            ◀
+          </button>
+
+          <div className="mb-1 rounded-full bg-black/35 backdrop-blur px-3 py-1.5 text-[9px] text-white/55">
+            لمس • سوایپ
+          </div>
+
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={moveRight}
+            className="pointer-events-auto w-16 h-16 sm:w-[70px] sm:h-[70px] rounded-[22px] border border-white/15 bg-slate-950/55 backdrop-blur-md text-white text-2xl font-black shadow-xl active:scale-90 active:bg-white/20 transition"
+            aria-label="حرکت به راست"
+          >
+            ▶
+          </button>
+        </div>
+
+        {/* Ready */}
         <AnimatePresence>
-          {status === "win" && (
+          {status === "ready" && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center text-center px-5"
+              className="absolute inset-0 z-[60] flex items-center justify-center bg-slate-950/72 backdrop-blur-[3px] p-5"
             >
-              <div className="w-full max-w-md rounded-3xl border border-white/15 bg-white/5 p-6 text-white">
-                <div className="text-3xl mb-2">🏁 قهرمان!</div>
-                <div className="text-white/80 mb-4">
-                  ۱۰ مرحله رو تموم کردی 🎉
-                  <br />
-                  امتیاز نهایی: <span className="font-bold">{score}</span>
+              <motion.div
+                initial={{ y: 18, opacity: 0, scale: 0.96 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                className="w-full max-w-sm rounded-[28px] border border-white/15 bg-slate-900/80 p-6 text-center text-white shadow-2xl"
+              >
+                <div className="mx-auto mb-4 w-20 h-20 flex items-center justify-center">
+                  <CarSprite player />
+                </div>
+                <div className="text-2xl font-black">سبقت‌گیر ژنینو</div>
+                <div className="mt-1 text-xs font-bold text-yellow-300 tracking-wider">
+                  GENINO STREET RACE
+                </div>
+                <p className="mt-4 text-sm leading-7 text-white/70">
+                  بین ماشین‌ها جاخالی بده، سکه جمع کن و تا مرحله آخر رکورد بزن.
+                </p>
+
+                <div className="mt-4 grid grid-cols-3 gap-2 text-[10px]">
+                  <div className="rounded-xl bg-white/5 border border-white/10 p-2">🏁 {stages} مرحله</div>
+                  <div className="rounded-xl bg-white/5 border border-white/10 p-2">❤️ {livesStart} جان</div>
+                  <div className="rounded-xl bg-white/5 border border-white/10 p-2">🏆 {best}</div>
                 </div>
 
-                <div className="flex justify-center gap-2">
-                  <button
-                    onClick={restart}
-                    className="px-6 py-3 rounded-xl bg-yellow-400 text-black font-extrabold hover:brightness-105 transition"
-                  >
-                    دوباره از اول
-                  </button>
-                  <button
-                    onClick={hardReset}
-                    className="px-6 py-3 rounded-xl bg-white/10 text-white font-extrabold border border-white/20 hover:bg-white/15 transition"
-                  >
-                    خروج
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={start}
+                  className="mt-5 w-full rounded-2xl bg-gradient-to-r from-yellow-300 to-amber-500 py-3.5 font-black text-slate-950 shadow-[0_10px_30px_rgba(245,158,11,.25)] active:scale-[.98] transition"
+                >
+                  شروع مسابقه
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Pause */}
+        <AnimatePresence>
+          {status === "paused" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-5"
+            >
+              <div className="w-full max-w-xs rounded-[26px] border border-white/15 bg-slate-900/90 p-6 text-center text-white">
+                <div className="text-4xl">⏸️</div>
+                <div className="mt-3 text-xl font-black">مسابقه متوقف شد</div>
+                <button
+                  type="button"
+                  onClick={resumeGame}
+                  className="mt-5 w-full rounded-2xl bg-yellow-400 py-3 font-black text-slate-950"
+                >
+                  ادامه مسابقه
+                </button>
               </div>
             </motion.div>
           )}
@@ -883,20 +852,112 @@ const resumeGame = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-40 bg-black/55 backdrop-blur-[1px] flex items-center justify-center text-center px-5"
+              className="absolute inset-0 z-[60] flex items-center justify-center bg-black/55 backdrop-blur-[2px]"
             >
-              <div className="px-6 py-4 rounded-3xl border border-white/15 bg-white/5 text-white">
-                <div className="text-2xl font-extrabold text-yellow-300">
-                  {stageBanner || "مرحله بعد..."}
-                </div>
-                <div className="text-xs text-white/70 mt-2">
-                  آماده شو… 🏁
-                </div>
-              </div>
+              <motion.div
+                initial={{ scale: 0.7, opacity: 0 }}
+                animate={{ scale: [0.7, 1.08, 1], opacity: 1 }}
+                className="text-center text-white"
+              >
+                <div className="text-sm text-yellow-300 font-bold">آماده باش</div>
+                <div className="mt-1 text-4xl font-black">{stageBanner}</div>
+                <div className="mt-2 text-sm text-white/65">سرعت بیشتر می‌شود ⚡</div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+
+        {/* Lose */}
+        <AnimatePresence>
+          {status === "lose" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 z-[70] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-5"
+            >
+              <motion.div
+                initial={{ y: 20, scale: 0.94 }}
+                animate={{ y: 0, scale: 1 }}
+                className="w-full max-w-sm rounded-[28px] border border-red-300/15 bg-slate-900/90 p-6 text-center text-white"
+              >
+                <div className="text-5xl">💥</div>
+                <div className="mt-2 text-2xl font-black">مسابقه تمام شد</div>
+                <div className="mt-4 flex justify-center gap-6">
+                  <div>
+                    <div className="text-[10px] text-white/50">امتیاز</div>
+                    <div className="font-black text-xl">{score}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-white/50">رکورد</div>
+                    <div className="font-black text-xl text-yellow-300">{Math.max(best, score)}</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={restart}
+                  className="mt-5 w-full rounded-2xl bg-yellow-400 py-3 font-black text-slate-950"
+                >
+                  دوباره مسابقه بده
+                </button>
+                <button
+                  type="button"
+                  onClick={hardReset}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 py-3 font-bold text-white/75"
+                >
+                  بازگشت به شروع
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Win */}
+        <AnimatePresence>
+          {status === "win" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 z-[70] flex items-center justify-center bg-slate-950/82 backdrop-blur-sm p-5"
+            >
+              <motion.div
+                initial={{ y: 20, scale: 0.94 }}
+                animate={{ y: 0, scale: 1 }}
+                className="w-full max-w-sm rounded-[28px] border border-yellow-300/20 bg-slate-900/90 p-6 text-center text-white"
+              >
+                <motion.div
+                  className="text-6xl"
+                  animate={{ rotate: [-5, 5, -5], scale: [1, 1.08, 1] }}
+                  transition={{ duration: 1.1, repeat: Infinity }}
+                >
+                  🏆
+                </motion.div>
+                <div className="mt-2 text-2xl font-black text-yellow-300">قهرمان ژنینو!</div>
+                <p className="mt-2 text-sm text-white/65">
+                  هر {stages} مرحله را با موفقیت تمام کردی.
+                </p>
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="text-[10px] text-white/50">امتیاز نهایی</div>
+                  <div className="text-3xl font-black">{score}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={restart}
+                  className="mt-5 w-full rounded-2xl bg-gradient-to-r from-yellow-300 to-amber-500 py-3 font-black text-slate-950"
+                >
+                  مسابقه دوباره
+                </button>
+                <button
+                  type="button"
+                  onClick={hardReset}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 py-3 font-bold text-white/75"
+                >
+                  بازگشت به شروع
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+// D:\projects\Genino\genino-web\src\services\auth.js
 // ذخیره توکن
 export function saveToken(token) {
   localStorage.setItem("genino_token", token);

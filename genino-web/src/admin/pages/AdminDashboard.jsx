@@ -41,6 +41,11 @@ export default function AdminDashboard() {
       desc: "مدیریت سفیران، امتیازها، اخطارها و پورسانت‌ها",
       path: "/admin/ambassadors",
     },
+    {
+  title: "کارمند پرستاران کودک",
+  desc: "بررسی مدارک پرستاران، تأیید، رد یا تعلیق پروفایل‌ها",
+  path: "/admin/nurses",
+},
   ];
 
   return (

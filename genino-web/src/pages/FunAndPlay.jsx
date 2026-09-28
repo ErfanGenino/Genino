@@ -209,9 +209,9 @@ const GAME_REGISTRY = [
   {
     id: "color-tap",
     type: "color",
-    title: "رنگ درست رو بزن",
-    category: "یادگیری رنگ‌ها",
-    hint: "روی رنگی که گفته می‌شود کلیک کن. 🎨",
+    title: "ژلی فراری!",
+category: "سرعت + واکنش + هیجان",
+hint: "از آزمایشگاه فرار کن؛ بپر، سر بخور و قدرت جمع کن! 👾💨",
     icon: Puzzle,
     Component: ColorTapGame,
     props: { optionsCount: 4 },

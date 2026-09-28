@@ -122,8 +122,24 @@ export default function SportClasses() {
   );
 
   const goToShopFilter = (item) => {
-    navigate(`/shop?category=${encodeURIComponent(item)}`);
-  };
+  const showAllItems = [
+    "همه ورزش‌های تیمی",
+    "همه ورزش‌های انفرادی",
+    "همه ورزش‌های رزمی",
+    "همه کلاس‌های تناسب اندام",
+    "همه کلاس‌های ورزشی کودک",
+    "همه کلاس‌های ورزشی",
+  ];
+
+  if (showAllItems.includes(item)) {
+    navigate("/shop?service=sport-class");
+    return;
+  }
+
+  navigate(
+    `/shop?service=sport-class&sportField=${encodeURIComponent(item)}`
+  );
+};
 
   return (
     <main

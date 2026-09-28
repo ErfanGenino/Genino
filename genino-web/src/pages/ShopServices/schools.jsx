@@ -43,8 +43,32 @@ export default function Schools() {
   );
 
   const goToShopFilter = (item) => {
-    navigate(`/shop?category=${encodeURIComponent(item)}`);
-  };
+
+  // 🏫 نمایش همه مدارس
+  if (
+    activeSection === "نمایش همه" ||
+    item === "همه مدارس" ||
+    item === "همه انواع مدارس"
+  ) {
+    navigate("/shop?service=school");
+    return;
+  }
+
+  // 🎓 فیلتر بر اساس مقطع تحصیلی
+  if (activeSection === "مقطع تحصیلی") {
+    navigate(
+      `/shop?service=school&schoolLevel=${encodeURIComponent(item)}`
+    );
+    return;
+  }
+
+  // 🏫 فیلتر بر اساس نوع مدرسه
+  if (activeSection === "نوع مدرسه") {
+    navigate(
+      `/shop?service=school&schoolType=${encodeURIComponent(item)}`
+    );
+  }
+};
 
   return (
     <main

@@ -6,6 +6,7 @@
 import { motion } from "framer-motion";
 
 export default function VendorSelectedPackageSummary({
+  vendor,
   packageConfirmed,
   selectedPackage,
   packagePrice,
@@ -19,6 +20,94 @@ export default function VendorSelectedPackageSummary({
   ambassadorCode,
 }) {
   if (!packageConfirmed || !selectedPackage) return null;
+
+  /*
+ * تشخیص مقاوم نوع فعالیت
+ * ممکن است نوع فعالیت از بک‌اند به شکل‌های زیر برسد:
+ * product / service / both
+ * SHOP / SERVICE / BOTH
+ */
+const normalizedVendorActivityType = String(
+  vendor?.activityType || ""
+)
+  .trim()
+  .toUpperCase();
+
+const normalizedPackageTargetType = String(
+  selectedPackage?.targetType || ""
+)
+  .trim()
+  .toUpperCase();
+
+/*
+ * ابتدا نوع فعالیت خود وندور ملاک است.
+ * اگر خالی بود، از نوع بسته استفاده می‌کنیم.
+ */
+const resolvedActivityType =
+  normalizedVendorActivityType || normalizedPackageTargetType;
+
+const isProductProvider =
+  resolvedActivityType === "PRODUCT" ||
+  resolvedActivityType === "SHOP";
+
+const isServiceProvider =
+  resolvedActivityType === "SERVICE";
+
+const isBothProvider =
+  resolvedActivityType === "BOTH";
+
+const hasProductActivity =
+  isProductProvider || isBothProvider;
+
+const hasServiceActivity =
+  isServiceProvider || isBothProvider;
+
+/*
+ * تعداد ماه‌های اعتبار بسته
+ * چند نام احتمالی را پوشش می‌دهیم تا اطلاعات واقعی بسته نمایش داده شود.
+ */
+const rawDurationMonths =
+  selectedPackage?.durationMonths ??
+  selectedPackage?.validityMonths ??
+  selectedPackage?.duration ??
+  selectedPackage?.months ??
+  vendor?.selectedPackageDurationMonths ??
+  0;
+
+const durationMonths = Number(rawDurationMonths) || 0;
+
+/*
+ * قانون ژنینو:
+ * ارائه‌دهنده کالا و ارائه‌دهنده هر دو، همیشه صفحه اختصاصی دارند.
+ * ارائه‌دهنده صرفاً خدمات، بر اساس مشخصات بسته بررسی می‌شود.
+ */
+const servicePackageHasDedicatedPage =
+  selectedPackage?.hasDedicatedPage === true ||
+  selectedPackage?.hasDedicatedPage === 1 ||
+  selectedPackage?.hasDedicatedPage === "true";
+
+const hasDedicatedPage = hasProductActivity
+  ? true
+  : servicePackageHasDedicatedPage;
+
+
+
+    const calculatedDiscountPercent =
+  discountInfo &&
+  remainingAfterAmbassador > 0
+    ? Math.round(
+        (discountAmount / remainingAfterAmbassador) * 100
+      )
+    : 0;
+
+const displayedDiscountPercent =
+  Number(discountInfo?.percent) > 0
+    ? Number(discountInfo.percent)
+    : calculatedDiscountPercent;
+
+
+
+
 
   return (
     <motion.section
@@ -43,48 +132,80 @@ export default function VendorSelectedPackageSummary({
           <div className="mt-3 grid gap-3 text-sm text-stone-700 sm:grid-cols-2 lg:grid-cols-4">
             <p>
               نام بسته:
-              <span className="font-black"> {selectedPackage.title}</span>
+              <span className="font-black">
+                {" "}
+                {selectedPackage.title}
+              </span>
             </p>
+
+            {selectedPackage?.serviceCategory && (
+  <p>
+    نوع خدمت:
+    <span className="font-black text-amber-700">
+      {" "}
+      {selectedPackage.serviceCategory.title}
+    </span>
+  </p>
+)}
 
             <p>
               اعتبار:
               <span className="font-black">
                 {" "}
-                {selectedPackage.durationMonths} ماه
+                {durationMonths
+                  ? `${durationMonths.toLocaleString("fa-IR")} ماه`
+                  : "ثبت نشده"}
               </span>
             </p>
 
             <p>
               صفحه اختصاصی:
-              <span className="font-black">
+              <span
+                className={
+                  hasDedicatedPage
+                    ? "font-black text-green-700"
+                    : "font-black text-stone-500"
+                }
+              >
                 {" "}
-                {selectedPackage.hasDedicatedPage ? "دارد" : "ندارد"}
+                {hasDedicatedPage ? "دارد" : "ندارد"}
               </span>
             </p>
 
-            {selectedPackage.targetType === "SHOP" ? (
-              <p>
-                تعداد پنجره:
-                <span className="font-black">
-                  {" "}
-                  {selectedPackage.windowCount ?? "نامحدود"}
-                </span>
-              </p>
-            ) : (
+            {/* اطلاعات مربوط به فروش کالا */}
+            <p>
+  تعداد پنجره فروش:
+  <span className="font-black">
+    {" "}
+    {selectedPackage?.windowCount !== null &&
+    selectedPackage?.windowCount !== undefined
+      ? Number(selectedPackage.windowCount).toLocaleString("fa-IR")
+      : "ثبت نشده"}
+  </span>
+</p>
+
+            {/* اطلاعات مربوط به ارائه خدمات */}
+            {hasServiceActivity && (
               <>
                 <p>
-                  مجوز دستاورد:
-                  <span className="font-black">
-                    {" "}
-                    {selectedPackage.achievementLimit ?? "ندارد"}
-                  </span>
-                </p>
+  مجوز دستاورد:
+  <span className="font-black">
+    {" "}
+    {selectedPackage?.achievementLimit !== null &&
+    selectedPackage?.achievementLimit !== undefined
+      ? Number(selectedPackage.achievementLimit).toLocaleString("fa-IR")
+      : "ثبت نشده"}
+  </span>
+</p>
 
                 <p>
                   کاربران مجاز:
                   <span className="font-black">
                     {" "}
-                    {selectedPackage.allowedUserCount ?? "نامحدود"}
+                    {selectedPackage.allowedUserCount !== null &&
+                    selectedPackage.allowedUserCount !== undefined
+                      ? selectedPackage.allowedUserCount.toLocaleString("fa-IR")
+                      : "نامحدود"}
                   </span>
                 </p>
               </>
@@ -92,50 +213,73 @@ export default function VendorSelectedPackageSummary({
           </div>
 
           {selectedPackage.description && (
-            <p className="mt-3 text-sm text-stone-600">
+            <p className="mt-3 text-sm leading-7 text-stone-600">
               {selectedPackage.description}
             </p>
           )}
         </div>
 
         <div className="mt-4 space-y-3 text-sm text-stone-700">
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-3">
             <span>مبلغ بسته:</span>
+
             <span className="font-black">
-              {packagePrice.toLocaleString("fa-IR")} ریال
+              {(packagePrice || 0).toLocaleString("fa-IR")} ریال
             </span>
           </div>
 
           {ambassadorConfirmed && (
             <>
-              <div className="flex justify-between text-green-700">
+              <div className="flex justify-between gap-3 text-green-700">
                 <span>تخفیف سفیر:</span>
+
                 <span className="font-black">
-                  - {ambassadorDiscount.toLocaleString("fa-IR")} ریال
+                  - {(ambassadorDiscount || 0).toLocaleString("fa-IR")} ریال
                 </span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-3">
                 <span>باقیمانده پس از تخفیف سفیر:</span>
+
                 <span className="font-black">
-                  {remainingAfterAmbassador.toLocaleString("fa-IR")} ریال
+                  {(remainingAfterAmbassador || 0).toLocaleString("fa-IR")} ریال
                 </span>
               </div>
             </>
           )}
 
           {discountInfo && (
-            <div className="flex justify-between text-green-700">
-              <span>تخفیف کد تخفیف ({discountInfo.percent}٪):</span>
-              <span className="font-black">
-                - {discountAmount.toLocaleString("fa-IR")} ریال
-              </span>
-            </div>
-          )}
+  <div className="rounded-xl border border-green-100 bg-green-50/60 p-3">
+    <div className="flex justify-between gap-3 text-green-700">
+      <span>
+        کد تخفیف{" "}
+        <span className="font-black">
+          {discountInfo.code || ""}
+        </span>
+        :
+      </span>
 
-          <div className="border-t border-green-100 pt-3 flex justify-between text-lg font-black text-[#6f4a18]">
+      <span className="font-black">
+        {displayedDiscountPercent.toLocaleString("fa-IR")}٪
+      </span>
+    </div>
+
+    <div className="mt-2 flex justify-between gap-3 text-green-700">
+      <span>مبلغ تخفیف:</span>
+
+      <span className="font-black">
+        - {(discountAmount || 0).toLocaleString("fa-IR")} ریال
+      </span>
+    </div>
+  </div>
+)}
+
+          <div className="flex justify-between gap-3 border-t border-green-100 pt-3 text-lg font-black text-[#6f4a18]">
             <span>مبلغ پرداخت‌شده / قابل پرداخت:</span>
-            <span>{finalPrice.toLocaleString("fa-IR")} ریال</span>
+
+            <span>
+              {(finalPrice || 0).toLocaleString("fa-IR")} ریال
+            </span>
           </div>
         </div>
 
@@ -163,7 +307,9 @@ export default function VendorSelectedPackageSummary({
               <p>
                 شماره تماس:{" "}
                 <span className="font-black">
-                  {ambassadorInfo.phone || ambassadorInfo.mobile || "-"}
+                  {ambassadorInfo.phone ||
+                    ambassadorInfo.mobile ||
+                    "-"}
                 </span>
               </p>
             </div>
@@ -171,7 +317,8 @@ export default function VendorSelectedPackageSummary({
         )}
 
         <p className="mt-4 text-sm leading-7 text-stone-600">
-          مرحله انتخاب بسته همکاری تکمیل شد. اکنون وارد مرحله تکمیل مدارک و قرارداد شده‌اید.
+          مرحله انتخاب بسته همکاری تکمیل شد. اکنون وارد مرحله تکمیل مدارک و
+          قرارداد شده‌اید.
         </p>
       </div>
     </motion.section>

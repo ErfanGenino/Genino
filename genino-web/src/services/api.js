@@ -24,6 +24,11 @@ function clearTokens() {
   localStorage.removeItem("genino_token");
   localStorage.removeItem("genino_refresh_token");
   localStorage.removeItem("genino_user");
+  // پاک‌کردن اطلاعات نشست فروشنده
+  localStorage.removeItem("genino_vendor_id");
+
+  window.dispatchEvent(new Event("genino_token_changed"));
+  window.dispatchEvent(new Event("genino_vendor_changed"));
 }
 
 export async function authFetch(url, options = {}) {
@@ -59,19 +64,59 @@ res = await doRequest();
 
 // ✅ اگر access token منقضی شد، با refresh token توکن جدید می‌گیریم
 if ((res.status === 401 || res.status === 403) && token) {
+
+  const vendorId = localStorage.getItem("genino_vendor_id");
+
+  console.log(
+    "🚨 AUTH ERROR:",
+    url,
+    "STATUS:",
+    res.status,
+    "VENDOR:",
+    vendorId
+  );
+
+
+  // اگر کاربر فروشنده است و خطا مربوط به درخواست کاربر بود،
+  // کل نشست را پاک نکن
+  if (vendorId && !url.includes("/vendors")) {
+    console.warn(
+      "⚠️ Vendor token used on non vendor endpoint:",
+      url
+    );
+
+    return {
+      ok: false,
+      status: res.status,
+      message: "دسترسی فروشنده به این بخش مجاز نیست"
+    };
+  }
+
+
   console.warn("ACCESS TOKEN EXPIRED - TRYING REFRESH TOKEN");
 
   const refreshToken = getRefreshToken();
 
   if (!refreshToken) {
+
+    console.error(
+      "🚨 TOKEN CLEAR BECAUSE NO REFRESH TOKEN",
+      "URL:",
+      url,
+      "STATUS:",
+      res.status
+    );
+
     clearTokens();
+
     window.location.href = "/";
+
     return {
       ok: false,
       status: 401,
       message: "نشست شما به پایان رسیده است.",
     };
-  }
+}
 
   try {
     const refreshRes = await fetch(`${BASE_URL}/auth/refresh-token`, {
@@ -91,6 +136,15 @@ if ((res.status === 401 || res.status === 403) && token) {
 
       res = await doRequest();
     } else {
+
+      console.error(
+        "🚨 TOKEN CLEAR AFTER REFRESH FAILED",
+        "URL:",
+        url,
+        "STATUS:",
+        res.status
+      );
+
       clearTokens();
 
       window.location.href = "/";
@@ -522,8 +576,12 @@ export async function reactToPrivateMessage(messageId, emoji) {
   });
 }
 
-export async function searchGeninoUsers(query) {
-  return authFetch(`/users/search?q=${encodeURIComponent(query)}`, {
+export async function searchGeninoUsers(query = "") {
+  const url = query.trim()
+    ? `/users/search?q=${encodeURIComponent(query)}`
+    : "/users/search";
+
+  return authFetch(url, {
     method: "GET",
   });
 }
@@ -728,6 +786,12 @@ export async function deleteMemoryAlbumComment(commentId) {
 
 // --- Genino Children ---
 
+export async function getMyChildren() {
+  return authFetch("/children", {
+    method: "GET",
+  });
+}
+
 export async function getGeninoChildren() {
   return authFetch("/children/public", {
     method: "GET",
@@ -796,6 +860,153 @@ export async function removeFavoriteArticle(slug) {
   });
 }
 
+// --- Favorite Products ---
+
+export async function getFavoriteProducts() {
+  return authFetch("/favorite-products", {
+    method: "GET",
+  });
+}
+
+export async function getFavoriteProductIds() {
+  return authFetch("/favorite-products/ids", {
+    method: "GET",
+  });
+}
+
+export async function saveFavoriteProduct(productId) {
+  return authFetch(`/favorite-products/${productId}`, {
+    method: "POST",
+  });
+}
+
+export async function removeFavoriteProduct(productId) {
+  return authFetch(`/favorite-products/${productId}`, {
+    method: "DELETE",
+  });
+}
+
+// --- Child Favorite Products ---
+
+export async function getChildFavoriteProductStatus(productId) {
+  return authFetch(
+    `/child-favorite-products/product/${productId}/status`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+export async function saveChildFavoriteProduct(childId, productId) {
+  return authFetch(
+    `/child-favorite-products/${childId}/${productId}`,
+    {
+      method: "POST",
+    }
+  );
+}
+
+
+export async function removeChildFavoriteProduct(childId, productId) {
+  return authFetch(
+    `/child-favorite-products/${childId}/${productId}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
+export async function getPublicChildFavoriteProducts(childId) {
+  return authFetch(
+    `/child-favorite-products/public/${childId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function getChildFavoriteProducts(childId) {
+  return authFetch(
+    `/child-favorite-products/${childId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function updateChildGiftVisibility(
+  childId,
+  productId,
+  showInGiftGame
+) {
+
+  return authFetch(
+    `/child-favorite-products/${childId}/${productId}/visibility`,
+    {
+      method:"PATCH",
+      body:JSON.stringify({
+        showInGiftGame,
+      }),
+    }
+  );
+
+}
+
+// تغییر وضعیت نمایش محصول در هدیه‌بازی
+export async function updateGiftVisibility(
+  productId,
+  showInGiftGame
+) {
+  return authFetch(
+    `/favorite-products/${productId}/gift-visibility`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        showInGiftGame,
+      }),
+    }
+  );
+}
+
+// دریافت علاقه‌مندی‌های عمومی یک کاربر برای هدیه‌بازی
+export async function getGiftWishlist(userId) {
+  return authFetch(
+    `/favorite-products/gift/${userId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+// --- Gift Selected Users ---
+
+export async function getGiftSelectedUsers() {
+  return authFetch("/gift/selected-users", {
+    method: "GET",
+  });
+}
+
+
+export async function addGiftSelectedUser(userId) {
+  return authFetch(`/gift/selected-users/${userId}`, {
+    method: "POST",
+  });
+}
+
+
+export async function removeGiftSelectedUser(userId) {
+  return authFetch(`/gift/selected-users/${userId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getFollowedChildren() {
+  return authFetch("/children/followed", {
+    method: "GET",
+  });
+}
+
 // --- Relationship Assessments ---
 
 export async function getRelationshipAssessments() {
@@ -829,10 +1040,20 @@ export async function getMyAmbassador() {
 // --- Vendors ---
 
 export async function registerVendor(payload) {
-  return authFetch("/vendors/register", {
+
+  const res = await authFetch("/vendors/register", {
     method: "POST",
     body: JSON.stringify(payload),
   });
+
+  if (res?.ok && res?.token) {
+    saveTokens(
+      res.token,
+      res.refreshToken
+    );
+  }
+
+  return res;
 }
 
 export async function loginVendor(payload) {
@@ -854,8 +1075,19 @@ export async function getVendorById(id) {
   });
 }
 
+// دریافت اطلاعات حساب فروشنده لاگین‌شده
 export async function getVendorProfile() {
-  return authFetch("/vendors/me");
+  return authFetch("/vendors/me", {
+    method: "GET",
+  });
+}
+
+// ویرایش اطلاعات حساب فروشنده لاگین‌شده
+export async function updateVendorProfile(payload) {
+  return authFetch("/vendors/me", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function confirmVendorPackage(payload) {
@@ -874,6 +1106,55 @@ export async function updateVendorBankingInfo(vendorId, payload) {
 
 export async function presignVendorDocumentUpload(payload) {
   return authFetch("/uploads/presign/vendor-document", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// --- Vendor School Header Image Upload ---
+export async function presignVendorSchoolHeaderUpload(payload) {
+  return authFetch("/uploads/presign/vendor-school-header",{
+      method:"POST",
+      body:JSON.stringify(payload),
+    });
+  }
+
+export async function presignVendorSchoolStaffUpload(payload) {
+  return authFetch(
+    "/uploads/presign/vendor-school-staff",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+// --- Vendor Kindergarten Image Upload ---
+
+export async function presignVendorKindergartenHeaderUpload(payload) {
+  return authFetch(
+    "/uploads/presign/vendor-kindergarten-header",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function presignVendorKindergartenStaffUpload(payload) {
+  return authFetch(
+    "/uploads/presign/vendor-kindergarten-staff",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+
+export async function presignVendorAvatarUpload(payload) {
+  return authFetch("/uploads/presign/vendor-avatar", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -995,4 +1276,454 @@ export async function rejectAdminVendor(vendorId, reason) {
     method: "POST",
     body: JSON.stringify({ reason }),
   });
+}
+
+
+// --- Vendor School Profile ---
+
+export async function getVendorSchoolProfile(vendorId){
+  return authFetch(
+    `/vendor-school/${vendorId}`, {
+      method:"GET",
+    });
+}
+
+
+export async function saveVendorSchoolProfile(
+  vendorId,
+  payload
+){
+  return authFetch(
+    `/vendor-school/${vendorId}`, {
+      method:"PUT",
+      body:JSON.stringify(payload),
+    });
+}
+
+
+
+
+// --- Vendor Kindergarten Profile ---
+
+export async function getVendorKindergartenProfile(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-kindergarten/${vendorId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+export async function saveVendorKindergartenProfile(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-kindergarten/${vendorId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+// --- Vendor Playhouse Profile ---
+
+export async function getVendorPlayhouseProfile(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-playhouse/${vendorId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+export async function saveVendorPlayhouseProfile(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-playhouse/${vendorId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+// --- Vendor Education Class Profile ---
+
+export async function getVendorEducationClassProfile(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-education-class/${vendorId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function saveVendorEducationClassProfile(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-education-class/${vendorId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+// --- Vendor Art Class Profile ---
+
+export async function getVendorArtClassProfile(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-art-class/${vendorId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+export async function saveVendorArtClassProfile(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-art-class/${vendorId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+// --- Vendor Sport Class Profile ---
+
+export async function getVendorSportClassProfile(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-sport-class/${vendorId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+export async function saveVendorSportClassProfile(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-sport-class/${vendorId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+// --- Vendor Private Teacher Profile ---
+
+export async function getVendorPrivateTeacherProfile(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-private-teacher/${vendorId}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+export async function saveVendorPrivateTeacherProfile(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-private-teacher/${vendorId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+// --- Vendor Children (Shared) ---
+
+export async function searchVendorChildren(q = "") {
+  return authFetch(
+    `/vendor-children/search?q=${encodeURIComponent(q)}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+
+export async function getVendorChildren() {
+  return authFetch(
+    "/vendor-children",
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+export async function addVendorChild(
+  childId,
+  relationType
+) {
+  return authFetch(
+    "/vendor-children/add",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        childId,
+        relationType,
+      }),
+    }
+  );
+}
+
+
+export async function removeVendorChild(
+  childId
+) {
+  return authFetch(
+    `/vendor-children/${childId}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
+
+// --- Vendor School Students ---
+export async function searchSchoolChildren(q=""){
+  return authFetch(
+    `/vendor-school-students/search?q=${encodeURIComponent(q)}`, {
+      method:"GET",
+    });
+}
+
+
+
+export async function addSchoolStudent(
+  schoolId,
+  childId
+){
+return authFetch("/vendor-school-students/add",
+    {method:"POST",
+      body:JSON.stringify({
+        schoolId,
+        childId
+      })
+    });
+}
+
+
+
+export async function getSchoolStudents(
+  schoolId
+){
+  return authFetch(
+    `/vendor-school-students/${schoolId}`,
+    {
+      method:"GET",
+    });
+}
+
+
+export async function removeSchoolStudent(
+  schoolId,
+  childId
+){
+  return authFetch(
+    `/vendor-school-students/${schoolId}/${childId}`,
+    {
+      method:"DELETE",
+    }
+  );
+}
+
+// --- Vendor School Achievement ---
+
+export async function createSchoolAchievement(
+  vendorId,
+  payload
+){
+  return authFetch(
+    `/vendor-school/${vendorId}/achievement`,
+    {
+      method:"POST",
+      body:JSON.stringify(payload),
+    }
+  );
+}
+
+
+export async function getSchoolAchievements(
+  vendorId
+){
+  return authFetch(
+    `/vendor-school/${vendorId}/achievements`
+  );
+}
+
+// --- Vendor Kindergarten Achievement ---
+
+export async function createKindergartenAchievement(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-kindergarten/${vendorId}/achievement`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function getKindergartenAchievements(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-kindergarten/${vendorId}/achievements`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+// --- Vendor Art Class Achievement ---
+
+export async function createArtClassAchievement(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-art-class/${vendorId}/achievement`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+export async function getArtClassAchievements(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-art-class/${vendorId}/achievements`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+// --- Vendor Sport Class Achievement ---
+
+export async function createSportClassAchievement(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-sport-class/${vendorId}/achievement`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+export async function getSportClassAchievements(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-sport-class/${vendorId}/achievements`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+// --- Vendor Playhouse Achievement ---
+
+export async function createPlayhouseAchievement(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-playhouse/${vendorId}/achievement`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+export async function getPlayhouseAchievements(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-playhouse/${vendorId}/achievements`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+
+
+// --- Vendor Private Teacher Achievement ---
+
+export async function createPrivateTeacherAchievement(
+  vendorId,
+  payload
+) {
+  return authFetch(
+    `/vendor-private-teacher/${vendorId}/achievement`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+export async function getPrivateTeacherAchievements(
+  vendorId
+) {
+  return authFetch(
+    `/vendor-private-teacher/${vendorId}/achievements`,
+    {
+      method: "GET",
+    }
+  );
 }

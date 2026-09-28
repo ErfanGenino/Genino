@@ -1,3 +1,4 @@
+// D:\projects\Genino\genino-web\src\AuthStart.jsx
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "./assets/logo-genino.png";
 import { Brain, Gift, ShoppingBag, Bot, ChevronLeft, ChevronRight, Scale, Scale3D, Apple, BookCheck, Baby, DollarSign, PartyPopper, Play, LetterText, FileHeart } from "lucide-react";
@@ -20,9 +21,10 @@ import socialBg from "./assets/optimized/outhstart-cards/social-bg.webp";
 import funBg from "./assets/optimized/outhstart-cards/fun-bg.webp";
 import eventsBg from "./assets/optimized/outhstart-cards/events-bg.webp";
 import singleWorldBg from "./assets/optimized/outhstart-cards/single-world-bg.webp";
-import familyFinanceBg from "./assets/optimized/outhstart-cards/family-finance-bg.webp";
+import babysitterBg from "./assets/optimized/outhstart-cards/babysitter-bg.webp";
 import myChildBg from "./assets/optimized/outhstart-cards/mychild-bg.webp";
 import AuthFeatureCircleSlider from "./components/AuthStart/AuthFeatureCircleSlider";
+import ProductCategoryCircleSlider from "./components/AuthStart/ProductCategoryCircleSlider";
 import myChildIcon from "./assets/authstart-icons/mychild.png";
 import shopIcon from "./assets/authstart-icons/shop.png";
 import womenHealthIcon from "./assets/authstart-icons/women-health.png";
@@ -34,8 +36,11 @@ import socialIcon from "./assets/authstart-icons/social.png";
 import funIcon from "./assets/authstart-icons/fun.png";
 import eventsIcon from "./assets/authstart-icons/events.png";
 import singleWorldIcon from "./assets/authstart-icons/single-world.png";
-import familyFinanceIcon from "./assets/authstart-icons/family-finance.png";
-
+import babysitterIcon from "./assets/authstart-icons/babysitter.png";
+import normalizeProduct from "./utils/normalizeProduct";
+import { getHomeProducts } from "./services/homeProductsService";
+import EventCard from "./components/Events/EventCard";
+import EducationCard from "./components/Classes/EducationCard";
 
 
 
@@ -53,6 +58,28 @@ export default function AuthStart() {
   const [isSendingLifeInvite, setIsSendingLifeInvite] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [canInstallPwa, setCanInstallPwa] = useState(false);
+  const [latestShopProducts, setLatestShopProducts] = useState([]);
+  const [sismooniProducts, setSismooniProducts] = useState([]);
+  const [discountedProducts, setDiscountedProducts] = useState([]);
+  const [featuredServices, setFeaturedServices] = useState([]);
+  const [eventServices, setEventServices] = useState([]);
+  const [educationServices, setEducationServices] = useState([]);
+  const [featuredServicesLoading, setFeaturedServicesLoading] = useState(true);
+  const [latestProductsLoading, setLatestProductsLoading] = useState(true);
+  const [kindergartens, setKindergartens,] = useState([]);
+  const [kindergartensLoading, setKindergartensLoading,] = useState(true);
+  const [schools, setSchools,] = useState([]);
+  const [schoolsLoading, setSchoolsLoading,] = useState(true);
+  const [playhouses, setPlayhouses] = useState([]);
+  const [playhousesLoading, setPlayhousesLoading] = useState(true);
+  const [educationCenters, setEducationCenters,] = useState([]);
+  const [educationCentersLoading, setEducationCentersLoading,] = useState(true);
+  const [artCenters, setArtCenters] = useState([]);
+  const [artCentersLoading, setArtCentersLoading] = useState(true);
+  const [sportCenters, setSportCenters] = useState([]);
+  const [sportCentersLoading, setSportCentersLoading] = useState(true);
+  const [privateTeachers, setPrivateTeachers] = useState([]);
+  const [privateTeachersLoading, setPrivateTeachersLoading] = useState(true);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -66,6 +93,516 @@ export default function AuthStart() {
 
   const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:80/api";
+
+  useEffect(() => {
+  let isMounted = true;
+
+  async function loadLatestShopProducts() {
+  try {
+    const data = await getHomeProducts(API_BASE_URL);
+
+    if (isMounted) {
+      setLatestShopProducts(data.latestProducts);
+      setSismooniProducts(data.sismooniProducts);
+      setDiscountedProducts(data.discountedProducts);
+      
+
+    const serviceRes = await fetch(
+  `${API_BASE_URL}/vendor-services/public/home-list`
+);
+
+const serviceData =
+  await serviceRes.json();
+
+
+if(isMounted && serviceData.ok){
+
+  const services =
+    serviceData.services || [];
+
+
+  setFeaturedServices(
+    services
+  );
+
+const classRes = await fetch(
+  `${API_BASE_URL}/vendor-services/public/home-classes`
+);
+
+
+const classData =
+  await classRes.json();
+
+
+if(
+  isMounted &&
+  classData.ok
+){
+
+  setEducationServices(
+    classData.services || []
+  );
+
+}
+
+  const eventRes = await fetch(
+  `${API_BASE_URL}/vendor-services/public/home-events`
+);
+
+
+const eventData =
+  await eventRes.json();
+
+
+if(
+  isMounted &&
+  eventData.ok
+){
+
+  setEventServices(
+    eventData.services || []
+  );
+
+}
+
+}
+    }
+
+  } catch (error) {
+    console.error(
+      "خطا در دریافت محصولات صفحه اصلی:",
+      error
+    );
+
+    if (isMounted) {
+      setLatestShopProducts([]);
+      setSismooniProducts([]);
+      setDiscountedProducts([]);
+    }
+
+  } finally {
+    if (isMounted) {
+      setLatestProductsLoading(false);
+    }
+  }
+}
+
+  // دریافت فوری هنگام ورود به صفحه
+  loadLatestShopProducts();
+
+  // دریافت مجدد هر ۱۵ دقیقه
+  const intervalId = setInterval(
+    loadLatestShopProducts,
+    15 * 60 * 1000
+  );
+
+  return () => {
+    isMounted = false;
+    clearInterval(intervalId);
+  };
+}, [API_BASE_URL]);
+
+useEffect(() => {
+  let isMounted = true;
+
+  async function loadKindergartens() {
+    try {
+      setKindergartensLoading(true);
+
+      const res = await fetch(
+        `${API_BASE_URL}/vendor-kindergarten/public/list`
+      );
+
+      const data = await res.json();
+
+      console.log(
+  "AUTHSTART KINDERGARTENS:",
+  data
+);
+
+      if (!isMounted) return;
+
+      if (!res.ok || !data?.ok) {
+        setKindergartens([]);
+        return;
+      }
+
+      setKindergartens(
+        Array.isArray(data.kindergartens)
+          ? data.kindergartens
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOAD AUTHSTART KINDERGARTENS ERROR:",
+        error
+      );
+
+      if (isMounted) {
+        setKindergartens([]);
+      }
+
+    } finally {
+
+      if (isMounted) {
+        setKindergartensLoading(false);
+      }
+    }
+  }
+
+  loadKindergartens();
+
+  return () => {
+    isMounted = false;
+  };
+
+}, [API_BASE_URL]);
+
+useEffect(() => {
+  let isMounted = true;
+
+  async function loadPlayhouses() {
+    try {
+
+      setPlayhousesLoading(true);
+
+      const res = await fetch(
+        `${API_BASE_URL}/vendor-playhouse/public/list`
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "AUTHSTART PLAYHOUSES:",
+        data
+      );
+
+      if (!isMounted) return;
+
+      if (!res.ok || !data?.ok) {
+        setPlayhouses([]);
+        return;
+      }
+
+      setPlayhouses(
+        Array.isArray(data.playhouses)
+          ? data.playhouses
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOAD AUTHSTART PLAYHOUSES ERROR:",
+        error
+      );
+
+      if (isMounted) {
+        setPlayhouses([]);
+      }
+
+    } finally {
+
+      if (isMounted) {
+        setPlayhousesLoading(false);
+      }
+    }
+  }
+
+  loadPlayhouses();
+
+  return () => {
+    isMounted = false;
+  };
+
+}, [API_BASE_URL]);
+
+
+useEffect(() => {
+  let isMounted = true;
+
+  async function loadEducationCenters() {
+    try {
+      setEducationCentersLoading(true);
+
+      const res = await fetch(
+        `${API_BASE_URL}/vendor-education-class/public/list`
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "AUTHSTART EDUCATION CENTERS:",
+        data
+      );
+
+      if (!isMounted) return;
+
+      if (!res.ok || !data?.ok) {
+        setEducationCenters([]);
+        return;
+      }
+
+      setEducationCenters(
+        Array.isArray(data.educationClasses)
+          ? data.educationClasses
+          : []
+      );
+    } catch (error) {
+      console.error(
+        "LOAD AUTHSTART EDUCATION CENTERS ERROR:",
+        error
+      );
+
+      if (isMounted) {
+        setEducationCenters([]);
+      }
+    } finally {
+      if (isMounted) {
+        setEducationCentersLoading(false);
+      }
+    }
+  }
+
+  loadEducationCenters();
+
+  return () => {
+    isMounted = false;
+  };
+}, [API_BASE_URL]);
+
+useEffect(() => {
+  let isMounted = true;
+
+  async function loadArtCenters() {
+    try {
+      setArtCentersLoading(true);
+
+      const res = await fetch(
+        `${API_BASE_URL}/vendor-art-class/public/list`
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "AUTHSTART ART CENTERS:",
+        data
+      );
+
+      if (!isMounted) return;
+
+      if (!res.ok || !data?.ok) {
+        setArtCenters([]);
+        return;
+      }
+
+      setArtCenters(
+        Array.isArray(data.artClasses)
+          ? data.artClasses
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOAD AUTHSTART ART CENTERS ERROR:",
+        error
+      );
+
+      if (isMounted) {
+        setArtCenters([]);
+      }
+
+    } finally {
+
+      if (isMounted) {
+        setArtCentersLoading(false);
+      }
+    }
+  }
+
+  loadArtCenters();
+
+  return () => {
+    isMounted = false;
+  };
+
+}, [API_BASE_URL]);
+
+useEffect(() => {
+  let isMounted = true;
+
+  async function loadSportCenters() {
+    try {
+      setSportCentersLoading(true);
+
+      const res = await fetch(
+        `${API_BASE_URL}/vendor-sport-class/public/list`
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "AUTHSTART SPORT CENTERS:",
+        data
+      );
+
+      if (!isMounted) return;
+
+      if (!res.ok || !data?.ok) {
+        setSportCenters([]);
+        return;
+      }
+
+      setSportCenters(
+        Array.isArray(data.sportClasses)
+          ? data.sportClasses
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOAD AUTHSTART SPORT CENTERS ERROR:",
+        error
+      );
+
+      if (isMounted) {
+        setSportCenters([]);
+      }
+
+    } finally {
+
+      if (isMounted) {
+        setSportCentersLoading(false);
+      }
+    }
+  }
+
+  loadSportCenters();
+
+  return () => {
+    isMounted = false;
+  };
+
+}, [API_BASE_URL]);
+
+
+useEffect(() => {
+  let isMounted = true;
+
+  async function loadPrivateTeachers() {
+    try {
+      setPrivateTeachersLoading(true);
+
+      const res = await fetch(
+        `${API_BASE_URL}/vendor-private-teacher/public/list`
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "AUTHSTART PRIVATE TEACHERS:",
+        data
+      );
+
+      if (!isMounted) return;
+
+      if (!res.ok || !data?.ok) {
+        setPrivateTeachers([]);
+        return;
+      }
+
+      setPrivateTeachers(
+        Array.isArray(data.privateTeachers)
+          ? data.privateTeachers
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOAD AUTHSTART PRIVATE TEACHERS ERROR:",
+        error
+      );
+
+      if (isMounted) {
+        setPrivateTeachers([]);
+      }
+
+    } finally {
+
+      if (isMounted) {
+        setPrivateTeachersLoading(false);
+      }
+    }
+  }
+
+  loadPrivateTeachers();
+
+  return () => {
+    isMounted = false;
+  };
+
+}, [API_BASE_URL]);
+
+
+
+useEffect(() => {
+  let isMounted = true;
+
+  async function loadSchools() {
+    try {
+      setSchoolsLoading(true);
+
+      const res = await fetch(
+        `${API_BASE_URL}/vendor-school/public/list`
+      );
+
+      const data = await res.json();
+
+      if (!isMounted) return;
+
+      if (!res.ok || !data?.ok) {
+        setSchools([]);
+        return;
+      }
+
+      setSchools(
+        Array.isArray(data.schools)
+          ? data.schools
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOAD AUTHSTART SCHOOLS ERROR:",
+        error
+      );
+
+      if (isMounted) {
+        setSchools([]);
+      }
+
+    } finally {
+
+      if (isMounted) {
+        setSchoolsLoading(false);
+      }
+
+    }
+  }
+
+  loadSchools();
+
+  return () => {
+    isMounted = false;
+  };
+
+}, [API_BASE_URL]);
 
   const features = [
   {
@@ -81,6 +618,20 @@ export default function AuthStart() {
     link: "/shop",
     image: shopBg,
     icon: shopIcon,
+  },
+  {
+    title: "رویدادها و جشن‌ها",
+    desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما",
+    link: "/events",
+    image: eventsBg,
+    icon: eventsIcon,
+  },
+  {
+    title: "پرستار کودک",
+    desc: "یافتن و آشنایی با پرستاران کودک ثبت‌شده در ژنینو.",
+    link: "/child-nurses",
+    image: babysitterBg,
+    icon: babysitterIcon,
   },
   {
     title: "سلامت بانوان",
@@ -118,25 +669,11 @@ export default function AuthStart() {
     icon: magazineIcon,
   },
   {
-    title: "شبکه اجتماعی ژنینو",
-    desc: "در ژنینو با والدین دیگر در ارتباط باشید، تجربه‌ها را به اشتراک بگذارید و از لحظات طلایی کودکی الهام بگیرید 💬✨",
-    link: "/social",
-    image: socialBg,
-    icon: socialIcon,
-  },
-  {
     title: "بازی و سرگرمی",
     desc: "کودک شما با بازی‌های آموزشی و کارتون‌های هدفمند رشد می‌کند.",
     link: "/fun",
     image: funBg,
     icon: funIcon,
-  },
-  {
-    title: "رویدادها و جشن‌ها",
-    desc: "معرفی رویدادهای آموزشی و تفریحی ویژه‌ی کودکان در شهر شما",
-    link: "/events",
-    image: eventsBg,
-    icon: eventsIcon,
   },
   {
     title: "جهان مجردها",
@@ -146,12 +683,13 @@ export default function AuthStart() {
     icon: singleWorldIcon,
   },
   {
-    title: "اقتصاد و حسابداری خانواده",
-    desc: "ژنینو دستیاری هوشمند و همراهی مطمئن برای ارتقاع سطح مالی خانواده",
-    link: "/family-finance",
-    image: familyFinanceBg,
-    icon: familyFinanceIcon,
+    title: "شبکه اجتماعی ژنینو",
+    desc: "در ژنینو با والدین دیگر در ارتباط باشید، تجربه‌ها را به اشتراک بگذارید و از لحظات طلایی کودکی الهام بگیرید 💬✨",
+    link: "/social",
+    image: socialBg,
+    icon: socialIcon,
   },
+  
 ];
 
 // ✅ تقسیم کارت‌ها به دسته‌های ۴تایی
@@ -161,28 +699,63 @@ const chunk = (arr, size) => {
   return out;
 };
 
+
+const productCategoryItems = [
+  {
+    title: "سیسمونی تخصصی",
+    image: "/images/shop/categories/sismooni.webp",
+    link: "/shop/sismooni",
+  },
+  {
+    title: "نوزاد، کودک و نوجوان",
+    image: "/images/shop/categories/kids.webp",
+    link: "/shop/kids",
+  },
+  {
+    title: "مد و پوشاک",
+    image: "/images/shop/categories/fashion.webp",
+    link: "/shop/fashion",
+  },
+  {
+    title: "کالای خواب و حمام",
+    image: "/images/shop/categories/bed-bath.webp",
+    link: "/shop/bed-bath",
+  },
+  {
+    title: "ساعت و زیورآلات",
+    image: "/images/shop/categories/watch-jewelry.webp",
+    link: "/shop/watch-jewelry",
+  },
+  {
+    title: "کالای ورزشی",
+    image: "/images/shop/categories/sport.webp",
+    link: "/shop/sport",
+  },
+  {
+    title: "سلامت و پزشکی",
+    image: "/images/shop/categories/medical.webp",
+    link: "/shop/medical",
+  },
+  {
+    title: "آرایشی و بهداشتی",
+    image: "/images/shop/categories/beauty.webp",
+    link: "/shop/beauty",
+  },
+  {
+    title: "عطر و ادکلن",
+    image: "/images/shop/categories/perfume.webp",
+    link: "/shop/perfume",
+  },
+  {
+    title: "صنایع دستی",
+    image: "/images/shop/categories/handmade.webp",
+    link: "/shop/handmade",
+  },
+];
+
+
+
 const featuresChunks = chunk(features, 4);
-
-// 🛍️ اسلایدر ۱: سیسمونی تخصصی ژنینو
-const babyStarterProducts = Array.from({ length: 20 }).map((_, i) => ({
-  id: `baby-${i + 1}`,
-  name: `سیسمونی تخصصی ${i + 1}`,
-  price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
-  image: logo,
-  category: ["کالسکه", "لباس نوزاد", "بهداشت کودک", "اتاق کودک"][i % 4],
-}));
-
-// 🧩 اسلایدر ۲: خدمات برگزیده ژنینو (ارائه‌دهنده خدمات)
-const featuredServices = Array.from({ length: 20 }).map((_, i) => ({
-  id: `svc-${i + 1}`,
-  name:
-    ["کلاس موسیقی کودک", "کلاس ورزشی کودک", "مهد کودک", "مدرسه"][i % 4] +
-    ` ${i + 1}`,
-  price: ["رزرو آنلاین", "مشاهده جزئیات", "شروع از ۱٫۲ میلیون", "ثبت‌نام/استعلام"][i % 4],
-  image: logo,
-  category: ["آموزشی", "ورزشی", "مراقبتی", "مدرسه"][i % 4],
-}));
-
 
   const [highlight, setHighlight] = useState(false);
 
@@ -217,6 +790,13 @@ useEffect(() => {
 
   const loadUnreadCount = async () => {
     const token = localStorage.getItem("genino_token");
+
+    const vendorId = localStorage.getItem("genino_vendor_id");
+
+if (vendorId) {
+  if (isMounted) setSocialUnreadCount(0);
+  return;
+}
 
     if (!token) {
       if (isMounted) setSocialUnreadCount(0);
@@ -272,6 +852,8 @@ const CrystalDust = () => {
     { top: "42%", left: "88%", size: 1 },
     { top: "78%", left: "52%", size: 1.2 },
   ];
+
+  
 
   return (
     <motion.div
@@ -416,6 +998,10 @@ const handleInstallPwa = async () => {
 
 
 
+
+
+
+
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#f7f2eb] to-[#fffdf8] text-gray-800 px-6 pt-3 sm:pt-6 lg:pt-8 pb-[6rem] sm:pb-0 text-center overflow-x-hidden overflow-y-auto">
 
@@ -488,104 +1074,340 @@ transition-all
         ))}
       </div>
 
-<TodayCalendarBox className="mt-0" />
+<div
+  className="
+    relative
+    z-20
 
-<div className="w-full mt-1 z-20">
-  <AuthFeatureCircleSlider items={features} />
+    w-[calc(100%+3rem)]
+    -mx-6
+
+    mt-2
+  "
+>
+  <TodayCalendarBox />
 </div>
 
+{/* اسلایدر اصلی صفحه */}
 <motion.div
-  className="relative z-20 w-full flex justify-center mt-2 mb-1 px-4"
-  initial={{ opacity: 0, y: 14 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.7, ease: "easeOut" }}
->
-  <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-xl">
-  <motion.button
-    type="button"
-    onClick={() => navigate("/mychild")}
-    whileHover={{ scale: 1.04 }}
-    whileTap={{ scale: 0.97 }}
-    className="group relative overflow-hidden rounded-3xl whitespace-nowrap whitespace-nowrap bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-5 py-3 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
-  >
-    <CrystalDust />
-    <span className="relative flex items-center justify-center gap-2 text-[11px] sm:text-sm">
-      <Baby className="w-4 h-4 sm:w-5 sm:h-5" />
-      کودک من
-    </span>
-  </motion.button>
+  className="
+    relative
+    z-20
 
-  <motion.button
-    type="button"
-    onClick={() => navigate("/genino-children")}
-    whileHover={{ scale: 1.04 }}
-    whileTap={{ scale: 0.97 }}
-    className="group relative overflow-hidden rounded-3xl whitespace-nowrap whitespace-nowrap bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-5 py-3 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
-  >
-    <CrystalDust /> 
-    <span className="relative flex items-center justify-center gap-2 text-[11px] sm:text-sm">
-      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-      کودکان ژنینویی
-    </span>
-  </motion.button>
+    w-[calc(100%+3rem)]
+    -mx-6
+    max-w-none
 
-  <motion.button
-  type="button"
-  onClick={handleOpenLifeCompanion}
-  whileHover={{ scale: 1.04 }}
-  whileTap={{ scale: 0.97 }}
-  className="group relative overflow-hidden rounded-3xl whitespace-nowrap bg-gradient-to-r from-[#f6c343] via-[#d4af37] to-[#b8860b] px-3 sm:px-5 py-3 shadow-[0_12px_30px_rgba(212,175,55,0.35)] border border-yellow-200 text-white font-extrabold"
->
-  <CrystalDust />
+    mt-2
+    mb-2
 
-  <span className="relative flex items-center justify-center gap-2 text-[11px] sm:text-sm">
-    <HeartHandshake className="w-4 h-4 sm:w-5 sm:h-5" />
-    همراه زندگی
-  </span>
-</motion.button>
+    rounded-none
+    overflow-hidden
 
-</div>
-</motion.div>
-
-<motion.div
-  className="relative w-full max-w-3xl mt-2 mb-4 sm:mt-4 sm:mb-8 rounded-3xl overflow-hidden z-20"
+    sm:w-[calc(100%+3rem)]
+    sm:-mx-6
+    sm:max-w-none
+    sm:mt-4
+    sm:mb-8
+    sm:rounded-3xl
+  "
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.8, ease: 'easeOut' }}
+  transition={{ duration: 0.8, ease: "easeOut" }}
 >
   <PromoSlider
     variant="golden"
     interval={6}
-
-    /* 🌟 ارتفاع بزرگ‌تر */
     height="h-52 sm:h-60 md:h-64 lg:h-72"
-
-    className="rounded-3xl overflow-hidden shadow-[0_10px_25px_rgba(212,175,55,0.25)]"
+    className="
+  rounded-none
+  sm:rounded-3xl
+  overflow-hidden
+  shadow-none
+  sm:shadow-[0_10px_25px_rgba(212,175,55,0.25)]
+"
     slides={[
-  { id: 1, image: "/images/slides/authstart/1.jpg", link: "/shop" },
-  { id: 2, image: "/images/slides/authstart/2.jpg", link: "/shop" },
-  { id: 3, image: "/images/slides/authstart/3.jpg", link: "/shop" },
-  { id: 4, image: "/images/slides/authstart/4.jpg", link: "/shop" },
-  { id: 5, image: "/images/slides/authstart/5.jpg", link: "/shop" },
-  { id: 6, image: "/images/slides/authstart/6.jpg", link: "/shop" },
-  { id: 7, image: "/images/slides/authstart/7.jpg", link: "/shop" },
-]}
+      { id: 1, image: "/images/slides/authstart/1.jpg", link: "/shop" },
+      { id: 2, image: "/images/slides/authstart/5.jpg", link: "/gift" },
+      { id: 3, image: "/images/slides/authstart/6.jpg", link: "/genino-health" },
+      { id: 4, image: "/images/slides/authstart/8.jpg", link: "/events" },
+      { id: 5, image: "/images/slides/authstart/2.jpg", link: "/shop" },
+      { id: 6, image: "/images/slides/authstart/3.jpg", link: "/shop" },
+      { id: 7, image: "/images/slides/authstart/4.jpg", link: "/shop" },
+      { id: 8, image: "/images/slides/authstart/9.jpg", link: "/social" },
+      { id: 9, image: "/images/slides/authstart/7.jpg", link: "/shop" },
+    ]}
   />
 </motion.div>
 
 
+{/* نوار سه‌دکمه‌ای */}
+<motion.div
+  className="
+    relative
+    z-20
+
+    w-[calc(100%+3rem)]
+    -mx-6
+
+    mt-0
+    mb-2
+
+    sm:w-full
+    sm:mx-0
+    sm:max-w-3xl
+  "
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.55, ease: "easeOut" }}
+>
+  <div
+    className="
+      grid
+      grid-cols-3
+
+      w-full
+
+      rounded-none
+      sm:rounded-2xl
+
+      overflow-hidden
+
+      border-y
+      sm:border
+
+      border-yellow-200
+
+      bg-gradient-to-l
+      from-[#fffaf0]
+      via-[#fff4cf]
+      to-[#f6df9b]
+
+      shadow-[0_5px_18px_rgba(120,85,38,0.10)]
+    "
+  >
+
+    {/* کودک من */}
+    <motion.button
+      type="button"
+      onClick={() => navigate("/mychild")}
+      whileTap={{ scale: 0.97 }}
+      className="
+        flex
+        min-w-0
+        items-center
+        justify-center
+        gap-1.5
+
+        border-l
+        border-yellow-200/80
+
+        px-2
+        py-3
+
+        text-[11px]
+        font-black
+        text-[#4b2f17]
+
+        transition
+        hover:bg-white/30
+      "
+    >
+      <span
+        className="
+          flex
+          h-7
+          w-7
+          shrink-0
+          items-center
+          justify-center
+          rounded-lg
+
+          bg-gradient-to-br
+          from-[#4b2f17]
+          via-[#9b6a26]
+          to-[#d4af37]
+
+          text-white
+          shadow-sm
+        "
+      >
+        <Baby className="h-3.5 w-3.5" />
+      </span>
+
+      <span className="whitespace-nowrap">
+        کودک من
+      </span>
+    </motion.button>
+
+
+    {/* کودکان ژنینویی */}
+    <motion.button
+      type="button"
+      onClick={() => navigate("/genino-children")}
+      whileTap={{ scale: 0.97 }}
+      className="
+        flex
+        min-w-0
+        items-center
+        justify-center
+        gap-1.5
+
+        border-l
+        border-yellow-200/80
+
+        px-2
+        py-3
+
+        text-[11px]
+        font-black
+        text-[#4b2f17]
+
+        transition
+        hover:bg-white/30
+      "
+    >
+      <span
+        className="
+          flex
+          h-7
+          w-7
+          shrink-0
+          items-center
+          justify-center
+          rounded-lg
+
+          bg-gradient-to-br
+          from-[#4b2f17]
+          via-[#9b6a26]
+          to-[#d4af37]
+
+          text-white
+          shadow-sm
+        "
+      >
+        <Sparkles className="h-3.5 w-3.5" />
+      </span>
+
+      <span className="whitespace-nowrap">
+        کودکان ژنینویی
+      </span>
+    </motion.button>
+
+
+    {/* همراه زندگی */}
+    <motion.button
+      type="button"
+      onClick={handleOpenLifeCompanion}
+      whileTap={{ scale: 0.97 }}
+      className="
+        flex
+        min-w-0
+        items-center
+        justify-center
+        gap-1.5
+
+        px-2
+        py-3
+
+        text-[11px]
+        font-black
+        text-[#4b2f17]
+
+        transition
+        hover:bg-white/30
+      "
+    >
+      <span
+        className="
+          flex
+          h-7
+          w-7
+          shrink-0
+          items-center
+          justify-center
+          rounded-lg
+
+          bg-gradient-to-br
+          from-[#4b2f17]
+          via-[#9b6a26]
+          to-[#d4af37]
+
+          text-white
+          shadow-sm
+        "
+      >
+        <HeartHandshake className="h-3.5 w-3.5" />
+      </span>
+
+      <span className="whitespace-nowrap">
+        همراه زندگی
+      </span>
+    </motion.button>
+
+  </div>
+</motion.div>
+
+
+{/* اسلایدر بار بی‌نهایت */}
+<div
+  className="
+    relative
+    z-20
+
+    w-[calc(100%+3rem)]
+    -mx-6
+
+    mt-2
+    mb-2
+
+    sm:w-full
+    sm:mx-0
+  "
+>
+  <AuthFeatureCircleSlider items={features} />
+</div>
+
+
+
+
 {/* 🛍️ آخرین محصولات فروشگاه ژنینو */}
-<ScrollProduct
-  title=" آخرین محصولات فروشگاه ژنینو"
-  color="yellow"
-  items={Array.from({ length: 25 }).map((_, i) => ({
-    id: i + 1,
-    name: `محصول جدید ${i + 1}`,
-    price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
-    image: logo,
-    category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
-  }))}
-/>
+{latestProductsLoading ? (
+  <div className="relative z-20 my-5 w-full text-center">
+    <div className="mx-auto max-w-6xl rounded-3xl border border-yellow-100 bg-white/80 px-4 py-8 text-sm font-bold text-yellow-700 shadow-sm">
+      در حال دریافت آخرین محصولات فروشگاه...
+    </div>
+  </div>
+) : latestShopProducts.length > 0 ? (
+  <div
+  className="
+    relative
+    z-20
+
+    w-[calc(100%+3rem)]
+    -mx-6
+
+    sm:w-full
+    sm:mx-0
+  "
+>
+  <ScrollProduct
+    title="آخرین محصولات فروشگاه ژنینو"
+    titleLink="/shop"
+    color="yellow"
+    items={latestShopProducts}
+    variant="shop"
+    autoScroll={true}
+    interval={6000}
+  />
+</div>
+) : (
+  <div className="relative z-20 my-5 w-full text-center">
+    <div className="mx-auto max-w-6xl rounded-3xl border border-yellow-100 bg-white/80 px-4 py-8 text-sm text-gray-500 shadow-sm">
+      هنوز محصول منتشرشده‌ای در فروشگاه وجود ندارد.
+    </div>
+  </div>
+)}
 
 
 {/* ✅ کارت‌ها ۴تایی + اسلایدر زیر هر ۴ کارت */}
@@ -647,8 +1469,43 @@ transition-all
     </motion.section>
   </div>
 
-  {/* ✅ اسلایدر ۱: مثل اسکرول اول/آخر (مستقیم زیر main) */}
-  <ScrollProduct title="سیسمونی تخصصی ژنینو" color="yellow" items={babyStarterProducts} />
+  {/* 🛍️ جدیدترین محصولات سیسمونی تخصصی */}
+{latestProductsLoading ? (
+  <div className="relative z-20 my-5 w-full text-center">
+    <div className="mx-auto max-w-6xl rounded-3xl border border-yellow-100 bg-white/80 px-4 py-8 text-sm font-bold text-yellow-700 shadow-sm">
+      در حال دریافت محصولات سیسمونی تخصصی...
+    </div>
+  </div>
+) : sismooniProducts.length > 0 ? (
+  <div
+  className="
+    relative
+    z-20
+
+    w-[calc(100%+3rem)]
+    -mx-6
+
+    sm:w-full
+    sm:mx-0
+  "
+>
+  <ScrollProduct
+    title="سیسمونی تخصصی ژنینو"
+    titleLink={`/shop?category=${encodeURIComponent("سیسمونی تخصصی")}`}
+    color="yellow"
+    items={sismooniProducts}
+    variant="shop"
+    autoScroll={true}
+    interval={6000}
+  />
+</div>
+) : (
+  <div className="relative z-20 my-5 w-full text-center">
+    <div className="mx-auto max-w-6xl rounded-3xl border border-yellow-100 bg-white/80 px-4 py-8 text-sm text-gray-500 shadow-sm">
+      هنوز محصول منتشرشده‌ای در بخش سیسمونی تخصصی وجود ندارد.
+    </div>
+  </div>
+)}
 
   {/* 🔸 بلاک دوم: ۴ کارت دوم */}
   <div className="w-full max-w-6xl mx-auto">
@@ -700,8 +1557,32 @@ transition-all
     </motion.section>
   </div>
 
-  {/* ✅ اسلایدر ۲: مثل اسکرول اول/آخر */}
-  <ScrollProduct title="خدمات برگزیده ژنینو" color="blue" items={featuredServices} />
+
+
+{/* 🔥 محصولات تخفیف‌خورده */}
+{latestProductsLoading ? (
+  <div className="relative z-20 my-5 w-full text-center">
+    <div className="mx-auto max-w-6xl rounded-3xl border border-amber-100 bg-white/80 px-4 py-8 text-sm font-bold text-amber-700 shadow-sm">
+      در حال دریافت محصولات تخفیف‌خورده...
+    </div>
+  </div>
+) : discountedProducts.length > 0 ? (
+  <ScrollProduct
+    title="محصولات تخفیف‌خورده"
+    titleLink="/shop?discount=active"
+    color="amber"
+    items={discountedProducts}
+    variant="shop"
+    autoScroll={true}
+    interval={6000}
+  />
+) : (
+  <div className="relative z-20 my-5 w-full text-center">
+    <div className="mx-auto max-w-6xl rounded-3xl border border-amber-100 bg-white/80 px-4 py-8 text-sm text-gray-500 shadow-sm">
+      در حال حاضر محصول تخفیف‌خورده‌ای وجود ندارد.
+    </div>
+  </div>
+)}
 
   {/* 🔸 باقی کارت‌ها */}
   <div className="w-full max-w-6xl mx-auto">
@@ -720,8 +1601,15 @@ transition-all
     <motion.div
       whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
       transition={{ type: "spring", stiffness: 200, damping: 15 }}
-      className="flex flex-row sm:flex-col items-stretch sm:items-center justify-start sm:justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[180px] sm:h-[300px] md:h-[280px] lg:h-[290px] cursor-pointer hover:shadow-lg p-0 sm:p-3 gap-0 sm:gap-4"
+      className="relative flex flex-row sm:flex-col items-stretch sm:items-center justify-start sm:justify-between bg-[#fff8e6]/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-md border-2 border-[#d4af37] h-[180px] sm:h-[300px] md:h-[280px] lg:h-[290px] cursor-pointer hover:shadow-lg p-0 sm:p-3 gap-0 sm:gap-4"
     >
+    {item.title === "شبکه اجتماعی ژنینو" && socialUnreadCount > 0 && (
+  <div className="absolute top-3 left-3 z-20">
+    <span className="min-w-[28px] h-[28px] px-2 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center shadow-md">
+      {socialUnreadCount > 99 ? "99+" : socialUnreadCount}
+    </span>
+  </div>
+)}
       <div className="w-1/2 h-full sm:w-[70%] sm:h-auto sm:aspect-square md:w-[65%] lg:w-[85%] overflow-hidden flex-shrink-0 rounded-none sm:rounded-2xl bg-[#fff8e6] flex items-center justify-center">
   <img
     src={item.image || logo}
@@ -748,20 +1636,2781 @@ transition-all
 </div>
 
 
+{/* 🛍️ دسته‌بندی کالاهای ژنینو */}
+<div
+  className="
+    relative
+    z-20
+    w-[calc(100%+3rem)]
+    -mx-6
+    mt-14
+    mb-2
+    sm:w-full
+    sm:mx-0
+  "
+>
+  <h2 className="text-base sm:text-lg font-extrabold text-yellow-700 text-center mb-6">
+    دسته‌بندی کالاهای ژنینو
+  </h2>
 
-      {/* 🔥 محصولات تخفیف‌خورده */}
+  <ProductCategoryCircleSlider items={productCategoryItems} />
+</div>
 
-  <ScrollProduct
-    title=" محصولات تخفیف‌خورده"
-    color="amber"
-    items={Array.from({ length: 25 }).map((_, i) => ({
-    id: i + 1,
-    name: `محصول جدید ${i + 1}`,
-    price: `${(Math.floor(Math.random() * 300) + 100) * 1000} تومان`,
-    image: logo,
-    category: ["آموزشی", "خلاقیت", "ورزشی", "تفریحی"][i % 4],
-  }))}
+
+
+{/* 🏫 مدارس ژنینو */}
+{schoolsLoading ? (
+
+  <div
+    className="
+      relative
+      z-20
+      my-6
+      w-full
+      text-center
+    "
+  >
+    <div
+      className="
+        mx-auto
+        max-w-6xl
+        rounded-3xl
+        border
+        border-blue-100
+        bg-white/80
+        px-4
+        py-8
+        text-sm
+        font-bold
+        text-blue-700
+        shadow-sm
+      "
+    >
+      در حال دریافت مدارس...
+    </div>
+  </div>
+
+) : schools.length > 0 ? (
+
+  <section
+    dir="rtl"
+    className="
+      relative
+      z-20
+      my-6
+
+      w-[calc(100%+3rem)]
+      sm:w-full
+
+      rounded-none
+      sm:rounded-[2rem]
+
+      border
+      border-blue-100
+
+      bg-gradient-to-br
+      from-blue-50
+      via-sky-50
+      to-white
+
+      p-4
+      sm:p-6
+
+      shadow-sm
+    "
+  >
+
+    {/* عنوان */}
+    <div
+      className="
+        mx-auto
+        mb-4
+        flex
+        w-full
+        max-w-6xl
+        items-center
+        justify-between
+      "
+    >
+
+      <h2
+        className="
+          text-lg
+          font-black
+          text-[#1e4f7a]
+          sm:text-xl
+        "
+      >
+        مدارس ژنینو
+      </h2>
+
+      <button
+        type="button"
+        onClick={() =>
+          navigate("/shop/services/schools")
+        }
+        className="
+          text-xs
+          font-black
+          text-[#3b82b8]
+          hover:text-[#1e4f7a]
+        "
+      >
+        مشاهده همه
+      </button>
+
+    </div>
+
+
+    {/* کارت‌ها */}
+    <div
+      className="
+        mx-auto
+        flex
+        w-full
+        max-w-6xl
+        gap-4
+        overflow-x-auto
+        px-3
+        pb-4
+        snap-x
+        snap-mandatory
+      "
+    >
+
+      {schools.map((school) => {
+
+        const schoolImage =
+          school.image?.trim()
+            ? school.image
+            : null;
+
+        return (
+
+          <motion.div
+            key={school.id}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() =>
+              navigate(
+                `/vendor/service/school/${school.vendorId}`
+              )
+            }
+            className="
+              group
+              w-[230px]
+              min-w-[230px]
+              flex-none
+              cursor-pointer
+              snap-start
+              overflow-hidden
+              rounded-3xl
+              border
+              border-blue-200
+              bg-white
+              text-right
+              shadow-md
+            "
+          >
+
+            {/* عکس مدرسه */}
+            <div
+              className="
+                relative
+                h-[145px]
+                w-full
+                overflow-hidden
+                bg-blue-50
+              "
+            >
+
+              {schoolImage ? (
+
+                <img
+                  src={schoolImage}
+                  alt={
+                    school.schoolName ||
+                    "مدرسه"
+                  }
+                  className="
+                    h-full
+                    w-full
+                    object-cover
+                  "
+                />
+
+              ) : (
+
+                <div
+                  className="
+                    flex
+                    h-full
+                    w-full
+                    items-center
+                    justify-center
+                    text-5xl
+                  "
+                >
+                  🏫
+                </div>
+
+              )}
+
+
+              <div
+                className="
+                  absolute
+                  right-2
+                  top-2
+                  rounded-full
+                  bg-white/95
+                  px-3
+                  py-1
+                  text-[10px]
+                  font-black
+                  text-[#1e4f7a]
+                  shadow
+                "
+              >
+                مدرسه
+              </div>
+
+            </div>
+
+
+            {/* اطلاعات مدرسه */}
+            <div className="p-4">
+
+              <h3
+                className="
+                  truncate
+                  text-sm
+                  font-black
+                  text-[#17324d]
+                "
+              >
+                {school.schoolName ||
+                  "مدرسه ژنینو"}
+              </h3>
+
+
+              {school.slogan && (
+
+                <p
+                  className="
+                    mt-1
+                    line-clamp-2
+                    text-[11px]
+                    leading-5
+                    text-gray-500
+                  "
+                >
+                  {school.slogan}
+                </p>
+
+              )}
+
+
+              <div
+                className="
+                  mt-3
+                  flex
+                  flex-wrap
+                  gap-1.5
+                "
+              >
+
+                {school.city && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-blue-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#1e4f7a]
+                    "
+                  >
+                    📍 {school.city}
+                  </span>
+
+                )}
+
+
+                {school.district && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-blue-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#1e4f7a]
+                    "
+                  >
+                    منطقه {school.district}
+                  </span>
+
+                )}
+
+
+                {school.gender && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-blue-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#1e4f7a]
+                    "
+                  >
+                    {school.gender}
+                  </span>
+
+                )}
+
+              </div>
+
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  navigate(
+                    `/vendor/service/school/${school.vendorId}`
+                  );
+                }}
+                className="
+                  mt-4
+                  w-full
+                  rounded-xl
+                  bg-gradient-to-r
+                  from-[#1e4f7a]
+                  via-[#3b82b8]
+                  to-[#62b6e8]
+                  py-2
+                  text-[11px]
+                  font-black
+                  text-white
+                "
+              >
+                مشاهده مدرسه
+              </button>
+
+            </div>
+
+          </motion.div>
+
+        );
+
+      })}
+
+    </div>
+
+  </section>
+
+) : null}
+
+
+{/* 🧸 مهدکودک‌های ژنینو */}
+{kindergartensLoading ? (
+
+  <div
+    className="
+      relative
+      z-20
+      my-6
+      w-full
+      text-center
+    "
+  >
+    <div
+      className="
+        mx-auto
+        max-w-6xl
+        rounded-3xl
+        border
+        border-yellow-100
+        bg-white/80
+        px-4
+        py-8
+        text-sm
+        font-bold
+        text-yellow-700
+        shadow-sm
+      "
+    >
+      در حال دریافت مهدکودک‌ها...
+    </div>
+  </div>
+
+) : kindergartens.length > 0 ? (
+
+  <section
+    dir="rtl"
+    className="
+      relative
+      z-20
+      my-6
+
+      w-[calc(100%+3rem)]
+      sm:w-full
+
+      rounded-none
+      sm:rounded-[2rem]
+
+      border
+      border-yellow-100
+
+      bg-gradient-to-br
+      from-yellow-50
+      via-amber-50
+      to-white
+
+      p-4
+      sm:p-6
+
+      shadow-sm
+    "
+  >
+
+    <div
+      className="
+        mx-auto
+        mb-4
+        flex
+        w-full
+        max-w-6xl
+        items-center
+        justify-between
+      "
+    >
+
+      <h2
+        className="
+          text-lg
+          font-black
+          text-[#7a5526]
+          sm:text-xl
+        "
+      >
+        مهدکودک‌های ژنینو
+      </h2>
+
+      <button
+        type="button"
+        onClick={() =>
+          navigate("/shop/services/kindergartens")
+        }
+        className="
+          text-xs
+          font-black
+          text-[#b88724]
+          hover:text-[#7a5526]
+        "
+      >
+        مشاهده همه
+      </button>
+
+    </div>
+
+
+    <div
+      className="
+        mx-auto
+        flex
+        w-full
+        max-w-6xl
+        gap-4
+        overflow-x-auto
+        px-3
+        pb-4
+        snap-x
+        snap-mandatory
+      "
+    >
+
+      {kindergartens.map((kindergarten) => {
+
+  const kindergartenImage =
+    kindergarten.image?.trim()
+      ? kindergarten.image
+      : null;
+
+  return (
+    <motion.div
+      key={kindergarten.id}
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() =>
+        navigate(
+          `/vendor/service/kindergarten/${kindergarten.vendorId}?view=public`
+        )
+      }
+      className="
+        group
+        w-[230px]
+        min-w-[230px]
+        flex-none
+        cursor-pointer
+        overflow-hidden
+        rounded-3xl
+        border
+        border-yellow-200
+        bg-white
+        text-right
+        shadow-md
+      "
+    >
+
+      {/* عکس مهدکودک */}
+      <div
+        className="
+          relative
+          h-[145px]
+          w-full
+          overflow-hidden
+          bg-yellow-50
+        "
+      >
+
+        {kindergartenImage ? (
+          <img
+            src={kindergartenImage}
+            alt={
+              kindergarten.kindergartenName ||
+              "مهدکودک"
+            }
+            className="
+              h-full
+              w-full
+              object-cover
+            "
+          />
+        ) : (
+          <div
+            className="
+              flex
+              h-full
+              w-full
+              items-center
+              justify-center
+              text-5xl
+            "
+          >
+            🧸
+          </div>
+        )}
+
+        <div
+          className="
+            absolute
+            right-2
+            top-2
+            rounded-full
+            bg-white/95
+            px-3
+            py-1
+            text-[10px]
+            font-black
+            text-[#7a5526]
+            shadow
+          "
+        >
+          مهدکودک
+        </div>
+
+      </div>
+
+
+      {/* اطلاعات */}
+      <div className="p-4">
+
+        <h3
+          className="
+            text-sm
+            font-black
+            text-[#4b2f17]
+          "
+        >
+          {kindergarten.kindergartenName ||
+            "مهدکودک ژنینو"}
+        </h3>
+
+
+        {kindergarten.slogan && (
+          <p
+            className="
+              mt-1
+              line-clamp-2
+              text-[11px]
+              leading-5
+              text-gray-500
+            "
+          >
+            {kindergarten.slogan}
+          </p>
+        )}
+
+
+        <div
+          className="
+            mt-3
+            flex
+            flex-wrap
+            gap-1.5
+          "
+        >
+
+          {kindergarten.city && (
+            <span
+              className="
+                rounded-full
+                bg-yellow-50
+                px-2
+                py-1
+                text-[10px]
+                font-bold
+                text-[#7a5526]
+              "
+            >
+              📍 {kindergarten.city}
+            </span>
+          )}
+
+
+          {kindergarten.district && (
+            <span
+              className="
+                rounded-full
+                bg-yellow-50
+                px-2
+                py-1
+                text-[10px]
+                font-bold
+                text-[#7a5526]
+              "
+            >
+              منطقه {kindergarten.district}
+            </span>
+          )}
+
+
+          {kindergarten.gender && (
+            <span
+              className="
+                rounded-full
+                bg-yellow-50
+                px-2
+                py-1
+                text-[10px]
+                font-bold
+                text-[#7a5526]
+              "
+            >
+              {kindergarten.gender}
+            </span>
+          )}
+
+        </div>
+
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+
+            navigate(
+              `/vendor/service/kindergarten/${kindergarten.vendorId}?view=public`
+            );
+          }}
+          className="
+            mt-4
+            w-full
+            rounded-xl
+            bg-gradient-to-r
+            from-[#7a5526]
+            via-[#b88724]
+            to-[#d4af37]
+            py-2
+            text-[11px]
+            font-black
+            text-white
+          "
+        >
+          مشاهده مهدکودک
+        </button>
+
+      </div>
+
+    </motion.div>
+  );
+})}
+
+    </div>
+
+  </section>
+
+) : null}
+
+{/* 🎮 خانه‌های بازی ژنینو */}
+{playhousesLoading ? (
+
+  <div
+    className="
+      relative
+      z-20
+      my-6
+      w-full
+      text-center
+    "
+  >
+    <div
+      className="
+        mx-auto
+        max-w-6xl
+        rounded-3xl
+        border
+        border-green-100
+        bg-white/80
+        px-4
+        py-8
+        text-sm
+        font-bold
+        text-green-700
+        shadow-sm
+      "
+    >
+      در حال دریافت خانه‌های بازی...
+    </div>
+  </div>
+
+) : playhouses.length > 0 ? (
+
+  <section
+    dir="rtl"
+    className="
+      relative
+      z-20
+      my-6
+
+      w-[calc(100%+3rem)]
+      sm:w-full
+
+      rounded-none
+      sm:rounded-[2rem]
+
+      border
+      border-green-100
+
+      bg-gradient-to-br
+      from-green-50
+      via-emerald-50
+      to-white
+
+      p-4
+      sm:p-6
+
+      shadow-sm
+    "
+  >
+
+    {/* عنوان */}
+    <div
+      className="
+        mx-auto
+        mb-4
+        flex
+        w-full
+        max-w-6xl
+        items-center
+        justify-between
+      "
+    >
+
+      <h2
+        className="
+          text-lg
+          font-black
+          text-[#276749]
+          sm:text-xl
+        "
+      >
+        خانه‌های بازی ژنینو
+      </h2>
+
+
+      <button
+        type="button"
+        onClick={() =>
+          navigate(
+            "/shop/services/playhouses"
+          )
+        }
+        className="
+          text-xs
+          font-black
+          text-[#3f9b6d]
+          hover:text-[#276749]
+        "
+      >
+        مشاهده همه
+      </button>
+
+    </div>
+
+
+    {/* کارت‌ها */}
+    <div
+      className="
+        mx-auto
+        flex
+        w-full
+        max-w-6xl
+        gap-4
+        overflow-x-auto
+        px-3
+        pb-4
+        snap-x
+        snap-mandatory
+      "
+    >
+
+      {playhouses.map((playhouse) => {
+
+        const playhouseImage =
+          playhouse.image?.trim()
+            ? playhouse.image
+            : null;
+
+
+        return (
+
+          <motion.div
+            key={playhouse.id}
+            whileHover={{
+              y: -4,
+            }}
+            whileTap={{
+              scale: 0.98,
+            }}
+            onClick={() =>
+              navigate(
+                `/vendor/service/playhouse/${playhouse.vendorId}?view=public`
+              )
+            }
+            className="
+              group
+              w-[230px]
+              min-w-[230px]
+              flex-none
+              cursor-pointer
+              snap-start
+              overflow-hidden
+              rounded-3xl
+              border
+              border-green-200
+              bg-white
+              text-right
+              shadow-md
+            "
+          >
+
+            {/* عکس خانه بازی */}
+            <div
+              className="
+                relative
+                h-[145px]
+                w-full
+                overflow-hidden
+                bg-green-50
+              "
+            >
+
+              {playhouseImage ? (
+
+                <img
+                  src={playhouseImage}
+                  alt={
+                    playhouse.playhouseName ||
+                    "خانه بازی"
+                  }
+                  className="
+                    h-full
+                    w-full
+                    object-cover
+                  "
+                />
+
+              ) : (
+
+                <div
+                  className="
+                    flex
+                    h-full
+                    w-full
+                    items-center
+                    justify-center
+                    text-5xl
+                  "
+                >
+                  🎮
+                </div>
+
+              )}
+
+
+              <div
+                className="
+                  absolute
+                  right-2
+                  top-2
+                  rounded-full
+                  bg-white/95
+                  px-3
+                  py-1
+                  text-[10px]
+                  font-black
+                  text-[#276749]
+                  shadow
+                "
+              >
+                خانه بازی
+              </div>
+
+            </div>
+
+
+            {/* اطلاعات */}
+            <div className="p-4">
+
+              <h3
+                className="
+                  text-sm
+                  font-black
+                  text-[#1f5138]
+                "
+              >
+                {playhouse.playhouseName ||
+                  "خانه بازی ژنینو"}
+              </h3>
+
+
+              {playhouse.slogan && (
+
+                <p
+                  className="
+                    mt-1
+                    line-clamp-2
+                    text-[11px]
+                    leading-5
+                    text-gray-500
+                  "
+                >
+                  {playhouse.slogan}
+                </p>
+
+              )}
+
+
+              <div
+                className="
+                  mt-3
+                  flex
+                  flex-wrap
+                  gap-1.5
+                "
+              >
+
+                {playhouse.city && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-green-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#276749]
+                    "
+                  >
+                    📍 {playhouse.city}
+                  </span>
+
+                )}
+
+
+                {playhouse.district && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-green-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#276749]
+                    "
+                  >
+                    منطقه {playhouse.district}
+                  </span>
+
+                )}
+
+
+                {playhouse.gender && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-green-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#276749]
+                    "
+                  >
+                    {playhouse.gender}
+                  </span>
+
+                )}
+
+              </div>
+
+
+              <button
+                type="button"
+                onClick={(e) => {
+
+                  e.stopPropagation();
+
+                  navigate(
+                    `/vendor/service/playhouse/${playhouse.vendorId}?view=public`
+                  );
+
+                }}
+                className="
+                  mt-4
+                  w-full
+                  rounded-xl
+                  bg-gradient-to-r
+                  from-[#276749]
+                  via-[#3f9b6d]
+                  to-[#70c99a]
+                  py-2
+                  text-[11px]
+                  font-black
+                  text-white
+                "
+              >
+                مشاهده خانه بازی
+              </button>
+
+            </div>
+
+          </motion.div>
+
+        );
+
+      })}
+
+    </div>
+
+  </section>
+
+) : null}
+
+{/* 📚 مراکز آموزشی ژنینو */}
+{educationCentersLoading ? (
+
+  <div
+    className="
+      relative
+      z-20
+      my-6
+      w-full
+      text-center
+    "
+  >
+    <div
+      className="
+        mx-auto
+        max-w-6xl
+        rounded-3xl
+        border
+        border-indigo-100
+        bg-white/80
+        px-4
+        py-8
+        text-sm
+        font-bold
+        text-indigo-700
+        shadow-sm
+      "
+    >
+      در حال دریافت مراکز آموزشی...
+    </div>
+  </div>
+
+) : educationCenters.length > 0 ? (
+
+  <section
+    dir="rtl"
+    className="
+      relative
+      z-20
+      my-6
+
+      w-[calc(100%+3rem)]
+      sm:w-full
+
+      rounded-none
+      sm:rounded-[2rem]
+
+      border
+      border-indigo-100
+
+      bg-gradient-to-br
+      from-indigo-50
+      via-violet-50
+      to-white
+
+      p-4
+      sm:p-6
+
+      shadow-sm
+    "
+  >
+
+    {/* عنوان */}
+    <div
+      className="
+        mx-auto
+        mb-4
+        flex
+        w-full
+        max-w-6xl
+        items-center
+        justify-between
+      "
+    >
+
+      <h2
+        className="
+          text-lg
+          font-black
+          text-[#4c3f91]
+          sm:text-xl
+        "
+      >
+        مراکز آموزشی ژنینو
+      </h2>
+
+      <button
+        type="button"
+        onClick={() =>
+          navigate(
+            "/shop/services/education-classes"
+          )
+        }
+        className="
+          text-xs
+          font-black
+          text-[#6d5bb3]
+          hover:text-[#4c3f91]
+        "
+      >
+        مشاهده همه
+      </button>
+
+    </div>
+
+
+    {/* کارت‌ها */}
+    <div
+      className="
+        mx-auto
+        flex
+        w-full
+        max-w-6xl
+        gap-4
+        overflow-x-auto
+        px-3
+        pb-4
+        snap-x
+        snap-mandatory
+      "
+    >
+
+      {educationCenters.map(
+        (educationCenter) => {
+
+          const centerImage =
+            educationCenter.image?.trim()
+              ? educationCenter.image
+              : null;
+
+          return (
+
+            <motion.div
+              key={educationCenter.id}
+              whileHover={{
+                y: -4,
+              }}
+              whileTap={{
+                scale: 0.98,
+              }}
+              onClick={() =>
+                navigate(
+                  `/vendor/service/education-class/${educationCenter.vendorId}?view=public`
+                )
+              }
+              className="
+                group
+                w-[230px]
+                min-w-[230px]
+                flex-none
+                cursor-pointer
+                snap-start
+                overflow-hidden
+                rounded-3xl
+                border
+                border-indigo-200
+                bg-white
+                text-right
+                shadow-md
+              "
+            >
+
+              {/* تصویر */}
+              <div
+                className="
+                  relative
+                  h-[145px]
+                  w-full
+                  overflow-hidden
+                  bg-indigo-50
+                "
+              >
+
+                {centerImage ? (
+
+                  <img
+                    src={centerImage}
+                    alt={
+                      educationCenter.centerName ||
+                      "مرکز آموزشی"
+                    }
+                    className="
+                      h-full
+                      w-full
+                      object-cover
+                    "
+                  />
+
+                ) : (
+
+                  <div
+                    className="
+                      flex
+                      h-full
+                      w-full
+                      items-center
+                      justify-center
+                      text-5xl
+                    "
+                  >
+                    📚
+                  </div>
+
+                )}
+
+
+                <div
+                  className="
+                    absolute
+                    right-2
+                    top-2
+                    rounded-full
+                    bg-white/95
+                    px-3
+                    py-1
+                    text-[10px]
+                    font-black
+                    text-[#4c3f91]
+                    shadow
+                  "
+                >
+                  مرکز آموزشی
+                </div>
+
+              </div>
+
+
+              {/* اطلاعات */}
+              <div className="p-4">
+
+                <h3
+                  className="
+                    truncate
+                    text-sm
+                    font-black
+                    text-[#372f6b]
+                  "
+                >
+                  {educationCenter.centerName ||
+                    "مرکز آموزشی ژنینو"}
+                </h3>
+
+
+                {educationCenter.slogan && (
+
+                  <p
+                    className="
+                      mt-1
+                      line-clamp-2
+                      text-[11px]
+                      leading-5
+                      text-gray-500
+                    "
+                  >
+                    {educationCenter.slogan}
+                  </p>
+
+                )}
+
+
+                <div
+                  className="
+                    mt-3
+                    flex
+                    flex-wrap
+                    gap-1.5
+                  "
+                >
+
+                  {educationCenter.city && (
+
+                    <span
+                      className="
+                        rounded-full
+                        bg-indigo-50
+                        px-2
+                        py-1
+                        text-[10px]
+                        font-bold
+                        text-[#4c3f91]
+                      "
+                    >
+                      📍 {educationCenter.city}
+                    </span>
+
+                  )}
+
+
+                  {educationCenter.district && (
+
+                    <span
+                      className="
+                        rounded-full
+                        bg-indigo-50
+                        px-2
+                        py-1
+                        text-[10px]
+                        font-bold
+                        text-[#4c3f91]
+                      "
+                    >
+                      منطقه {educationCenter.district}
+                    </span>
+
+                  )}
+
+
+                  {educationCenter.gender && (
+
+                    <span
+                      className="
+                        rounded-full
+                        bg-indigo-50
+                        px-2
+                        py-1
+                        text-[10px]
+                        font-bold
+                        text-[#4c3f91]
+                      "
+                    >
+                      {educationCenter.gender}
+                    </span>
+
+                  )}
+
+                </div>
+
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    navigate(
+                      `/vendor/service/education-class/${educationCenter.vendorId}?view=public`
+                    );
+                  }}
+                  className="
+                    mt-4
+                    w-full
+                    rounded-xl
+                    bg-gradient-to-r
+                    from-[#4c3f91]
+                    via-[#6d5bb3]
+                    to-[#9687d5]
+                    py-2
+                    text-[11px]
+                    font-black
+                    text-white
+                  "
+                >
+                  مشاهده مرکز آموزشی
+                </button>
+
+              </div>
+
+            </motion.div>
+
+          );
+        }
+      )}
+
+    </div>
+
+  </section>
+
+) : null}
+
+
+{/* 🎨 مراکز هنری ژنینو */}
+{artCentersLoading ? (
+
+  <div
+    className="
+      relative
+      z-20
+      my-6
+      w-full
+      text-center
+    "
+  >
+    <div
+      className="
+        mx-auto
+        max-w-6xl
+        rounded-3xl
+        border
+        border-rose-100
+        bg-white/80
+        px-4
+        py-8
+        text-sm
+        font-bold
+        text-rose-700
+        shadow-sm
+      "
+    >
+      در حال دریافت مراکز هنری...
+    </div>
+  </div>
+
+) : artCenters.length > 0 ? (
+
+  <section
+    dir="rtl"
+    className="
+      relative
+      z-20
+      my-6
+
+      w-[calc(100%+3rem)]
+      sm:w-full
+
+      rounded-none
+      sm:rounded-[2rem]
+
+      border
+      border-rose-100
+
+      bg-gradient-to-br
+      from-rose-50
+      via-pink-50
+      to-white
+
+      p-4
+      sm:p-6
+
+      shadow-sm
+    "
+  >
+
+    {/* عنوان */}
+    <div
+      className="
+        mx-auto
+        mb-4
+        flex
+        w-full
+        max-w-6xl
+        items-center
+        justify-between
+      "
+    >
+
+      <h2
+        className="
+          text-lg
+          font-black
+          text-[#9f3657]
+          sm:text-xl
+        "
+      >
+        مراکز هنری ژنینو
+      </h2>
+
+      <button
+        type="button"
+        onClick={() =>
+          navigate(
+            "/shop/services/art-classes"
+          )
+        }
+        className="
+          text-xs
+          font-black
+          text-[#c65378]
+          hover:text-[#9f3657]
+        "
+      >
+        مشاهده همه
+      </button>
+
+    </div>
+
+
+    {/* کارت‌ها */}
+    <div
+      className="
+        mx-auto
+        flex
+        w-full
+        max-w-6xl
+        gap-4
+        overflow-x-auto
+        px-3
+        pb-4
+        snap-x
+        snap-mandatory
+      "
+    >
+
+      {artCenters.map((artCenter) => {
+
+        const centerImage =
+          artCenter.image?.trim()
+            ? artCenter.image
+            : null;
+
+        return (
+
+          <motion.div
+            key={artCenter.id}
+            whileHover={{
+              y: -4,
+            }}
+            whileTap={{
+              scale: 0.98,
+            }}
+            onClick={() =>
+              navigate(
+                `/vendor/service/art-class/${artCenter.vendorId}?view=public`
+              )
+            }
+            className="
+              group
+              w-[230px]
+              min-w-[230px]
+              flex-none
+              cursor-pointer
+              snap-start
+              overflow-hidden
+              rounded-3xl
+              border
+              border-rose-200
+              bg-white
+              text-right
+              shadow-md
+            "
+          >
+
+            {/* تصویر مرکز هنری */}
+            <div
+              className="
+                relative
+                h-[145px]
+                w-full
+                overflow-hidden
+                bg-rose-50
+              "
+            >
+
+              {centerImage ? (
+
+                <img
+                  src={centerImage}
+                  alt={
+                    artCenter.centerName ||
+                    "مرکز هنری"
+                  }
+                  className="
+                    h-full
+                    w-full
+                    object-cover
+                  "
+                />
+
+              ) : (
+
+                <div
+                  className="
+                    flex
+                    h-full
+                    w-full
+                    items-center
+                    justify-center
+                    text-5xl
+                  "
+                >
+                  🎨
+                </div>
+
+              )}
+
+
+              <div
+                className="
+                  absolute
+                  right-2
+                  top-2
+                  rounded-full
+                  bg-white/95
+                  px-3
+                  py-1
+                  text-[10px]
+                  font-black
+                  text-[#9f3657]
+                  shadow
+                "
+              >
+                مرکز هنری
+              </div>
+
+            </div>
+
+
+            {/* اطلاعات */}
+            <div className="p-4">
+
+              <h3
+                className="
+                  truncate
+                  text-sm
+                  font-black
+                  text-[#7d2945]
+                "
+              >
+                {artCenter.centerName ||
+                  "مرکز هنری ژنینو"}
+              </h3>
+
+
+              {artCenter.slogan && (
+
+                <p
+                  className="
+                    mt-1
+                    line-clamp-2
+                    text-[11px]
+                    leading-5
+                    text-gray-500
+                  "
+                >
+                  {artCenter.slogan}
+                </p>
+
+              )}
+
+
+              <div
+                className="
+                  mt-3
+                  flex
+                  flex-wrap
+                  gap-1.5
+                "
+              >
+
+                {artCenter.city && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-rose-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#9f3657]
+                    "
+                  >
+                    📍 {artCenter.city}
+                  </span>
+
+                )}
+
+
+                {artCenter.district && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-rose-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#9f3657]
+                    "
+                  >
+                    منطقه {artCenter.district}
+                  </span>
+
+                )}
+
+
+                {artCenter.gender && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-rose-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#9f3657]
+                    "
+                  >
+                    {artCenter.gender}
+                  </span>
+
+                )}
+
+              </div>
+
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  navigate(
+                    `/vendor/service/art-class/${artCenter.vendorId}?view=public`
+                  );
+                }}
+                className="
+                  mt-4
+                  w-full
+                  rounded-xl
+                  bg-gradient-to-r
+                  from-[#9f3657]
+                  via-[#c65378]
+                  to-[#e88fa9]
+                  py-2
+                  text-[11px]
+                  font-black
+                  text-white
+                "
+              >
+                مشاهده مرکز هنری
+              </button>
+
+            </div>
+
+          </motion.div>
+
+        );
+
+      })}
+
+    </div>
+
+  </section>
+
+) : null}
+
+
+{/* 🏅 مراکز ورزشی ژنینو */}
+{sportCentersLoading ? (
+
+  <div
+    className="
+      relative
+      z-20
+      my-6
+      w-full
+      text-center
+    "
+  >
+    <div
+      className="
+        mx-auto
+        max-w-6xl
+        rounded-3xl
+        border
+        border-orange-100
+        bg-white/80
+        px-4
+        py-8
+        text-sm
+        font-bold
+        text-orange-700
+        shadow-sm
+      "
+    >
+      در حال دریافت مراکز ورزشی...
+    </div>
+  </div>
+
+) : sportCenters.length > 0 ? (
+
+  <section
+    dir="rtl"
+    className="
+      relative
+      z-20
+      my-6
+
+      w-[calc(100%+3rem)]
+      sm:w-full
+
+      rounded-none
+      sm:rounded-[2rem]
+
+      border
+      border-orange-100
+
+      bg-gradient-to-br
+      from-orange-50
+      via-amber-50
+      to-white
+
+      p-4
+      sm:p-6
+
+      shadow-sm
+    "
+  >
+
+    <div
+      className="
+        mx-auto
+        mb-4
+        flex
+        w-full
+        max-w-6xl
+        items-center
+        justify-between
+      "
+    >
+
+      <h2
+        className="
+          text-lg
+          font-black
+          text-[#9a4d13]
+          sm:text-xl
+        "
+      >
+        مراکز ورزشی ژنینو
+      </h2>
+
+      <button
+        type="button"
+        onClick={() =>
+          navigate(
+            "/shop/services/sport-classes"
+          )
+        }
+        className="
+          text-xs
+          font-black
+          text-[#d97706]
+          hover:text-[#9a4d13]
+        "
+      >
+        مشاهده همه
+      </button>
+
+    </div>
+
+
+    <div
+      className="
+        mx-auto
+        flex
+        w-full
+        max-w-6xl
+        gap-4
+        overflow-x-auto
+        px-3
+        pb-4
+        snap-x
+        snap-mandatory
+      "
+    >
+
+      {sportCenters.map((sportCenter) => {
+
+        const centerImage =
+          sportCenter.image?.trim()
+            ? sportCenter.image
+            : null;
+
+        return (
+
+          <motion.div
+            key={sportCenter.id}
+            whileHover={{
+              y: -4,
+            }}
+            whileTap={{
+              scale: 0.98,
+            }}
+            onClick={() =>
+              navigate(
+                `/vendor/service/sport-class/${sportCenter.vendorId}?view=public`
+              )
+            }
+            className="
+              group
+              w-[230px]
+              min-w-[230px]
+              flex-none
+              cursor-pointer
+              snap-start
+              overflow-hidden
+              rounded-3xl
+              border
+              border-orange-200
+              bg-white
+              text-right
+              shadow-md
+            "
+          >
+
+            <div
+              className="
+                relative
+                h-[145px]
+                w-full
+                overflow-hidden
+                bg-orange-50
+              "
+            >
+
+              {centerImage ? (
+
+                <img
+                  src={centerImage}
+                  alt={
+                    sportCenter.centerName ||
+                    "مرکز ورزشی"
+                  }
+                  className="
+                    h-full
+                    w-full
+                    object-cover
+                  "
+                />
+
+              ) : (
+
+                <div
+                  className="
+                    flex
+                    h-full
+                    w-full
+                    items-center
+                    justify-center
+                    text-5xl
+                  "
+                >
+                  🏅
+                </div>
+
+              )}
+
+              <div
+                className="
+                  absolute
+                  right-2
+                  top-2
+                  rounded-full
+                  bg-white/95
+                  px-3
+                  py-1
+                  text-[10px]
+                  font-black
+                  text-[#9a4d13]
+                  shadow
+                "
+              >
+                مرکز ورزشی
+              </div>
+
+            </div>
+
+
+            <div className="p-4">
+
+              <h3
+                className="
+                  truncate
+                  text-sm
+                  font-black
+                  text-[#78350f]
+                "
+              >
+                {sportCenter.centerName ||
+                  "مرکز ورزشی ژنینو"}
+              </h3>
+
+
+              {sportCenter.slogan && (
+
+                <p
+                  className="
+                    mt-1
+                    line-clamp-2
+                    text-[11px]
+                    leading-5
+                    text-gray-500
+                  "
+                >
+                  {sportCenter.slogan}
+                </p>
+
+              )}
+
+
+              <div
+                className="
+                  mt-3
+                  flex
+                  flex-wrap
+                  gap-1.5
+                "
+              >
+
+                {sportCenter.city && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-orange-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#9a4d13]
+                    "
+                  >
+                    📍 {sportCenter.city}
+                  </span>
+
+                )}
+
+
+                {sportCenter.district && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-orange-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#9a4d13]
+                    "
+                  >
+                    منطقه {sportCenter.district}
+                  </span>
+
+                )}
+
+
+                {sportCenter.gender && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-orange-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#9a4d13]
+                    "
+                  >
+                    {sportCenter.gender}
+                  </span>
+
+                )}
+
+              </div>
+
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  navigate(
+                    `/vendor/service/sport-class/${sportCenter.vendorId}?view=public`
+                  );
+                }}
+                className="
+                  mt-4
+                  w-full
+                  rounded-xl
+                  bg-gradient-to-r
+                  from-[#9a4d13]
+                  via-[#d97706]
+                  to-[#f59e0b]
+                  py-2
+                  text-[11px]
+                  font-black
+                  text-white
+                "
+              >
+                مشاهده مرکز ورزشی
+              </button>
+
+            </div>
+
+          </motion.div>
+
+        );
+
+      })}
+
+    </div>
+
+  </section>
+
+) : null}
+
+
+{/* 👨‍🏫 معلمان خصوصی ژنینو */}
+{privateTeachersLoading ? (
+
+  <div
+    className="
+      relative
+      z-20
+      my-6
+      w-full
+      text-center
+    "
+  >
+    <div
+      className="
+        mx-auto
+        max-w-6xl
+        rounded-3xl
+        border
+        border-emerald-100
+        bg-white/80
+        px-4
+        py-8
+        text-sm
+        font-bold
+        text-emerald-700
+        shadow-sm
+      "
+    >
+      در حال دریافت معلمان خصوصی...
+    </div>
+  </div>
+
+) : privateTeachers.length > 0 ? (
+
+  <section
+    dir="rtl"
+    className="
+      relative
+      z-20
+      my-6
+
+      w-[calc(100%+3rem)]
+      sm:w-full
+
+      rounded-none
+      sm:rounded-[2rem]
+
+      border
+      border-emerald-100
+
+      bg-gradient-to-br
+      from-emerald-50
+      via-green-50
+      to-white
+
+      p-4
+      sm:p-6
+
+      shadow-sm
+    "
+  >
+
+    <div
+      className="
+        mx-auto
+        mb-4
+        flex
+        w-full
+        max-w-6xl
+        items-center
+        justify-between
+      "
+    >
+
+      <h2
+        className="
+          text-lg
+          font-black
+          text-[#166534]
+          sm:text-xl
+        "
+      >
+        معلمان خصوصی ژنینو
+      </h2>
+
+      <button
+        type="button"
+        onClick={() =>
+          navigate(
+            "/shop/services/private-teachers"
+          )
+        }
+        className="
+          text-xs
+          font-black
+          text-[#16a34a]
+          hover:text-[#166534]
+        "
+      >
+        مشاهده همه
+      </button>
+
+    </div>
+
+
+    <div
+      className="
+        mx-auto
+        flex
+        w-full
+        max-w-6xl
+        gap-4
+        overflow-x-auto
+        px-3
+        pb-4
+        snap-x
+        snap-mandatory
+      "
+    >
+
+      {privateTeachers.map((teacher) => {
+
+        const teacherImage =
+          teacher.image?.trim()
+            ? teacher.image
+            : null;
+
+        return (
+
+          <motion.div
+            key={teacher.id}
+            whileHover={{
+              y: -4,
+            }}
+            whileTap={{
+              scale: 0.98,
+            }}
+            onClick={() =>
+              navigate(
+                `/vendor/service/private-teacher/${teacher.vendorId}?view=public`
+              )
+            }
+            className="
+              group
+              w-[230px]
+              min-w-[230px]
+              flex-none
+              cursor-pointer
+              snap-start
+              overflow-hidden
+              rounded-3xl
+              border
+              border-emerald-200
+              bg-white
+              text-right
+              shadow-md
+            "
+          >
+
+            <div
+              className="
+                relative
+                h-[145px]
+                w-full
+                overflow-hidden
+                bg-emerald-50
+              "
+            >
+
+              {teacherImage ? (
+
+                <img
+                  src={teacherImage}
+                  alt={
+                    teacher.teacherName ||
+                    "معلم خصوصی"
+                  }
+                  className="
+                    h-full
+                    w-full
+                    object-cover
+                  "
+                />
+
+              ) : (
+
+                <div
+                  className="
+                    flex
+                    h-full
+                    w-full
+                    items-center
+                    justify-center
+                    text-5xl
+                  "
+                >
+                  👨‍🏫
+                </div>
+
+              )}
+
+              <div
+                className="
+                  absolute
+                  right-2
+                  top-2
+                  rounded-full
+                  bg-white/95
+                  px-3
+                  py-1
+                  text-[10px]
+                  font-black
+                  text-[#166534]
+                  shadow
+                "
+              >
+                معلم خصوصی
+              </div>
+
+            </div>
+
+
+            <div className="p-4">
+
+              <h3
+                className="
+                  truncate
+                  text-sm
+                  font-black
+                  text-[#14532d]
+                "
+              >
+                {teacher.teacherName ||
+                  "معلم خصوصی ژنینو"}
+              </h3>
+
+
+              {teacher.slogan && (
+
+                <p
+                  className="
+                    mt-1
+                    line-clamp-2
+                    text-[11px]
+                    leading-5
+                    text-gray-500
+                  "
+                >
+                  {teacher.slogan}
+                </p>
+
+              )}
+
+
+              <div
+                className="
+                  mt-3
+                  flex
+                  flex-wrap
+                  gap-1.5
+                "
+              >
+
+                {teacher.city && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-emerald-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#166534]
+                    "
+                  >
+                    📍 {teacher.city}
+                  </span>
+
+                )}
+
+
+                {teacher.district && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-emerald-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#166534]
+                    "
+                  >
+                    منطقه {teacher.district}
+                  </span>
+
+                )}
+
+
+                {teacher.gender && (
+
+                  <span
+                    className="
+                      rounded-full
+                      bg-emerald-50
+                      px-2
+                      py-1
+                      text-[10px]
+                      font-bold
+                      text-[#166534]
+                    "
+                  >
+                    {teacher.gender}
+                  </span>
+
+                )}
+
+              </div>
+
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  navigate(
+                    `/vendor/service/private-teacher/${teacher.vendorId}?view=public`
+                  );
+                }}
+                className="
+                  mt-4
+                  w-full
+                  rounded-xl
+                  bg-gradient-to-r
+                  from-[#166534]
+                  via-[#16a34a]
+                  to-[#4ade80]
+                  py-2
+                  text-[11px]
+                  font-black
+                  text-white
+                "
+              >
+                مشاهده معلم خصوصی
+              </button>
+
+            </div>
+
+          </motion.div>
+
+        );
+      })}
+
+    </div>
+
+  </section>
+
+) : null}
+
+
+
+{/* 🎉 رویدادها و جشن‌ها */}
+{eventServices.length > 0 && (
+<section
+  dir="rtl"
+  className="
+    relative
+    z-20
+    my-6
+    w-[calc(100%+3rem)]
+    sm:w-full
+    rounded-none
+    sm:rounded-[2rem]
+    bg-gradient-to-br
+    from-purple-50
+    via-purple-100/60
+    to-white
+    border
+    border-purple-100
+    p-4
+    sm:p-6
+    shadow-sm
+  "
+>
+
+  <div
+    className="
+      mx-auto
+      mb-4
+      flex
+      w-full
+      max-w-6xl
+      items-center
+      justify-between
+    "
+  >
+
+    <h2
+      className="
+        text-lg
+        font-black
+        text-[#654184]
+        sm:text-xl
+      "
+    >
+      رویدادها و جشن‌ها
+    </h2>
+
+
+    <button
+      type="button"
+      onClick={() =>
+        navigate("/events")
+      }
+      className="
+        text-xs
+        font-black
+        text-[#8b68ad]
+        hover:text-[#654184]
+      "
+    >
+      مشاهده همه
+    </button>
+
+  </div>
+
+
+  <div
+className="
+mx-auto
+flex
+w-full
+max-w-6xl
+gap-4
+overflow-x-auto
+pb-4
+px-3
+snap-x
+snap-mandatory
+scrollbar-thin
+"
+>
+
+    {eventServices.map(
+      (service) => (
+
+        <div
+          key={service.id}
+          className="
+            w-[220px]
+            min-w-[220px]
+            flex-none
+          "
+        >
+          <EventCard
+            service={service}
+          />
+        </div>
+
+      )
+    )}
+
+  </div>
+
+</section>
+)}
+
+
+{/* 📚 کلاس‌های آموزشی و دوره‌ها */}
+{educationServices.length > 0 && (
+<section
+  dir="rtl"
+  className="
+    relative
+    z-20
+    my-6
+
+    w-[calc(100%+3rem)]
+    sm:w-full
+
+    rounded-none
+    sm:rounded-[2rem]
+
+    bg-gradient-to-br
+    from-green-50
+    via-emerald-50
+    to-white
+    border
+    border-green-100
+    p-4
+    sm:p-6
+    shadow-sm
+  "
+>
+
+  <div
+    className="
+      mx-auto
+      mb-4
+      flex
+      w-full
+      max-w-6xl
+      items-center
+      justify-between
+    "
+  >
+
+    <h2
+      className="
+        text-lg
+        font-black
+        text-[#166534]
+        sm:text-xl
+      "
+    >
+      کلاس‌های آموزشی و دوره‌ها
+    </h2>
+
+
+    <button
+      type="button"
+      onClick={() =>
+        navigate("/classes")
+      }
+      className="
+        text-xs
+        font-black
+        text-[#22c55e]
+        hover:text-[#166534]
+      "
+    >
+      مشاهده همه
+    </button>
+
+  </div>
+
+
+  <div
+className="
+mx-auto
+flex
+w-full
+max-w-6xl
+gap-4
+overflow-x-auto
+pb-4
+px-3
+snap-x
+snap-mandatory
+"
+>
+
+    {educationServices.map(
+      (service) => (
+
+        <div
+          key={service.id}
+          className="
+            w-[220px]
+            min-w-[220px]
+            flex-none
+          "
+        >
+
+          <EducationCard
+ service={service}
 />
+
+        </div>
+
+      )
+    )}
+
+  </div>
+
+</section>
+)}
+      
 
 
 <AnimatePresence>
@@ -1012,7 +4661,7 @@ transition-all
         <p className="text-sm sm:text-base text-gray-600 leading-8 font-bold">
   اپلیکیشن رسمی ژنینو
   <br />
-  ژانویه ۲۰۲۷ افتتاح می‌شود ✨
+ نوروز ۱۴۰۶ افتتاح می‌شود ✨
   <br />
   اما همین حالا می‌توانید وب‌اپلیکیشن ژنینو را روی گوشی نصب کنید.
 </p>

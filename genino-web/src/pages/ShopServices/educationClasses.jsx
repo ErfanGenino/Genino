@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function EducationClasses() {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState("زبان");
+  const [activeSection, setActiveSection] = useState("زبان‌های خارجی");
 
   const sections = [
     {
@@ -42,6 +42,21 @@ export default function EducationClasses() {
     "زبان بختیاری",
     "زبان قشقایی",
     "همه زبان‌ها و گویش‌های ایرانی",
+  ],
+},
+{
+  title: "دروس تخصصی مدارس ایران",
+  items: [
+    "ریاضی",
+    "فیزیک",
+    "شیمی",
+    "زیست شناسی",
+    "ادبیات",
+    "تاریخ",
+    "جغرافیا",
+    "آمار و احتمال",
+    "حسابداری",
+    "همه دروس تخصصی",
   ],
 },
     {
@@ -106,8 +121,24 @@ export default function EducationClasses() {
   );
 
   const goToShopFilter = (item) => {
-    navigate(`/shop?category=${encodeURIComponent(item)}`);
-  };
+  const showAllItems = [
+    "همه کلاس‌های زبان",
+    "همه زبان‌ها و گویش‌های ایرانی",
+    "همه دروس تخصصی",
+    "همه کلاس‌های فناوری",
+    "همه مهارت‌های فردی",
+    "همه کلاس‌های آموزشی",
+  ];
+
+  if (showAllItems.includes(item)) {
+    navigate("/shop?service=education-class");
+    return;
+  }
+
+  navigate(
+    `/shop?service=education-class&educationField=${encodeURIComponent(item)}`
+  );
+};
 
   return (
     <main

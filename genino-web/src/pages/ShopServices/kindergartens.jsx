@@ -8,16 +8,20 @@ export default function Kindergartens() {
 
   const sections = [
     {
-      title: "رده سنی",
-      items: [
-        "شیرخوار",
-        "نوپا",
-        "۳ تا ۴ سال",
-        "۴ تا ۵ سال",
-        "۵ تا ۶ سال",
-        "همه مهدکودک‌ها",
-      ],
-    },
+  title: "رده سنی",
+  items: [
+    "شیرخوار",
+    "نوپا",
+    "زیر ۱ سال",
+    "۱ تا ۲ سال",
+    "۲ تا ۳ سال",
+    "۳ تا ۴ سال",
+    "۴ تا ۵ سال",
+    "۵ تا ۶ سال",
+    "پیش‌دبستانی",
+    "همه مهدکودک‌ها",
+  ],
+},
     {
       title: "نوع مهد",
       items: [
@@ -88,8 +92,63 @@ export default function Kindergartens() {
   );
 
   const goToShopFilter = (item) => {
-    navigate(`/shop?category=${encodeURIComponent(item)}`);
-  };
+  // 👶 رده سنی
+  if (activeSection === "رده سنی") {
+    if (item === "همه مهدکودک‌ها") {
+      navigate("/shop?service=kindergarten");
+      return;
+    }
+
+    navigate(
+      `/shop?service=kindergarten&kindergartenAge=${encodeURIComponent(item)}`
+    );
+    return;
+  }
+
+  // 🏫 نوع مهد
+  if (activeSection === "نوع مهد") {
+    if (item === "همه انواع مهدکودک") {
+      navigate("/shop?service=kindergarten");
+      return;
+    }
+
+    navigate(
+      `/shop?service=kindergarten&kindergartenType=${encodeURIComponent(item)}`
+    );
+    return;
+  }
+
+  // 🎨 فعالیت‌ها
+  if (activeSection === "فعالیت‌ها") {
+    if (item === "همه فعالیت‌ها") {
+      navigate("/shop?service=kindergarten");
+      return;
+    }
+
+    navigate(
+      `/shop?service=kindergarten&kindergartenActivity=${encodeURIComponent(item)}`
+    );
+    return;
+  }
+
+  // 🏫 امکانات
+  if (activeSection === "امکانات") {
+    if (item === "همه امکانات") {
+      navigate("/shop?service=kindergarten");
+      return;
+    }
+
+    navigate(
+      `/shop?service=kindergarten&kindergartenFacility=${encodeURIComponent(item)}`
+    );
+    return;
+  }
+
+  // 👀 نمایش همه
+  if (activeSection === "نمایش همه") {
+    navigate("/shop?service=kindergarten");
+  }
+};
 
   return (
     <main

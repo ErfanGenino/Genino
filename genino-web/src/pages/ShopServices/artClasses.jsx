@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
+
 export default function ArtClasses() {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("هنرهای تجسمی");
@@ -90,7 +91,7 @@ export default function ArtClasses() {
   ],
 },
     {
-  title: "دستی و خلاقیت",
+  title: "هنر دستی و خلاقیت",
   items: [
     "کاردستی",
     "خلاقیت کودک",
@@ -125,8 +126,23 @@ export default function ArtClasses() {
   );
 
   const goToShopFilter = (item) => {
-    navigate(`/shop?category=${encodeURIComponent(item)}`);
-  };
+  const showAllItems = [
+    "همه هنرهای تجسمی",
+    "همه کلاس‌های موسیقی",
+    "همه هنرهای نمایشی",
+    "همه هنرهای دستی",
+    "همه کلاس‌های هنری",
+  ];
+
+  if (showAllItems.includes(item)) {
+    navigate("/shop?service=art-class");
+    return;
+  }
+
+  navigate(
+    `/shop?service=art-class&artField=${encodeURIComponent(item)}`
+  );
+};
 
   return (
     <main
